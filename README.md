@@ -37,8 +37,8 @@ Contribuzione al progetto ([emoji key](https://allcontributors.org/docs/en/emoji
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
-<div style="width: fit-content; margin: auto;"> 
-  <table>
+<div style="width: 50%; margin-right: auto; margin-left: auto;"> 
+  <table align="center">
     <tbody>
       <tr>
         <td align="center" valign="top" width="14.28%"><a href="https://github.com/RiccardoElena"><img src="https://avatars.githubusercontent.com/u/23059036?v=4?s=100" width="100px;" alt="Riccardo Elena"/><br /><sub><b>Riccardo Elena</b></sub></a><br /><a href="https://github.com/RiccardoElena/UninaDelivery/commits?author=RiccardoElena" title="Code">💻</a> <a href="#ideas-RiccardoElena" title="Ideas, Planning, & Feedback">🤔</a> <a href="#content-RiccardoElena" title="Content">🖋</a> <a href="https://github.com/RiccardoElena/UninaDelivery/commits?author=RiccardoElena" title="Documentation">📖</a></td>
