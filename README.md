@@ -44,6 +44,7 @@
 <table>
   <tbody>
     <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/RiccardoElena"><img src="https://avatars.githubusercontent.com/u/23059036?v=4?s=100" width="100px;" alt="Riccardo Elena"/><br /><sub><b>Riccardo Elena</b></sub></a><br /><a href="https://github.com/RiccardoElena/UninaDelivery/commits?author=RiccardoElena" title="Code">💻</a> <a href="#ideas-RiccardoElena" title="Ideas, Planning, & Feedback">🤔</a> <a href="#content-RiccardoElena" title="Content">🖋</a> <a href="https://github.com/RiccardoElena/UninaDelivery/commits?author=RiccardoElena" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://www.zgenny.it"><img src="https://avatars.githubusercontent.com/u/60586355?v=4?s=100" width="100px;" alt="zGenny"/><br /><sub><b>zGenny</b></sub></a><br /><a href="https://github.com/RiccardoElena/UninaDelivery/commits?author=zGenny" title="Code">💻</a> <a href="#ideas-zGenny" title="Ideas, Planning, & Feedback">🤔</a> <a href="#content-zGenny" title="Content">🖋</a> <a href="https://github.com/RiccardoElena/UninaDelivery/commits?author=zGenny" title="Documentation">📖</a></td>
     </tr>
   </tbody>
