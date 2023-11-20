@@ -59,7 +59,6 @@ Da definire in seguito ad assegnazione traccia
 
 ### Struttura del repository
 
-- `README.md`: README generale del progetto, questo file.
 - `oo/`: cartella relativa al progetto di Object Orientation.
   - `oo/docs`: documentazione del progetto di Object Orientation.
     - `Documentazione-ObjectOrientation-GroupID.pdf`: documentazione del progetto di Object Orientation.
@@ -70,6 +69,8 @@ Da definire in seguito ad assegnazione traccia
     - `Documentazione-BasiDiDati-GroupID.pdf`: documentazione del progetto di Basi di Dati.
   - `db/src/`: codice sorgente del progetto di Basi di Dati.
     - `README.md`: README del progetto di Basi di Dati.
+- `README.md`: README generale del progetto, questo file.
+- `sun_checks.xml`: file di configurazione Checkstyle.
 
 ### Gestione repository GitHub
 
