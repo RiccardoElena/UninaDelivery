@@ -1,0 +1,29 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "RiccardoElena",
+      "name": "Riccardo Elena",
+      "avatar_url": "https://avatars.githubusercontent.com/u/23059036?v=4",
+      "profile": "https://github.com/RiccardoElena",
+      "contributions": [
+        "code",
+        "ideas",
+        "data",
+        "content"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "UninaDelivery",
+  "projectOwner": "RiccardoElena"
+}
