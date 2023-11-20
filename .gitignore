@@ -1,2 +1,1 @@
-**/.vscode/*.json
-!**/.vscode/*.txt
+/.vscode/settings.json
