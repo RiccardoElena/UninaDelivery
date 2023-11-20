@@ -1,1 +1,14 @@
 /.vscode/settings.json
+### Doc related
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.blx
+*.log
+*.toc
+*.out
+*.psd
+*.pdf
+*.lol
+*.synctex.gz
