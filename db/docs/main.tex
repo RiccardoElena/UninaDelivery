@@ -18,7 +18,7 @@
 % Global variables
 
   \gdef\maintitle{Project Title}
-  \gdef\authors{Riccardo Elena - Gennaro De Gregorio}
+  \gdef\authors{Riccardo Elena - Gennaro De Gregorio} % chktex 8
 
 % Default color
   \definecolor{PRIMARY}{HTML}{cc4400}
@@ -61,10 +61,10 @@
   \fancyfoot[L]{\textcolor{PRIMARY}{\maintitle}}
   \fancyfoot[C]{\textcolor{black}{\thepage}}
   \fancyfoot[R]{\textcolor{PRIMARY}{\footnotesize\authors}}
-  \let\oldheadrule\headrule
+  \let\oldheadrule=\headrule
   \renewcommand{\headrule}{\color{PRIMARY}\oldheadrule}
   \renewcommand{\headrulewidth}{0.5pt}
-  \let\oldfootrule\footrule
+  \let\oldfootrule=\footrule
   \renewcommand{\footrule}{\color{PRIMARY}\oldfootrule}
   \renewcommand{\footrulewidth}{0.5pt}
 
