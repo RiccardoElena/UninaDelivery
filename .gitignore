@@ -12,3 +12,5 @@
 *.pdf
 *.lol
 *.synctex.gz
+*.fls
+*.fdb_latexmk
