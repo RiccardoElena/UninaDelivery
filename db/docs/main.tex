@@ -1,0 +1,106 @@
+\documentclass[14pt, twoside]{extreport}
+
+% Packages
+\usepackage{graphicx}  % Required for including images
+\usepackage{extsizes}   % More font sizes
+\usepackage[a4paper, width=180mm, bottom=25mm, top=25mm, bindingoffset=6mm]{geometry} % Page margins
+\usepackage{fancyhdr}  % Headers and footers
+\pagestyle{fancy} % All pages have headers and footers
+\usepackage[defaultcolors]{xcolor} % Required for specifying colors by name
+\usepackage[italian]{babel} % Italian language
+\usepackage[utf8]{inputenc} % Required for including letters with accents
+\usepackage{amsmath, amssymb, amsthm, amsfonts} % Required for math
+\usepackage{mathtools} % Required for math
+\usepackage{hyperref} % Required for links
+\usepackage{afterpage} % Required for color pages 
+\usepackage{titlesec} % Required for titles
+
+% Global variables
+
+  \gdef\maintitle{Project Title}
+  \gdef\authors{Riccardo Elena - Gennaro De Gregorio}
+
+% Default color
+  \definecolor{PRIMARY}{HTML}{cc4400}
+  \definecolor{SECONDARY}{HTML}{f7dba7}
+  \definecolor{TERTIARY}{HTML}{191919}
+  \color{TERTIARY}
+
+% Graphics path
+  \graphicspath{{./sources/}}
+
+% Title format
+
+  \titleformat{\chapter}[block]
+    {\normalfont\huge\bfseries\color{PRIMARY}}
+    {\ \textcolor{black}{\thechapter}}{20pt}{\Huge}
+
+  \titleformat{\section}[block]
+    {\normalfont\large\bfseries\color{PRIMARY}}
+    {\ \textcolor{black}{\thesection}}{20pt}{\Large}
+
+  \titleformat{\subsection}[block]
+    {\normalfont\normalsize\bfseries\color{PRIMARY}}
+    {\ \textcolor{black}{\thesubsection}}{20pt}{\large}
+
+  \titleformat{\subsubsection}[block]
+    {\normalfont\normalsize\bfseries\color{PRIMARY}}
+    {\ }{20pt}{\normalsize}
+
+
+% Header and footer
+  
+  % Choosing info to display in the header
+  \renewcommand{\chaptermark}[1]{\markboth{\normalsize \textcolor{PRIMARY}{ \large #1}}{}}
+  \renewcommand{\sectionmark}[1]{\markright{\normalsize \textcolor{PRIMARY}{\thesection} \hspace{2 pt} \large \textcolor{TERTIARY}{#1}}{}}
+
+  % Header and footer style
+  \fancyhf{}
+  \fancyhead[L]{\small\rightmark}
+  \fancyhead[R]{\small\leftmark}
+  \fancyfoot[L]{\textcolor{PRIMARY}{\maintitle}}
+  \fancyfoot[C]{\textcolor{black}{\thepage}}
+  \fancyfoot[R]{\textcolor{PRIMARY}{\footnotesize\authors}}
+  \let\oldheadrule\headrule
+  \renewcommand{\headrule}{\color{PRIMARY}\oldheadrule}
+  \renewcommand{\headrulewidth}{0.5pt}
+  \let\oldfootrule\footrule
+  \renewcommand{\footrule}{\color{PRIMARY}\oldfootrule}
+  \renewcommand{\footrulewidth}{0.5pt}
+
+% Title page info
+
+  % TODO: Refactor title page in a separate file and adjust spacing
+  \title{
+    \color{PRIMARY}\maintitle \\
+    \color{SECONDARY}\large Università degli Studi di Napoli Federico II \\
+    \normalsize Dipartimento d'Ingegneria Elettronica e delle Tecnologie dell'Informazione \\
+    \includegraphics[width=0.5\textwidth]{uni_logo.pdf}
+    }
+  \author{\color{PRIMARY}\authors}
+  \date{\color{SECONDARY}\today}
+
+\begin{document}
+
+% Title page
+\pagecolor{TERTIARY}\afterpage{\nopagecolor}
+\maketitle
+
+% Table of contents
+\tableofcontents
+
+% Chapters
+
+\chapter{Chapter}
+\section{Section}
+\subsection{Subsection}
+\subsubsection{Subsubsection}
+Normal text
+
+\newpage
+
+Non-starting page
+% ...
+
+\end{document}
+
