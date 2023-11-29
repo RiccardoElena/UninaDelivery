@@ -61,10 +61,12 @@
   \fancyfoot[L]{\textcolor{PRIMARY}{\maintitle}}
   \fancyfoot[C]{\textcolor{black}{\thepage}}
   \fancyfoot[R]{\textcolor{PRIMARY}{\footnotesize\authors}}
-  \let\oldheadrule=\headrule
+  \let\oldheadrule=\headrule{}
+
   \renewcommand{\headrule}{\color{PRIMARY}\oldheadrule}
   \renewcommand{\headrulewidth}{0.5pt}
-  \let\oldfootrule=\footrule
+  \let\oldfootrule=\footrule{}
+
   \renewcommand{\footrule}{\color{PRIMARY}\oldfootrule}
   \renewcommand{\footrulewidth}{0.5pt}
 
