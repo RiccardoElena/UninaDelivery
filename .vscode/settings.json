@@ -9,5 +9,7 @@
     "-q",
     "-v0"
   ],
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "cmake.configureOnOpen": false,
 }
 

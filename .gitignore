@@ -14,5 +14,8 @@
 *.synctex.gz
 *.fls
 *.fdb_latexmk
+### Build related
+*.class
+**/target/
 
 !**/sources/*.pdf
