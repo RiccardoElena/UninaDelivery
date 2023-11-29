@@ -1,8 +1,8 @@
-\documentclass[14pt, twoside]{extreport}
+\documentclass[14pt]{extreport}
+
 
 % Packages
 \usepackage{graphicx}  % Required for including images
-\usepackage{extsizes}   % More font sizes
 \usepackage[a4paper, width=180mm, bottom=25mm, top=25mm, bindingoffset=6mm]{geometry} % Page margins
 \usepackage{fancyhdr}  % Headers and footers
 \pagestyle{fancy} % All pages have headers and footers
@@ -18,7 +18,7 @@
 % Global variables
 
   \gdef\maintitle{Project Title}
-  \gdef\authors{Riccardo Elena - Gennaro De Gregorio} % chktex 8
+  \gdef\authors{Riccardo Elena -- Gennaro De Gregorio} % chktex 8
 
 % Default color
   \definecolor{PRIMARY}{HTML}{cc4400}
@@ -50,6 +50,8 @@
 
 % Header and footer
   
+  \setlength{\headheight}{16.20004pt}
+  \addtolength{\topmargin}{-2.20004pt}
   % Choosing info to display in the header
   \renewcommand{\chaptermark}[1]{\markboth{\normalsize \textcolor{PRIMARY}{ \large #1}}{}}
   \renewcommand{\sectionmark}[1]{\markright{\normalsize \textcolor{PRIMARY}{\thesection} \hspace{2 pt} \large \textcolor{TERTIARY}{#1}}{}}
@@ -74,22 +76,22 @@
 
   % TODO: Refactor title page in a separate file and adjust spacing
   \title{
-    \color{PRIMARY}\maintitle \\
+    \color{PRIMARY}\maintitle{} \\
     \color{SECONDARY}\large Università degli Studi di Napoli Federico II \\
     \normalsize Dipartimento d'Ingegneria Elettronica e delle Tecnologie dell'Informazione \\
     \includegraphics[width=0.5\textwidth]{uni_logo.pdf}
     }
-  \author{\color{PRIMARY}\authors}
-  \date{\color{SECONDARY}\today}
+  \author{\color{PRIMARY}\authors{}}
+  \date{\color{SECONDARY}\today{}}
 
 \begin{document}
 
 % Title page
 \pagecolor{TERTIARY}\afterpage{\nopagecolor}
-\maketitle
+\maketitle{}
 
 % Table of contents
-\tableofcontents
+\tableofcontents{}
 
 % Chapters
 
@@ -99,7 +101,7 @@
 \subsubsection{Subsubsection}
 Normal text
 
-\newpage
+\newpage{}
 
 Non-starting page
 % ...
