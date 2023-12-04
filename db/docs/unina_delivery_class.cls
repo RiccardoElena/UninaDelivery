@@ -1,6 +1,6 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{unina_delivery_class}[2023/12/01 Unina Delivery Class]
-\LoadClass[14pt]{extreport}
+\LoadClass[12pt]{extreport}
 % Packages
 \usepackage{graphicx}  % Required for including images
 \usepackage[a4paper, width=180mm, bottom=25mm, top=25mm, bindingoffset=6mm]{geometry} % Page margins
@@ -14,10 +14,10 @@
 \usepackage{hyperref} % Required for links
 \usepackage{afterpage} % Required for color pages 
 \usepackage{titlesec} % Required for titles
-% Global variables
 
+% Global variables
   \gdef\maintitle{\textcolor{PRIMARY}{Project Title}}
-  \gdef\authors{Riccardo Elena -- Gennaro De Gregorio} % chktex 8
+  \gdef\authors{Riccardo Elena --- Gennaro De Gregorio}
 
 % Default color
   \definecolor{PRIMARY}{HTML}{cc4400}
@@ -70,3 +70,14 @@
 
   \renewcommand{\footrule}{\color{PRIMARY}\oldfootrule}
   \renewcommand{\footrulewidth}{0.5pt}
+
+% Setting paragraph style
+  \setlength\parindent{0pt}
+  \setlength\parskip{12pt}
+
+% Setting itemize style
+  \renewcommand{\labelitemi}{\textcolor{PRIMARY}{\textbullet}}
+
+  \renewcommand{\labelitemii}{\textcolor{SECONDARY}{\textbullet}}
+
+  \renewcommand{\labelitemiii}{\textcolor{TERTIARY}{-}}
