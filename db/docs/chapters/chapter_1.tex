@@ -1,0 +1,79 @@
+\chapter{Considerazioni sul Dominio}
+
+\section{Analisi del Problema}
+
+Si vuole progettare e sviluppare un database per la gestione della logistica delle spedizioni di merci.
+
+Questo sistema deve essere in grado di gestire le informazioni relative ai clienti, ai mezzi di trasporto, ai corrieri, ai magazzini e ai prodotti, per poter essere a disposizione di un operatore incaricato alla pianificazione di spedizioni.
+
+\section{Assunzioni sul Dominio} 
+
+Per modellare il minimondo relativo al problema, si sono fatte le seguenti assunzioni:
+
+\begin{itemize}
+  \item \textbf{Il sistema gestisce spedizioni di merci presenti nei propri magazzini, verso clienti che hanno effettuato un ordine}.
+  
+  Si è assunto che la ditta a cui è rivolto il sistema non si occupi di spedizioni postali tra clienti, ma solo di spedizioni di merci presenti nei propri magazzini, che siano della ditta stessa o lasciate in gestione alla ditta da aziende terze.
+
+  Quest'assunzione è stata fatta per avere una linea di continuità col requisito di controllo della disponibilità della merce, cosa di cui non si occupa un servizio postale.
+
+  \item  \textbf{Il sistema si occupa della gestione delle spedizioni verso magazzini, oltre che verso clienti}.
+  
+  Si è assunto che la ditta a cui è rivolto il sistema possa avere la merce richiesta da un cliente distribuita in più magazzini, e che sia sconvenevole far partire spedizioni dirette verso il cliente da ogni magazzino che ha la merce richiesta.
+
+  Si è quindi piuttosto presupposto un sistema di spedizioni intermedie per merci che non sono presenti nel magazzino più vicino al cliente, ma che sono presenti in altri magazzini della ditta.
+
+  \item \textbf{Il sistema non si occupa di selezionare il percorso della merce dal magazzino originario al cliente}.
+  
+  Si è assunto che sia compito di un operatore umano selezionare il percorso della merce dal magazzino originario al cliente, e che il sistema si occupi solo di gestire le informazioni relative alla spedizione.
+
+  Si è quindi presupposto che una merce possa andare da un magazzino a potenzialmente qualsiasi altro, e che sarà premura di un operatore scegliere percorsi ragionevoli.
+
+  \item \textbf{Struttura gerarchica dei magazzini}.
+  
+  Si è assunto, oltre alla presenza di molteplici magazzini di proprietà della ditta, che questi magazzini siano organizzati in una struttura gerarchica territoriale come segue:
+  \begin{itemize}
+    \item Ogni magazzino è \textbf{citadino}, e può spedire direttamente ai clienti della sua città.
+    \item Alcuni magazzini \textbf{cittadini} sono \textbf{regionali}, che smistano le merci in una regione.
+    \item Alcuni magazzini \textbf{regionali} sono \textbf{nazionali}, che smistano le merci in una nazione.
+    \item Alcuni magazzini \textbf{nazionali} sono \textbf{centrali}, che smistano le merci in un continente.
+    \end{itemize}
+
+  \item \textbf{Distribuzione mezzi di trasporto}.
+  
+  Si è assunto che la ditta abbia a disposizione diversi tipi e livelli di mezzi per il trasporto merci, e che questi mezzi siano distribuiti in maniera diversa fra i magazzini, in base alla loro dimensione e al loro ruolo nella struttura gerarchica.
+
+  In particolare, si è deciso di dividere i mezzi di trasporto in:
+  
+  \begin{itemize}
+    \item \textbf{Su strada}, come camion e furgoni, divisi a loro volta in:
+      \begin{itemize}
+        \item \textbf{Piccoli}, ovvero furgoncini, camion di piccole dimensioni e motoclicli che possono essere guidati con una patente A o B, presenti in tutti i magazzini. Ogni mezzo \textbf{su strada piccolo} può coprire una zona comprendente diversi CAP, ed è impiegato in viaggi \textbf{cittadine e intraregionali} al cliente finale.
+        \item \textbf{Grandi}, ovvero TIR e camion di grandi dimensioni, che possono essere guidati con una patente C, presenti in magazzini regionali o superiori, per il trasporto fra magazzini, in viaggi \textbf{interregionali e intranazionalia}.
+      \end{itemize}
+    
+    \item \textbf{Su ferro}, come treni e tram, presenti in magazzini nazionali o superiori, per il trasporto fra magazzini, in viaggi \textbf{internazionali e intracontinentali}.
+    
+    \item \textbf{Via acqua}, come navi, presenti solo nei magazzini centrali, per il trasporto fra magazzini, in viaggi \textbf{intercontinentali}.
+    
+    \item \textbf{Via aria}, come aerei, presenti solo nei magazzini centrali, per il trasporto fra magazzini, in viaggi \textbf{intercontinentali}.
+  
+  \end{itemize}
+
+  \item \textbf{Gestione dei trasportatori}.
+  
+  Si è assunto che la ditta abbia diretta responsabilità solo sui mezzi su strada, e che i mezzi su ferro, via acqua e via aria siano di enti di spedizione terzi, con cui la ditta ha un contratto di collaborazione e per questo ne conserva solo l'evenutale disponibilità e i dati ad essa relativi.
+
+  Si è dunque presupposto che gli unici trasportatori dipendenti dalla ditta siano i conducenti dei mezzi su strada, dei quali il sistema terrà traccia, tra le altre cose, della tipologia di pantente, per associarli ai mezzi che possono guidare.
+
+  \item \textbf{Gestione di ordini e spedizioni}.
+  
+  Si è assunto che il cliente della ditta possa effettuare un ordine contenenti più prodotti, e che la ditta possa spedire i prodotti di un ordine in più spedizioni, in base alla disponibilità dei prodotti nei magazzini.
+
+  Si è inoltre assunto, come anticipato prima, che il sistema gestisca anche spedizioni fra magazzini, oltre che verso clienti.
+
+  Si è presupposto infine che il sistema non si occupi di gestire le spedizione in modo da evitare ritardi sulle date di consegna, ma che sia premura dell'operatore umano che pianifica le spedizioni scegliere percorsi che evitino ritardi.
+
+\end{itemize}
+
+% TODO: @zGenny UML and ER diagrams needs to be updated according to the new domain assumptions
