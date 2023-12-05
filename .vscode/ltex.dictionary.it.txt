@@ -55,3 +55,4 @@ merge
 linting
 commit
 naming
+intraregionali

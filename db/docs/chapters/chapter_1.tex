@@ -33,7 +33,7 @@ Per modellare il minimondo relativo al problema, si sono fatte le seguenti assun
   
   Si è assunto, oltre alla presenza di molteplici magazzini di proprietà della ditta, che questi magazzini siano organizzati in una struttura gerarchica territoriale come segue:
   \begin{itemize}
-    \item Ogni magazzino è \textbf{citadino}, e può spedire direttamente ai clienti della sua città.
+    \item Ogni magazzino è \textbf{cittadino}, e può spedire direttamente ai clienti della sua città.
     \item Alcuni magazzini \textbf{cittadini} sono \textbf{regionali}, che smistano le merci in una regione.
     \item Alcuni magazzini \textbf{regionali} sono \textbf{nazionali}, che smistano le merci in una nazione.
     \item Alcuni magazzini \textbf{nazionali} sono \textbf{centrali}, che smistano le merci in un continente.
@@ -48,8 +48,8 @@ Per modellare il minimondo relativo al problema, si sono fatte le seguenti assun
   \begin{itemize}
     \item \textbf{Su strada}, come camion e furgoni, divisi a loro volta in:
       \begin{itemize}
-        \item \textbf{Piccoli}, ovvero furgoncini, camion di piccole dimensioni e motoclicli che possono essere guidati con una patente A o B, presenti in tutti i magazzini. Ogni mezzo \textbf{su strada piccolo} può coprire una zona comprendente diversi CAP, ed è impiegato in viaggi \textbf{cittadine e intraregionali} al cliente finale.
-        \item \textbf{Grandi}, ovvero TIR e camion di grandi dimensioni, che possono essere guidati con una patente C, presenti in magazzini regionali o superiori, per il trasporto fra magazzini, in viaggi \textbf{interregionali e intranazionalia}.
+        \item \textbf{Piccoli}, ovvero furgoncini, camion di piccole dimensioni e motocicli che possono essere guidati con una patente A o B, presenti in tutti i magazzini. Ogni mezzo \textbf{su strada piccolo} può coprire una zona comprendente diversi CAP, ed è impiegato in viaggi \textbf{cittadini e intraregionali} per raggiungere il cliente finale.
+        \item \textbf{Grandi}, ovvero TIR e camion di grandi dimensioni, che possono essere guidati con una patente C, presenti in magazzini regionali o superiori, per il trasporto fra magazzini, in viaggi \textbf{interregionali e intranazionali}.
       \end{itemize}
     
     \item \textbf{Su ferro}, come treni e tram, presenti in magazzini nazionali o superiori, per il trasporto fra magazzini, in viaggi \textbf{internazionali e intracontinentali}.
@@ -64,7 +64,7 @@ Per modellare il minimondo relativo al problema, si sono fatte le seguenti assun
   
   Si è assunto che la ditta abbia diretta responsabilità solo sui mezzi su strada, e che i mezzi su ferro, via acqua e via aria siano di enti di spedizione terzi, con cui la ditta ha un contratto di collaborazione e per questo ne conserva solo l'evenutale disponibilità e i dati ad essa relativi.
 
-  Si è dunque presupposto che gli unici trasportatori dipendenti dalla ditta siano i conducenti dei mezzi su strada, dei quali il sistema terrà traccia, tra le altre cose, della tipologia di pantente, per associarli ai mezzi che possono guidare.
+  Si è dunque presupposto che gli unici trasportatori dipendenti dalla ditta siano i conducenti dei mezzi su strada, dei quali il sistema terrà traccia, tra le altre cose, della tipologia di patente, per associarli ai mezzi che possono guidare.
 
   \item \textbf{Gestione di ordini e spedizioni}.
   
