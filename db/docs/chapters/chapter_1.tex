@@ -8,7 +8,7 @@ Questo sistema deve essere in grado di gestire le informazioni relative ai clien
 
 \section{Assunzioni sul Dominio} 
 
-Per modellare il minimondo relativo al problema, si sono fatte le seguenti assunzioni:
+Per modellare il mini-mondo relativo al problema, si sono fatte le seguenti assunzioni:
 
 \begin{itemize}
   \item \textbf{Il sistema gestisce spedizioni di merci presenti nei propri magazzini, verso clienti che hanno effettuato un ordine}.
@@ -25,9 +25,11 @@ Per modellare il minimondo relativo al problema, si sono fatte le seguenti assun
 
   \item \textbf{Il sistema non si occupa di selezionare il percorso della merce dal magazzino originario al cliente}.
   
-  Si è assunto che sia compito di un operatore umano selezionare il percorso della merce dal magazzino originario al cliente, e che il sistema si occupi solo di gestire le informazioni relative alla spedizione.
+  Si è assunto che sia compito di un operatore  selezionare il percorso della merce dal magazzino originario al cliente, e che il sistema si occupi solo di gestire le informazioni relative alla spedizione.
 
   Si è quindi presupposto che una merce possa andare da un magazzino a potenzialmente qualsiasi altro, e che sarà premura di un operatore scegliere percorsi ragionevoli.
+
+  Quest'assunzione è stata fatta in funzione del requisito della traccia che richiede di far gestire all'operatore la pianificazione delle spedizioni, che chiaramente comprende anche il percorso.
 
   \item \textbf{Struttura gerarchica dei magazzini}.
   
@@ -62,7 +64,7 @@ Per modellare il minimondo relativo al problema, si sono fatte le seguenti assun
 
   \item \textbf{Gestione dei trasportatori}.
   
-  Si è assunto che la ditta abbia diretta responsabilità solo sui mezzi su strada, e che i mezzi su ferro, via acqua e via aria siano di enti di spedizione terzi, con cui la ditta ha un contratto di collaborazione e per questo ne conserva solo l'evenutale disponibilità e i dati ad essa relativi.
+  Si è assunto che la ditta abbia diretta responsabilità solo sui mezzi su strada, e che i mezzi su ferro, via acqua e via aria siano di enti di spedizione terzi, con cui la ditta ha un contratto di collaborazione e per questo ne conserva solo l'eventuale disponibilità e i dati a essa relativi.
 
   Si è dunque presupposto che gli unici trasportatori dipendenti dalla ditta siano i conducenti dei mezzi su strada, dei quali il sistema terrà traccia, tra le altre cose, della tipologia di patente, per associarli ai mezzi che possono guidare.
 
@@ -72,7 +74,7 @@ Per modellare il minimondo relativo al problema, si sono fatte le seguenti assun
 
   Si è inoltre assunto, come anticipato prima, che il sistema gestisca anche spedizioni fra magazzini, oltre che verso clienti.
 
-  Si è presupposto infine che il sistema non si occupi di gestire le spedizione in modo da evitare ritardi sulle date di consegna, ma che sia premura dell'operatore umano che pianifica le spedizioni scegliere percorsi che evitino ritardi.
+  Si è presupposto infine che il sistema non si occupi di gestire le spedizione in modo da evitare ritardi sulle date di consegna, ma che sia premura dell'operatore che pianifica le spedizioni scegliere percorsi che evitino ritardi.
 
 \end{itemize}
 

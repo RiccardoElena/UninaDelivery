@@ -56,3 +56,5 @@ linting
 commit
 naming
 intraregionali
+intranazionali
+mini-mondo
