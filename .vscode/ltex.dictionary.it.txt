@@ -58,3 +58,9 @@ naming
 intraregionali
 intranazionali
 mini-mondo
+Enhanced
+Entity
+Relationship
+Diagram
+Class
+modellizzazione
