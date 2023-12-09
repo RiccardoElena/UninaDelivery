@@ -14,7 +14,7 @@
 \usepackage[hidelinks]{hyperref} % Required for links
 \usepackage{afterpage} % Required for color pages 
 \usepackage{titlesec} % Required for titles
-\usepackage{tcolorbox} % Required for boxes
+\usepackage[most]{tcolorbox} % Required for boxes
 
 % Global variables
   \gdef\maintitle{\textcolor{PRIMARY}{Project Title}}
@@ -44,7 +44,6 @@
     {\ \textcolor{black}{\thesection}}{20pt}{\Large}
 
   % Subsections
-  % FIXME: @RiccardoElena fix subsection title format to display a dot
   \titleformat{\subsection}[block]
     {\normalfont\normalsize\bfseries\color{PRIMARY}}
     {\ \textcolor{black}{\thesubsection}}{20pt}{\large}
@@ -95,12 +94,21 @@
 \renewcommand{\textbf}[1]{\textcolor{PRIMARY}{\oldtextbf{#1}}}
 
 % Custom box definition
-% TODO: @RiccardoElena improve boc style to reduce colframe size
 \newtcolorbox[auto counter]{note}[1][]{
+  enhanced,
+  breakable,
   colback=SECONDARY!70!white,
   colframe=PRIMARY!70!white,
+  drop fuzzy shadow,
+  attach boxed title to top left={yshift*=-\tcboxedtitleheight},
   title= Nota \thetcbcounter: #1,
   boxrule=0.5pt,  % riduce lo spessore del bordo del box
   toptitle=1mm,  % riduce lo spazio sopra il titolo
   bottomtitle=1mm,  % riduce lo spazio sotto il titolo
+  boxed title style={
+    rounded corners,
+    sharp corners=northeast,
+    colback=tcbcolframe,
+    boxrule=0pt,
+  }
 }
