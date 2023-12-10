@@ -64,3 +64,4 @@ Relationship
 Diagram
 Class
 modellizzazione
+Bool

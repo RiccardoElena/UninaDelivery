@@ -10,17 +10,19 @@ Questa fase di progettazione è stata svolta utilizzando, oltre che il modello \
 
 \subsubsection{Precisazioni sui Diagrammi}
 
-Per migliorare la leggibilità dei diagrammi, si è deciso di specificare le \textbf{molteplicità} degli attributi esclusivamente per sottolineare la possibilità di essere valorizzato a \textbf{NULL}. In tali casi si è utilizzata la molteplicità \textbf{[0..1]} esclusivamente per gli attributi di tipo \textbf{Bool}, mentre \textbf{[0..*]} per gli altri.
+Per migliorare la leggibilità dei diagrammi, si è deciso di specificare le \textbf{molteplicità} degli attributi esclusivamente per sottolineare la possibilità di essere valorizzato a \textbf{NULL}. In tali casi si è utilizzata la molteplicità \textbf{[\(0..1\)]} esclusivamente per gli attributi di tipo \textbf{Bool}, mentre \textbf{[\(0..*\)]} per gli altri.
 
 \bigskip
 
 \begin{note}[Leggibilità dei Diagrammi]
-  In caso di problemi di leggibilità dei diagrammi, sono disponibili le versioni originali nella pagina GitHub del progetto: \href{https://github.com/RiccardoElena/UninaDelivery/blob/develop/db/docs/sources/ER_Diagram.pdf}{\textit{\underline{ER Diagram}}} e \href{https://github.com/RiccardoElena/UninaDelivery/blob/develop/db/docs/sources/UML_Calss_Diagram.pdf}{\textit{\underline{UML Class Diagram}}}.
+  In caso di problemi di leggibilità dei diagrammi, sono disponibili le versioni originali nella pagina GitHub del progetto: \href{https://github.com/RiccardoElena/UninaDelivery/blob/develop/db/docs/sources/ER_Diagram.pdf}{\textit{\underline{ER Diagram}}} e \href{https://github.com/RiccardoElena/UninaDelivery/blob/develop/db/docs/sources/UML_Class_Diagram.pdf}{\textit{\underline{UML Class Diagram}}}.
 \end{note}
 
 \newpage
 
-% TODO: @zGenny UML and ER diagrams needs to be updated according to the new domain assumptions
+% TODO: @zGenny UML needs to be polished (line overlappping and 'create' missing 's')
+% TODO: @zGenny ER needs to be completed (missing attributes to zone and address, business mail is not PK)
+
 \section{Enhanced Entity Relationship Diagram}
 \begin{center}
   \includegraphics[width=0.9\textwidth]{ER_Diagram.pdf}
@@ -31,3 +33,11 @@ Per migliorare la leggibilità dei diagrammi, si è deciso di specificare le \te
   \includegraphics[width=\textwidth]{UML_Class_Diagram.pdf}
 \end{center}
 
+\section{Ristrutturazione del Diagramma UML}
+
+% TODO: @RiccardoElena @zGenny write this section
+  % it should contains:
+  % 1) all the considerations about the UML diagram
+  % 2) the changes made to the UML diagram
+  % 3) the new UML diagram
+  % 4) constrints dictonary (table (?)). Styled as the example in the slides
