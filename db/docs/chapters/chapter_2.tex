@@ -2,15 +2,31 @@
 
 \section{Premesse alla lettura dei diagrammi}
 
-\subsubsection{Modelli Utilizzati}
+\subsection{Modelli Utilizzati}
 
 Procediamo alla modellizzazione del mini-mondo, partendo dalla progettazione concettuale.
 
 Questa fase di progettazione è stata svolta utilizzando, oltre che il modello \textbf{UML} nella forma di un \textbf{Class Diagram}, anche il modello \textbf{EER}, ovvero \textbf{Enhanced Entity Relationship}, per cogliere meglio aspetti del dominio che un modello \textbf{ER} classico non avrebbe potuto cogliere, come ad esempio \textbf{generalizzazioni e specializzazioni}.
 
-\subsubsection{Precisazioni sui Diagrammi}
+\subsection{Precisazioni sui Diagrammi}
 
-Per migliorare la leggibilità dei diagrammi, si è deciso di specificare le \textbf{molteplicità} degli attributi esclusivamente per sottolineare la possibilità di essere valorizzato a \textbf{NULL}. In tali casi si è utilizzata la molteplicità \textbf{[\(0..1\)]} esclusivamente per gli attributi di tipo \textbf{Bool}, mentre \textbf{[\(0..*\)]} per gli altri.
+\subsubsection{EER Diagram}
+
+Vista la densità del diagramma \textbf{EER}, si è deciso d'introdurre un \textbf{color coding} per facilitarne la lettura:
+
+\begin{itemize}
+  \item \textcolor{PRIMARY}{Entità}, e dunque Specializzazioni in \textcolor{PRIMARY}{arancione};
+  \item \textcolor{CONTRAST}{Relazioni} in \textcolor{CONTRAST}{celeste};
+  \item \textcolor{NEWGREEN}{Attributi} in \textcolor{NEWGREEN}{verde};
+\end{itemize}
+
+Inoltre, in caso di accavallamento di linee, si è deciso d'interrompere la linea in secondo piano in corrispondenza di un intersezione, così da evidenziare i diversi collegamenti.
+
+\subsubsection{UML Class Diagram}
+
+Per migliorare la leggibilità dei diagrammi, si è deciso di specificare le \textbf{molteplicità} degli attributi esclusivamente per sottolineare la possibilità di essere valorizzato a \textbf{NULL}. 
+
+In tali casi si è utilizzata la molteplicità \textbf{[\(0..1\)]} esclusivamente per gli attributi di tipo \textbf{Bool}, mentre \textbf{[\(0..*\)]} per gli altri.
 
 \bigskip
 
@@ -19,9 +35,6 @@ Per migliorare la leggibilità dei diagrammi, si è deciso di specificare le \te
 \end{note}
 
 \newpage
-
-% [x]: @zGenny UML needs to be polished (line overlappping and 'create' missing 's')
-% [x]: @zGenny ER needs to be completed (missing attributes to zone and address, business mail is not PK)
 
 \section{Enhanced Entity Relationship Diagram}
 \begin{center}
@@ -32,6 +45,8 @@ Per migliorare la leggibilità dei diagrammi, si è deciso di specificare le \te
 \begin{center}
   \includegraphics[width=\textwidth]{UML_Class_Diagram.pdf}
 \end{center}
+
+\newpage
 
 \section{Ristrutturazione del Diagramma UML}
 

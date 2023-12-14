@@ -24,6 +24,10 @@
   \definecolor{PRIMARY}{HTML}{cc4400}
   \definecolor{SECONDARY}{HTML}{f7dba7}
   \definecolor{TERTIARY}{HTML}{191919}
+  \definecolor{CONTRAST}{HTML}{2F8A1B} % TODO: @zGenny change this color to the azure one used in diagrams (HEX format)
+  \definecolor{NEWGREEN}{HTML}{2F8A1B} % TODO: @zGenny change this color to the green one used in diagrams (HEX format)
+
+
   \color{TERTIARY}
 
 % Graphics path
