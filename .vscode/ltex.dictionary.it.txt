@@ -66,3 +66,13 @@ Class
 modellizzazione
 Bool
 coding
+Multivalore
+Order
+Shipment
+Price
+on-the-fly
+Product
+Employee
+Overlapping
+Deposit
+Transport
