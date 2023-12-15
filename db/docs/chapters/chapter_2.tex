@@ -36,15 +36,16 @@ In tali casi si è utilizzata la molteplicità \textbf{[\(0..1\)]} esclusivament
 
 \newpage
 % TODO for EER diagram @zGenny:
-% [ ]: add assosation class with Date field to drives association
-% [ ]: to fix the "not world wide standard of zipcode problem" we can use both zipcode and country as primary key for the zone entity
-% [ ]: add Price field to the Shipping entity as a calculated field. It will after removed in the restructuring phase
-% [ ]: add the "isAvailable" field to the Driver entity
-% [ ]: change the "OnTravel" field to "isAvailable" to the Vehicle entity for more felxibility
-% [ ]: chenge the "IsCompleted" field to the Order entity to a calculated field. It can been extracted checking if all products in the order are in a shipment to the order maker. This one is gonna be stored in the restructured
-% [ ]: add "HasArrived" field to the Shipment entity, to check if the shipment went to the destination or not
-% [ ]: remove $FiscalCode" field to the Account entity, it's not needed
-% [ ]: in the end export the new diagram as a pdf and replace the old one
+% [x]: add assosation class with Date field to drives association
+% [x]: to fix the "not world wide standard of zipcode problem" we can use both zipcode and country as primary key for the zone entity
+% [x]: add Price field to the Shipping entity as a calculated field. It will after removed in the restructuring phase
+% [x]: add the "isAvailable" field to the Driver entity
+% [x]: change the "OnTravel" field to "isAvailable" to the Vehicle entity for more felxibility
+% [x]: chenge the "IsCompleted" field to the Order entity to a calculated field. It can been extracted checking if all products in the order are in a shipment to the order maker. This one is gonna be stored in the restructured
+% FIXME: @RiccardoElena hope we dont consider IsCompleted when there are no products in the order or we wont be able to have an history of the orders.
+% [x]: add "HasArrived" field to the Shipment entity, to check if the shipment went to the destination or not
+% [x]: remove $FiscalCode" field to the Account entity, it's not needed
+% [x]: in the end export the new diagram as a pdf and replace the old one
 \section{Enhanced Entity Relationship Diagram}
 \begin{center}
   \includegraphics[width=0.9\textwidth]{ER_Diagram.pdf}
