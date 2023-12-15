@@ -25,13 +25,12 @@ Per modellare il mini-mondo relativo al problema, si sono fatte le seguenti assu
 
   \item \textbf{Il sistema non si occupa di selezionare il percorso della merce dal magazzino originario al cliente}.
   
-  Si è assunto che sia compito di un operatore  selezionare il percorso della merce dal magazzino originario al cliente, e che il sistema si occupi solo di gestire le informazioni relative alla spedizione.
+  Si è assunto che sia compito di un operatore  selezionare il percorso della merce dal magazzino originario al cliente, e che conservi solo le informazioni relative alla spedizione.
 
   Si è quindi presupposto che una merce possa andare da un magazzino a potenzialmente qualsiasi altro, e che sarà premura di un operatore scegliere percorsi ragionevoli.
 
   Quest'assunzione è stata fatta in funzione del requisito della traccia che richiede di far gestire all'operatore la pianificazione delle spedizioni, che chiaramente comprende anche il percorso.
 
-  \newpage
   \item \textbf{Struttura gerarchica dei magazzini}.
   
   Si è assunto, oltre alla presenza di molteplici magazzini di proprietà della ditta, che questi magazzini siano organizzati in una struttura gerarchica territoriale come segue:
@@ -44,9 +43,7 @@ Per modellare il mini-mondo relativo al problema, si sono fatte le seguenti assu
 
   \item \textbf{Distribuzione mezzi di trasporto}.
   
-  Si è assunto che la ditta abbia a disposizione diversi tipi e livelli di mezzi per il trasporto merci, e che questi mezzi siano distribuiti in maniera diversa fra i magazzini, in base alla loro dimensione e al loro ruolo nella struttura gerarchica.
-
-  In particolare, si è deciso di dividere i mezzi di trasporto in:
+  Si è assunto che la ditta abbia a disposizione diversi tipi e livelli di mezzi per il trasporto merci, e che questi mezzi siano distribuiti in maniera diversa fra i magazzini, in base alla loro dimensione e al loro ruolo nella struttura gerarchica. In particolare, si è deciso di dividere i mezzi di trasporto in:
   
   \begin{itemize}
     \item \textbf{Su strada}, come camion e furgoni, divisi a loro volta in:
@@ -63,6 +60,8 @@ Per modellare il mini-mondo relativo al problema, si sono fatte le seguenti assu
   
   \end{itemize}
 
+  Si è inoltre considerato che ogni mezzo di trasporto copra al più una zona al giorno, non effettuando altri viaggi.
+
   \item \textbf{Gestione dei trasportatori}.
   
   Si è assunto che la ditta abbia diretta responsabilità solo sui mezzi su strada, e che i mezzi su ferro, via acqua e via aria siano di enti di spedizione terzi, con cui la ditta ha un contratto di collaborazione e per questo ne conserva solo l'eventuale disponibilità e i dati a essa relativi.
@@ -76,6 +75,3 @@ Per modellare il mini-mondo relativo al problema, si sono fatte le seguenti assu
   Si è presupposto dunque che il sistema non si occupi di gestire le spedizione in modo da evitare ritardi sulle date di consegna, ma esclusivamente di presentare in ordine le spedizioni per permettere all'operatore che pianifica le spedizioni di scegliere percorsi che evitino ritardi.
 
 \end{itemize}
-
-% TODO: @RiccardoElena add assumption about number of travel for transport per day
-
