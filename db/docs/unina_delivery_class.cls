@@ -15,6 +15,10 @@
 \usepackage{afterpage} % Required for color pages 
 \usepackage{titlesec} % Required for titles
 \usepackage[most]{tcolorbox} % Required for boxes
+\usepackage{tabularx} % Required for tables
+\usepackage{colortbl} % Change color of table elements
+\usepackage{ifthen} % Required for if-then-else
+\usepackage{xargs} % Required for more than one optional parameter in new commands
 
 % Global variables
   \gdef\maintitle{\textcolor{PRIMARY}{Project Title}}
@@ -116,3 +120,27 @@
     boxrule=0pt,
   }
 }
+
+% Custom table definition
+
+\newcommandx{\customTable}[5][2={},3={}]{
+  \renewcommand{\arraystretch}{1.5}
+  \newcolumntype{Y}{>{\centering\arraybackslash}X}
+  \arrayrulecolor{PRIMARY}
+  \begin{table}[h]
+    \ifthenelse{\equal{#3}{}}{}{\label{#3}}
+    \centering
+    \begin{tabularx}{\textwidth}{#1}
+    \hline
+    \rowcolor{SECONDARY} #4 \\
+    \hline
+    #5
+    \hline
+    \end{tabularx}
+    \ifthenelse{\equal{#2}{}}{}{\caption{#2}}
+  \end{table}
+} 
+% Invoke this as \customTable{table format}[table caption][table label]{table head}{table content}
+% table head should be a list of column names separated by &
+% the arguments in square brackets are optional, if you don't need them square brackets can be omitted
+
