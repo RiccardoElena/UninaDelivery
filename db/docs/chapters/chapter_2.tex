@@ -250,11 +250,161 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 \subsection{Dizionario dei Vincoli}
 
 \customTable{ccY}[Dizionario dei vincoli Prima Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
-  Val 1 & Val 2 & Val 3 \\
-  Val 1.2 & Val 2.2 & Val 3.2 \\
+  \textbf{formatAccountName} & Dominio &
+  {\footnotesize
+  Il campo \textbf{Name} della classe \textbf{Account} deve contenere solo caratteri alfabetici
+  }\\
+
+  \textbf{formatAccountSurname} & Dominio &
+  {\footnotesize
+  Il campo \textbf{Surname} della classe \textbf{Account} deve contenere solo caratteri alfabetici
+  }\\
+
+  \textbf{formatAccountEmail} & Dominio &
+  {\footnotesize
+  Il campo \textbf{Email} della classe \textbf{Account} deve avere il formato <regex>
+  }\\
+  
+  \textbf{formatDate} & Dominio & 
+  {\footnotesize
+  Per ogni campo di tipo \textbf{date} se la data inserita non è nel formato dd/mm/yyyy viene convertita
+  }\\
+  
+  \textbf{validAccountBirthdate} & Dominio & 
+  {\footnotesize
+  L'utente deve aver compiuto 16 anni
+  }\\
+
+  \textbf{formatOperatorBusinessmail} & Dominio &
+  {\footnotesize
+  Il campo \textbf{Businessmail} della classe Operator deve avere il formato <regex> 
+  }\\
+  
+  \textbf{formatDriverBusinessmail} & Dominio &
+  {\footnotesize
+  Il campo \textbf{Businessmail} della classe Driver deve avere il formato <regex> 
+  }\\
+  
+  \textbf{formatAccountProPic} & Dominio &
+  {\footnotesize
+  Il campo \textbf{ProPic} deve essere un'immagine valida in formato Base64 <regex>
+  }\\
+
+  \textbf{formatAccountPassword} & Dominio &
+  {\footnotesize
+  Il campo \textbf{Password} della classe \textbf{Account} deve avere il formato <regex>. HASH sha 256
+  }\\
+
+  \textbf{formatTransportMaxCapacity} & Dominio &
+  {\footnotesize
+  Il campo \textbf{MaxCapacity} della classe \textbf{Transport} dev'essere positivo.
+  }\\
+
+  \textbf{formatOrderExtraWarranty} & Dominio &
+  {\footnotesize
+  Il campo \textbf{ExtraWarranty} della classe \textbf{Order} deve essere non negativo.
+  }\\
+
+  \textbf{formatAddressAddressNo} & Dominio &
+  {\footnotesize
+  Il campo \textbf{AddressNo} della classe \textbf{Address} contiene numeri non negativi, forse UNA lettera e al più la parola BIS.
+  }\\
 }
 
+\customTable{ccY}[Dizionario dei vincoli Seconda Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
+  \textbf{formatAddressStreet} & Dominio &
+  {\footnotesize
+  Il campo \textbf{Street} della classe \textbf{Address} può contenere solo caratteri alfanumerici.
+  }\\
+  
+  \textbf{formatDepositOccupiedSpace} & Dominio & 
+  {\footnotesize
+  Il campo \textbf{OccupiedSpace} della classe \textbf{Deposit} deve essere un float non negativo.
+  }\\
+  
+  \textbf{formatDepositMaxCapacity} & Dominio & 
+  {\footnotesize
+  Il campo \textbf{MaxCapacity} della classe \textbf{Deposit} deve essere un float non negativo.
+  }\\
+  
+  \textbf{formatProductCategory} & Dominio  & 
+  {\footnotesize
+  Il campo \textbf{Category} della classe \textbf{Product} deve contenere solo caratteri alfabetici.
+  }\\
+  
+  \textbf{formatProductName} & Dominio  & 
+  {\footnotesize
+  Il campo \textbf{Name} della classe \textbf{Product} deve contenere caratteri alfanumerici e può contenere caratteri speciali. <regex>
+  }\\
+  
+  \textbf{formatProductSupplier} & Dominio  & 
+  {\footnotesize
+  Il campo \textbf{Supplier} della classe \textbf{Product} deve contenere caratteri alfanumerici.
+  }\\
+  
+  \textbf{formatProductDescription} & Dominio & 
+  {\footnotesize
+  Il campo \textbf{Description} della classe \textbf{Product} deve contenere caratteri alfanumerici e può contenere caratteri speciali. <regex>
+  }\\
+  
+  \textbf{formatProductPackageSizeLiters} & Dominio & 
+  {\footnotesize
+  Il campo \textbf{PackageSizeLiters} della classe \textbf{Product} deve essere positivo.
+  }\\
 
+  \textbf{formatProductPrice} & Dominio & 
+  {\footnotesize
+  Il campo \textbf{MaxCapacity} della classe \textbf{Deposit} deve essere positivo.
+  }\\
+  
+  \textbf{formatStoresQuantity} & Dominio & 
+  {\footnotesize
+  Il campo \textbf{Quantity} della classe d'associazione \textbf{Stores} deve essere positivo.
+  }\\ %nota se arriva a 0 viene eliminato dal db
+  
+  \textbf{formatContainsQuantity} & Dominio & 
+  {\footnotesize
+  Il campo \textbf{Quantity} della classe d'associazione \textbf{Contains} deve essere positivo.
+  }\\
+  
+  \textbf{formatZoneZipCode} & Dominio & 
+  {\footnotesize
+  Il campo \textbf{ZipCode} della classe \textbf{Zone} deve contenere solo caratteri numerici.
+  }\\
+  
+}
+
+\customTable{ccY}[Dizionario dei vincoli Terza Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
+  \textbf{formatZoneCity} & Dominio & 
+  {\footnotesize
+  Il campo \textbf{City} della classe Zone deve contenere solo caratteri alfabetici.
+  }\\
+  
+  \textbf{formatZoneState} & Dominio & 
+  {\footnotesize
+  Il campo \textbf{State} della classe Zone deve contenere solo caratteri alfabetici.
+  }\\
+  
+  \textbf{formatZoneCountry} & Dominio & 
+  {\footnotesize
+  Il campo \textbf{Country} della classe Zone deve contenere solo caratteri alfabetici.
+  }\\
+  
+  \textbf{checkDepositFullness} & N-upla & 
+  {\footnotesize
+  Nella classe \textbf{Deposit} il campo \textbf{OccupiedSpace} può avere valori solo minori o uguali al campo \textbf{MaxCapacity}
+  }\\
+  
+  \textbf{checkTransportFullness} & N-upla & 
+  {\footnotesize
+  Nella classe \textbf{Transport} il campo \textbf{OccupiedSpace} può avere valori solo minori o uguali al campo \textbf{MaxCapacity}
+  }\\
+  
+  \textbf{checkProductDescriptionOnTopic} & N-upla &
+  {\footnotesize
+  Nella calsse \textbf{Product} il campo \textbf{Description} dev'essere una stringa che contenga le stringhe presenti nei campi \textbf{Category}, \textbf{Name} e \textbf{Supplier}
+  }\\
+}
 
 
 % TODO: @RiccardoElena @zGenny write this section
