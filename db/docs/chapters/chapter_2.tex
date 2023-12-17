@@ -241,10 +241,83 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 \subsection{Dizionario delle Associazioni}
 
 \customTable{cYYY}[Dizionario delle associazioni Prima Parte]{\textbfB{Associazione} & \textbfB{Descrizione} & \textbfB{Attributi} & \textbfB{Classi Coinvolte}}{
-  Val 1 & Val 2 & Val 3 & Val 4 \\
-  Val 1.2 & Val 2.2 & Val 3.2 & Val 4.2 \\
+  \textbf{Makes} & 
+  {\footnotesize
+  Esprime la relazione tra un \textbf{Account} e un \textbf{Order}. Un \textbf{Account} può effettuare più \textbf{Order}, mentre un \textbf{Order} è effettuato da un solo \textbf{Account}.
+  } & 
+  --- & 
+  {\footnotesize
+  \textbf{Account [1] (Makes)}
+  \textbf{Order [*] (was made)}
+  }\\
+
+  \textbf{Inhabits} &
+  {\footnotesize
+  Esprime la relazione tra un \textbf{Account} e un \textbf{Address}. Un \textbf{Account} può avere un solo \textbf{Address}, mentre un \textbf{Address} può corrispondere a più \textbf{Account}.
+  } &
+  --- &
+  {\footnotesize
+  \textbf{Account [0..*] (Inhabits)}
+
+  \textbf{Address [1] (is inhabited by)}
+  }\\
+
+  \textbf{Sited} &
+  {\footnotesize
+  Esprime la relazione tra un \textbf{Address} e un \textbf{Deposito}. Un \textbf{Address} può corrispondere a un solo \textbf{Deposit}, mentre un \textbf{Deposit} ha solo un \textbf{Address}.
+  } &
+  --- &
+  {\footnotesize
+  \textbf{Address [1] (is sited)}
+
+  \textbf{Deposit [1] (is sited in)}
+  }\\
+
+  \textbf{Of} &
+  {\footnotesize
+  Esprime la relazione tra \textbf{Zone} e \textbf{Address}. Un \textbf{Zone} può contenere più \textbf{Address}, mentre un \textbf{Address} può appartenere a una sola \textbf{Zone}.
+  } &
+  --- &
+  {\footnotesize
+  \textbf{Zone [*] (is of)}
+
+  \textbf{Address [*] (of)}
+  }\\
 }
-  
+\customTable{cYYY}[Dizionario delle associazioni Seconda Parte]{\textbfB{Associazione} & \textbfB{Descrizione} & \textbfB{Attributi} & \textbfB{Classi Coinvolte}}{
+  \textbf{Contains} &
+  {\footnotesize
+  Esprime la relazione tra \textbf{Order} e \textbf{Product}. Un \textbf{Order} può contenere più \textbf{Product}, mentre un \textbf{Product} può essere contenuto in più \textbf{Order}. 
+  Inoltre l'associazione comprende 2 attributi che indicano la quantità di prodotti contenuti in un ordine \textbf{(Quantity)} e se il prodotto sia stato spedito o meno \textbf{(IsSent)}.
+  } &
+  \textbf{IsSent}
+
+  \textbf{Quantity} &
+  {\footnotesize
+  \textbf{Order [*] (contains)}
+  \textbf{Product [*] (is contained)}
+  }\\
+
+  \textbf{Stores} &
+  {\footnotesize
+  Esprime la relazione tra \textbf{Deposit} e \textbf{Product}. Un \textbf{Deposit} può contenere più \textbf{Product}, mentre un \textbf{Product} può essere contenuto in più \textbf{Deposit}.
+  } &
+  \textbf{Quantity} &
+  {\footnotesize
+  \textbf{Deposit [*] (stores)}
+  \textbf{Product [*] (is stored)}
+  }\\
+
+  \textbf{ShippedFrom} &
+  {\footnotesize
+  Descrizione
+  } &
+  --- &
+  {\footnotesize
+  \textbf{Shipment [*] (ships)}
+  \textbf{Deposit [*] (is shipped from)}
+  }\\
+}
 
 \newpage
 \subsection{Dizionario dei Vincoli}
