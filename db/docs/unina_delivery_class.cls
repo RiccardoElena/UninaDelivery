@@ -19,6 +19,8 @@
 \usepackage{colortbl} % Change color of table elements
 \usepackage{ifthen} % Required for if-then-else
 \usepackage{xargs} % Required for more than one optional parameter in new commands
+\usepackage{soul} % Required for fancy text highlighting
+\usepackage{float} % Required for forcing floating objects in position
 
 % Global variables
   \gdef\maintitle{\textcolor{PRIMARY}{Project Title}}
@@ -98,8 +100,8 @@
   \renewcommand{\labelitemiii}{\textcolor{TERTIARY}{-}}
 
 % Setting custom bold text color
-\let\oldtextbf\textbf
-\renewcommand{\textbf}[1]{\textcolor{PRIMARY}{\oldtextbf{#1}}}
+\let\textbfB\textbf
+\renewcommand{\textbf}[1]{\textcolor{PRIMARY}{\textbfB{#1}}}
 
 % Custom box definition
 \newtcolorbox[auto counter]{note}[1][]{
@@ -122,12 +124,11 @@
 }
 
 % Custom table definition
-
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
 \newcommandx{\customTable}[5][2={},3={}]{
-  \renewcommand{\arraystretch}{1.5}
-  \newcolumntype{Y}{>{\centering\arraybackslash}X}
+  \renewcommand{\arraystretch}{2.2}
   \arrayrulecolor{PRIMARY}
-  \begin{table}[h]
+  \begin{table}[H]
     \ifthenelse{\equal{#3}{}}{}{\label{#3}}
     \centering
     \begin{tabularx}{\textwidth}{#1}
@@ -140,7 +141,11 @@
     \ifthenelse{\equal{#2}{}}{}{\caption{#2}}
   \end{table}
 } 
-% Invoke this as \customTable{table format}[table caption][table label]{table head}{table content}
-% table head should be a list of column names separated by &
-% the arguments in square brackets are optional, if you don't need them square brackets can be omitted
+  % Invoke this as \customTable{table format}[table caption][table label]{table head}{table content}
+  % table head should be a list of column names separated by &
+  % the arguments in square brackets are optional, if you don't need them square brackets can be omitted
 
+% Custom link definition
+
+\newcommand{\exlink}[2]{\setulcolor{PRIMARY}\href{#1}{\ul{\textit{#2}}}}
+\newcommand{\intlink}[2]{\setulcolor{SECONDARY}\hyperref[#1]{\ul{\textit{#2}}}}
