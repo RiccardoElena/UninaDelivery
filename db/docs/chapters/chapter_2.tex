@@ -237,7 +237,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
 }
 
-\newpage
+\newpage % TODO: @RiccardoElena should this be removed?
 \subsection{Dizionario delle Associazioni}
 
 \customTable{cYYY}[Dizionario delle associazioni Prima Parte]{\textbfB{Associazione} & \textbfB{Descrizione} & \textbfB{Attributi} & \textbfB{Classi Coinvolte}}{
@@ -248,6 +248,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   --- & 
   {\footnotesize
   \textbf{Account [1] (Makes)}
+
   \textbf{Order [*] (was made)}
   }\\
 
@@ -283,8 +284,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
   \textbf{Address [*] (of)}
   }\\
-}
-\customTable{cYYY}[Dizionario delle associazioni Seconda Parte]{\textbfB{Associazione} & \textbfB{Descrizione} & \textbfB{Attributi} & \textbfB{Classi Coinvolte}}{
+
   \textbf{Contains} &
   {\footnotesize
   Esprime la relazione tra \textbf{Order} e \textbf{Product}. Un \textbf{Order} può contenere più \textbf{Product}, mentre un \textbf{Product} può essere contenuto in più \textbf{Order}. 
@@ -295,9 +295,11 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   \textbf{Quantity} &
   {\footnotesize
   \textbf{Order [*] (contains)}
+
   \textbf{Product [*] (is contained)}
   }\\
-
+}
+\customTable{cYYY}[Dizionario delle associazioni Seconda Parte]{\textbfB{Associazione} & \textbfB{Descrizione} & \textbfB{Attributi} & \textbfB{Classi Coinvolte}}{
   \textbf{Stores} &
   {\footnotesize
   Esprime la relazione tra \textbf{Deposit} e \textbf{Product}. Un \textbf{Deposit} può contenere più \textbf{Product}, mentre un \textbf{Product} può essere contenuto in più \textbf{Deposit}.
@@ -305,17 +307,121 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   \textbf{Quantity} &
   {\footnotesize
   \textbf{Deposit [*] (stores)}
+
   \textbf{Product [*] (is stored)}
   }\\
 
   \textbf{ShippedFrom} &
   {\footnotesize
-  Descrizione
+  Esprime la relazione tra \textbf{Shipment} e \textbf{Deposit}. Una \textbf{Shipment} può partire da un solo \textbf{Deposit}, mentre un \textbf{Deposit} può essere il punto di partenza di più \textbf{Shipment}.
   } &
   --- &
   {\footnotesize
   \textbf{Shipment [*] (ships)}
+
   \textbf{Deposit [*] (is shipped from)}
+  }\\
+
+  \textbf{Contains} &
+  {\footnotesize
+  Esprime la relazione tra \textbf{Shipment} e \textbf{Order}. Una \textbf{Shipment} può contenere più \textbf{Order}, mentre un \textbf{Order} può essere contenuto in più \textbf{Shipment}.
+  } &
+  --- &
+  {\footnotesize
+  \textbf{Shipment [*] (contains)}
+
+  \textbf{Order [*] (is contained)}
+  }\\
+
+  \textbf{Creates} &
+  {\footnotesize
+  Esprime la relazione tra l'\textbf{Operator} e l'\textbf{Order}. Un \textbf{Operator} può creare più \textbf{Order}, mentre un \textbf{Order} può essere creato da un solo \textbf{Operator}.
+  } &
+  --- &
+  {\footnotesize
+  \textbf{Operator [1] (creates)}
+
+  \textbf{Shipment [*] (is created)}
+  }\\
+
+  \textbf{TransportedBy} &
+  {\footnotesize
+  Esprime la relazione tra \textbf{Shipment} e \textbf{Transport}. Una \textbf{Shipment} può essere trasportata da un solo \textbf{Transport}, mentre un \textbf{Transport} può trasportare più \textbf{Shipment}.
+  } &
+  --- &
+  {\footnotesize
+  \textbf{Shipment [*] (transportedBy)}
+
+  \textbf{Transport [1] (transport)}
+  }\\
+  
+  \textbf{Belongs} &
+  {\footnotesize
+  Esprime la relazione tra \textbf{Transport} e \textbf{Deposit}. Un \textbf{Transport} può appartenere a un solo \textbf{Deposit}, mentre un \textbf{Deposit} può avere più \textbf{Transport}.
+  } &
+  --- &
+  {\footnotesize
+  \textbf{Deposit [1] (belonged)}
+
+  \textbf{Transport [*] (belongs)}
+  }\\
+}
+\customTable{cYYY}[Dizionario delle associazioni Terza Parte]{\textbfB{Associazione} & \textbfB{Descrizione} & \textbfB{Attributi} & \textbfB{Classi Coinvolte}}{
+  
+
+  \textbf{Is} &
+  {\footnotesize
+  Esprime la relazione tra \textbf{Account} e \textbf{Driver}. Un \textbf{Account} potrebbe essere un \textbf{Driver}, mentre un \textbf{Driver} è un tipo di \textbf{Account}.
+  } &
+  --- &
+  {\footnotesize
+  \textbf{Account [1] (is)}
+
+  \textbf{Driver [0..1] (is of)}
+  }\\
+
+  \textbf{Is} &
+  {\footnotesize
+  Esprime la relazione tra \textbf{Account} e \textbf{Operator}. Un \textbf{Account} potrebbe essere un \textbf{Operator}, mentre un \textbf{Operator} è un tipo di \textbf{Account}.
+  } &
+  --- &
+  {\footnotesize
+  \textbf{Account [1] (is)}
+
+  \textbf{Operator [0..1] (is of)}
+  }\\
+
+  \textbf{WorksAt} &
+  {\footnotesize
+  Esprime la relazione tra \textbf{Driver} e \textbf{Deposit}. Un \textbf{Driver} può lavorare in un solo \textbf{Deposit}, mentre un \textbf{Deposit} può avere più \textbf{Driver}.
+  } &
+  --- &
+  {\footnotesize
+  \textbf{Driver [0..*] (works At]}
+
+  \textbf{Deposit [1] (works from)}
+  }\\
+
+  \textbf{Covers} &
+  {\footnotesize
+  Esprime la relazione tra \textbf{Transport} e \textbf{Zone}. Un \textbf{Transport} può coprire più \textbf{Zone} in una determinata \textbf{Date}, mentre una \textbf{Zone} può essere coperta da più \textbf{Transport}.
+  } &
+  \textbf{Date} &
+  {\footnotesize
+  \textbf{Zone [*] (is covered)}
+
+  \textbf{Transport [*] (covers)}
+  }\\
+
+  \textbf{Drives} &
+  {\footnotesize
+  Esprime la relazione tra \textbf{Driver} e \textbf{Transport}. Un \textbf{Driver} può guidare più \textbf{Transport}, ma solo uno in una determinata \textbf{Date}, mentre un \textbf{Transport} può essere guidato da più \textbf{Driver}, ma soltanto da uno in una determinata \textbf{date}.
+  
+  } &
+  \textbf{Date} &
+  {\footnotesize
+  \textbf{Driver [*] (Drives)}
+  \textbf{Transport [*] (is driven)}
   }\\
 }
 
