@@ -236,7 +236,6 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
 }
 
-\newpage % TODO: @RiccardoElena should this be removed?
 \subsection{Dizionario delle Associazioni}
 
 \customTable{cYYY}[Dizionario delle associazioni Prima Parte]{\textbfB{Associazione} & \textbfB{Descrizione} & \textbfB{Attributi} & \textbfB{Classi Coinvolte}}{
@@ -246,9 +245,10 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   } & 
   --- & 
   {\footnotesize
-  \textbf{Account [1] (Makes)}
+  \textbf{Account \([1]\)} (\textit{makes}): L'account che effettua un dato ordine;
 
-  \textbf{Order [*] (was made)}
+  \textbf{Order \([*]\)} (\textit{made by}): Gli ordini effettuati da un dato account;
+  
   }\\
 
   \textbf{Inhabits} &
@@ -257,9 +257,9 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   } &
   --- &
   {\footnotesize
-  \textbf{Account [0..*] (Inhabits)}
+  \textbf{Account \([0..*]\)} (\textit{inhabits}): Gli account che abitano in un dato indirizzo;
 
-  \textbf{Address [1] (is inhabited by)}
+  \textbf{Address \([1]\)} (\textit{is inhabited by}): L'indirizzo abitato da un dato account;
   }\\
 
   \textbf{Sited} &
@@ -268,34 +268,36 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   } &
   --- &
   {\footnotesize
-  \textbf{Address [1] (is sited)}
+  \textbf{Address \([1]\)} (\textit{is site of}): L'indirizzo di un dato deposito;
 
-  \textbf{Deposit [1] (is sited in)}
+  \textbf{Deposit \([1]\)} (\textit{sited on}): Il deposito che si trova in un dato indirizzo;
+  
   }\\
-
-  \textbf{Of} &
+  % TODO: @zGenny probably 'In' is a better name for this association instead of 'Of'
+  \textbf{In} &
   {\footnotesize
-  Esprime la relazione tra \textbf{Zone} e \textbf{Address}. Un \textbf{Zone} può contenere più \textbf{Address}, mentre un \textbf{Address} può appartenere a una sola \textbf{Zone}.
+  Esprime la relazione tra \textbf{Zone} e \textbf{Address}. Un \textbf{Zone} può contenere più \textbf{Address}, e un \textbf{Address} può appartenere a più \textbf{Zone}.
   } &
   --- &
   {\footnotesize
-  \textbf{Zone [*] (is of)}
+  \textbf{Zone \([*]\)} (\textit{has}): Le zone che contengono un dato indirizzo;
 
-  \textbf{Address [*] (of)}
+  \textbf{Address \([*]\)} (\textit{in}): Gli indirizzi che appartengono a una data zona;
   }\\
 
   \textbf{Contains} &
   {\footnotesize
-  Esprime la relazione tra \textbf{Order} e \textbf{Product}. Un \textbf{Order} può contenere più \textbf{Product}, mentre un \textbf{Product} può essere contenuto in più \textbf{Order}. 
-  Inoltre l'associazione comprende 2 attributi che indicano la quantità di prodotti contenuti in un ordine \textbf{(Quantity)} e se il prodotto sia stato spedito o meno \textbf{(IsSent)}.
+  Esprime la relazione tra \textbf{Order} e \textbf{Product}. Un \textbf{Order} può contenere più \textbf{Product} e un \textbf{Product} può essere contenuto in più \textbf{Order}. 
+  
   } &
-  \textbf{IsSent}
-
-  \textbf{Quantity} &
   {\footnotesize
-  \textbf{Order [*] (contains)}
+  \text{\textbf{IsSent}} (\textit{bool}) Indica se un dato prodotto in un dato ordine è stato spedito al cliente; 
 
-  \textbf{Product [*] (is contained)}
+  \textbf{Quantity} (\textit{integer}): Numero di pezzi di un dato prodotto contenuti in un ordine;} &
+  {\footnotesize
+  \textbf{Order \([*]\)} (\textit{contains}): Gli ordini che contengono un dato prodotto;
+
+  \textbf{Product \([*]\)} (\textit{is contained}): I prodotti contenuti in un dato ordine;
   }\\
 }
 \customTable{cYYY}[Dizionario delle associazioni Seconda Parte]{\textbfB{Associazione} & \textbfB{Descrizione} & \textbfB{Attributi} & \textbfB{Classi Coinvolte}}{
@@ -303,33 +305,38 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   {\footnotesize
   Esprime la relazione tra \textbf{Deposit} e \textbf{Product}. Un \textbf{Deposit} può contenere più \textbf{Product}, mentre un \textbf{Product} può essere contenuto in più \textbf{Deposit}.
   } &
-  \textbf{Quantity} &
   {\footnotesize
-  \textbf{Deposit [*] (stores)}
 
-  \textbf{Product [*] (is stored)}
+  \textbf{Quantity} (\textit{integer}): Numero di pezzi di un dato prodotto conservati in un deposito; 
+  } &
+  
+  {\footnotesize
+  \textbf{Deposit \([*]\)} (\textit{stores}): I depositi che contengono un dato prodotto;
+
+  \textbf{Product \([*]\)} (\textit{is stored in}): I prodotti contenuti in un dato deposito;
+  
   }\\
 
   \textbf{ShippedFrom} &
   {\footnotesize
-  Esprime la relazione tra \textbf{Shipment} e \textbf{Deposit}. Una \textbf{Shipment} può partire da un solo \textbf{Deposit}, mentre un \textbf{Deposit} può essere il punto di partenza di più \textbf{Shipment}.
+  Esprime la relazione tra \textbf{Shipment} e \textbf{Deposit} \textit{mittente}. Una \textbf{Shipment} può avere un solo mittente, mentre un \textbf{Deposit} può essere mittente di più \textbf{Shipment}.
   } &
   --- &
   {\footnotesize
-  \textbf{Shipment [*] (ships)}
+  \textbf{Shipment \([*]\)} (\textit{shipped}): Le spedizioni che partono da un dato deposito; 
 
-  \textbf{Deposit [*] (is shipped from)}
+  \textbf{Deposit \([1]\)} (\textit{seder}): Il deposito mittente di una data spedizione; 
   }\\
-
+  % ? @zGenny we should consider to call this one 'Ships' insted of 'Contains' to avoid confusion with the other 'Contains' association 
   \textbf{Contains} &
   {\footnotesize
   Esprime la relazione tra \textbf{Shipment} e \textbf{Order}. Una \textbf{Shipment} può contenere più \textbf{Order}, mentre un \textbf{Order} può essere contenuto in più \textbf{Shipment}.
   } &
   --- &
   {\footnotesize
-  \textbf{Shipment [*] (contains)}
+  \textbf{Shipment \([*]\)} (\textit{ships}): Le spedizioni che spediscono un dato ordine; 
 
-  \textbf{Order [*] (is contained)}
+  \textbf{Order \([*]\)} (\textit{is shipped}): Gli ordini spediti da una data spedizione; 
   }\\
 
   \textbf{Creates} &
@@ -338,9 +345,9 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   } &
   --- &
   {\footnotesize
-  \textbf{Operator [1] (creates)}
+  \textbf{Operator \([1]\)} (\textit{creates}): L'operatore che crea una data spedizione; 
 
-  \textbf{Shipment [*] (is created)}
+  \textbf{Shipment \([*]\)} (\textit{is created}): Le spedizioni create da un dato operatore; 
   }\\
 
   \textbf{TransportedBy} &
@@ -349,10 +356,13 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   } &
   --- &
   {\footnotesize
-  \textbf{Shipment [*] (transportedBy)}
+  \textbf{Shipment \([*]\)} (\textit{transported by}): Le spedizioni trasportate da un dato mezzo di trasporto;; 
 
-  \textbf{Transport [1] (transport)}
+  \textbf{Transport \([1]\)} (\textit{transports}): Il mezzo di trasporto che trasporta una data spedizione; 
   }\\
+  
+}
+\customTable{cYYY}[Dizionario delle associazioni Terza Parte]{\textbfB{Associazione} & \textbfB{Descrizione} & \textbfB{Attributi} & \textbfB{Classi Coinvolte}}{
   
   \textbf{Belongs} &
   {\footnotesize
@@ -360,34 +370,31 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   } &
   --- &
   {\footnotesize
-  \textbf{Deposit [1] (belonged)}
+  \textbf{Deposit \([1]\)} (\textit{is belonged}): Il deposito a cui appartiene un dato mezzo di trasporto; 
 
-  \textbf{Transport [*] (belongs)}
-  }\\
-}
-\customTable{cYYY}[Dizionario delle associazioni Terza Parte]{\textbfB{Associazione} & \textbfB{Descrizione} & \textbfB{Attributi} & \textbfB{Classi Coinvolte}}{
-  
-
-  \textbf{Is} &
-  {\footnotesize
-  Esprime la relazione tra \textbf{Account} e \textbf{Driver}. Un \textbf{Account} potrebbe essere un \textbf{Driver}, mentre un \textbf{Driver} è un tipo di \textbf{Account}.
-  } &
-  --- &
-  {\footnotesize
-  \textbf{Account [1] (is)}
-
-  \textbf{Driver [0..1] (is of)}
+  \textbf{Transport \([*]\)} (\textit{belongs}): I mezzi di trasporto che appartengono a un dato deposito; 
   }\\
 
   \textbf{Is} &
   {\footnotesize
-  Esprime la relazione tra \textbf{Account} e \textbf{Operator}. Un \textbf{Account} potrebbe essere un \textbf{Operator}, mentre un \textbf{Operator} è un tipo di \textbf{Account}.
+  Esprime la relazione tra \textbf{Account} e \textbf{Driver}. Indica se un \textbf{Account} oltre a essere un cliente è anche un \textbf{Driver}.
   } &
   --- &
   {\footnotesize
-  \textbf{Account [1] (is)}
+  \textbf{Account \([1]\)} (\textit{is}): I dati generali dell'account di un dato autista; 
 
-  \textbf{Operator [0..1] (is of)}
+  \textbf{Driver \([0..1]\)} (\textit{has}): I dati specifici dell'autista di un dato account;
+  }\\
+
+  \textbf{Is} &
+  {\footnotesize
+  Esprime la relazione tra \textbf{Account} e \textbf{Operator}. Indica se un \textbf{Account} oltre a essere un cliente è anche un \textbf{Operator}.
+  } &
+  --- &
+  {\footnotesize
+  \textbf{Account \([1]\)} (\textit{is}): I dati generali dell'account di un dato operatore; 
+
+  \textbf{Operator \([0..1]\)} (\textit{has}): I dati specifici dell'operatore di un dato account;
   }\\
 
   \textbf{WorksAt} &
@@ -396,35 +403,42 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   } &
   --- &
   {\footnotesize
-  \textbf{Driver [0..*] (works At]}
+  \textbf{Driver \([0..*]\)} (\textit{works at}): Gli autisti che lavorano per un dato deposito; 
 
-  \textbf{Deposit [1] (works from)}
+  \textbf{Deposit \([1]\)} (\textit{employs}): Il deposito che impiega un dato autista; 
   }\\
 
   \textbf{Covers} &
   {\footnotesize
-  Esprime la relazione tra \textbf{Transport} e \textbf{Zone}. Un \textbf{Transport} può coprire più \textbf{Zone} in una determinata \textbf{Date}, mentre una \textbf{Zone} può essere coperta da più \textbf{Transport}.
+  Esprime la relazione tra \textbf{Transport} e \textbf{Zone}. Un \textbf{Transport} può coprire più \textbf{Zone}, mentre una \textbf{Zone} può essere coperta da più \textbf{Transport}.
   } &
-  \textbf{Date} &
   {\footnotesize
-  \textbf{Zone [*] (is covered)}
 
-  \textbf{Transport [*] (covers)}
+  \textbf{Date} (\textit{date}): Data in cui un trasporto copre una certa zona. Un trasporto non può coprire più zone nella stessa data; 
+  
+  } &
+  {\footnotesize
+  \textbf{Zone \([*]\)} (\textit{is covered}): Le zone coperte da un dato mezzo di trasporto;
+
+  \textbf{Transport \([*]\)} (\textit{covers}): I trasporti che coprono una data zona. Anche più di uno per data;
   }\\
 
   \textbf{Drives} &
   {\footnotesize
-  Esprime la relazione tra \textbf{Driver} e \textbf{Transport}. Un \textbf{Driver} può guidare più \textbf{Transport}, ma solo uno in una determinata \textbf{Date}, mentre un \textbf{Transport} può essere guidato da più \textbf{Driver}, ma soltanto da uno in una determinata \textbf{date}.
+  Esprime la relazione tra \textbf{Driver} e \textbf{Transport}. Un \textbf{Driver} può guidare più \textbf{Transport}, mentre un \textbf{Transport} può essere guidato da più \textbf{Driver}.
   
   } &
-  \textbf{Date} &
   {\footnotesize
-  \textbf{Driver [*] (Drives)}
-  \textbf{Transport [*] (is driven)}
+
+  \textbf{Date} (\textit{date}): Data in cui un autista giuda un mezzo di trasporto. Un trasporto non può essere guidato da più autisti nella stessa data e viceversa; 
+  
+  } &
+  {\footnotesize
+  \textbf{Driver \([*]\)} (\textit{drives}): Gli autisti che guidano per un dato mezzo di trasporto; 
+  \textbf{Transport \([*]\)} (\textit{is driven}): I mezzi di trasporto guidati da un dato autista;
   }\\
 }
 
-\newpage
 \subsection{Dizionario dei Vincoli}
 
 \customTable{ccY}[Dizionario dei vincoli Prima Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
@@ -440,7 +454,8 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
   \textbf{formatAccountEmail} & Dominio &
   {\footnotesize
-  Il campo \textbf{Email} della classe \textbf{Account} deve avere il formato <regex>
+  Il campo \textbf{Email} della classe \textbf{Account} deve avere il formato `\textbf{word}@\textbf{domain}.\textbf{ext}', dove \textit{word} può contenere solo caratteri alfanumerici, mentre \textit{domain} e \textit{ext} solo caratteri alfabetici.
+  
   }\\
   
   \textbf{formatDate} & Dominio & 
@@ -452,26 +467,30 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   {\footnotesize
   L'utente deve aver compiuto 16 anni
   }\\
-
+  % ? maybe this two should be considered n-ple type
   \textbf{formatOperatorBusinessmail} & Dominio &
   {\footnotesize
-  Il campo \textbf{Businessmail} della classe Operator deve avere il formato <regex> 
+  Il campo \textbf{Businessmail} della classe Operator deve avere il formato `\textbf{n}.\textbf{surnameN}@uninadelivery.operator.com', dove \textit{n} è l'iniziale del nome dell'operatore, \textit{surname} è il suo cognome, mentre \textit{N} è un numero intero positivo, da utilizzare per eventuali omonimie.
   }\\
   
   \textbf{formatDriverBusinessmail} & Dominio &
   {\footnotesize
-  Il campo \textbf{Businessmail} della classe Driver deve avere il formato <regex> 
+  Il campo \textbf{Businessmail} della classe Driver deve avere il formato `\textbf{n}.\textbf{surnameN}@uninadelivery.driver.com', dove \textit{n} è l'iniziale del nome dell'operatore, \textit{surname} è il suo cognome, mentre \textit{N} è un numero intero positivo, da utilizzare per eventuali omonimie.
   }\\
   
   \textbf{formatAccountProPic} & Dominio &
   {\footnotesize
-  Il campo \textbf{ProPic} deve essere un'immagine valida in formato Base64 <regex>
+  Il campo \textbf{ProPic} deve essere una stringa in formato \textit{Base64} compatibile con un immagine in formato `JPEG'. 
   }\\
 
   \textbf{formatAccountPassword} & Dominio &
   {\footnotesize
-  Il campo \textbf{Password} della classe \textbf{Account} deve avere il formato <regex>. HASH sha 256
+  Il campo \textbf{Password} della classe \textbf{Account} dev'essere una valida stringa codificata dall'algoritmo HASH SHA-256.
   }\\
+
+}
+
+\customTable{ccY}[Dizionario dei vincoli Seconda Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
 
   \textbf{formatTransportMaxCapacity} & Dominio &
   {\footnotesize
@@ -483,13 +502,15 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   Il campo \textbf{ExtraWarranty} della classe \textbf{Order} deve essere non negativo.
   }\\
 
+  \textbf{formatOrderEmissionDate} & Dominio &
+  {\footnotesize
+    Il campo \textbf{EmissionDate} della classe \textbf{Order} non può essere successiva alla data corrente.
+  }\\
+
   \textbf{formatAddressAddressNo} & Dominio &
   {\footnotesize
-  Il campo \textbf{AddressNo} della classe \textbf{Address} contiene numeri non negativi, forse UNA lettera e al più la parola BIS.
+  Il campo \textbf{AddressNo} della classe \textbf{Address} dev'essere una stringa formata da sole cifre, seguita al più da una lettera, eventualmente seguita dalla parola `BIS'.
   }\\
-}
-
-\customTable{ccY}[Dizionario dei vincoli Seconda Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
   \textbf{formatAddressStreet} & Dominio &
   {\footnotesize
   Il campo \textbf{Street} della classe \textbf{Address} può contenere solo caratteri alfanumerici.
@@ -512,7 +533,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   
   \textbf{formatProductName} & Dominio  & 
   {\footnotesize
-  Il campo \textbf{Name} della classe \textbf{Product} deve contenere caratteri alfanumerici e può contenere caratteri speciali. <regex>
+  Il campo \textbf{Name} della classe \textbf{Product} deve contenere caratteri alfanumerici, tra cui necessariamente il primo, e può contenere caratteri speciali. 
   }\\
   
   \textbf{formatProductSupplier} & Dominio  & 
@@ -522,7 +543,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   
   \textbf{formatProductDescription} & Dominio & 
   {\footnotesize
-  Il campo \textbf{Description} della classe \textbf{Product} deve contenere caratteri alfanumerici e può contenere caratteri speciali. <regex>
+  Il campo \textbf{Description} della classe \textbf{Product} deve contenere caratteri alfanumerici e può contenere caratteri speciali. 
   }\\
   
   \textbf{formatProductPackageSizeLiters} & Dominio & 
@@ -535,24 +556,26 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   Il campo \textbf{MaxCapacity} della classe \textbf{Deposit} deve essere positivo.
   }\\
   
-  \textbf{formatStoresQuantity} & Dominio & 
-  {\footnotesize
-  Il campo \textbf{Quantity} della classe d'associazione \textbf{Stores} deve essere positivo.
-  }\\ %nota se arriva a 0 viene eliminato dal db
-  
-  \textbf{formatContainsQuantity} & Dominio & 
-  {\footnotesize
-  Il campo \textbf{Quantity} della classe d'associazione \textbf{Contains} deve essere positivo.
-  }\\
-  
-  \textbf{formatZoneZipCode} & Dominio & 
-  {\footnotesize
-  Il campo \textbf{ZipCode} della classe \textbf{Zone} deve contenere solo caratteri numerici.
-  }\\
   
 }
 
 \customTable{ccY}[Dizionario dei vincoli Terza Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
+  
+  \textbf{formatStoresQuantity} & Dominio & 
+  {\footnotesize
+  Il campo \textbf{Quantity} della classe d'associazione \textbf{Stores} deve essere non negativo.
+  }\\ % ! we have to define a trigger that delete the product if quantity is 0
+
+  \textbf{formatContainsQuantity} & Dominio & 
+  {\footnotesize
+  Il campo \textbf{Quantity} della classe d'associazione \textbf{Contains} deve essere positivo.
+  }\\
+
+  \textbf{formatZoneZipCode} & Dominio & 
+  {\footnotesize
+  Il campo \textbf{ZipCode} della classe \textbf{Zone} deve contenere solo caratteri numerici.
+  }\\
+
   \textbf{formatZoneCity} & Dominio & 
   {\footnotesize
   Il campo \textbf{City} della classe Zone deve contenere solo caratteri alfabetici.
@@ -580,9 +603,50 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   
   \textbf{checkProductDescriptionOnTopic} & N-upla &
   {\footnotesize
-  Nella calsse \textbf{Product} il campo \textbf{Description} dev'essere una stringa che contenga le stringhe presenti nei campi \textbf{Category}, \textbf{Name} e \textbf{Supplier}
+  Nella classe \textbf{Product} il campo \textbf{Description} dev'essere una stringa che contenga le stringhe presenti nei campi \textbf{Category}, \textbf{Name} e \textbf{Supplier}
   }\\
+
+  \textbf{onlyOneTravelPerDayTransport} & Intrarelazionale & 
+  {\footnotesize
+  Nella classe d’associazione \textbf{Drives} un \textbf{Transport} non può essere guidato più volte nella stessa \textbf{data}
+  }\\
+
+  \textbf{onlyOneTravelPerDayDriver} & Intrarelazionale &
+  {\footnotesize
+  Nella classe d’associazione \textbf{Drives} un \textbf{Driver} non può guidare più volte nella stessa \textbf{data}.
+  }\\
+
+  \textbf{onlyOneZonePerDay} & Intrarelazionale & 
+  {\footnotesize    
+  Nella classe d’associazione \textbf{Covers} un \textbf{Transport} non può essere impiegato nella stessa data
+  }\\
+
 }
+
+\customTable{ccY}[Dizionario dei vincoli Terza Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
+  \textbf{validEmployeeBorthdate} & Interrelazionale &
+  {\footnote
+  Se \textbf{Account} è un \textbf{Driver} o un \textbf{Operator} deve aver compiuto 18 anni
+  }\\
+
+  \textbf{isAddressForSomethingGeneral} & Interrelazionale &
+  {\footnotesize
+  Un \textbf{Address}, non può non corrispondere né ad un \textbf{Deposit}, né a degli \textbf{Account}.
+  }\\
+
+  \textbf{validShipmentDate} & Interrelazionale & 
+  {\footnote
+  Il Campo \textbf{ShipmentDate} deve essere una data successiva a tutte le date dei campi \textbf{EmissionDate} delle classi \textbf{Order} associate con quello \textbf{Shipment}
+  }\\
+
+  \textbf{isAddressForSomethingSpecific} & Interrelazionale &
+  {\footnotesize
+  Se \textbf{Deposit} non è di tipo city, \textbf{Address} non può essere contemporaneamente in relazione con \textbf{Account} e \textbf{Deposit}. 
+  }\\
+
+}
+
+
 
 
 % TODO: @RiccardoElena @zGenny write this section
