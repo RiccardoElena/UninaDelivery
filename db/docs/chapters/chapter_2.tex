@@ -103,7 +103,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 \subsection{Class Diagram Ristrutturato}
 
 % TODO: @zGenny review restructured diagram, if it's ok export it and uncommend this part. To adjust size add 0.x or 1.x near to \textwidth
-
+% FIXME: @zGenny there's a HUGE problem in the assosation between Zone and Address. The cardinality is wrong. It should be N to 1 and not N to N. We should discuss this asap.
 \begin{center}
   \includegraphics[width=\textwidth]{UML_Class_Diagram_Restructured.pdf} 
 \end{center}
@@ -467,7 +467,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   {\footnotesize
   L'utente deve aver compiuto 16 anni
   }\\
-  % ? maybe this two should be considered n-ple type
+  % ? maybe this two should be considered n-ple type % TODO
   \textbf{formatOperatorBusinessmail} & Dominio &
   {\footnotesize
   Il campo \textbf{Businessmail} della classe Operator deve avere il formato `\textbf{n}.\textbf{surnameN}@uninadelivery.operator.com', dove \textit{n} è l'iniziale del nome dell'operatore, \textit{surname} è il suo cognome, mentre \textit{N} è un numero intero positivo, da utilizzare per eventuali omonimie.
@@ -611,7 +611,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
 }
 
-\customTable{ccY}[Dizionario dei vincoli Terza Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
+\customTable{ccY}[Dizionario dei vincoli Quarta Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
   
   \textbf{onlyOneTravelPerDayDriver} & Intrarelazionale &
   {\footnotesize
@@ -643,6 +643,32 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   Se \textbf{Deposit} non è di tipo city, \textbf{Address} non può essere contemporaneamente in relazione con \textbf{Account} e \textbf{Deposit}. 
   }\\
 
+  \textbf{isDriverAssignedToValidTransport} & Interrelazionale &
+  {\footnotesize
+  Il \textbf{Transport} associato a un \textbf{Driver} deve appartenere al \textbf{Deposit} in cui lavora.
+  }\\
+
+  \textbf{isShipmentAssignedToValidTransport} & Interrelazionale &
+  {\footnotesize
+
+  Il \textbf{Transport } associato a \textbf{Shipment} deve appartenere al \textbf{Deposit} di partenza della spedizione.
+  }\\
+}
+
+\customTable{ccY}[Dizionario dei vincoli Quinta Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
+
+  \textbf{isShipmentDirectedInCorrectZone} & Interrelazionale &
+  {\footnotesize
+
+  Il \textbf{Transport} associato a una \textbf{Shipment} deve coprire la \textbf{Zone} di destinazione della spedizione in data \textbf{ShippingDate}.
+  La \textbf{Zone} di destinazione di una \textbf{Shipment} è la \textbf{Zone} dell'\textbf{Address} di un \textbf{Deposit} se la spedizione è diretta a un \textbf{Deposit}, altrimenti è la \textbf{Zone} dell'\textbf{Address} di tutti gli \textbf{Account} destinatari.
+  
+  }\\
+
+  \textbf{isShipmentContainingValidOrders} & Interrelazionale &
+  {\footnotesize 
+  Gli \textbf{Order} associati a una \textbf{Shipment} devono contenere \textbf{Product} che sono conservati nel \textbf{Deposit} di partenza della spedizione.
+  }\\
 }
 
 
@@ -652,5 +678,5 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   % it should contains:
   % [x] all the considerations about the UML diagram
   % [x] the changes made to the UML diagram
-  % [ ] the new UML diagram
+  % [x] the new UML diagram
   % [ ] constrints dictonary (table (?)). Styled as the example in the slides
