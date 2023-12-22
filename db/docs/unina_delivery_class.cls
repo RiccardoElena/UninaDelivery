@@ -126,7 +126,7 @@
 % Custom table definition
 \newcolumntype{Y}{>{\centering\arraybackslash}X}
 \newcommandx{\customTable}[5][2={},3={}]{
-  \renewcommand{\arraystretch}{2.2}
+  \renewcommand{\arraystretch}{2.1}
   \arrayrulecolor{PRIMARY}
   \begin{table}[H]
     \ifthenelse{\equal{#3}{}}{}{\label{#3}}
