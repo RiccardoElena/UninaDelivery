@@ -1,0 +1,70 @@
+{
+  "java.checkstyle.configuration": "${workspaceFolder}/sun_checks.xml",
+  "latex-workshop.linting.chktex.enabled": true,
+  "latex-workshop.linting.chktex.exec.args": [
+    "-wall",
+    "-n22",
+    "-n30",
+    "-e16",
+    "-q",
+    "-v0",
+    "-n11",
+    "-n44",
+  ],
+  "latex-workshop.latex.tools": [
+		{
+			"name": "lualatex",
+			"command": "lualatex",
+			"args": [
+				"-shell-escape",
+				"-synctex=1",
+				"-interaction=nonstopmode",
+				"-file-line-error",
+				"-output-directory=%OUTDIR%",
+				"%DOC%"
+			],
+			"env": {}
+		},
+		{
+			"name": "xelatex",
+			"command": "xelatex",
+			"args": [
+				"-synctex=1",
+				"-interaction=nonstopmode",
+				"-file-line-error",
+				"%DOC%"
+			],
+			"env": {}
+		},
+		{
+			"name": "bibtex",
+			"command": "bibtex",
+			"args": ["%DOCFILE%"],
+			"env": {}
+		}
+	],
+	"latex-workshop.latex.recipes": [
+		{
+			"name": "lualatex",
+			"tools": ["lualatex"]
+		},
+		{
+			"name": "xelatex",
+			"tools": ["xelatex"]
+		}
+	],
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "cmake.configureOnOpen": false,
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "uninadelivery",
+      "database": "uninadelivery",
+      "username": "riccardoelena"
+    }
+  ],
+}
+
