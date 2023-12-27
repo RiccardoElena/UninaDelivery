@@ -25,100 +25,193 @@ CREATE SCHEMA uninadelivery;
 
 ALTER SCHEMA uninadelivery OWNER TO zgenny;
 
+--
+-- Name: alphanumericstring; Type: DOMAIN; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE DOMAIN uninadelivery.alphanumericstring AS text
+	CONSTRAINT alphanumericstring_check CHECK ((VALUE ~ '^\w+$'::text));
+
+
+ALTER DOMAIN uninadelivery.alphanumericstring OWNER TO riccardoelena;
+
+--
+-- Name: alphnumstring; Type: DOMAIN; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE DOMAIN uninadelivery.alphnumstring AS text
+	CONSTRAINT alphnumstring_check CHECK ((VALUE ~ '^\w*$'::text));
+
+
+ALTER DOMAIN uninadelivery.alphnumstring OWNER TO riccardoelena;
+
+--
+-- Name: deposittype; Type: TYPE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TYPE uninadelivery.deposittype AS ENUM (
+    'City',
+    'State',
+    'Country',
+    'Central'
+);
+
+
+ALTER TYPE uninadelivery.deposittype OWNER TO riccardoelena;
+
+--
+-- Name: drivinglicencetype; Type: TYPE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TYPE uninadelivery.drivinglicencetype AS ENUM (
+    'BE',
+    'CE'
+);
+
+
+ALTER TYPE uninadelivery.drivinglicencetype OWNER TO riccardoelena;
+
+--
+-- Name: emailstring; Type: DOMAIN; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE DOMAIN uninadelivery.emailstring AS text
+	CONSTRAINT emailstring_check CHECK ((VALUE ~ '^[a-zA-Z0-9]+[a-zA-Z0-9.]*[a-zA-Z0-9]+@[a-zA-Z.]+\.[a-zA-Z]{2,}$'::text));
+
+
+ALTER DOMAIN uninadelivery.emailstring OWNER TO riccardoelena;
+
+--
+-- Name: letterstring; Type: DOMAIN; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE DOMAIN uninadelivery.letterstring AS text
+	CONSTRAINT letterstring_check CHECK ((VALUE ~ '^[a-zA-Z]+$'::text));
+
+
+ALTER DOMAIN uninadelivery.letterstring OWNER TO riccardoelena;
+
+--
+-- Name: numericstring; Type: DOMAIN; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE DOMAIN uninadelivery.numericstring AS text
+	CONSTRAINT numericstring_check CHECK ((VALUE ~ '^\d*$'::text));
+
+
+ALTER DOMAIN uninadelivery.numericstring OWNER TO riccardoelena;
+
+--
+-- Name: transporttype; Type: TYPE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TYPE uninadelivery.transporttype AS ENUM (
+    'WheeledSmall',
+    'WheeledLarge',
+    'Rails',
+    'Water',
+    'Air'
+);
+
+
+ALTER TYPE uninadelivery.transporttype OWNER TO riccardoelena;
+
+--
+-- Name: worldzone; Type: TYPE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TYPE uninadelivery.worldzone AS ENUM (
+    'NA',
+    'EUW',
+    'EUNE',
+    'LATAM',
+    'MIDEAST',
+    'CKJ',
+    'SEA',
+    'IND',
+    'RUS',
+    'STAN',
+    'OC',
+    'AFN',
+    'AFC',
+    'AFS'
+);
+
+
+ALTER TYPE uninadelivery.worldzone OWNER TO riccardoelena;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: orders; Type: TABLE; Schema: uninadelivery; Owner: zgenny
+-- Name: address; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
 --
 
-CREATE TABLE uninadelivery.orders (
-    order_id integer NOT NULL,
-    name character varying(100),
-    order_date date
+CREATE TABLE uninadelivery.address (
+    addressno uninadelivery.alphnumstring NOT NULL,
+    street uninadelivery.alphnumstring NOT NULL,
+    zipcode uninadelivery.numericstring NOT NULL,
+    country uninadelivery.letterstring NOT NULL,
+    CONSTRAINT addressno_domain CHECK (((addressno)::text ~ '^[1-9]\d*[a-z]?(?:BIS)?$'::text))
 );
 
 
-ALTER TABLE uninadelivery.orders OWNER TO zgenny;
+ALTER TABLE uninadelivery.address OWNER TO riccardoelena;
 
 --
--- Name: orders_order_id_seq; Type: SEQUENCE; Schema: uninadelivery; Owner: zgenny
+-- Name: area; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
 --
 
-CREATE SEQUENCE uninadelivery.orders_order_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE uninadelivery.orders_order_id_seq OWNER TO zgenny;
-
---
--- Name: orders_order_id_seq; Type: SEQUENCE OWNED BY; Schema: uninadelivery; Owner: zgenny
---
-
-ALTER SEQUENCE uninadelivery.orders_order_id_seq OWNED BY uninadelivery.orders.order_id;
-
-
---
--- Name: test; Type: TABLE; Schema: uninadelivery; Owner: zgenny
---
-
-CREATE TABLE uninadelivery.test (
-    nomecorso character varying(10),
-    anno smallint,
-    data date,
-    c1 integer
+CREATE TABLE uninadelivery.area (
+    zipcode uninadelivery.numericstring NOT NULL,
+    city uninadelivery.letterstring NOT NULL,
+    state uninadelivery.letterstring NOT NULL,
+    country uninadelivery.letterstring NOT NULL,
+    worldzone uninadelivery.worldzone NOT NULL
 );
 
 
-ALTER TABLE uninadelivery.test OWNER TO zgenny;
+ALTER TABLE uninadelivery.area OWNER TO riccardoelena;
 
 --
--- Name: orders order_id; Type: DEFAULT; Schema: uninadelivery; Owner: zgenny
+-- Data for Name: address; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
 --
 
-ALTER TABLE ONLY uninadelivery.orders ALTER COLUMN order_id SET DEFAULT nextval('uninadelivery.orders_order_id_seq'::regclass);
-
-
---
--- Data for Name: orders; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
---
-
-COPY uninadelivery.orders (order_id, name, order_date) FROM stdin;
-1	John	2005-10-12
-2	Luna	2023-12-28
-3	Luna	2023-12-30
-4	Antonio	2023-08-12
-5	Mattia	2022-02-10
+COPY uninadelivery.address (addressno, street, zipcode, country) FROM stdin;
 \.
 
 
 --
--- Data for Name: test; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
+-- Data for Name: area; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
 --
 
-COPY uninadelivery.test (nomecorso, anno, data, c1) FROM stdin;
+COPY uninadelivery.area (zipcode, city, state, country, worldzone) FROM stdin;
 \.
 
 
 --
--- Name: orders_order_id_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: zgenny
+-- Name: address address_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
 --
 
-SELECT pg_catalog.setval('uninadelivery.orders_order_id_seq', 5, true);
+ALTER TABLE ONLY uninadelivery.address
+    ADD CONSTRAINT address_pk PRIMARY KEY (addressno, street, zipcode, country);
 
 
 --
--- Name: orders orders_pkey; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
+-- Name: area area_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
 --
 
-ALTER TABLE ONLY uninadelivery.orders
-    ADD CONSTRAINT orders_pkey PRIMARY KEY (order_id);
+ALTER TABLE ONLY uninadelivery.area
+    ADD CONSTRAINT area_pk PRIMARY KEY (zipcode, country);
+
+
+--
+-- Name: address address_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.address
+    ADD CONSTRAINT address_fk FOREIGN KEY (zipcode, country) REFERENCES uninadelivery.area(zipcode, country) ON DELETE CASCADE;
 
 
 --
