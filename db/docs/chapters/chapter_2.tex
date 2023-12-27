@@ -96,14 +96,14 @@ In ultima analisi, la classe \textbf{Shipment} è coinvolta in due associazioni 
 
 Aldilà delle chiavi primarie già presenti nello schema concettuale esplicitate nel \textbf{diagramma ER} e dell'attributo \textbf{TransportID} introdotto \intlink{Redundancy analysis}{precedentemente}, si è deciso di aggiungere chiavi surrogate per le entità \textbf{Order}, \textbf{Shipment} e \textbf{Deposit}, poiché migrando le chiavi di altre entità si sarebbero ottenute chiavi composte troppo lunghe e complesse.
 
-Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la chiave primaria di \textbf{Zone} essendo una composizione e di conseguenza già concettualmente una \textit{parte} dell'entità \textbf{Address}. 
+Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la chiave primaria di \textbf{Area} essendo una composizione e di conseguenza già concettualmente una \textit{parte} dell'entità \textbf{Address}. 
 
 \newpage
 
 \subsection{Class Diagram Ristrutturato}
 
 % TODO: @zGenny review restructured diagram, if it's ok export it and uncommend this part. To adjust size add 0.x or 1.x near to \textwidth
-% FIXME: @zGenny there's a HUGE problem in the assosation between Zone and Address. The cardinality is wrong. It should be N to 1 and not N to N. We should discuss this asap.
+% FIXME: @zGenny there's a HUGE problem in the assosation between Area and Address. The cardinality is wrong. It should be N to 1 and not N to N. We should discuss this asap.
 \begin{center}
   \includegraphics[width=\textwidth]{UML_Class_Diagram_Restructured.pdf} 
 \end{center}
@@ -202,7 +202,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   }\\
   
 
-  \textbf{Zone} & Zona del mondo raggiungibile da un mezzo di trasporto. Contiene più indirizzi. &
+  \textbf{Area} & Zona del mondo raggiungibile da un mezzo di trasporto. Contiene più indirizzi. &
   {\footnotesize
   \textbf{ZipCode} (\textit{string}): Chiave Primaria. Codice di Avviamento Postale della zona;
 
@@ -273,16 +273,16 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   \textbf{Deposit \([1]\)} (\textit{sited on}): Il deposito che si trova in un dato indirizzo;
   
   }\\
-  % TODO: @zGenny probably 'In' is a better name for this association instead of 'Of'
-  \textbf{In} &
+  
+  \textbf{Located} &
   {\footnotesize
-  Esprime la relazione tra \textbf{Zone} e \textbf{Address}. Un \textbf{Zone} può contenere più \textbf{Address}, e un \textbf{Address} può appartenere a più \textbf{Zone}.
+  Esprime la relazione tra \textbf{Area} e \textbf{Address}. Un \textbf{Area} può contenere più \textbf{Address}, e un \textbf{Address} appartiene a un'unica \textbf{Area}.
   } &
   --- &
   {\footnotesize
-  \textbf{Zone \([*]\)} (\textit{has}): Le zone che contengono un dato indirizzo;
+  \textbf{Area \([*]\)} (\textit{is location}): Le Area che contengono un dato indirizzo;
 
-  \textbf{Address \([*]\)} (\textit{in}): Gli indirizzi che appartengono a una data zona;
+  \textbf{Address \([*]\)} (\textit{located}): Gli indirizzi che appartengono a una data zona;
   }\\
 
   \textbf{Contains} &
@@ -327,8 +327,8 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
   \textbf{Deposit \([1]\)} (\textit{seder}): Il deposito mittente di una data spedizione; 
   }\\
-  % ? @zGenny we should consider to call this one 'Ships' insted of 'Contains' to avoid confusion with the other 'Contains' association 
-  \textbf{Contains} &
+  
+  \textbf{Ships} &
   {\footnotesize
   Esprime la relazione tra \textbf{Shipment} e \textbf{Order}. Una \textbf{Shipment} può contenere più \textbf{Order}, mentre un \textbf{Order} può essere contenuto in più \textbf{Shipment}.
   } &
@@ -410,15 +410,15 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
   \textbf{Covers} &
   {\footnotesize
-  Esprime la relazione tra \textbf{Transport} e \textbf{Zone}. Un \textbf{Transport} può coprire più \textbf{Zone}, mentre una \textbf{Zone} può essere coperta da più \textbf{Transport}.
+  Esprime la relazione tra \textbf{Transport} e \textbf{Area}. Un \textbf{Transport} può coprire più \textbf{Area}, mentre una \textbf{Area} può essere coperta da più \textbf{Transport}.
   } &
   {\footnotesize
 
-  \textbf{Date} (\textit{date}): Data in cui un trasporto copre una certa zona. Un trasporto non può coprire più zone nella stessa data; 
+  \textbf{Date} (\textit{date}): Data in cui un trasporto copre una certa zona. Un trasporto non può coprire più Area nella stessa data; 
   
   } &
   {\footnotesize
-  \textbf{Zone \([*]\)} (\textit{is covered}): Le zone coperte da un dato mezzo di trasporto;
+  \textbf{Area \([*]\)} (\textit{is covered}): Le Area coperte da un dato mezzo di trasporto;
 
   \textbf{Transport \([*]\)} (\textit{covers}): I trasporti che coprono una data zona. Anche più di uno per data;
   }\\
@@ -454,8 +454,17 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
   \textbf{formatAccountEmail} & Dominio &
   {\footnotesize
-  Il campo \textbf{Email} della classe \textbf{Account} deve avere il formato `\textbf{word}@\textbf{domain}.\textbf{ext}', dove \textit{word} può contenere solo caratteri alfanumerici, mentre \textit{domain} ed \textit{ext} solo caratteri alfabetici.
-  
+  Il campo \textbf{Email} della classe \textbf{Account} deve avere il formato `\textbf{word}@\textbf{domain}.\textbf{ext}', dove \textit{word} può contenere solo caratteri alfanumerici o al più dei punti, \textit{domain} da soli caratteri alfabetici o punti, mentre \textit{ext} da solo caratteri alfabetici, e dev'essere lunga almeno due caratteri.
+  }\\
+
+  \textbf{formatOperatorBusinessmail} & Dominio &
+  {\footnotesize
+  Il campo \textbf{Businessmail} della classe \textbf{Operator} deve avere il formato `\textbf{word}@\textbf{domain}.\textbf{ext}', dove \textit{word} può contenere solo caratteri alfanumerici o al più dei punti, \textit{domain} da soli caratteri alfabetici o punti, mentre \textit{ext} da solo caratteri alfabetici, e dev'essere lunga almeno due caratteri.
+  }\\
+
+  \textbf{formatDriverBusinessmail} & Dominio &
+  {\footnotesize
+  Il campo \textbf{Businessmail} della classe \textbf{Driver} deve avere il formato `\textbf{word}@\textbf{domain}.\textbf{ext}', dove \textit{word} può contenere solo caratteri alfanumerici o al più dei punti, \textit{domain} da soli caratteri alfabetici o punti, mentre \textit{ext} da solo caratteri alfabetici, e dev'essere lunga almeno due caratteri.
   }\\
   
   \textbf{formatDate} & Dominio & 
@@ -467,17 +476,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   {\footnotesize
   L'utente deve aver compiuto 16 anni
   }\\
-  % ? maybe this two should be considered n-ple type % TODO
-  \textbf{formatOperatorBusinessmail} & Dominio &
-  {\footnotesize
-  Il campo \textbf{Businessmail} della classe Operator deve avere il formato `\textbf{n}.\textbf{surnameN}@uninadelivery.operator.com', dove \textit{n} è l'iniziale del nome dell'operatore, \textit{surname} è il suo cognome, mentre \textit{N} è un numero intero positivo, da utilizzare per eventuali omonimie.
-  }\\
-  
-  \textbf{formatDriverBusinessmail} & Dominio &
-  {\footnotesize
-  Il campo \textbf{Businessmail} della classe Driver deve avere il formato `\textbf{n}.\textbf{surnameN}@uninadelivery.driver.com', dove \textit{n} è l'iniziale del nome dell'operatore, \textit{surname} è il suo cognome, mentre \textit{N} è un numero intero positivo, da utilizzare per eventuali omonimie.
-  }\\
-  
+
   \textbf{formatAccountProPic} & Dominio &
   {\footnotesize
   Il campo \textbf{ProPic} deve essere una stringa in formato \textit{Base64} compatibile con un immagine in formato `JPEG'. 
@@ -569,24 +568,24 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   Il campo \textbf{Quantity} della classe d'associazione \textbf{Contains} deve essere positivo.
   }\\
 
-  \textbf{formatZoneZipCode} & Dominio & 
+  \textbf{formatAreaZipCode} & Dominio & 
   {\footnotesize
-  Il campo \textbf{ZipCode} della classe \textbf{Zone} deve contenere solo caratteri numerici.
+  Il campo \textbf{ZipCode} della classe \textbf{Area} deve contenere solo caratteri numerici.
   }\\
 
-  \textbf{formatZoneCity} & Dominio & 
+  \textbf{formatAreaCity} & Dominio & 
   {\footnotesize
-  Il campo \textbf{City} della classe Zone deve contenere solo caratteri alfabetici.
+  Il campo \textbf{City} della classe Area deve contenere solo caratteri alfabetici.
   }\\
   
-  \textbf{formatZoneState} & Dominio & 
+  \textbf{formatAreaState} & Dominio & 
   {\footnotesize
-  Il campo \textbf{State} della classe Zone deve contenere solo caratteri alfabetici.
+  Il campo \textbf{State} della classe Area deve contenere solo caratteri alfabetici.
   }\\
   
-  \textbf{formatZoneCountry} & Dominio & 
+  \textbf{formatAreaCountry} & Dominio & 
   {\footnotesize
-  Il campo \textbf{Country} della classe Zone deve contenere solo caratteri alfabetici.
+  Il campo \textbf{Country} della classe Area deve contenere solo caratteri alfabetici.
   }\\
   
   \textbf{checkDepositFullness} & N-upla & 
@@ -618,12 +617,12 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   Nella classe d’associazione \textbf{Drives} un \textbf{Driver} non può guidare più volte nella stessa \textbf{data}.
   }\\
 
-  \textbf{onlyOneZonePerDay} & Intrarelazionale & 
+  \textbf{onlyOneAreaPerDay} & Intrarelazionale & 
   {\footnotesize    
   Nella classe d’associazione \textbf{Covers} un \textbf{Transport} non può essere impiegato nella stessa data
   }\\
 
-  \textbf{validEmployeeBorthdate} & Interrelazionale &
+  \textbf{validEmployeeBirthdate} & Interrelazionale &
   {\footnotesize
   Se \textbf{Account} è un \textbf{Driver} o un \textbf{Operator} deve aver compiuto 18 anni
   }\\
@@ -657,11 +656,11 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
 \customTable{ccY}[Dizionario dei vincoli Quinta Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
 
-  \textbf{isShipmentDirectedInCorrectZone} & Interrelazionale &
+  \textbf{isShipmentDirectedInCorrectArea} & Interrelazionale &
   {\footnotesize
 
-  Il \textbf{Transport} associato a una \textbf{Shipment} deve coprire la \textbf{Zone} di destinazione della spedizione in data \textbf{ShippingDate}.
-  La \textbf{Zone} di destinazione di una \textbf{Shipment} è la \textbf{Zone} dell'\textbf{Address} di un \textbf{Deposit} se la spedizione è diretta a un \textbf{Deposit}, altrimenti è la \textbf{Zone} dell'\textbf{Address} di tutti gli \textbf{Account} destinatari.
+  Il \textbf{Transport} associato a una \textbf{Shipment} deve coprire la \textbf{Area} di destinazione della spedizione in data \textbf{ShippingDate}.
+  La \textbf{Area} di destinazione di una \textbf{Shipment} è la \textbf{Area} dell'\textbf{Address} di un \textbf{Deposit} se la spedizione è diretta a un \textbf{Deposit}, altrimenti è la \textbf{Area} dell'\textbf{Address} di tutti gli \textbf{Account} destinatari.
   
   }\\
 
@@ -669,14 +668,14 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   {\footnotesize 
   Gli \textbf{Order} associati a una \textbf{Shipment} devono contenere \textbf{Product} che sono conservati nel \textbf{Deposit} di partenza della spedizione.
   }\\
+
+  \textbf{formatOperatorBusinessmail} & Interrelazionale &
+  {\footnotesize
+  Il campo \textbf{Businessmail} della classe Operator deve avere il formato `\textbf{n}.\textbf{surnameN}@uninadelivery.operator.com', dove \textit{n} è l'iniziale del nome dell'operatore, \textit{surname} è il suo cognome, mentre \textit{N} è un numero intero positivo, da utilizzare per eventuali omonimie.
+  }\\
+  
+  \textbf{formatDriverBusinessmail} & Interrelazionale &
+  {\footnotesize
+  Il campo \textbf{Businessmail} della classe Driver deve avere il formato `\textbf{n}.\textbf{surnameN}@uninadelivery.driver.com', dove \textit{n} è l'iniziale del nome dell'operatore, \textit{surname} è il suo cognome, mentre \textit{N} è un numero intero positivo, da utilizzare per eventuali omonimie.
+  }\\
 }
-
-
-
-
-% TODO: @RiccardoElena @zGenny write this section
-  % it should contains:
-  % [x] all the considerations about the UML diagram
-  % [x] the changes made to the UML diagram
-  % [x] the new UML diagram
-  % [ ] constrints dictonary (table (?)). Styled as the example in the slides

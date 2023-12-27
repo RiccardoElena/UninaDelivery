@@ -1,0 +1,63 @@
+\chapter{Schema Logico}
+
+\section{Traduzione delle Associazioni}
+
+\customTable{cY}[Dizionario delle classi Seconda Parte]{\textbfB{Associazione} & \textbfB{Strategia di Traduzione}}{
+  \textbf{makes} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Account} in \textbf{Order}.} \\
+  \textbf{contains} & {\footnotesize Definizione di una nuova tabella \textbf{Contains} con chiavi esterne rispettivamente verso \textbf{Order} e \textbf{Product}, oltre che gli attributi della relazione.} \\
+  \textbf{stores} & {\footnotesize Definizione di una nuova tabella \textbf{Stores} con chiavi esterne verso \textbf{Product} e \textbf{Deposit}, oltre che gli attributi della relazione.} \\
+  \textbf{worksAt} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Deposit} in \textbf{Driver}.} \\
+  \textbf{belongs} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Deposit} in \textbf{Transport}.} \\
+  \textbf{drives} & {\footnotesize Definizione di una nuova tabella \textbf{Drives} con chiavi esterne verso \textbf{Transport} e \textbf{Driver}, oltre che gli attributi della relazione.} \\
+  \textbf{transportedBy} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Transport} in \textbf{Shipment}.} \\
+  \textbf{covers} & {\footnotesize Definizione di una nuova tabella \textbf{Covers} con chiavi esterne verso \textbf{Transport} e \textbf{Area}, oltre che gli attributi della relazione.} \\
+  \textbf{ships} & {\footnotesize Definizione di una nuova tabella \textbf{Contains} con chiavi esterne verso \textbf{Shipment} e \textbf{Order}.} \\
+  \textbf{shippedFrom} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Deposit} in \textbf{Shipment}.} \\
+  \textbf{shippedTo} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Deposit} in \textbf{Shipment}.} \\
+  \textbf{is} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Account} in \textbf{Operator}.} \\
+  \textbf{is} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Account} in \textbf{Driver}.} \\
+  \textbf{inhabits} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Address} in \textbf{Account}.} \\
+  \textbf{sited} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Address} in \textbf{Deposit}.} \\
+  \textbf{located} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Address} in \textbf{Area}.} \\
+}
+
+\section{Traduzione delle Classi}
+
+\begin{note}[Indicazioni di Chiave Primaria e Chiave Esterna]
+  Per evidenziare la presenza di \textbf{chiavi primarie} e \textbf{chiavi esterne} nei diagrammi, si è deciso sottolineare le \underline{chiavi primarie} e mettere in corsivo le \textit{chiavi esterne}.
+
+  Per evitare superflue verbosità si è scelto di chiamare tutti i campi che rappresentano una chiave esterna con il nome della chiave primaria cui fanno riferimento. In caso di ambiguità, si è scelto di utilizzare il nome dell'associazione tradotta con l'uso di tale chiave o la classe a cui appartiene la chiave primaria a cui fa riferimento la chiave esterna.
+\end{note}
+
+% ? % TODO @zGenny need your opinion about the styling of this section. Is it good enough, or is it too empty?
+% you can try your table idea here.
+
+\textbf{Area} (\underline{ZipCode}, City, State, \underline{Country}, WorldZone) 
+
+\textbf{Address} (\underline{AddressNo}, \underline{Street}, \underline{\textit{ZipCode}}, \underline{\textit{Country}}) 
+
+\textbf{Account} (Name, Surname, \underline{Email}, Birthdate, ProPic, Password, \textit{AddressNo}, \textit{Street}, \textit{ZipCode}, \textit{State})
+
+\textbf{Order} (\underline{OrderID}, EmissionDate, isExpress, ExtraWarranty, IsCompleted, \textit{Email})
+
+\textbf{Contains} (\textit{OrderID}, \textit{Name}, \textit{Supplier}, IsSent, Quantity)
+
+\textbf{Product} (Category, \underline{Name}, \underline{Supplier}, Description, PackageSizeLiters, isFragile, Price)
+
+\textbf{Stores} (\textit{Name}, \textit{Supplier}, \textit{DepositID}, Quantity)
+
+\textbf{Deposit} (\underline{DepositID}, OccupiedSpace, MaxCapacity, DepositType, \textit{AddressNo}, \textit{Street}, \textit{ZipCode}, \textit{State})
+
+\textbf{Shipment} (\underline{ShipmentID}, ShippingDate, HasArrived, \textit{ShippedFrom}, \textit{DirectedTo}, \textit{BusinessMail}, \textit{TransportID})
+
+\textbf{Ships} (\textit{ShipmentID}, \textit{OrderID})
+
+\textbf{Operator} (\underline{BusinessMail}, \textit{Email})
+
+\textbf{Transport} (\underline{TransportID}, MaxCapacity, OccupiedSpace, IsAvailable, TransportType, \textit{DepositID}) 
+
+\textbf{Drives} (\textit{TransportID}, \textit{DriverBusinessMail}, Date)
+
+\textbf{Driver} (\underline{BusinessMail}, DrivingLincenceType, IsAvailable, \textit{Email}, \textit{DepositID})
+
+\textbf{Covers} (\textit{TransportID}, \textit{ZipCode}, \textit{Country}, Date)

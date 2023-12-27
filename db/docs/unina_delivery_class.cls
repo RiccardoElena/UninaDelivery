@@ -21,6 +21,8 @@
 \usepackage{xargs} % Required for more than one optional parameter in new commands
 \usepackage{soul} % Required for fancy text highlighting
 \usepackage{float} % Required for forcing floating objects in position
+\usepackage{listings, lstautogobble, lstfiracode} % Required for code listings
+\usepackage[no-math]{fontspec} % Required for custom font
 
 % Global variables
   \gdef\maintitle{\textcolor{PRIMARY}{Project Title}}
@@ -32,6 +34,7 @@
   \definecolor{TERTIARY}{HTML}{191919}
   \definecolor{CONTRAST}{HTML}{6C8EBF}
   \definecolor{NEWGREEN}{HTML}{228231} 
+  \definecolor{NEWPINK}{HTML}{FC79C6}
 
 
   \color{TERTIARY}
@@ -146,6 +149,63 @@
   % the arguments in square brackets are optional, if you don't need them square brackets can be omitted
 
 % Custom link definition
-
 \newcommand{\exlink}[2]{\setulcolor{PRIMARY}\href{#1}{\ul{\textit{#2}}}}
 \newcommand{\intlink}[2]{\setulcolor{SECONDARY}\hyperref[#1]{\ul{\textit{#2}}}}
+
+% Icluding FiraCode font
+\newfontfamily\FiraCode{FiraCode}[
+                Path = fonts/,
+                Extension = .ttf,
+                UprightFont = *-Regular,
+                BoldFont = *-Bold,
+                Contextuals=Alternate
+        ]
+
+% Custom theme for code listings
+\renewcommand{\lstlistingname}{Codice}
+\renewcommand\lstlistlistingname{Frammenti di Codice}
+\lstdefinelanguage{PSQL}{
+  autogobble=true,
+  mathescape=false,
+  captionpos=b,
+  basicstyle=\linespread{1.2}\color{white!80!gray}\FiraCode\footnotesize,
+  numbers=left,
+  numberstyle=\color{CONTRAST},
+  xleftmargin=1cm,
+  frame=l,
+  framesep=1cm,
+  framexleftmargin=1cm,
+  stepnumber=1,
+  numbersep=10pt,
+  tabsize=2,
+  extendedchars=true,
+  breaklines=true,
+  % Comments
+  morecomment=[l][\color{yellow}]{--},
+  morecomment=[l][\color{SECONDARY}]\$\$,
+  % Strings
+  string=[s]{'}{'},
+  stringstyle=\color{NEWGREEN},
+  % Keywords
+    %% all keywords ahve to be added here
+    alsoletter={*, SELECT, FROM, WHERE, GROUP, BY, BEG, HAVING, ORDER, ASC, DESC, CASCADE, LIMIT, OFFSET, AS, INNER, JOIN, ON, LEFT, RIGHT, FULL, OUTER, UNION, ALL, NOT, NULL, IS, DISTINCT, CASE, FUNCTI, TRIGGER, WHEN, THEN, ELSE, END, CAST, IN, ANY, SOME, EXISTS, INSERT, INTO, VALUES, UPDATE, SET, DELETE, TRUNCATE, CREATE, TABLE, PRIMARY, KEY, FOREIGN, REFERENCES, CHECK, CONSTRAINT, UNIQUE, DEFAULT, ALTER, DROP, INDEX, VIEW, SEQUENCE, TRIGGER, FUNCTION, PROCEDURE, RETURNS, RETURN, TYPE, ENUM, DOMAIN, AGGREGATE, COLLATE, EXTENSION, IF, EXISTS, OWNER, MODE, TO, PUBLIC, GRANT, REVOKE, ROLE, USER, PASSWORD, LOGIN, CONNECTION, LIMIT, SESSION, ROLE, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, integer, boolean, float, text, varchar, char, date, time, timestamp, interval, numeric, money, bit, bytea, serial, bigserial, smallserial, smallint, bigint, real, double, precision, decimal, OR, REPLACE, FUNCTION, RETURNS, TABLE, BEGIN, END, LOOP, WHILE, FOR, DECLARE},
+    %% numeric keywords
+    keywords=[0]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0},
+    %% language keywords
+    keywords=[1]{*, DATABASE, SELECT, FROM, WHERE, GROUP, BY, BEG, HAVING, ORDER, ASC, CASCADE, DESC, LIMIT, OFFSET, AS, INNER, JOIN, ON, LEFT, RIGHT, FULL, OUTER, UNION, ALL, NOT, NULL, IS, DISTINCT, CASE, FUNCTI, TRIGGER, WHEN, THEN, ELSE, END, CAST, IN, ANY, SOME, EXISTS, INSERT, INTO, VALUES, UPDATE, SET, DELETE, TRUNCATE, CREATE, TABLE, PRIMARY, KEY, FOREIGN, REFERENCES, CHECK, CONSTRAINT, UNIQUE, DEFAULT, ALTER, DROP, INDEX, VIEW, SEQUENCE, TRIGGER, FUNCTION, PROCEDURE, RETURNS, RETURN, TYPE, ENUM, DOMAIN, AGGREGATE, COLLATE, EXTENSION, IF, EXISTS, OWNER, MODE, TO, PUBLIC, GRANT, REVOKE, ROLE, USER, PASSWORD, LOGIN, CONNECTION, LIMIT, SESSION, ROLE, OR, REPLACE, FUNCTION, RETURNS, TABLE, BEGIN, END, LOOP, WHILE, FOR, DECLARE},
+    %% data type keywords
+    keywords=[2]{integer, boolean, float, text, varchar, char, date, time, timestamp, interval, numeric, money, bit, bytea, serial, bigserial, smallserial, smallint, bigint, real, double, precision, decimal},
+    %% Colors
+    keywordstyle=[0]\color{CONTRAST},
+    keywordstyle=[1]\color{PRIMARY},
+    keywordstyle=[2]\color{NEWPINK},
+    keywordstyle=\color{PRIMARY},
+  backgroundcolor=\color{TERTIARY!90!violet},
+  xleftmargin=2.5em,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  frame=none
+}
+
+\lstset{language=PSQL}

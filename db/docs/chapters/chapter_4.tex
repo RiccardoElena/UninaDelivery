@@ -1,0 +1,78 @@
+\chapter{Implementazione del Database}
+
+In conclusione si riportano le istruzioni per la creazione del database e la sua popolazione.
+
+Come DBMS provider si è scelto di utilizzare PostgreSQL, per la sua facilità di utilizzo e la sua affidabilità.
+
+Il database è hostato localmente per rendere più agevole la connessione.
+
+Per pulizia del codice si è preferito lavorare su uno \textbf{schema} creato appositamente per il progetto, chiamato \textbf{UninaDelivery}.
+
+\section{Definizione dei Domini Personalizzati}
+
+Vista la vasta gamma di vincoli di dominio simili su vari campi, si è deciso di definire dei domini personalizzati per facilitare la creazione delle tabelle.
+
+\begin{lstlisting}
+  CREATE DOMAIN letterString AS text CHECK (VALUE ~ '^[a-zA-Z]+$');
+  
+  CREATE DOMAIN numberString AS text CHECK (VALUE ~ '^[0-9]+$');
+  
+  CREATE DOMAIN alphanumericString AS text CHECK (VALUE ~ '^\w+$');
+  
+  CREATE DOMAIN emailString AS text CHECK (
+    VALUE ~ '^\w+[\w.]*\w@[a-zA-Z.]+\.[a-zA-Z]{2,}$'
+  );
+\end{lstlisting}
+
+Inoltre per i campi che nel diagramma ristrutturato sono stati definiti come \textbf{enumerazioni}, si è deciso di utilizzare dei tipi enumerati personalizzati.
+
+\begin{lstlisting}
+  CREATE TYPE WorldZone AS ENUM (
+    'NA', 'EUW', 'EUNE', 'LATAM', 'MIDEAST', 'CKJ', 'SEA', 'IND', 'RUS', 'STAN', 
+    'OC', 'AFN', 'AFC', 'AFS'
+  );
+
+  CREATE TYPE DepositType AS ENUM (
+    'City', 'State', 'Country', 'Central'
+  );
+
+  CREATE TYPE TransportType AS ENUM (
+    'WheeledSmall', 'WheeledLarge', 'Rails', 'Water', 'Air'
+  );
+  
+  CREATE TYPE DrivingLicenceType AS ENUM ('BE', 'CE');
+\end{lstlisting}
+
+\section{Creazione delle Tabelle}
+
+Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-upla, oltre che le chiavi primarie e le chiavi esterne.
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Area}}]
+  CREATE TABLE Area (
+    ZipCode numericString,
+    City letterString,
+    State letterString,
+    Country letterString,
+    WorldZone WorldZone
+  );
+  ALTER TABLE Area ADD CONSTRAINT Area_pk PRIMARY KEY (ZipCode, Country);
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Address}}]
+  CREATE TABLE Address (
+    AddressNo alphNumString NOT NULL,
+    Street alphNumString NOT NULL,
+    ZipCode numericString NOT NULL,
+    Country letterString NOT NULL
+  );
+  ALTER TABLE Address ADD CONSTRAINT Address_pk PRIMARY KEY (
+    AddressNo,Street, ZipCode, Country
+  );
+  ALTER TABLE Address ADD CONSTRAINT AddressNo_domain CHECK (
+    AddressNo ~ '^[1-9]\d*[a-z]?(?:BIS)?$'
+  );
+  ALTER TABLE Address ADD CONSTRAINT Address_fk FOREIGN KEY 
+    (ZipCode,Country) REFERENCES Area(ZipCode,Country) 
+    ON DELETE CASCADE;
+\end{lstlisting}
+    
