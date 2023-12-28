@@ -140,6 +140,103 @@ CREATE TYPE uninadelivery.worldzone AS ENUM (
 
 ALTER TYPE uninadelivery.worldzone OWNER TO riccardoelena;
 
+--
+-- Name: isaddressforsomethingspecific_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.isaddressforsomethingspecific_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+  DECLARE 
+    flag integer;
+    query text = 'SELECT COUNT(*) 
+                  INTO flag
+                  FROM ? 
+                  WHERE AddressNo = NEW.AddressNo AND 
+                        Street = NEW.Street AND 
+                        ZipCode = NEW.ZipCode AND  
+                        Country = NEW.Country';
+    tableName text;
+BEGIN
+    FOREACH tableName IN ARRAY TG_ARGV LOOP
+
+      IF tableName == 'Deposit' THEN
+        query = query || " AND DepositType <> 'City'";
+      ELSIF tableName == 'Account' THEN
+        IF NEW.DepositType = 'City' THEN
+          RETURN NEW;
+        END IF;
+      ELSE 
+        perform raise_custom_error('E0003');
+      END IF;
+          
+      EXECUTE IMMEDIATE query USING tableName;
+      IF flag > 0 THEN
+        perform raise_custom_error('E0002');
+      END IF;
+    END LOOP;
+
+    RETURN NEW;
+  END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.isaddressforsomethingspecific_func() OWNER TO riccardoelena;
+
+--
+-- Name: raise_custom_error(text); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.raise_custom_error(p_error_code text) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  v_error_message TEXT;
+BEGIN
+  -- Find error message in the custom_error_messages table 
+  SELECT error_message INTO v_error_message
+  FROM custom_error_messages
+  WHERE error_code = p_error_code;
+
+  -- Raise exception with the retrieved error message
+  RAISE EXCEPTION USING 
+            ERRCODE = p_error_code, 
+            MESSAGE = v_error_message;
+  
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      RAISE EXCEPTION 'Error % not found', p_error_code;
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.raise_custom_error(p_error_code text) OWNER TO riccardoelena;
+
+--
+-- Name: validemployeebirthdate_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.validemployeebirthdate_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+  DECLARE
+    employee_age integer;
+  BEGIN
+    SELECT EXTRACT( YEAR FROM age(Birthdate))
+      INTO employee_age
+      FROM account
+      WHERE Email = NEW.Email;
+
+    IF employee_age < 18 THEN
+      perform raise_custom_error('E0001');
+    END IF;
+    RETURN NEW;
+  END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.validemployeebirthdate_func() OWNER TO riccardoelena;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -252,6 +349,18 @@ CREATE TABLE uninadelivery.covers (
 
 
 ALTER TABLE uninadelivery.covers OWNER TO riccardoelena;
+
+--
+-- Name: custom_error_messages; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TABLE uninadelivery.custom_error_messages (
+    error_code text NOT NULL,
+    error_message text NOT NULL
+);
+
+
+ALTER TABLE uninadelivery.custom_error_messages OWNER TO riccardoelena;
 
 --
 -- Name: deposit; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
@@ -536,6 +645,17 @@ COPY uninadelivery.covers (transportid, zipcode, country, date) FROM stdin;
 
 
 --
+-- Data for Name: custom_error_messages; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+--
+
+COPY uninadelivery.custom_error_messages (error_code, error_message) FROM stdin;
+E0001	Account birthdate is too young to be an employee
+E0002	This address is already occupied
+E0003	Incompatible table in input
+\.
+
+
+--
 -- Data for Name: deposit; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
 --
 
@@ -652,6 +772,14 @@ ALTER TABLE ONLY uninadelivery.area
 
 
 --
+-- Name: custom_error_messages custom_error_messages_pkey; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.custom_error_messages
+    ADD CONSTRAINT custom_error_messages_pkey PRIMARY KEY (error_code);
+
+
+--
 -- Name: deposit deposit_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
 --
 
@@ -764,6 +892,34 @@ ALTER TABLE ONLY uninadelivery.transport
 
 
 --
+-- Name: account isaddressforsomethingspecificaccount; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isaddressforsomethingspecificaccount BEFORE INSERT ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func('Deposit');
+
+
+--
+-- Name: deposit isaddressforsomethingspecificdeposit; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isaddressforsomethingspecificdeposit BEFORE INSERT ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func('Account');
+
+
+--
+-- Name: driver validdriverbirthdate; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER validdriverbirthdate BEFORE INSERT ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.validemployeebirthdate_func();
+
+
+--
+-- Name: operator validoperatorbirthdate; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER validoperatorbirthdate BEFORE INSERT ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.validemployeebirthdate_func();
+
+
+--
 -- Name: account account_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
 --
 
@@ -792,15 +948,15 @@ ALTER TABLE ONLY uninadelivery.contains
 --
 
 ALTER TABLE ONLY uninadelivery.covers
-    ADD CONSTRAINT covers_fk_area FOREIGN KEY (zipcode, country) REFERENCES uninadelivery.area(zipcode, country);
+    ADD CONSTRAINT covers_fk_area FOREIGN KEY (zipcode, country) REFERENCES uninadelivery.area(zipcode, country) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- Name: covers covers_fk_tranport; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: covers covers_fk_transport; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
 --
 
 ALTER TABLE ONLY uninadelivery.covers
-    ADD CONSTRAINT covers_fk_tranport FOREIGN KEY (transportid) REFERENCES uninadelivery.transport(transportid);
+    ADD CONSTRAINT covers_fk_transport FOREIGN KEY (transportid) REFERENCES uninadelivery.transport(transportid) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -816,7 +972,7 @@ ALTER TABLE ONLY uninadelivery.deposit
 --
 
 ALTER TABLE ONLY uninadelivery.driver
-    ADD CONSTRAINT driver_fk_account FOREIGN KEY (email) REFERENCES uninadelivery.account(email);
+    ADD CONSTRAINT driver_fk_account FOREIGN KEY (email) REFERENCES uninadelivery.account(email) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -824,7 +980,7 @@ ALTER TABLE ONLY uninadelivery.driver
 --
 
 ALTER TABLE ONLY uninadelivery.driver
-    ADD CONSTRAINT driver_fk_deposit FOREIGN KEY (depositid) REFERENCES uninadelivery.deposit(depositid);
+    ADD CONSTRAINT driver_fk_deposit FOREIGN KEY (depositid) REFERENCES uninadelivery.deposit(depositid) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -832,7 +988,7 @@ ALTER TABLE ONLY uninadelivery.driver
 --
 
 ALTER TABLE ONLY uninadelivery.drives
-    ADD CONSTRAINT drives_fk_driver FOREIGN KEY (businessmail) REFERENCES uninadelivery.driver(businessmail);
+    ADD CONSTRAINT drives_fk_driver FOREIGN KEY (businessmail) REFERENCES uninadelivery.driver(businessmail) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -840,7 +996,7 @@ ALTER TABLE ONLY uninadelivery.drives
 --
 
 ALTER TABLE ONLY uninadelivery.drives
-    ADD CONSTRAINT drives_fk_transport FOREIGN KEY (transportid) REFERENCES uninadelivery.transport(transportid);
+    ADD CONSTRAINT drives_fk_transport FOREIGN KEY (transportid) REFERENCES uninadelivery.transport(transportid) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -864,7 +1020,7 @@ ALTER TABLE ONLY uninadelivery.shipment
 --
 
 ALTER TABLE ONLY uninadelivery.shipment
-    ADD CONSTRAINT shipment_fk_operator FOREIGN KEY (businessmail) REFERENCES uninadelivery.operator(businessmail);
+    ADD CONSTRAINT shipment_fk_operator FOREIGN KEY (businessmail) REFERENCES uninadelivery.operator(businessmail) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -888,7 +1044,7 @@ ALTER TABLE ONLY uninadelivery.shipment
 --
 
 ALTER TABLE ONLY uninadelivery.ships
-    ADD CONSTRAINT ships_fk_order FOREIGN KEY (orderid) REFERENCES uninadelivery."Order"(orderid);
+    ADD CONSTRAINT ships_fk_order FOREIGN KEY (orderid) REFERENCES uninadelivery."Order"(orderid) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -896,7 +1052,7 @@ ALTER TABLE ONLY uninadelivery.ships
 --
 
 ALTER TABLE ONLY uninadelivery.ships
-    ADD CONSTRAINT ships_fk_shipment FOREIGN KEY (shipmentid) REFERENCES uninadelivery.shipment(shipmentid);
+    ADD CONSTRAINT ships_fk_shipment FOREIGN KEY (shipmentid) REFERENCES uninadelivery.shipment(shipmentid) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -904,7 +1060,7 @@ ALTER TABLE ONLY uninadelivery.ships
 --
 
 ALTER TABLE ONLY uninadelivery.stores
-    ADD CONSTRAINT stores_fk_deposit FOREIGN KEY (depositid) REFERENCES uninadelivery.deposit(depositid);
+    ADD CONSTRAINT stores_fk_deposit FOREIGN KEY (depositid) REFERENCES uninadelivery.deposit(depositid) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -912,7 +1068,7 @@ ALTER TABLE ONLY uninadelivery.stores
 --
 
 ALTER TABLE ONLY uninadelivery.stores
-    ADD CONSTRAINT stores_fk_product FOREIGN KEY (name, supplier) REFERENCES uninadelivery.product(name, supplier);
+    ADD CONSTRAINT stores_fk_product FOREIGN KEY (name, supplier) REFERENCES uninadelivery.product(name, supplier) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
