@@ -25,7 +25,7 @@ Vista la vasta gamma di vincoli di dominio simili su vari campi, si è deciso di
 \end{lstlisting}
 
 Inoltre per i campi che nel diagramma ristrutturato sono stati definiti come \textbf{enumerazioni}, si è deciso di utilizzare dei tipi enumerati personalizzati.
-
+% TODO @zGenny @RiccardoElena we need to stlye this part
 \begin{lstlisting}
   CREATE TYPE WorldZone AS ENUM (
     'NA', 'EUW', 'EUNE', 'LATAM', 'MIDEAST', 'CKJ', 'SEA', 'IND', 'RUS', 'STAN', 
@@ -84,10 +84,10 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   ALTER TABLE Account ADD CONSTRAINT formatAccountAddressNo CHECK (
     AddressNo ~ '^[1-9]\d*[a-z]?(?:BIS)?$'
   );
-  ALTER TABLE Account ADD CONSTRAINT account_fk FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country);
+  ALTER TABLE Account ADD CONSTRAINT account_fk FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
 \end{lstlisting}
-   
-\begin{lstlisting}
+   % TODO define a trigger to avoid manual insertion of null email
+\begin{lstlisting} 
   CREATE TABLE "Order"(
     OrderID SERIAL, 
     EmissionDate Date NOT NULL,
@@ -100,7 +100,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   ALTER TABLE "Order" ADD CONSTRAINT formatOrderExtraWarranty CHECK (
     ExtraWarranty >=0
   );
-  ALTER TABLE "Order" ADD CONSTRAINT Order_fk FOREIGN KEY (Email) REFERENCES Account(Email);
+  ALTER TABLE "Order" ADD CONSTRAINT Order_fk FOREIGN KEY (Email) REFERENCES Account(Email) ON DELETE SET NULL ON UPDATE CASCADE;
   ALTER TABLE "Order" ADD CONSTRAINT formatOrderEmissionDate CHECK (
     EmissionDate <= current_date
   );
@@ -134,18 +134,19 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   );
 \end{lstlisting}
 
+% TODO define a trigger to avoid manual insertion of null name or supplier
 \begin{lstlisting}
   CREATE TABLE Contains (
     OrderID integer NOT NULL,
-    Name text NOT NULL,
-    Supplier alphNumString NOT NULL,
+    Name text ,
+    Supplier alphNumString ,
     IsSent boolean,
     Quantity smallint NOT NULL
   );
   ALTER TABLE contains ADD CONSTRAINT noDuplicateProductPerOrder UNIQUE(OrderID, Name, Supplier);
   ALTER TABLE contains ADD CONSTRAINT formatContainsQuantity CHECK (Quantity > 0);
-  ALTER TABLE contains ADD CONSTRAINT contains_fk_order FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID);
-  ALTER TABLE contains ADD CONSTRAINT contains_fk_product FOREIGN KEY (Name,Supplier) REFERENCES Product(Name, Supplier);
+  ALTER TABLE contains ADD CONSTRAINT contains_fk_order FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE contains ADD CONSTRAINT contains_fk_product FOREIGN KEY (Name,Supplier) REFERENCES Product(Name, Supplier) ON DELETE RESTRICT ON UPDATE CASCADE;
 \end{lstlisting}
 
 \begin{lstlisting}
@@ -172,7 +173,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   ALTER TABLE Deposit ADD CONSTRAINT formatDepositAddressNo CHECK (
     AddressNo ~ '^[1-9]\d*[a-z]?(?:BIS)?$'
   );
-  ALTER TABLE Deposit ADD CONSTRAINT Deposit_fk FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country);
+  ALTER TABLE Deposit ADD CONSTRAINT Deposit_fk FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
   ALTER TABLE deposit ADD CONSTRAINT onlyOneDepositPerAddress UNIQUE(AddressNo, Street, ZipCode, Country);
 \end{lstlisting}
 
@@ -186,7 +187,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
     DepositID integer NOT NULL
   );
   ALTER TABLE Transport ADD CONSTRAINT Transport_pk PRIMARY KEY(TransportID);
-  ALTER TABLE Transport ADD CONSTRAINT Transport_fk FOREIGN KEY(DepositID) REFERENCES Deposit(DepositID);
+  ALTER TABLE Transport ADD CONSTRAINT Transport_fk FOREIGN KEY(DepositID) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE; 
   ALTER TABLE Transport ADD CONSTRAINT formatTransportMaxCapacity CHECK (
     MaxCapacity >0
   );
@@ -204,7 +205,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   BusinessMail emailString NOT NULL
 );
 ALTER TABLE Operator ADD CONSTRAINT Operator_pk PRIMARY KEY (BusinessMail);
-ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES Account(Email);
+ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES Account(Email) ON DELETE CASCADE ON UPDATE CASCADE;
 \end{lstlistng}
 
 \begin{lstlisting}
@@ -218,14 +219,14 @@ ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES A
     TransportID integer NOT NULL
   );
   ALTER TABLE Shipment ADD CONSTRAINT Shipment_pk PRIMARY KEY (ShipmentID);
-  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_startDeposit FOREIGN KEY (ShippedFrom) REFERENCES Deposit(DepositID);
-  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_arrivalDeposit FOREIGN KEY (DirectedTo) REFERENCES Deposit(DepositID);
+  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_startDeposit FOREIGN KEY (ShippedFrom) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_arrivalDeposit FOREIGN KEY (DirectedTo) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE;
   ALTER TABLE Shipment ADD CONSTRAINT checkDifferentStartEndDeposits CHECK (
     ShippedFrom <> DirectedTo
   );
-  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID);
+  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE RESTRICT ON UPDATE CASCADE;
   ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_operator FOREIGN KEY (BusinessMail) REFERENCES Operator(Businessmail);
-\end{lstlisting}
+\end{lstlisting} % TODO make a trigger that block delete operator if exists unfinsihed shipment
 
 \begin{lstlisting}
   CREATE TABLE Ships ( 
