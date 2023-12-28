@@ -87,7 +87,9 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   ALTER TABLE Account ADD CONSTRAINT account_fk FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
 \end{lstlisting}
    % TODO define a trigger to avoid manual insertion of null email
-\begin{lstlisting} 
+
+\newpage
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Order}}]
   CREATE TABLE "Order"(
     OrderID SERIAL, 
     EmissionDate Date NOT NULL,
@@ -106,7 +108,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   );
 \end{lstlisting}
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Product}}]
   CREATE TABLE Product (
     Category letterString NOT NULL,
     Name text NOT NULL,
@@ -133,9 +135,10 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
     (Description ILIKE ('% ' || Category || ' %')) AND (Description ILIKE ('% ' || Name || ' %')) AND (Description ILIKE ('% ' || Supplier || ' %'))
   );
 \end{lstlisting}
-
 % TODO define a trigger to avoid manual insertion of null name or supplier
-\begin{lstlisting}
+
+\newpage
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Contains}}]
   CREATE TABLE Contains (
     OrderID integer NOT NULL,
     Name text ,
@@ -149,7 +152,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   ALTER TABLE contains ADD CONSTRAINT contains_fk_product FOREIGN KEY (Name,Supplier) REFERENCES Product(Name, Supplier) ON DELETE RESTRICT ON UPDATE CASCADE;
 \end{lstlisting}
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Deposit}}]
   CREATE TABLE Deposit (
     DepositID SERIAL NOT NULL,
     OccupiedSpace real NOT NULL,
@@ -177,7 +180,8 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   ALTER TABLE deposit ADD CONSTRAINT onlyOneDepositPerAddress UNIQUE(AddressNo, Street, ZipCode, Country);
 \end{lstlisting}
 
-\begin{lstlisting}
+\newpage
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Transport}}]
   CREATE TABLE Transport (
     TransportID Serial NOT NULL,
     OccupiedSpace real NOT NULL,
@@ -199,16 +203,29 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   );
 \end{lstlisting}
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Operator}}]
   CREATE TABLE Operator (
   Email emailString NOT NULL,
   BusinessMail emailString NOT NULL
 );
 ALTER TABLE Operator ADD CONSTRAINT Operator_pk PRIMARY KEY (BusinessMail);
 ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES Account(Email) ON DELETE CASCADE ON UPDATE CASCADE;
-\end{lstlistng}
+\end{lstlisting}
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Covers}}]
+  CREATE TABLE Covers (
+    TransportID integer NOT NULL,
+    ZipCode numericString NOT NULL,
+    Country letterString NOT NULL,
+    Date date
+  );
+  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Area FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Covers ADD CONSTRAINT onlyOneAreaPerDay UNIQUE (TransportID, Date);
+\end{lstlisting}
+
+\newpage
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Shipment}}]
   CREATE TABLE Shipment (
     ShipmentID Serial NOT NULL,
     ShippingDate date NOT NULL,
@@ -225,32 +242,21 @@ ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES A
     ShippedFrom <> DirectedTo
   );
   ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE RESTRICT ON UPDATE CASCADE;
-  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_operator FOREIGN KEY (BusinessMail) REFERENCES Operator(Businessmail);
-\end{lstlisting} % TODO make a trigger that block delete operator if exists unfinsihed shipment
+  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_operator FOREIGN KEY (BusinessMail) REFERENCES Operator(Businessmail) ON DELETE CASCADE ON UPDATE CASCADE;
+\end{lstlisting} % TODO make a trigger that block delete operator if exists unfinsihed shipment and set false to transport on his delete
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Ships}}]
   CREATE TABLE Ships ( 
     ShipmentID integer NOT NULL,
     OrderID integer NOT NULL
   );
   ALTER TABLE Ships ADD CONSTRAINT noDuplicateOrderInShipment UNIQUE (ShipmentID, OrderID);
-  ALTER TABLE Ships ADD CONSTRAINT Ships_fk_Shipment FOREIGN KEY (ShipmentID) REFERENCES Shipment(ShipmentID);
-  ALTER TABLE Ships ADD CONSTRAINT Ships_fk_Order FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID);
+  ALTER TABLE Ships ADD CONSTRAINT Ships_fk_Shipment FOREIGN KEY (ShipmentID) REFERENCES Shipment(ShipmentID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Ships ADD CONSTRAINT Ships_fk_Order FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID) ON DELETE CASCADE ON UPDATE CASCADE;
 \end{lstlisting}
 
-\begin{lstlisting}
-  CREATE TABLE Covers (
-    TransportID integer NOT NULL,
-    ZipCode numericString NOT NULL,
-    Country letterString NOT NULL,
-    Date date
-  );
-  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Tranport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID);
-  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Area FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country);
-  ALTER TABLE Covers ADD CONSTRAINT onlyOneAreaPerDay UNIQUE (TransportID, Date);
-\end{lstlisting}
-
-\begin{lstlisting}
+\newpage
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Driver}}]
   CREATE TABLE Driver (
     BusinessMail emailString NOT NULL,
     DrivingLicenceType DrivingLicenceType NOT NULL,
@@ -259,23 +265,23 @@ ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES A
     DepositID integer NOT NULL 
   );
   ALTER TABLE Driver ADD CONSTRAINT Driver_pk PRIMARY KEY (BusinessMail);
-  ALTER TABLE Driver ADD CONSTRAINT Driver_fk_Account FOREIGN KEY (Email) REFERENCES Account(Email);
-  ALTER TABLE Driver ADD CONSTRAINT Driver_fk_Deposit FOREIGN KEY (DepositID) REFERENCES Deposit(DepositID);
+  ALTER TABLE Driver ADD CONSTRAINT Driver_fk_Account FOREIGN KEY (Email) REFERENCES Account(Email) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Driver ADD CONSTRAINT Driver_fk_Deposit FOREIGN KEY (DepositID) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE;
 \end{lstlisting}
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Drives}}]
   CREATE TABLE Drives(
     TransportID integer NOT NULL,
     BusinessMail emailString NOT NULL,
     Date date NOT NULL
   );
-  ALTER TABLE Drives ADD CONSTRAINT Drives_fk_Driver FOREIGN KEY (BusinessMail) REFERENCES Driver(BusinessMail);
-  ALTER TABLE Drives ADD CONSTRAINT Drives_fk_Transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID);
+  ALTER TABLE Drives ADD CONSTRAINT Drives_fk_Driver FOREIGN KEY (BusinessMail) REFERENCES Driver(BusinessMail) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Drives ADD CONSTRAINT Drives_fk_Transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE CASCADE ON UPDATE CASCADE;
   ALTER TABLE Drives ADD CONSTRAINT onlyOneTravelPerDayTransport UNIQUE (TransportID, Date);
   ALTER TABLE Drives ADD CONSTRAINT onlyOneTravelPerDayDriver UNIQUE (BusinessMail, Date);
 \end{lstlisting}
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Stores}}]
   CREATE TABLE Stores(
     Name text NOT NULL,
     Supplier text NOT NULL,
@@ -283,10 +289,133 @@ ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES A
     Quantity integer NOT NULL
   );
   ALTER TABLE Stores ADD CONSTRAINT noDuplicateProductInDeposit UNIQUE (Name, Supplier, DepositID);
-  ALTER TABLE Stores
-  ADD CONSTRAINT Stores_fk_Product FOREIGN KEY (Name, Supplier) REFERENCES Product(Name, Supplier);
-  ALTER TABLE Stores
-  ADD CONSTRAINT Stores_fk_Deposit FOREIGN KEY (DepositID) REFERENCES Deposit(DepositID);
-  ALTER TABLE Stores
-  ADD CONSTRAINT formatStoresQuantity CHECK(Quantity > 0);
+  ALTER TABLE Stores ADD CONSTRAINT Stores_fk_Product FOREIGN KEY (Name, Supplier) REFERENCES Product(Name, Supplier) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Stores ADD CONSTRAINT Stores_fk_Deposit FOREIGN KEY (DepositID) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Stores ADD CONSTRAINT formatStoresQuantity CHECK(Quantity > 0);
 \end{lstlisting}
+
+\section{Creazione di Trigger e Funzioni}
+
+Sono riportati alcuni dei trigger e delle funzioni creati per la gestione dei vincoli individuati e più in generale del database.
+
+\subsection{Exception Handling}
+
+Per una gestione più pulita degli errori si è deciso di creare una funzione che lanciasse tutte le eccezioni personalizzate, ricavandole da un'apposita tabella \textbf{custom\_error\_messages}.
+
+Questa tabella si occupa di tener traccia dei codici di errore e dei messaggi di errore associati.
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{custom\_error\_messages}}]
+  CREATE TABLE custom_error_messages (
+    error_code integer NOT NULL PRIMARY KEY,
+    error_message text NOT NULL
+  );
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Creazione della funzione per gestire le eccezioni}]
+  CREATE OR REPLACE FUNCTION raise_custom_error(p_error_code TEXT)
+  RETURNS VOID AS $$
+  DECLARE
+    v_error_message TEXT;
+  BEGIN
+    -- Find error message in the custom_error_messages table 
+    SELECT error_message INTO v_error_message
+    FROM custom_error_messages
+    WHERE error_code = p_error_code;
+  
+    -- Raise exception with the retrieved error message
+    RAISE EXCEPTION USING 
+              ERRCODE = p_error_code, 
+              MESSAGE = v_error_message;
+    
+    -- If the error code given does not exist in the table, raise an exception to notify the user
+    EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+        RAISE EXCEPTION 'Error % not found', p_error_code;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+Prima di ogni implementazione seguente, verranno riportati eventuali inserimenti nella tabella \textbf{custom\_error\_messages} per dare maggior contesto sulla gestione delle eccezioni interna ai frammenti di codice.
+
+\subsection{Trigger per il vincolo \textbf{isAddressForSomethingSpecific}}
+
+Per gestire questo vincolo sono necessari due trigger, uno per la tabella \textbf{Account} e uno per la tabella \textbf{Deposit}.
+
+Nonostante ciò, la funzione che dovranno eseguire è praticamente analoga, fatto salvo per dei dettagli inerenti alla tabella su cui si sta lavorando.
+
+Si avrà infatti in entrambi i casi che la funzione dovrà controllare nella tabella tra le due in cui non è chiamato se esistono righe con lo stesso \textit{AddressNo}, \textit{Street}, \textit{ZipCode} e \textit{Country}.
+
+Dovrà inoltre tenere di conto del tipo di deposito. Infatti se si sta lavorando su \textbf{Account} si dovranno escludere dalla ricerca i \textbf{Deposit} di tipo \textit{City}, mentre se si sta lavorando su \textbf{Deposit} si dovrà controllare che il tipo di deposito inserito non sia \textit{City}.
+
+Si può dunque utilizzare \textbf{SQL Dinamico} per generalizzare la funzione e utilizzarla in entrambi i trigger.
+
+Le \textit{trigger function} però non possono accettare argomenti in ingresso. Per ovviare a ciò si è utilizzata la variabile \lstinline{TG_ARGV}, un array speciale messo a disposizione da PostgreSQL che contiene gli argomenti passati alla funzione all'interno di un trigger.
+
+Iterando tra gli elementi di questo array si può ottenere il tipo di tabella su cui si sta lavorando e passarlo alla funzione.
+
+\begin{lstlisting}[caption={Creazione errori personalizzati per \textbf{isAddressForSomethingSpecific}}]
+  -- Insert custom error messages
+  INSERT INTO custom_error_messages VALUES 
+    ('E0002', 'This address is already occupied'),
+    ('E0003', 'Incompatible table in input');
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Creazione dei trigger per il vincolo \textbf{isAddressForSomethingSpecific}}]
+  CREATE OR REPLACE TRIGGER isAddressForSomethingSpecificAccount
+  BEFORE INSERT ON Account
+  FOR EACH ROW
+  EXECUTE PROCEDURE isAddressForSomethingSpecific_func('Deposit');
+
+  CREATE OR REPLACE TRIGGER isAddressForSomethingSpecificDeposit
+  BEFORE INSERT ON Deposit
+  FOR EACH ROW
+  EXECUTE PROCEDURE isAddressForSomethingSpecific_func('Account');
+\end{lstlisting}
+
+\newpage
+\begin{lstlisting}[caption={Creazione della funzione \textbf{isAddressForSomethingSpecific\_func}}]
+  CREATE OR REPLACE FUNCTION isAddressForSomethingSpecific_func()
+  RETURNS TRIGGER
+  AS 
+  $$
+    DECLARE 
+      -- Get the number of rows that match the given address
+      flag integer;
+      -- Search for the given address in the given table
+      query text = 'SELECT COUNT(*) 
+                    INTO flag
+                    FROM ? 
+                    WHERE AddressNo = NEW.AddressNo AND 
+                          Street = NEW.Street AND 
+                          ZipCode = NEW.ZipCode AND  
+                          Country = NEW.Country';
+      -- temporary variable to store the table name
+      tableName text;
+  BEGIN
+      -- Iterate through the arguments passed to the function
+      FOREACH tableName IN ARRAY TG_ARGV LOOP
+        -- If searching in deposit, func must have been called from account
+        IF tableName == 'Deposit' THEN
+          query = query || " AND DepositType <> 'City'";
+        -- If searching in account, func must have been called from deposit
+        ELSIF tableName == 'Account' THEN
+          -- If the deposit is of type city, do nothing
+          IF NEW.DepositType = 'City' THEN
+            RETURN NEW;
+          END IF;
+        ELSE 
+          -- entering this branch means that a wrong table name has been passed
+          perform raise_custom_error('E0003');
+        END IF;
+            
+        EXECUTE IMMEDIATE query USING tableName;
+        IF flag > 0 THEN
+          perform raise_custom_error('E0002');
+        END IF;
+      END LOOP;
+  
+      RETURN NEW;
+    END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
