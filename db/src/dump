@@ -229,8 +229,8 @@ ALTER TABLE uninadelivery.area OWNER TO riccardoelena;
 
 CREATE TABLE uninadelivery.contains (
     orderid integer NOT NULL,
-    name text NOT NULL,
-    supplier uninadelivery.alphnumstring NOT NULL,
+    name text,
+    supplier uninadelivery.alphnumstring,
     issent boolean,
     quantity smallint NOT NULL,
     CONSTRAINT formatcontainsquantity CHECK ((quantity > 0))
@@ -768,7 +768,7 @@ ALTER TABLE ONLY uninadelivery.transport
 --
 
 ALTER TABLE ONLY uninadelivery.account
-    ADD CONSTRAINT account_fk FOREIGN KEY (zipcode, country) REFERENCES uninadelivery.area(zipcode, country);
+    ADD CONSTRAINT account_fk FOREIGN KEY (zipcode, country) REFERENCES uninadelivery.area(zipcode, country) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -776,7 +776,7 @@ ALTER TABLE ONLY uninadelivery.account
 --
 
 ALTER TABLE ONLY uninadelivery.contains
-    ADD CONSTRAINT contains_fk_order FOREIGN KEY (orderid) REFERENCES uninadelivery."Order"(orderid);
+    ADD CONSTRAINT contains_fk_order FOREIGN KEY (orderid) REFERENCES uninadelivery."Order"(orderid) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -784,7 +784,7 @@ ALTER TABLE ONLY uninadelivery.contains
 --
 
 ALTER TABLE ONLY uninadelivery.contains
-    ADD CONSTRAINT contains_fk_product FOREIGN KEY (name, supplier) REFERENCES uninadelivery.product(name, supplier);
+    ADD CONSTRAINT contains_fk_product FOREIGN KEY (name, supplier) REFERENCES uninadelivery.product(name, supplier) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --
@@ -808,7 +808,7 @@ ALTER TABLE ONLY uninadelivery.covers
 --
 
 ALTER TABLE ONLY uninadelivery.deposit
-    ADD CONSTRAINT deposit_fk FOREIGN KEY (zipcode, country) REFERENCES uninadelivery.area(zipcode, country);
+    ADD CONSTRAINT deposit_fk FOREIGN KEY (zipcode, country) REFERENCES uninadelivery.area(zipcode, country) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -844,19 +844,11 @@ ALTER TABLE ONLY uninadelivery.drives
 
 
 --
--- Name: operator operator_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
---
-
-ALTER TABLE ONLY uninadelivery.operator
-    ADD CONSTRAINT operator_fk FOREIGN KEY (email) REFERENCES uninadelivery.account(email);
-
-
---
 -- Name: Order order_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
 --
 
 ALTER TABLE ONLY uninadelivery."Order"
-    ADD CONSTRAINT order_fk FOREIGN KEY (email) REFERENCES uninadelivery.account(email);
+    ADD CONSTRAINT order_fk FOREIGN KEY (email) REFERENCES uninadelivery.account(email) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 --
@@ -864,7 +856,7 @@ ALTER TABLE ONLY uninadelivery."Order"
 --
 
 ALTER TABLE ONLY uninadelivery.shipment
-    ADD CONSTRAINT shipment_fk_arrivaldeposit FOREIGN KEY (directedto) REFERENCES uninadelivery.deposit(depositid);
+    ADD CONSTRAINT shipment_fk_arrivaldeposit FOREIGN KEY (directedto) REFERENCES uninadelivery.deposit(depositid) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -880,7 +872,7 @@ ALTER TABLE ONLY uninadelivery.shipment
 --
 
 ALTER TABLE ONLY uninadelivery.shipment
-    ADD CONSTRAINT shipment_fk_startdeposit FOREIGN KEY (shippedfrom) REFERENCES uninadelivery.deposit(depositid);
+    ADD CONSTRAINT shipment_fk_startdeposit FOREIGN KEY (shippedfrom) REFERENCES uninadelivery.deposit(depositid) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -888,7 +880,7 @@ ALTER TABLE ONLY uninadelivery.shipment
 --
 
 ALTER TABLE ONLY uninadelivery.shipment
-    ADD CONSTRAINT shipment_fk_transport FOREIGN KEY (transportid) REFERENCES uninadelivery.transport(transportid);
+    ADD CONSTRAINT shipment_fk_transport FOREIGN KEY (transportid) REFERENCES uninadelivery.transport(transportid) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --
@@ -928,7 +920,7 @@ ALTER TABLE ONLY uninadelivery.stores
 --
 
 ALTER TABLE ONLY uninadelivery.transport
-    ADD CONSTRAINT transport_fk FOREIGN KEY (depositid) REFERENCES uninadelivery.deposit(depositid);
+    ADD CONSTRAINT transport_fk FOREIGN KEY (depositid) REFERENCES uninadelivery.deposit(depositid) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
