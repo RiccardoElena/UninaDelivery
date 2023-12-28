@@ -36,15 +36,11 @@ In tali casi si è utilizzata la molteplicità \textbf{[\(0..1\)]} esclusivament
 \end{note}
 
 \newpage
-% TODO @zGenny export the ER diagram with the new changes and uncommend this part
 
 \section{Enhanced Entity Relationship Diagram}
 \begin{center}
   \includegraphics[width=0.9\textwidth]{ER_Diagram.pdf}
 \end{center}
-
-% TODO: need to re-export the UML diagram with the new changes. All the changes in the ER diagram are already done in the UML diagram
-% If it's needed scale the size of the image with 0.x or 1.x near to \textwidth
 
 \section{UML Class Diagram}
 \begin{center}
@@ -102,8 +98,6 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
 \subsection{Class Diagram Ristrutturato}
 
-% TODO: @zGenny review restructured diagram, if it's ok export it and uncommend this part. To adjust size add 0.x or 1.x near to \textwidth
-% FIXME: @zGenny there's a HUGE problem in the assosation between Area and Address. The cardinality is wrong. It should be N to 1 and not N to N. We should discuss this asap.
 \begin{center}
   \includegraphics[width=\textwidth]{UML_Class_Diagram_Restructured.pdf} 
 \end{center}
@@ -467,11 +461,6 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   Il campo \textbf{Businessmail} della classe \textbf{Driver} deve avere il formato `\textbf{word}@\textbf{domain}.\textbf{ext}', dove \textit{word} può contenere solo caratteri alfanumerici o al più dei punti, \textit{domain} da soli caratteri alfabetici o punti, mentre \textit{ext} da solo caratteri alfabetici, e dev'essere lunga almeno due caratteri.
   }\\
   
-  \textbf{formatDate} & Dominio & 
-  {\footnotesize
-  Per ogni campo di tipo \textbf{date} se la data inserita non è nel formato dd/mm/yyyy viene convertita
-  }\\
-  
   \textbf{validAccountBirthdate} & Dominio & 
   {\footnotesize
   L'utente deve aver compiuto 16 anni
@@ -611,7 +600,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
   \textbf{checkDifferentStartEndDeposits} & N-upla &
   {\footnotesize
-  Nella classe \textbf{Shipment} il campo \textbf{ShippedFrom} dev'essere diverso dal campo \textbf{ShippedTo}
+  Nella classe \textbf{Shipment} il campo \textbf{ShippedFrom} dev'essere diverso dal campo \textbf{DirectedTo}
   }\\
   
 }
@@ -643,7 +632,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   Se \textbf{Account} è un \textbf{Driver} o un \textbf{Operator} deve aver compiuto 18 anni
   }\\
 
-  \textbf{isAddressForSomethingGeneral} & Interrelazionale &
+  \textbf{isAddressForSomethingGeneral}\label{isAddressForSomethingGeneral} & Interrelazionale &
   {\footnotesize
   Un \textbf{Address}, non può non corrispondere né a un \textbf{Deposit}, né a degli \textbf{Account}.
   }\\
@@ -693,5 +682,10 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   \textbf{formatDriverBusinessmail} & Interrelazionale &
   {\footnotesize
   Il campo \textbf{Businessmail} della classe Driver deve avere il formato `\textbf{n}.\textbf{surnameN}@uninadelivery.driver.com', dove \textit{n} è l'iniziale del nome dell'autista, \textit{surname} è il suo cognome, mentre \textit{N} è un numero intero positivo, da utilizzare per eventuali omonimie.
+  }\\
+
+  \textbf{isAccountReachable} & Interrelazionale &
+  {\footnotesize
+  Un \textbf{Account} deve avere almeno un \textbf{Deposit} nella stessa \textbf{City}. Le \textbf{City} in cui non è presente un \textbf{Deposit} sono da considerare non ancora raggiungibili dal servizoi.
   }\\
 }

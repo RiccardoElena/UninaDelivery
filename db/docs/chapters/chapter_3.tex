@@ -17,11 +17,19 @@
   \textbf{is} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Account} in \textbf{Operator}.} \\
   \textbf{is} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Account} in \textbf{Driver}.} \\
   \textbf{inhabits} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Address} in \textbf{Account}.} \\
-  \textbf{sited} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Address} in \textbf{Deposit}.} \\
+  \textbf{sited} & {\footnotesize Accorpamento delle classi coinvolte nella classe \textbf{Deposit}.}\\
   \textbf{located} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Address} in \textbf{Area}.} \\
 }
 
 \section{Traduzione delle Classi}
+
+\subsection{Considerazioni sulla Traduzione delle Classi}
+
+Dalla \textbf{traduzione delle associazioni} si è evidenziato come, per via delle strategie utilizzate per il mapping, la classe \textbf{Address} sia ridondante. Infatti la classe \textbf{Deposit} e la classe \textbf{Account} ne contengono tutti i campi, essendo tutti chiavi primarie, e per la classe \textbf{Area} la migrazione delle chiavi avveniva \textit{verso \textbf{Address}}, diventando anch'esse chiavi primarie e venendo ereditate da \textbf{Deposit} e \textbf{Account}.
+È sufficiente quindi per eliminare la classe \textbf{Address} oltre alle strategie già messe in atto durante la \textbf{traduzione delle associazioni} migrare le chiavi primarie di \textbf{Area} direttamente verso \textbf{Deposit} e \textbf{Account}, andando a diminuire l'overhead e risolvendo in automatico vincoli come \intlink{isAddressForSomethingGeneral}{\textbf{isAddressForSomethingGeneral}}.
+
+Per mantenere la consistenza del database, va anche introdotto un vincolo di unicità nella nuova classe accorpata \textbf{Deposit}. Per garantire l'associazione di tipo \(1:1\) tra \textbf{Deposit} e \textbf{Address} è necessario che la quadrupla di campi \textit{AddressNo}, \textit{Street}, \textit{ZipCode} e \textit{Country} sia unica nella tabella.
+\section{Schema Logico}
 
 \begin{note}[Indicazioni di Chiave Primaria e Chiave Esterna]
   Per evidenziare la presenza di \textbf{chiavi primarie} e \textbf{chiavi esterne} nei diagrammi, si è deciso sottolineare le \underline{chiavi primarie} e mettere in corsivo le \textit{chiavi esterne}.
@@ -34,8 +42,6 @@
 
 \textbf{Area} (\underline{ZipCode}, City, State, \underline{Country}, WorldZone) 
 
-\textbf{Address} (\underline{AddressNo}, \underline{Street}, \underline{\textit{ZipCode}}, \underline{\textit{Country}}) 
-
 \textbf{Account} (Name, Surname, \underline{Email}, Birthdate, ProPic, Password, \textit{AddressNo}, \textit{Street}, \textit{ZipCode}, \textit{Country})
 
 \textbf{Order} (\underline{OrderID}, EmissionDate, isExpress, ExtraWarranty, IsCompleted, \textit{Email})
@@ -46,7 +52,9 @@
 
 \textbf{Stores} (\textit{Name}, \textit{Supplier}, \textit{DepositID}, Quantity)
 
-\textbf{Deposit} (\underline{DepositID}, OccupiedSpace, MaxCapacity, DepositType, \textit{AddressNo}, \textit{Street}, \textit{ZipCode}, \textit{Country})
+\textbf{Deposit} (\underline{DepositID}, OccupiedSpace, MaxCapacity, DepositType, \textit{AddressNo}, \textit{Street}, 
+
+\textit{ZipCode}, \textit{Country})
 
 \textbf{Shipment} (\underline{ShipmentID}, ShippingDate, HasArrived, \textit{ShippedFrom}, \textit{DirectedTo}, \textit{BusinessMail}, \textit{TransportID})
 

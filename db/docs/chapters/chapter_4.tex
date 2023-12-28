@@ -58,25 +58,6 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   ALTER TABLE Area ADD CONSTRAINT Area_pk PRIMARY KEY (ZipCode, Country);
 \end{lstlisting}
 
-\begin{lstlisting}[caption={Creazione della tabella \textbf{Address}}]
-  CREATE TABLE Address (
-    AddressNo alphNumString NOT NULL ,
-    Street alphNumString NOT NULL ,
-    ZipCode numericString NOT NULL ,
-    Country letterString NOT NULL
-  );
-  ALTER TABLE Address ADD CONSTRAINT Address_pk PRIMARY KEY (
-    AddressNo,Street, ZipCode, Country
-  );
-  ALTER TABLE Address ADD CONSTRAINT formatAddressAddressNo CHECK (
-    AddressNo ~ '^[1-9]\d*[a-z]?(?:BIS)?$'
-  );
-  ALTER TABLE Address ADD CONSTRAINT Address_fk FOREIGN KEY 
-    (ZipCode,Country) REFERENCES Area(ZipCode,Country) 
-    ON DELETE CASCADE;
-\end{lstlisting}
-% FIXME some constraint missing.
-% ! % TODO @zGenny we need to discuss the future of Address table.
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Account}}]
   CREATE TABLE Account (
     Name letterString NOT NULL,
@@ -100,6 +81,10 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   ALTER TABLE account ADD CONSTRAINT formatAccountProPic CHECK (
     ProPic ~ '^\/9j\/4AAQSkZJRg[-A-Za-z0-9+\/]*={0,2}$'
   );
+  ALTER TABLE Account ADD CONSTRAINT formatAccountAddressNo CHECK (
+    AddressNo ~ '^[1-9]\d*[a-z]?(?:BIS)?$'
+  );
+  ALTER TABLE Account ADD CONSTRAINT account_fk FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country);
 \end{lstlisting}
    
 \begin{lstlisting}
@@ -162,7 +147,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   ALTER TABLE contains ADD CONSTRAINT contains_fk_order FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID);
   ALTER TABLE contains ADD CONSTRAINT contains_fk_product FOREIGN KEY (Name,Supplier) REFERENCES Product(Name, Supplier);
 \end{lstlisting}
-% FIXME some constraint missing. Same as Account.
+
 \begin{lstlisting}
   CREATE TABLE Deposit (
     DepositID SERIAL NOT NULL,
@@ -184,6 +169,11 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   ALTER TABLE Deposit ADD CONSTRAINT checkDepositFullness CHECK (
     OccupiedSpace <= MaxCapacity
   );
+  ALTER TABLE Deposit ADD CONSTRAINT formatDepositAddressNo CHECK (
+    AddressNo ~ '^[1-9]\d*[a-z]?(?:BIS)?$'
+  );
+  ALTER TABLE Deposit ADD CONSTRAINT Deposit_fk FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country);
+  ALTER TABLE deposit ADD CONSTRAINT onlyOneDepositPerAddress UNIQUE(AddressNo, Street, ZipCode, Country);
 \end{lstlisting}
 
 \begin{lstlisting}
