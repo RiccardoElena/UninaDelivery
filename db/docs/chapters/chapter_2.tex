@@ -457,12 +457,12 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   Il campo \textbf{Email} della classe \textbf{Account} deve avere il formato `\textbf{word}@\textbf{domain}.\textbf{ext}', dove \textit{word} può contenere solo caratteri alfanumerici o al più dei punti, \textit{domain} da soli caratteri alfabetici o punti, mentre \textit{ext} da solo caratteri alfabetici, e dev'essere lunga almeno due caratteri.
   }\\
 
-  \textbf{formatOperatorBusinessmail} & Dominio &
+  \textbf{validOperatorBusinessmail} & Dominio &
   {\footnotesize
   Il campo \textbf{Businessmail} della classe \textbf{Operator} deve avere il formato `\textbf{word}@\textbf{domain}.\textbf{ext}', dove \textit{word} può contenere solo caratteri alfanumerici o al più dei punti, \textit{domain} da soli caratteri alfabetici o punti, mentre \textit{ext} da solo caratteri alfabetici, e dev'essere lunga almeno due caratteri.
   }\\
 
-  \textbf{formatDriverBusinessmail} & Dominio &
+  \textbf{validDriverBusinessmail} & Dominio &
   {\footnotesize
   Il campo \textbf{Businessmail} della classe \textbf{Driver} deve avere il formato `\textbf{word}@\textbf{domain}.\textbf{ext}', dove \textit{word} può contenere solo caratteri alfanumerici o al più dei punti, \textit{domain} da soli caratteri alfabetici o punti, mentre \textit{ext} da solo caratteri alfabetici, e dev'essere lunga almeno due caratteri.
   }\\
@@ -496,6 +496,11 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   Il campo \textbf{MaxCapacity} della classe \textbf{Transport} dev'essere positivo.
   }\\
 
+  \textbf{formatTransportOccupiedSpace} & Dominio &
+  {\footnotesize
+  Il campo \textbf{OccupiedSpace} della classe \textbf{Transport} dev'essere positivo.
+  }\\
+
   \textbf{formatOrderExtraWarranty} & Dominio &
   {\footnotesize
   Il campo \textbf{ExtraWarranty} della classe \textbf{Order} deve essere non negativo.
@@ -522,7 +527,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   
   \textbf{formatDepositMaxCapacity} & Dominio & 
   {\footnotesize
-  Il campo \textbf{MaxCapacity} della classe \textbf{Deposit} deve essere un float non negativo.
+  Il campo \textbf{MaxCapacity} della classe \textbf{Deposit} deve essere un float positivo.
   }\\
   
   \textbf{formatProductCategory} & Dominio  & 
@@ -545,17 +550,18 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   Il campo \textbf{Description} della classe \textbf{Product} deve contenere caratteri alfanumerici e può contenere caratteri speciali. 
   }\\
   
+}
+
+\customTable{ccY}[Dizionario dei vincoli Terza Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
+    
   \textbf{formatProductPackageSizeLiters} & Dominio & 
   {\footnotesize
   Il campo \textbf{PackageSizeLiters} della classe \textbf{Product} deve essere positivo.
   }\\ 
-}
 
-\customTable{ccY}[Dizionario dei vincoli Terza Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
-  
   \textbf{formatProductPrice} & Dominio & 
   {\footnotesize
-  Il campo \textbf{MaxCapacity} della classe \textbf{Deposit} deve essere positivo.
+  Il campo \textbf{Price} della classe \textbf{Product} deve essere positivo.
   }\\
 
   \textbf{formatStoresQuantity} & Dominio & 
@@ -603,15 +609,25 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   Nella classe \textbf{Product} il campo \textbf{Description} dev'essere una stringa che contenga le stringhe presenti nei campi \textbf{Category}, \textbf{Name} e \textbf{Supplier}
   }\\
 
+  \textbf{checkDifferentStartEndDeposits} & N-upla &
+  {\footnotesize
+  Nella classe \textbf{Shipment} il campo \textbf{ShippedFrom} dev'essere diverso dal campo \textbf{ShippedTo}
+  }\\
+  
+}
+
+\customTable{ccY}[Dizionario dei vincoli Quarta Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
+  
+  \textbf{noDuplicateProductPerOrder} & Intrarelazionale &
+  {\footnotesize
+  Nella classe d'associazione \textbf{Contains} un \textbf{Product} non può essere contenuto più volte nello stesso \textbf{Order}
+  }\\
+
   \textbf{onlyOneTravelPerDayTransport} & Intrarelazionale & 
   {\footnotesize
   Nella classe d’associazione \textbf{Drives} un \textbf{Transport} non può essere guidato più volte nella stessa \textbf{data}
   }\\
 
-}
-
-\customTable{ccY}[Dizionario dei vincoli Quarta Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
-  
   \textbf{onlyOneTravelPerDayDriver} & Intrarelazionale &
   {\footnotesize
   Nella classe d’associazione \textbf{Drives} un \textbf{Driver} non può guidare più volte nella stessa \textbf{data}.
@@ -676,6 +692,6 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   
   \textbf{formatDriverBusinessmail} & Interrelazionale &
   {\footnotesize
-  Il campo \textbf{Businessmail} della classe Driver deve avere il formato `\textbf{n}.\textbf{surnameN}@uninadelivery.driver.com', dove \textit{n} è l'iniziale del nome dell'operatore, \textit{surname} è il suo cognome, mentre \textit{N} è un numero intero positivo, da utilizzare per eventuali omonimie.
+  Il campo \textbf{Businessmail} della classe Driver deve avere il formato `\textbf{n}.\textbf{surnameN}@uninadelivery.driver.com', dove \textit{n} è l'iniziale del nome dell'autista, \textit{surname} è il suo cognome, mentre \textit{N} è un numero intero positivo, da utilizzare per eventuali omonimie.
   }\\
 }

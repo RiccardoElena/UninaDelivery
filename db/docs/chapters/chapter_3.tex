@@ -11,7 +11,7 @@
   \textbf{drives} & {\footnotesize Definizione di una nuova tabella \textbf{Drives} con chiavi esterne verso \textbf{Transport} e \textbf{Driver}, oltre che gli attributi della relazione.} \\
   \textbf{transportedBy} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Transport} in \textbf{Shipment}.} \\
   \textbf{covers} & {\footnotesize Definizione di una nuova tabella \textbf{Covers} con chiavi esterne verso \textbf{Transport} e \textbf{Area}, oltre che gli attributi della relazione.} \\
-  \textbf{ships} & {\footnotesize Definizione di una nuova tabella \textbf{Contains} con chiavi esterne verso \textbf{Shipment} e \textbf{Order}.} \\
+  \textbf{ships} & {\footnotesize Definizione di una nuova tabella \textbf{Ships} con chiavi esterne verso \textbf{Shipment} e \textbf{Order}.} \\
   \textbf{shippedFrom} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Deposit} in \textbf{Shipment}.} \\
   \textbf{shippedTo} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Deposit} in \textbf{Shipment}.} \\
   \textbf{is} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Account} in \textbf{Operator}.} \\
@@ -36,7 +36,7 @@
 
 \textbf{Address} (\underline{AddressNo}, \underline{Street}, \underline{\textit{ZipCode}}, \underline{\textit{Country}}) 
 
-\textbf{Account} (Name, Surname, \underline{Email}, Birthdate, ProPic, Password, \textit{AddressNo}, \textit{Street}, \textit{ZipCode}, \textit{State})
+\textbf{Account} (Name, Surname, \underline{Email}, Birthdate, ProPic, Password, \textit{AddressNo}, \textit{Street}, \textit{ZipCode}, \textit{Country})
 
 \textbf{Order} (\underline{OrderID}, EmissionDate, isExpress, ExtraWarranty, IsCompleted, \textit{Email})
 
@@ -46,7 +46,7 @@
 
 \textbf{Stores} (\textit{Name}, \textit{Supplier}, \textit{DepositID}, Quantity)
 
-\textbf{Deposit} (\underline{DepositID}, OccupiedSpace, MaxCapacity, DepositType, \textit{AddressNo}, \textit{Street}, \textit{ZipCode}, \textit{State})
+\textbf{Deposit} (\underline{DepositID}, OccupiedSpace, MaxCapacity, DepositType, \textit{AddressNo}, \textit{Street}, \textit{ZipCode}, \textit{Country})
 
 \textbf{Shipment} (\underline{ShipmentID}, ShippingDate, HasArrived, \textit{ShippedFrom}, \textit{DirectedTo}, \textit{BusinessMail}, \textit{TransportID})
 
@@ -56,7 +56,7 @@
 
 \textbf{Transport} (\underline{TransportID}, MaxCapacity, OccupiedSpace, IsAvailable, TransportType, \textit{DepositID}) 
 
-\textbf{Drives} (\textit{TransportID}, \textit{DriverBusinessMail}, Date)
+\textbf{Drives} (\textit{TransportID}, \textit{BusinessMail}, Date)
 
 \textbf{Driver} (\underline{BusinessMail}, DrivingLincenceType, IsAvailable, \textit{Email}, \textit{DepositID})
 
