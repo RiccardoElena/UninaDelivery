@@ -199,6 +199,7 @@ CREATE TABLE uninadelivery.account (
     street uninadelivery.alphnumstring NOT NULL,
     zipcode uninadelivery.numericstring NOT NULL,
     country uninadelivery.letterstring NOT NULL,
+    CONSTRAINT formataccountaddressno CHECK (((addressno)::text ~ '^[1-9]\d*[a-z]?(?:BIS)?$'::text)),
     CONSTRAINT formataccountpassword CHECK ((password ~ '\b[A-Fa-f0-9]{64}\b'::text)),
     CONSTRAINT formataccountpropic CHECK ((propic ~ '^\/9j\/4AAQSkZJRg[-A-Za-z0-9+\/]*={0,2}$'::text)),
     CONSTRAINT validaccountbirthdate CHECK ((EXTRACT(year FROM age((birthdate)::timestamp with time zone)) >= (16)::numeric))
@@ -206,21 +207,6 @@ CREATE TABLE uninadelivery.account (
 
 
 ALTER TABLE uninadelivery.account OWNER TO riccardoelena;
-
---
--- Name: address; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
---
-
-CREATE TABLE uninadelivery.address (
-    addressno uninadelivery.alphnumstring NOT NULL,
-    street uninadelivery.alphnumstring NOT NULL,
-    zipcode uninadelivery.numericstring NOT NULL,
-    country uninadelivery.letterstring NOT NULL,
-    CONSTRAINT formataddressaddressno CHECK (((addressno)::text ~ '^[1-9]\d*[a-z]?(?:BIS)?$'::text))
-);
-
-
-ALTER TABLE uninadelivery.address OWNER TO riccardoelena;
 
 --
 -- Name: area; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
@@ -282,7 +268,8 @@ CREATE TABLE uninadelivery.deposit (
     country uninadelivery.letterstring NOT NULL,
     CONSTRAINT checkdepositfullness CHECK ((occupiedspace <= maxcapacity)),
     CONSTRAINT foramtdepositmaxcapacity CHECK ((maxcapacity > (0)::double precision)),
-    CONSTRAINT foramtdepositoccupiedspace CHECK ((occupiedspace >= (0)::double precision))
+    CONSTRAINT foramtdepositoccupiedspace CHECK ((occupiedspace >= (0)::double precision)),
+    CONSTRAINT formatdepositaddressno CHECK (((addressno)::text ~ '^[1-9]\d*[a-z]?(?:BIS)?$'::text))
 );
 
 
@@ -525,14 +512,6 @@ COPY uninadelivery.account (name, surname, email, birthdate, propic, password, a
 
 
 --
--- Data for Name: address; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
---
-
-COPY uninadelivery.address (addressno, street, zipcode, country) FROM stdin;
-\.
-
-
---
 -- Data for Name: area; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
 --
 
@@ -665,14 +644,6 @@ ALTER TABLE ONLY uninadelivery.account
 
 
 --
--- Name: address address_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
---
-
-ALTER TABLE ONLY uninadelivery.address
-    ADD CONSTRAINT address_pk PRIMARY KEY (addressno, street, zipcode, country);
-
-
---
 -- Name: area area_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
 --
 
@@ -726,6 +697,14 @@ ALTER TABLE ONLY uninadelivery.contains
 
 ALTER TABLE ONLY uninadelivery.covers
     ADD CONSTRAINT onlyoneareaperday UNIQUE (transportid, date);
+
+
+--
+-- Name: deposit onlyonedepositperaddress; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.deposit
+    ADD CONSTRAINT onlyonedepositperaddress UNIQUE (addressno, street, zipcode, country);
 
 
 --
@@ -785,11 +764,11 @@ ALTER TABLE ONLY uninadelivery.transport
 
 
 --
--- Name: address address_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: account account_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
 --
 
-ALTER TABLE ONLY uninadelivery.address
-    ADD CONSTRAINT address_fk FOREIGN KEY (zipcode, country) REFERENCES uninadelivery.area(zipcode, country) ON DELETE CASCADE;
+ALTER TABLE ONLY uninadelivery.account
+    ADD CONSTRAINT account_fk FOREIGN KEY (zipcode, country) REFERENCES uninadelivery.area(zipcode, country);
 
 
 --
@@ -822,6 +801,14 @@ ALTER TABLE ONLY uninadelivery.covers
 
 ALTER TABLE ONLY uninadelivery.covers
     ADD CONSTRAINT covers_fk_tranport FOREIGN KEY (transportid) REFERENCES uninadelivery.transport(transportid);
+
+
+--
+-- Name: deposit deposit_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.deposit
+    ADD CONSTRAINT deposit_fk FOREIGN KEY (zipcode, country) REFERENCES uninadelivery.area(zipcode, country);
 
 
 --
