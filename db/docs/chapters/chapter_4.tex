@@ -15,7 +15,7 @@ Vista la vasta gamma di vincoli di dominio simili su vari campi, si è deciso di
 \begin{lstlisting}
   CREATE DOMAIN letterString AS text CHECK (VALUE ~ '^[a-zA-Z]+$');
   
-  CREATE DOMAIN numberString AS text CHECK (VALUE ~ '^[0-9]+$');
+  CREATE DOMAIN numericString AS text CHECK (VALUE ~ '^[0-9]+$');
   
   CREATE DOMAIN alphanumericString AS text CHECK (VALUE ~ '^\w+$');
   
@@ -49,30 +49,253 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Area}}]
   CREATE TABLE Area (
-    ZipCode numericString,
-    City letterString,
-    State letterString,
-    Country letterString,
-    WorldZone WorldZone
+    ZipCode numericString NOT NULL,
+    City letterString NOT NULL,
+    State letterString NOT NULL,
+    Country letterString NOT NULL,
+    WorldZone WorldZone NOT NULL
   );
   ALTER TABLE Area ADD CONSTRAINT Area_pk PRIMARY KEY (ZipCode, Country);
 \end{lstlisting}
 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Address}}]
   CREATE TABLE Address (
-    AddressNo alphNumString NOT NULL,
-    Street alphNumString NOT NULL,
-    ZipCode numericString NOT NULL,
+    AddressNo alphNumString NOT NULL ,
+    Street alphNumString NOT NULL ,
+    ZipCode numericString NOT NULL ,
     Country letterString NOT NULL
   );
   ALTER TABLE Address ADD CONSTRAINT Address_pk PRIMARY KEY (
     AddressNo,Street, ZipCode, Country
   );
-  ALTER TABLE Address ADD CONSTRAINT AddressNo_domain CHECK (
+  ALTER TABLE Address ADD CONSTRAINT formatAddressAddressNo CHECK (
     AddressNo ~ '^[1-9]\d*[a-z]?(?:BIS)?$'
   );
   ALTER TABLE Address ADD CONSTRAINT Address_fk FOREIGN KEY 
     (ZipCode,Country) REFERENCES Area(ZipCode,Country) 
     ON DELETE CASCADE;
 \end{lstlisting}
-    
+% FIXME some constraint missing.
+% ! % TODO @zGenny we need to discuss the future of Address table.
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Account}}]
+  CREATE TABLE Account (
+    Name letterString NOT NULL,
+    Surname letterString NOT NULL,
+    Email emailString NOT NULL,
+    Birthdate date NOT NULL,
+    ProPic text,
+    Password text NOT NULL,
+    AddressNo alphNumString NOT NULL,
+    Street alphNumString NOT NULL,
+    ZipCode numericString NOT NULL,
+    Country letterString NOT NULL
+  );
+  ALTER TABLE account ADD CONSTRAINT Account_pk PRIMARY KEY (Email);
+  ALTER TABLE account ADD CONSTRAINT validAccountBirthdate CHECK (
+    EXTRACT( YEAR FROM age(Birthdate)) >= 16 
+  );
+  ALTER TABLE account ADD CONSTRAINT formatAccountPassword CHECK(
+    Password ~ '\b[A-Fa-f0-9]{64}\b'
+  );
+  ALTER TABLE account ADD CONSTRAINT formatAccountProPic CHECK (
+    ProPic ~ '^\/9j\/4AAQSkZJRg[-A-Za-z0-9+\/]*={0,2}$'
+  );
+\end{lstlisting}
+   
+\begin{lstlisting}
+  CREATE TABLE "Order"(
+    OrderID SERIAL, 
+    EmissionDate Date NOT NULL,
+    IsExpress boolean,
+    ExtraWarranty smallint NOT NULL,
+    IsCompleted boolean,
+    Email emailString
+  );
+  ALTER TABLE "Order" ADD CONSTRAINT Order_pk PRIMARY KEY (OrderID);
+  ALTER TABLE "Order" ADD CONSTRAINT formatOrderExtraWarranty CHECK (
+    ExtraWarranty >=0
+  );
+  ALTER TABLE "Order" ADD CONSTRAINT Order_fk FOREIGN KEY (Email) REFERENCES Account(Email);
+  ALTER TABLE "Order" ADD CONSTRAINT formatOrderEmissionDate CHECK (
+    EmissionDate <= current_date
+  );
+\end{lstlisting}
+
+\begin{lstlisting}
+  CREATE TABLE Product (
+    Category letterString NOT NULL,
+    Name text NOT NULL,
+    Supplier alphNumString NOT NULL,
+    Description text NOT NULL,
+    PackageSizeLiters real NOT NULL,
+    IsFragile boolean,
+    Price numeric(100,2)
+  );
+  ALTER TABLE Product ADD CONSTRAINT Product_pk PRIMARY KEY (Name,Supplier);
+  ALTER TABLE Product ADD CONSTRAINT formatProductName CHECK(
+    Name ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]*$'
+  );
+  ALTER TABLE Product ADD CONSTRAINT formatProductDescription CHECK(
+    Description ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]*$'
+  );
+  ALTER TABLE Product ADD CONSTRAINT formatProductPackageSizeLiters CHECK(
+    PackageSizeLiters > 0
+  );
+  ALTER TABLE Product ADD CONSTRAINT formatProductPrice CHECK(
+    Price > 0
+  );
+  ALTER TABLE Product ADD CONSTRAINT checkProductDescriptionOnTopic CHECK(
+    (Description ILIKE ('% ' || Category || ' %')) AND (Description ILIKE ('% ' || Name || ' %')) AND (Description ILIKE ('% ' || Supplier || ' %'))
+  );
+\end{lstlisting}
+
+\begin{lstlisting}
+  CREATE TABLE Contains (
+    OrderID integer NOT NULL,
+    Name text NOT NULL,
+    Supplier alphNumString NOT NULL,
+    IsSent boolean,
+    Quantity smallint NOT NULL
+  );
+  ALTER TABLE contains ADD CONSTRAINT noDuplicateProductPerOrder UNIQUE(OrderID, Name, Supplier);
+  ALTER TABLE contains ADD CONSTRAINT formatContainsQuantity CHECK (Quantity > 0);
+  ALTER TABLE contains ADD CONSTRAINT contains_fk_order FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID);
+  ALTER TABLE contains ADD CONSTRAINT contains_fk_product FOREIGN KEY (Name,Supplier) REFERENCES Product(Name, Supplier);
+\end{lstlisting}
+% FIXME some constraint missing. Same as Account.
+\begin{lstlisting}
+  CREATE TABLE Deposit (
+    DepositID SERIAL NOT NULL,
+    OccupiedSpace real NOT NULL,
+    MaxCapacity real NOT NULL,
+    DepositType DepositType,
+    AddressNo alphNumString NOT NULL,
+    Street alphNumString NOT NULL,
+    ZipCode numericString NOT NULL,
+    Country letterString NOT NULL
+  );
+  ALTER TABLE Deposit ADD CONSTRAINT Deposit_pk PRIMARY KEY ( DepositID);
+  ALTER TABLE Deposit ADD CONSTRAINT foramtDepositOccupiedSpace CHECK(
+    OccupiedSpace >= 0
+  );
+  ALTER TABLE Deposit ADD CONSTRAINT foramtDepositMaxCapacity CHECK(
+    MaxCapacity > 0
+  );
+  ALTER TABLE Deposit ADD CONSTRAINT checkDepositFullness CHECK (
+    OccupiedSpace <= MaxCapacity
+  );
+\end{lstlisting}
+
+\begin{lstlisting}
+  CREATE TABLE Transport (
+    TransportID Serial NOT NULL,
+    OccupiedSpace real NOT NULL,
+    MaxCapacity real NOT NULL,
+    IsAvailable boolean, 
+    TransportType TransportType NOT NULL,
+    DepositID integer NOT NULL
+  );
+  ALTER TABLE Transport ADD CONSTRAINT Transport_pk PRIMARY KEY(TransportID);
+  ALTER TABLE Transport ADD CONSTRAINT Transport_fk FOREIGN KEY(DepositID) REFERENCES Deposit(DepositID);
+  ALTER TABLE Transport ADD CONSTRAINT formatTransportMaxCapacity CHECK (
+    MaxCapacity >0
+  );
+  ALTER TABLE Transport ADD CONSTRAINT formatTransportOccupiedSpace CHECK (
+    OccupiedSpace >=0
+  );
+  ALTER TABLE Transport ADD CONSTRAINT checkTransportFullness CHECK(
+    OccupiedSpace <= MaxCapacity
+  );
+\end{lstlisting}
+
+\begin{lstlisting}
+  CREATE TABLE Operator (
+  Email emailString NOT NULL,
+  BusinessMail emailString NOT NULL
+);
+ALTER TABLE Operator ADD CONSTRAINT Operator_pk PRIMARY KEY (BusinessMail);
+ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES Account(Email);
+\end{lstlistng}
+
+\begin{lstlisting}
+  CREATE TABLE Shipment (
+    ShipmentID Serial NOT NULL,
+    ShippingDate date NOT NULL,
+    HasArrived boolean,
+    ShippedFrom integer NOT NULL,
+    DirectedTo integer,
+    BusinessMail emailString NOT NULL,
+    TransportID integer NOT NULL
+  );
+  ALTER TABLE Shipment ADD CONSTRAINT Shipment_pk PRIMARY KEY (ShipmentID);
+  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_startDeposit FOREIGN KEY (ShippedFrom) REFERENCES Deposit(DepositID);
+  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_arrivalDeposit FOREIGN KEY (DirectedTo) REFERENCES Deposit(DepositID);
+  ALTER TABLE Shipment ADD CONSTRAINT checkDifferentStartEndDeposits CHECK (
+    ShippedFrom <> DirectedTo
+  );
+  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID);
+  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_operator FOREIGN KEY (BusinessMail) REFERENCES Operator(Businessmail);
+\end{lstlisting}
+
+\begin{lstlisting}
+  CREATE TABLE Ships ( 
+    ShipmentID integer NOT NULL,
+    OrderID integer NOT NULL
+  );
+  ALTER TABLE Ships ADD CONSTRAINT noDuplicateOrderInShipment UNIQUE (ShipmentID, OrderID);
+  ALTER TABLE Ships ADD CONSTRAINT Ships_fk_Shipment FOREIGN KEY (ShipmentID) REFERENCES Shipment(ShipmentID);
+  ALTER TABLE Ships ADD CONSTRAINT Ships_fk_Order FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID);
+\end{lstlisting}
+
+\begin{lstlisting}
+  CREATE TABLE Covers (
+    TransportID integer NOT NULL,
+    ZipCode numericString NOT NULL,
+    Country letterString NOT NULL,
+    Date date
+  );
+  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Tranport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID);
+  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Area FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country);
+  ALTER TABLE Covers ADD CONSTRAINT onlyOneAreaPerDay UNIQUE (TransportID, Date);
+\end{lstlisting}
+
+\begin{lstlisting}
+  CREATE TABLE Driver (
+    BusinessMail emailString NOT NULL,
+    DrivingLicenceType DrivingLicenceType NOT NULL,
+    IsAvailable boolean,
+    Email emailString, 
+    DepositID integer NOT NULL 
+  );
+  ALTER TABLE Driver ADD CONSTRAINT Driver_pk PRIMARY KEY (BusinessMail);
+  ALTER TABLE Driver ADD CONSTRAINT Driver_fk_Account FOREIGN KEY (Email) REFERENCES Account(Email);
+  ALTER TABLE Driver ADD CONSTRAINT Driver_fk_Deposit FOREIGN KEY (DepositID) REFERENCES Deposit(DepositID);
+\end{lstlisting}
+
+\begin{lstlisting}
+  CREATE TABLE Drives(
+    TransportID integer NOT NULL,
+    BusinessMail emailString NOT NULL,
+    Date date NOT NULL
+  );
+  ALTER TABLE Drives ADD CONSTRAINT Drives_fk_Driver FOREIGN KEY (BusinessMail) REFERENCES Driver(BusinessMail);
+  ALTER TABLE Drives ADD CONSTRAINT Drives_fk_Transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID);
+  ALTER TABLE Drives ADD CONSTRAINT onlyOneTravelPerDayTransport UNIQUE (TransportID, Date);
+  ALTER TABLE Drives ADD CONSTRAINT onlyOneTravelPerDayDriver UNIQUE (BusinessMail, Date);
+\end{lstlisting}
+
+\begin{lstlisting}
+  CREATE TABLE Stores(
+    Name text NOT NULL,
+    Supplier text NOT NULL,
+    DepositID integer NOT NULL,
+    Quantity integer NOT NULL
+  );
+  ALTER TABLE Stores ADD CONSTRAINT noDuplicateProductInDeposit UNIQUE (Name, Supplier, DepositID);
+  ALTER TABLE Stores
+  ADD CONSTRAINT Stores_fk_Product FOREIGN KEY (Name, Supplier) REFERENCES Product(Name, Supplier);
+  ALTER TABLE Stores
+  ADD CONSTRAINT Stores_fk_Deposit FOREIGN KEY (DepositID) REFERENCES Deposit(DepositID);
+  ALTER TABLE Stores
+  ADD CONSTRAINT formatStoresQuantity CHECK(Quantity > 0);
+\end{lstlisting}
