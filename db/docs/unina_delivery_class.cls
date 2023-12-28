@@ -31,13 +31,10 @@
 % Default color
   \definecolor{PRIMARY}{HTML}{cc4400}
   \definecolor{SECONDARY}{HTML}{f7dba7}
-  \definecolor{TERTIARY}{HTML}{191919}
+  \definecolor{TERTIARY}{HTML}{282A37}
   \definecolor{CONTRAST}{HTML}{6C8EBF}
   \definecolor{NEWGREEN}{HTML}{228231} 
   \definecolor{NEWPINK}{HTML}{FC79C6}
-
-
-  \color{TERTIARY}
 
 % Graphics path
   \graphicspath{{./sources/}}
@@ -203,19 +200,19 @@
   stringstyle=\color{NEWGREEN},
   % Keywords
     %% all keywords ahve to be added here
-    alsoletter={*, ADD, SELECT, FROM, WHERE, GROUP, BY, BEG, HAVING, ORDER, ASC, DESC, CASCADE, LIMIT, OFFSET, AS, INNER, JOIN, ON, LEFT, RIGHT, FULL, OUTER, UNION, ALL, NOT, NULL, IS, DISTINCT, CASE, FUNCTI, TRIGGER, WHEN, THEN, ELSE, END, CAST, IN, ANY, SOME, EXISTS, INSERT, INTO, VALUES, UPDATE, SET, DELETE, TRUNCATE, CREATE, TABLE, PRIMARY, KEY, FOREIGN, REFERENCES, CHECK, CONSTRAINT, UNIQUE, DEFAULT, ALTER, DROP, INDEX, VIEW, SEQUENCE, TRIGGER, FUNCTION, PROCEDURE, RETURNS, RETURN, TYPE, ENUM, DOMAIN, AGGREGATE, COLLATE, EXTENSION, IF, EXISTS, OWNER, MODE, TO, PUBLIC, GRANT, REVOKE, ROLE, USER, PASSWORD, LOGIN, CONNECTION, LIMIT, SESSION, ROLE, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, integer, boolean, float, text, varchar, char, date, time, timestamp, interval, numeric, money, bit, bytea, serial, bigserial, smallserial, smallint, bigint, real, double, precision, decimal, OR, REPLACE, FUNCTION, RETURNS, TABLE, BEGIN, END, LOOP, WHILE, FOR, DECLARE},
+    alsoletter={*, ADD, TG_ARGV SELECT, FROM, WHERE, GROUP, BY, BEG, HAVING, ORDER, ASC, DESC, CASCADE, LIMIT, OFFSET, AS, INNER, JOIN, ON, LEFT, RIGHT, FULL, OUTER, UNION, ALL, NOT, NULL, IS, DISTINCT, CASE, FUNCTI, TRIGGER, WHEN, THEN, ELSE, END, CAST, IN, ANY, SOME, EXISTS, INSERT, INTO, VALUES, UPDATE, SET, DELETE, TRUNCATE, CREATE, TABLE, PRIMARY, KEY, FOREIGN, REFERENCES, CHECK, CONSTRAINT, UNIQUE, DEFAULT, ALTER, DROP, INDEX, VIEW, SEQUENCE, TRIGGER, FUNCTION, PROCEDURE, RETURNS, RETURN, TYPE, ENUM, DOMAIN, AGGREGATE, COLLATE, EXTENSION, IF, EXISTS, OWNER, MODE, TO, PUBLIC, GRANT, REVOKE, ROLE, USER, PASSWORD, LOGIN, CONNECTION, LIMIT, SESSION, ROLE, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, integer, boolean, float, text, varchar, char, date, time, timestamp, interval, numeric, money, bit, bytea, serial, bigserial, smallserial, smallint, bigint, real, double, precision, decimal, OR, REPLACE, FUNCTION, RETURNS, TABLE, BEGIN, END, LOOP, WHILE, FOR, DECLARE},
     %% numeric keywords
     keywords=[0]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0},
     %% language keywords
     keywords=[1]{*, ADD, DATABASE, SELECT, FROM, WHERE, GROUP, BY, BEG, HAVING, ORDER, ASC, CASCADE, DESC, LIMIT, OFFSET, AS, INNER, JOIN, ON, LEFT, RIGHT, FULL, OUTER, UNION, ALL, NOT, NULL, IS, DISTINCT, CASE, FUNCTI, TRIGGER, WHEN, THEN, ELSE, END, CAST, IN, ANY, SOME, EXISTS, INSERT, INTO, VALUES, UPDATE, SET, DELETE, TRUNCATE, CREATE, TABLE, PRIMARY, KEY, FOREIGN, REFERENCES, CHECK, CONSTRAINT, UNIQUE, DEFAULT, ALTER, DROP, INDEX, VIEW, SEQUENCE, TRIGGER, FUNCTION, PROCEDURE, RETURNS, RETURN, TYPE, ENUM, DOMAIN, AGGREGATE, COLLATE, EXTENSION, IF, EXISTS, OWNER, MODE, TO, PUBLIC, GRANT, REVOKE, ROLE, USER, PASSWORD, LOGIN, CONNECTION, LIMIT, SESSION, ROLE, OR, REPLACE, FUNCTION, RETURNS, TABLE, BEGIN, END, LOOP, WHILE, FOR, DECLARE},
     %% data type keywords
-    keywords=[2]{integer, boolean, float, text, varchar, char, date, time, timestamp, interval, numeric, money, bit, bytea, serial, bigserial, smallserial, smallint, bigint, real, double, precision, decimal},
+    keywords=[2]{integer, TG_ARGV, boolean, float, text, varchar, char, date, time, timestamp, interval, numeric, money, bit, bytea, serial, bigserial, smallserial, smallint, bigint, real, double, precision, decimal},
     %% Colors
     keywordstyle=[0]\color{CONTRAST},
     keywordstyle=[1]\color{PRIMARY},
     keywordstyle=[2]\color{NEWPINK},
     keywordstyle=\color{PRIMARY},
-  backgroundcolor=\color{TERTIARY!90!violet},
+  backgroundcolor=\color{TERTIARY},
   xleftmargin=2.5em,
   showspaces=false,
   showstringspaces=false,
