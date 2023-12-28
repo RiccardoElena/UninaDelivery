@@ -88,7 +88,7 @@ Inoltre la ristrutturazione delle \textbf{Specializzazioni} di \textbf{Deposit} 
 
 In ultima analisi, la classe \textbf{Shipment} è coinvolta in due associazioni semanticamente identiche, che si distinguono solo per molteplicità e seconda classe coinvolta, ovvero \textbf{Account} e \textbf{Deposit}. In particolare quella con \textbf{Account} è un'associazione circolare, essendo entrambe le classi associate anche con \textbf{Order}. Si è quindi deciso di eliminare l'associazione con \textbf{Account}, essendo il destinatario della spedizione già noto tramite \textbf{Order}.
 
-\subsection{Identificazione delle Chiavi primarie}
+\subsection{Identificazione delle Chiavi primarie}\label{individuazioneDelleChiaviPrimarie}
 
 Aldilà delle chiavi primarie già presenti nello schema concettuale esplicitate nel \textbf{diagramma ER} e dell'attributo \textbf{TransportID} introdotto \intlink{Redundancy analysis}{precedentemente}, si è deciso di aggiungere chiavi surrogate per le entità \textbf{Order}, \textbf{Shipment} e \textbf{Deposit}, poiché migrando le chiavi di altre entità si sarebbero ottenute chiavi composte troppo lunghe e complesse.
 

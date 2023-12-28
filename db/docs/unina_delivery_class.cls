@@ -148,6 +148,21 @@
   % table head should be a list of column names separated by &
   % the arguments in square brackets are optional, if you don't need them square brackets can be omitted
 
+
+\newcommandx{\customTableLogic}[6][2={},3={}]{
+  \begin{table}[H]
+    \ifthenelse{\equal{#3}{}}{}{\label{#3}}
+  \centering
+  \begin{tabularx}{\textwidth}{#1}
+    \hline
+    \multicolumn{#4}{|c|}{\large\textbf{#5}} \\
+    \hline
+    #6 \\
+    \hline
+  \end{tabularx}
+\end{table}
+}
+
 % Custom link definition
 \newcommand{\exlink}[2]{\setulcolor{PRIMARY}\href{#1}{\ul{\textit{#2}}}}
 \newcommand{\intlink}[2]{\setulcolor{SECONDARY}\hyperref[#1]{\ul{\textit{#2}}}}
