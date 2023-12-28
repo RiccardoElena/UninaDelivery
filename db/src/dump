@@ -145,6 +145,69 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: Order; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TABLE uninadelivery."Order" (
+    orderid integer NOT NULL,
+    emissiondate date NOT NULL,
+    isexpress boolean,
+    extrawarranty smallint NOT NULL,
+    iscompleted boolean,
+    email uninadelivery.emailstring,
+    CONSTRAINT formatorderemissiondate CHECK ((emissiondate <= CURRENT_DATE)),
+    CONSTRAINT formatorderextrawarranty CHECK ((extrawarranty >= 0))
+);
+
+
+ALTER TABLE uninadelivery."Order" OWNER TO riccardoelena;
+
+--
+-- Name: Order_orderid_seq; Type: SEQUENCE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE SEQUENCE uninadelivery."Order_orderid_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE uninadelivery."Order_orderid_seq" OWNER TO riccardoelena;
+
+--
+-- Name: Order_orderid_seq; Type: SEQUENCE OWNED BY; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER SEQUENCE uninadelivery."Order_orderid_seq" OWNED BY uninadelivery."Order".orderid;
+
+
+--
+-- Name: account; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TABLE uninadelivery.account (
+    name uninadelivery.letterstring NOT NULL,
+    surname uninadelivery.letterstring NOT NULL,
+    email uninadelivery.emailstring NOT NULL,
+    birthdate date NOT NULL,
+    propic text,
+    password text,
+    addressno uninadelivery.alphnumstring NOT NULL,
+    street uninadelivery.alphnumstring NOT NULL,
+    zipcode uninadelivery.numericstring NOT NULL,
+    country uninadelivery.letterstring NOT NULL,
+    CONSTRAINT formataccountpassword CHECK ((password ~ '\b[A-Fa-f0-9]{64}\b'::text)),
+    CONSTRAINT formataccountpropic CHECK ((propic ~ '^\/9j\/4AAQSkZJRg[-A-Za-z0-9+\/]*={0,2}$'::text)),
+    CONSTRAINT validaccountbirthdate CHECK ((EXTRACT(year FROM age((birthdate)::timestamp with time zone)) >= (16)::numeric))
+);
+
+
+ALTER TABLE uninadelivery.account OWNER TO riccardoelena;
+
+--
 -- Name: address; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
 --
 
@@ -153,7 +216,7 @@ CREATE TABLE uninadelivery.address (
     street uninadelivery.alphnumstring NOT NULL,
     zipcode uninadelivery.numericstring NOT NULL,
     country uninadelivery.letterstring NOT NULL,
-    CONSTRAINT addressno_domain CHECK (((addressno)::text ~ '^[1-9]\d*[a-z]?(?:BIS)?$'::text))
+    CONSTRAINT formataddressaddressno CHECK (((addressno)::text ~ '^[1-9]\d*[a-z]?(?:BIS)?$'::text))
 );
 
 
@@ -175,6 +238,293 @@ CREATE TABLE uninadelivery.area (
 ALTER TABLE uninadelivery.area OWNER TO riccardoelena;
 
 --
+-- Name: contains; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TABLE uninadelivery.contains (
+    orderid integer NOT NULL,
+    name text NOT NULL,
+    supplier uninadelivery.alphnumstring NOT NULL,
+    issent boolean,
+    quantity smallint NOT NULL,
+    CONSTRAINT formatcontainsquantity CHECK ((quantity > 0))
+);
+
+
+ALTER TABLE uninadelivery.contains OWNER TO riccardoelena;
+
+--
+-- Name: covers; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TABLE uninadelivery.covers (
+    transportid integer NOT NULL,
+    zipcode uninadelivery.numericstring NOT NULL,
+    country uninadelivery.letterstring NOT NULL,
+    date date
+);
+
+
+ALTER TABLE uninadelivery.covers OWNER TO riccardoelena;
+
+--
+-- Name: deposit; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TABLE uninadelivery.deposit (
+    depositid integer NOT NULL,
+    occupiedspace real NOT NULL,
+    maxcapacity real NOT NULL,
+    deposittype uninadelivery.deposittype,
+    addressno uninadelivery.alphnumstring NOT NULL,
+    street uninadelivery.alphnumstring NOT NULL,
+    zipcode uninadelivery.numericstring NOT NULL,
+    country uninadelivery.letterstring NOT NULL,
+    CONSTRAINT checkdepositfullness CHECK ((occupiedspace <= maxcapacity)),
+    CONSTRAINT foramtdepositmaxcapacity CHECK ((maxcapacity > (0)::double precision)),
+    CONSTRAINT foramtdepositoccupiedspace CHECK ((occupiedspace >= (0)::double precision))
+);
+
+
+ALTER TABLE uninadelivery.deposit OWNER TO riccardoelena;
+
+--
+-- Name: deposit_depositid_seq; Type: SEQUENCE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE SEQUENCE uninadelivery.deposit_depositid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE uninadelivery.deposit_depositid_seq OWNER TO riccardoelena;
+
+--
+-- Name: deposit_depositid_seq; Type: SEQUENCE OWNED BY; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER SEQUENCE uninadelivery.deposit_depositid_seq OWNED BY uninadelivery.deposit.depositid;
+
+
+--
+-- Name: driver; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TABLE uninadelivery.driver (
+    businessmail uninadelivery.emailstring NOT NULL,
+    drivinglicencetype uninadelivery.drivinglicencetype NOT NULL,
+    isavailable boolean,
+    email uninadelivery.emailstring,
+    depositid integer NOT NULL
+);
+
+
+ALTER TABLE uninadelivery.driver OWNER TO riccardoelena;
+
+--
+-- Name: drives; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TABLE uninadelivery.drives (
+    transportid integer NOT NULL,
+    businessmail uninadelivery.emailstring NOT NULL,
+    date date NOT NULL
+);
+
+
+ALTER TABLE uninadelivery.drives OWNER TO riccardoelena;
+
+--
+-- Name: operator; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TABLE uninadelivery.operator (
+    email uninadelivery.emailstring NOT NULL,
+    businessmail uninadelivery.emailstring NOT NULL
+);
+
+
+ALTER TABLE uninadelivery.operator OWNER TO riccardoelena;
+
+--
+-- Name: product; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TABLE uninadelivery.product (
+    category uninadelivery.letterstring NOT NULL,
+    name text NOT NULL,
+    supplier uninadelivery.alphnumstring DEFAULT 'UninaDelivery'::text NOT NULL,
+    description text NOT NULL,
+    packagesizeliters real NOT NULL,
+    isfragile boolean,
+    price numeric(100,2),
+    CONSTRAINT checkproductdescriptionontopic CHECK (((description ~~* (('% '::text || (category)::text) || ' %'::text)) AND (description ~~* (('% '::text || name) || ' %'::text)) AND (description ~~* (('% '::text || (supplier)::text) || ' %'::text)))),
+    CONSTRAINT formatproductdescription CHECK ((description ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]*$'::text)),
+    CONSTRAINT formatproductname CHECK ((name ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]*$'::text)),
+    CONSTRAINT formatproductpackagesizeliters CHECK ((packagesizeliters > (0)::double precision)),
+    CONSTRAINT formatproductprice CHECK ((price > (0)::numeric))
+);
+
+
+ALTER TABLE uninadelivery.product OWNER TO riccardoelena;
+
+--
+-- Name: shipment; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TABLE uninadelivery.shipment (
+    shipmentid integer NOT NULL,
+    shippingdate date NOT NULL,
+    hasarrived boolean,
+    shippedfrom integer NOT NULL,
+    directedto integer,
+    businessmail uninadelivery.emailstring NOT NULL,
+    transportid integer NOT NULL,
+    CONSTRAINT checkdifferentstartenddeposits CHECK ((shippedfrom <> directedto))
+);
+
+
+ALTER TABLE uninadelivery.shipment OWNER TO riccardoelena;
+
+--
+-- Name: shipment_shipmentid_seq; Type: SEQUENCE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE SEQUENCE uninadelivery.shipment_shipmentid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE uninadelivery.shipment_shipmentid_seq OWNER TO riccardoelena;
+
+--
+-- Name: shipment_shipmentid_seq; Type: SEQUENCE OWNED BY; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER SEQUENCE uninadelivery.shipment_shipmentid_seq OWNED BY uninadelivery.shipment.shipmentid;
+
+
+--
+-- Name: ships; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TABLE uninadelivery.ships (
+    shipmentid integer NOT NULL,
+    orderid integer NOT NULL
+);
+
+
+ALTER TABLE uninadelivery.ships OWNER TO riccardoelena;
+
+--
+-- Name: stores; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TABLE uninadelivery.stores (
+    name text NOT NULL,
+    supplier text NOT NULL,
+    depositid integer NOT NULL,
+    quantity integer NOT NULL,
+    CONSTRAINT formatstoresquantity CHECK ((quantity > 0))
+);
+
+
+ALTER TABLE uninadelivery.stores OWNER TO riccardoelena;
+
+--
+-- Name: transport; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TABLE uninadelivery.transport (
+    transportid integer NOT NULL,
+    occupiedspace real NOT NULL,
+    maxcapacity real NOT NULL,
+    isavailable boolean,
+    transporttype uninadelivery.transporttype NOT NULL,
+    depositid integer NOT NULL,
+    CONSTRAINT checktransportfullness CHECK ((occupiedspace <= maxcapacity)),
+    CONSTRAINT formattransportmaxcapacity CHECK ((maxcapacity > (0)::double precision)),
+    CONSTRAINT formattransportoccupiedspace CHECK ((occupiedspace >= (0)::double precision))
+);
+
+
+ALTER TABLE uninadelivery.transport OWNER TO riccardoelena;
+
+--
+-- Name: transport_transportid_seq; Type: SEQUENCE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE SEQUENCE uninadelivery.transport_transportid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE uninadelivery.transport_transportid_seq OWNER TO riccardoelena;
+
+--
+-- Name: transport_transportid_seq; Type: SEQUENCE OWNED BY; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER SEQUENCE uninadelivery.transport_transportid_seq OWNED BY uninadelivery.transport.transportid;
+
+
+--
+-- Name: Order orderid; Type: DEFAULT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery."Order" ALTER COLUMN orderid SET DEFAULT nextval('uninadelivery."Order_orderid_seq"'::regclass);
+
+
+--
+-- Name: deposit depositid; Type: DEFAULT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.deposit ALTER COLUMN depositid SET DEFAULT nextval('uninadelivery.deposit_depositid_seq'::regclass);
+
+
+--
+-- Name: shipment shipmentid; Type: DEFAULT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.shipment ALTER COLUMN shipmentid SET DEFAULT nextval('uninadelivery.shipment_shipmentid_seq'::regclass);
+
+
+--
+-- Name: transport transportid; Type: DEFAULT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.transport ALTER COLUMN transportid SET DEFAULT nextval('uninadelivery.transport_transportid_seq'::regclass);
+
+
+--
+-- Data for Name: Order; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+--
+
+COPY uninadelivery."Order" (orderid, emissiondate, isexpress, extrawarranty, iscompleted, email) FROM stdin;
+\.
+
+
+--
+-- Data for Name: account; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+--
+
+COPY uninadelivery.account (name, surname, email, birthdate, propic, password, addressno, street, zipcode, country) FROM stdin;
+\.
+
+
+--
 -- Data for Name: address; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
 --
 
@@ -188,6 +538,130 @@ COPY uninadelivery.address (addressno, street, zipcode, country) FROM stdin;
 
 COPY uninadelivery.area (zipcode, city, state, country, worldzone) FROM stdin;
 \.
+
+
+--
+-- Data for Name: contains; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+--
+
+COPY uninadelivery.contains (orderid, name, supplier, issent, quantity) FROM stdin;
+\.
+
+
+--
+-- Data for Name: covers; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+--
+
+COPY uninadelivery.covers (transportid, zipcode, country, date) FROM stdin;
+\.
+
+
+--
+-- Data for Name: deposit; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+--
+
+COPY uninadelivery.deposit (depositid, occupiedspace, maxcapacity, deposittype, addressno, street, zipcode, country) FROM stdin;
+\.
+
+
+--
+-- Data for Name: driver; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+--
+
+COPY uninadelivery.driver (businessmail, drivinglicencetype, isavailable, email, depositid) FROM stdin;
+\.
+
+
+--
+-- Data for Name: drives; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+--
+
+COPY uninadelivery.drives (transportid, businessmail, date) FROM stdin;
+\.
+
+
+--
+-- Data for Name: operator; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+--
+
+COPY uninadelivery.operator (email, businessmail) FROM stdin;
+\.
+
+
+--
+-- Data for Name: product; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+--
+
+COPY uninadelivery.product (category, name, supplier, description, packagesizeliters, isfragile, price) FROM stdin;
+\.
+
+
+--
+-- Data for Name: shipment; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+--
+
+COPY uninadelivery.shipment (shipmentid, shippingdate, hasarrived, shippedfrom, directedto, businessmail, transportid) FROM stdin;
+\.
+
+
+--
+-- Data for Name: ships; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+--
+
+COPY uninadelivery.ships (shipmentid, orderid) FROM stdin;
+\.
+
+
+--
+-- Data for Name: stores; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+--
+
+COPY uninadelivery.stores (name, supplier, depositid, quantity) FROM stdin;
+\.
+
+
+--
+-- Data for Name: transport; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+--
+
+COPY uninadelivery.transport (transportid, occupiedspace, maxcapacity, isavailable, transporttype, depositid) FROM stdin;
+\.
+
+
+--
+-- Name: Order_orderid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: riccardoelena
+--
+
+SELECT pg_catalog.setval('uninadelivery."Order_orderid_seq"', 1, false);
+
+
+--
+-- Name: deposit_depositid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: riccardoelena
+--
+
+SELECT pg_catalog.setval('uninadelivery.deposit_depositid_seq', 1, false);
+
+
+--
+-- Name: shipment_shipmentid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: riccardoelena
+--
+
+SELECT pg_catalog.setval('uninadelivery.shipment_shipmentid_seq', 1, false);
+
+
+--
+-- Name: transport_transportid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: riccardoelena
+--
+
+SELECT pg_catalog.setval('uninadelivery.transport_transportid_seq', 1, false);
+
+
+--
+-- Name: account account_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.account
+    ADD CONSTRAINT account_pk PRIMARY KEY (email);
 
 
 --
@@ -207,11 +681,267 @@ ALTER TABLE ONLY uninadelivery.area
 
 
 --
+-- Name: deposit deposit_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.deposit
+    ADD CONSTRAINT deposit_pk PRIMARY KEY (depositid);
+
+
+--
+-- Name: driver driver_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.driver
+    ADD CONSTRAINT driver_pk PRIMARY KEY (businessmail);
+
+
+--
+-- Name: ships noduplicateorderinshipment; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.ships
+    ADD CONSTRAINT noduplicateorderinshipment UNIQUE (shipmentid, orderid);
+
+
+--
+-- Name: stores noduplicateproductindeposit; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.stores
+    ADD CONSTRAINT noduplicateproductindeposit UNIQUE (name, supplier, depositid);
+
+
+--
+-- Name: contains noduplicateproductperorder; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.contains
+    ADD CONSTRAINT noduplicateproductperorder UNIQUE (orderid, name, supplier);
+
+
+--
+-- Name: covers onlyoneareaperday; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.covers
+    ADD CONSTRAINT onlyoneareaperday UNIQUE (transportid, date);
+
+
+--
+-- Name: drives onlyonetravelperdaydriver; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.drives
+    ADD CONSTRAINT onlyonetravelperdaydriver UNIQUE (businessmail, date);
+
+
+--
+-- Name: drives onlyonetravelperdaytransport; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.drives
+    ADD CONSTRAINT onlyonetravelperdaytransport UNIQUE (transportid, date);
+
+
+--
+-- Name: operator operator_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.operator
+    ADD CONSTRAINT operator_pk PRIMARY KEY (businessmail);
+
+
+--
+-- Name: Order order_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery."Order"
+    ADD CONSTRAINT order_pk PRIMARY KEY (orderid);
+
+
+--
+-- Name: product product_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.product
+    ADD CONSTRAINT product_pk PRIMARY KEY (name, supplier);
+
+
+--
+-- Name: shipment shipment_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.shipment
+    ADD CONSTRAINT shipment_pk PRIMARY KEY (shipmentid);
+
+
+--
+-- Name: transport transport_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.transport
+    ADD CONSTRAINT transport_pk PRIMARY KEY (transportid);
+
+
+--
 -- Name: address address_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
 --
 
 ALTER TABLE ONLY uninadelivery.address
     ADD CONSTRAINT address_fk FOREIGN KEY (zipcode, country) REFERENCES uninadelivery.area(zipcode, country) ON DELETE CASCADE;
+
+
+--
+-- Name: contains contains_fk_order; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.contains
+    ADD CONSTRAINT contains_fk_order FOREIGN KEY (orderid) REFERENCES uninadelivery."Order"(orderid);
+
+
+--
+-- Name: contains contains_fk_product; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.contains
+    ADD CONSTRAINT contains_fk_product FOREIGN KEY (name, supplier) REFERENCES uninadelivery.product(name, supplier);
+
+
+--
+-- Name: covers covers_fk_area; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.covers
+    ADD CONSTRAINT covers_fk_area FOREIGN KEY (zipcode, country) REFERENCES uninadelivery.area(zipcode, country);
+
+
+--
+-- Name: covers covers_fk_tranport; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.covers
+    ADD CONSTRAINT covers_fk_tranport FOREIGN KEY (transportid) REFERENCES uninadelivery.transport(transportid);
+
+
+--
+-- Name: driver driver_fk_account; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.driver
+    ADD CONSTRAINT driver_fk_account FOREIGN KEY (email) REFERENCES uninadelivery.account(email);
+
+
+--
+-- Name: driver driver_fk_deposit; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.driver
+    ADD CONSTRAINT driver_fk_deposit FOREIGN KEY (depositid) REFERENCES uninadelivery.deposit(depositid);
+
+
+--
+-- Name: drives drives_fk_driver; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.drives
+    ADD CONSTRAINT drives_fk_driver FOREIGN KEY (businessmail) REFERENCES uninadelivery.driver(businessmail);
+
+
+--
+-- Name: drives drives_fk_transport; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.drives
+    ADD CONSTRAINT drives_fk_transport FOREIGN KEY (transportid) REFERENCES uninadelivery.transport(transportid);
+
+
+--
+-- Name: operator operator_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.operator
+    ADD CONSTRAINT operator_fk FOREIGN KEY (email) REFERENCES uninadelivery.account(email);
+
+
+--
+-- Name: Order order_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery."Order"
+    ADD CONSTRAINT order_fk FOREIGN KEY (email) REFERENCES uninadelivery.account(email);
+
+
+--
+-- Name: shipment shipment_fk_arrivaldeposit; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.shipment
+    ADD CONSTRAINT shipment_fk_arrivaldeposit FOREIGN KEY (directedto) REFERENCES uninadelivery.deposit(depositid);
+
+
+--
+-- Name: shipment shipment_fk_operator; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.shipment
+    ADD CONSTRAINT shipment_fk_operator FOREIGN KEY (businessmail) REFERENCES uninadelivery.operator(businessmail);
+
+
+--
+-- Name: shipment shipment_fk_startdeposit; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.shipment
+    ADD CONSTRAINT shipment_fk_startdeposit FOREIGN KEY (shippedfrom) REFERENCES uninadelivery.deposit(depositid);
+
+
+--
+-- Name: shipment shipment_fk_transport; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.shipment
+    ADD CONSTRAINT shipment_fk_transport FOREIGN KEY (transportid) REFERENCES uninadelivery.transport(transportid);
+
+
+--
+-- Name: ships ships_fk_order; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.ships
+    ADD CONSTRAINT ships_fk_order FOREIGN KEY (orderid) REFERENCES uninadelivery."Order"(orderid);
+
+
+--
+-- Name: ships ships_fk_shipment; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.ships
+    ADD CONSTRAINT ships_fk_shipment FOREIGN KEY (shipmentid) REFERENCES uninadelivery.shipment(shipmentid);
+
+
+--
+-- Name: stores stores_fk_deposit; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.stores
+    ADD CONSTRAINT stores_fk_deposit FOREIGN KEY (depositid) REFERENCES uninadelivery.deposit(depositid);
+
+
+--
+-- Name: stores stores_fk_product; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.stores
+    ADD CONSTRAINT stores_fk_product FOREIGN KEY (name, supplier) REFERENCES uninadelivery.product(name, supplier);
+
+
+--
+-- Name: transport transport_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+--
+
+ALTER TABLE ONLY uninadelivery.transport
+    ADD CONSTRAINT transport_fk FOREIGN KEY (depositid) REFERENCES uninadelivery.deposit(depositid);
 
 
 --
