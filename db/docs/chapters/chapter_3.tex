@@ -27,7 +27,7 @@
 
 Per quanto riguarda l'individuazione delle chiavi primarie, ciò è stato già fatto nella sezione \intlink{individuazioneDelleChiaviPrimarie}{identificazione delle chiavi primarie}.
 
-Dalla \textbf{traduzione delle associazioni} si è evidenziato come, per via delle strategie utilizzate per il mapping, la classe \textbf{Address} sia ridondante. Infatti la classe \textbf{Deposit} e la classe \textbf{Account} ne contengono tutti i campi, essendo tutti chiavi primarie, e per la classe \textbf{Area} la migrazione delle chiavi avveniva \textit{verso \textbf{Address}}, diventando anch'esse chiavi primarie e venendo ereditate da \textbf{Deposit} e \textbf{Account}.
+Dalla \textbf{traduzione delle associazioni} si è evidenziato come, per via delle strategie utilizzate per la traduzione, la classe \textbf{Address} sia ridondante. Infatti la classe \textbf{Deposit} e la classe \textbf{Account} ne contengono tutti i campi, essendo tutti chiavi primarie, e per la classe \textbf{Area} la migrazione delle chiavi avveniva \textit{verso \textbf{Address}}, diventando anch'esse chiavi primarie e venendo ereditate da \textbf{Deposit} e \textbf{Account}.
 È sufficiente quindi per eliminare la classe \textbf{Address} oltre alle strategie già messe in atto durante la \textbf{traduzione delle associazioni} migrare le chiavi primarie di \textbf{Area} direttamente verso \textbf{Deposit} e \textbf{Account}, andando a diminuire l'overhead e risolvendo in automatico vincoli come \intlink{isAddressForSomethingGeneral}{\textbf{isAddressForSomethingGeneral}}.
 
 Per mantenere la consistenza del database, va anche introdotto un vincolo di unicità nella nuova classe accorpata \textbf{Deposit}. Per garantire l'associazione di tipo \(1:1\) tra \textbf{Deposit} e \textbf{Address} è necessario che la quadrupla di campi \textit{AddressNo}, \textit{Street}, \textit{ZipCode} e \textit{Country} sia unica nella tabella.
@@ -63,7 +63,7 @@ Per mantenere la consistenza del database, va anche introdotto un vincolo di uni
 \customTableLogic{|Y|Y|Y|Y|}{4}{Product}{
   Category & \underline{Name} & \underline{Supplier} & Description \\
   \hline
-  PackageSizeLiters & isFragile & Price & -
+  PackageSizeLiters & isFragile & Price & ---
 }
 
 \customTableLogic{|Y|Y|Y|Y|}{4}{Stores}{
@@ -79,7 +79,7 @@ Per mantenere la consistenza del database, va anche introdotto un vincolo di uni
 \customTableLogic{|Y|Y|Y|Y|}{4}{Shipment}{
   \underline{ShipmentID} & ShippingDate & HasArrived & \textit{ShippedFrom} \\
   \hline
-  \textit{DirectedTo} & \textit{BusinessMail} & \textit{TransportID} & -
+  \textit{DirectedTo} & \textit{BusinessMail} & \textit{TransportID} & ---
 }
 
 \customTableLogic{|Y|Y|}{2}{Ships}{
@@ -102,7 +102,7 @@ Per mantenere la consistenza del database, va anche introdotto un vincolo di uni
 \customTableLogic{|Y|Y|Y|}{3}{Driver}{
   \underline{BusinessMail} & DrivingLincenceType & IsAvailable \\
   \hline
-  \textit{Email} & \textit{DepositID} & -
+  \textit{Email} & \textit{DepositID} & ---
 }
 
 \customTableLogic{|Y|Y|Y|Y|}{4}{Covers}{
