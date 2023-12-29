@@ -17,7 +17,7 @@ Vista la vasta gamma di vincoli di dominio simili su vari campi, si è deciso di
   
   CREATE DOMAIN numericString AS text CHECK (VALUE ~ '^[0-9]+$');
   
-  CREATE DOMAIN alphanumericString AS text CHECK (VALUE ~ '^\w+$');
+  CREATE DOMAIN alphanumericString AS text CHECK (VALUE ~ '^\w+[\w\s.]$');
   
   CREATE DOMAIN emailString AS text CHECK (
     VALUE ~ '^\w+[\w.]*\w@[a-zA-Z.]+\.[a-zA-Z]{2,}$'
@@ -76,7 +76,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
     EXTRACT( YEAR FROM age(Birthdate)) >= 16 
   );
   ALTER TABLE account ADD CONSTRAINT formatAccountPassword CHECK(
-    Password ~ '\b[A-Fa-f0-9]{64}\b'
+    Password ~ '^[A-Fa-f0-9]{64}$'
   );
   ALTER TABLE account ADD CONSTRAINT formatAccountProPic CHECK (
     ProPic ~ '^\/9j\/4AAQSkZJRg[-A-Za-z0-9+\/]*={0,2}$'
@@ -241,6 +241,9 @@ ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES A
   ALTER TABLE Shipment ADD CONSTRAINT checkDifferentStartEndDeposits CHECK (
     ShippedFrom <> DirectedTo
   );
+  ALTER TABLE Shipment ADD CONSTRAINT validShipmentDate CHECK (
+    ShippingDate >= current_date
+  );
   ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE RESTRICT ON UPDATE CASCADE;
   ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_operator FOREIGN KEY (BusinessMail) REFERENCES Operator(Businessmail) ON DELETE CASCADE ON UPDATE CASCADE;
 \end{lstlisting} % TODO make a trigger that block delete operator if exists unfinsihed shipment and set false to transport on his delete
@@ -379,36 +382,30 @@ Iterando tra gli elementi di questo array si può ottenere il tipo di tabella su
   AS 
   $$
     DECLARE 
-      -- Get the number of rows that match the given address
       flag integer;
-      -- Search for the given address in the given table
-      query text = 'SELECT COUNT(*) 
-                    INTO flag
-                    FROM ? 
-                    WHERE AddressNo = NEW.AddressNo AND 
-                          Street = NEW.Street AND 
-                          ZipCode = NEW.ZipCode AND  
-                          Country = NEW.Country';
-      -- temporary variable to store the table name
+      queryp1 text = 'SELECT COUNT(*) 
+                    FROM ';
+      queryp2 text = ' 
+                    WHERE (AddressNo = $1 AND 
+                          Street = $2 AND 
+                          ZipCode = $3 AND  
+                          Country = $4';
       tableName text;
   BEGIN
-      -- Iterate through the arguments passed to the function
       FOREACH tableName IN ARRAY TG_ARGV LOOP
-        -- If searching in deposit, func must have been called from account
-        IF tableName == 'Deposit' THEN
-          query = query || " AND DepositType <> 'City'";
-        -- If searching in account, func must have been called from deposit
-        ELSIF tableName == 'Account' THEN
-          -- If the deposit is of type city, do nothing
+  
+        IF tableName = 'Deposit' THEN
+          queryp2 = queryp2 || ' AND DepositType <> ''City'' ';
+        ELSIF tableName = 'Account' THEN
           IF NEW.DepositType = 'City' THEN
             RETURN NEW;
           END IF;
         ELSE 
-          -- entering this branch means that a wrong table name has been passed
           perform raise_custom_error('E0003');
         END IF;
             
-        EXECUTE IMMEDIATE query USING tableName;
+        queryp1 = queryp1 || tableName || queryp2 || ')';
+        EXECUTE queryp1 into flag USING NEW.AddressNo, NEW.Street, NEW.ZipCode, NEW.Country;
         IF flag > 0 THEN
           perform raise_custom_error('E0002');
         END IF;
@@ -419,3 +416,157 @@ Iterando tra gli elementi di questo array si può ottenere il tipo di tabella su
   $$ LANGUAGE plpgsql;
 \end{lstlisting}
 
+\subsection{Trigger per il vincolo \textbf{isShipmentDirectedInCorrectArea}}
+
+Il vincolo è diviso in due casi, uno per le spedizioni dirette ai clienti e uno per le spedizioni dirette ai depositi.
+
+In entrambi i casi però è necessario controllare che il trasporto associato alla spedizione abbia in programma per la data di spedizione la copertura della zona di destinazione.
+
+In particolare il trasporto è adatto se non ha ancora zone programmate per quel giorno, oppure se ha come zona programmata proprio quella di destinazione.
+
+In tal senso è possibile implementare questo vincolo utilizzando un corretto \textit{Exception Handling}.
+
+Una volta recuperati i dati necessari a determinare la zona da coprire infatti possiamo dividere il problema in tre casi:
+
+\begin{enumerate}
+  \item Il trasporto non ha zone programmate per quel giorno: la spedizione è valida e va inserita la copertura per la zona della spedizione in \textbf{Covers}.
+  \item Il trasporto ha come zona programmata proprio quella della spedizione: la spedizione è valida e non va inserita nessuna copertura.
+  \item Il trasporto ha zone programmate per quel giorno ma non quella della spedizione: la spedizione non è valida e va lanciata un'eccezione.
+\end{enumerate}
+
+Possiamo notare ora che, fatta eccezione per il caso \(2\) risolvibile con un banale \lstinline{IF EXISTS}, gli altri due casi possono essere accorpati.
+
+Infatti grazie al vincolo di unicità \textbf{onlyOneAreaPerDay} possiamo non preoccuparci di controllare se il trasporto è già impegnato in altra zona nella data di spedizione prima di inserire, poichè se ne occuperà \textbf{onlyOneAreaPerDay} lanciando un eccezione.
+
+Trattando dunque separatamente il caso \(2\), che fortunamente è il più banale non dovendo fare nulla, possiamo accorpare i casi \(1\) e \(3\).
+
+Per fare ciò andiamo a definire una funzione che si occupi di inserire la copertura per la zona di destinazione della spedizione, e che lanci un'eccezione se il trasporto è già impegnato in altra zona nella data di spedizione.
+
+\begin{lstlisting}[caption={funzione per inserimento in \textbf{Covers}}]
+  INSERT INTO custom_error_messages
+      VALUES (
+        'E0006',
+        'Shipment assigned to a transport already occupied with diffrent location'
+      );
+  
+  CREATE OR REPLACE FUNCTION createCoversForShipment(Zc Covers.ZipCode%TYPE, Cy Covers.Country%TYPE, Tid Covers.transportId%TYPE, D Covers.Date%TYPE)
+  RETURNS VOID AS $$
+  BEGIN
+    -- Excluding Case 2 where nothig has to be done
+    IF NOT EXISTS (
+        SELECT 1
+        FROM Covers
+        WHERE ZipCode = ZC
+          AND Country = Cy
+          AND transportid = Tid
+          AND Date = D
+      ) THEN
+        -- Trying to insert the new cover
+        INSERT INTO Covers
+          VALUES (Tid, Zc, Cy, D);
+    END IF;
+    -- If It's Case 1 the function will end here
+  EXCEPTION
+    WHEN unique_violation THEN 
+      -- Otherwise if it's Case 3 an exception will be raised
+      perform raise_custom_error('E0006');
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+È necessario adesso individuare il modo di raccogliere i dati necessari alla funzione nei due casi descritti sopra.
+
+Nel caso in cui la spedizione sia diretta verso un deposito, i dati relativi alla zona da coprire sono accessibili direttamente con l'utilizzo della chiave esterna, mentre i dati realtivi a data e trasporto sono presenti nella riga da inserire.
+
+Per quanto riguarda spedizioni dirette ai clienti invece, i dati relativi alla zona da coprire vanno recuperati nella tabella \textbf{Account}, passando per la tabella \textbf{Order} tramite la tabella \textbf{Ships}.
+
+Avendo però \textbf{Ships} delle chiavi esterne verso \textbf{Order} e \textbf{Shipment}, non è possibile far attivare il trigger con un inserimento su \textbf{Shipment}, poiché questo stesso trigger dovrebbe andare a cercare i dati in \textbf{Ships} che non è ancora stata popolata.
+
+Di conseguenza è necessario che il trigger si attivi su \textbf{Ships}, recuperando eventualmente i dati da \textbf{Shipment}.
+
+Vediamo dunque prima i due trigger e successivamente le funzioni associate. 
+
+La seconda delle due inoltre chiamerà una funzione che implementa il vincolo \textbf{isCityDepositShippingToClient}. 
+
+Questo avviene in questa stessa \textit{trigger function} poiché l'evento di innesco è lo stesso, e quindi è possibile evitare di creare un ulteriore trigger.
+
+Per questo vincolo è sufficiente controllare che, nel secondo caso di quelli trattati l'\textbf{Account} sia nella stessa \textbf{City} del \textbf{Deposit} di partenza della spedizione. 
+
+\begin{lstlisting}[caption={Trigger per il vincolo \textbf{isShipmentDirectedInCorrectArea}}]
+  CREATE OR REPLACE TRIGGER isShipmentDirectedInCorrectAreaDeposit 
+  BEFORE INSERT ON Shipment 
+  FOR EACH ROW 
+  EXECUTE PROCEDURE isShipmentDirectedInCorrectAreaDeposit_func();
+
+  CREATE OR REPLACE TRIGGER isShipmentDirectedInCorrectAreaAccount 
+  BEFORE INSERT ON Ships
+  FOR EACH ROW 
+  EXECUTE PROCEDURE isShipmentDirectedInCorrectAreaAccount_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per le spedizioni verso depositi}]
+  CREATE OR REPLACE FUNCTION isShipmentDirectedInCorrectAreaDeposit_func() 
+  RETURNS TRIGGER AS $$
+  DECLARE 
+    ZCode Deposit.ZipCode%TYPE;
+    Cy Deposit.Country%TYPE;
+  BEGIN 
+    -- Assuring it's the correct case
+    IF NEW.DirectedTo IS NULL THEN 
+      RETURN NEW;
+    END IF;
+
+    -- Retrieving the data needed
+    SELECT ZipCode, Country 
+    INTO ZCode, Cy
+    FROM deposit
+    WHERE depositid = NEW.DirectedTo;
+
+    -- Calling the function to insert the cover
+    perform createCoversForShipment(ZCode, Cy, NEW.transportId, NEW.ShippingDate);
+    RETURN NEW;
+
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per le spedizioni verso clienti}]
+  CREATE OR REPLACE FUNCTION isShipmentDirectedInCorrectAreaAccount_func() 
+  RETURNS TRIGGER AS $$
+  DECLARE 
+    ZCode Account.ZipCode%TYPE;
+    Cy Account.Country%TYPE;
+    Tid Shipment.transportId%TYPE;
+    D Shipment.ShippingDate%TYPE;
+  BEGIN 
+    -- Assuring it's the correct case
+    IF EXISTS (
+      SELECT 1
+      FROM Shipment
+      WHERE ShipmentID=NEW.ShipmentID AND DirectedTo IS NOT NULL
+    ) THEN
+      RETURN NEW;
+    END IF;
+  
+    -- Retrieving the data needed
+    SELECT ZipCode, Country 
+    INTO ZCode, Cy
+    FROM "Order" NATURAL JOIN Account
+    WHERE OrderId = NEW.OrderID;
+
+    -- calling the function to check isCityDepositShippingToClient constraint
+    perform isCityDepositShippingToClient(ZCode, Cy, NEW.shippedfrom);
+  
+    SELECT transportId, ShippingDate
+    INTO Tid, D
+    FROM shipment
+    WHERE shipmentid = NEW.shipmentid;
+  
+    -- Calling the function to insert the cover
+    perform createCoversForShipment(ZCode, Cy, Tid, D);
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+% TODO @zGenny last two constraints yet to be implemented. i'm trying to do them tomorrow
