@@ -36,14 +36,14 @@ CREATE DOMAIN uninadelivery.alphanumericstring AS text
 ALTER DOMAIN uninadelivery.alphanumericstring OWNER TO riccardoelena;
 
 --
--- Name: alphnumstring; Type: DOMAIN; Schema: uninadelivery; Owner: riccardoelena
+-- Name: alphanumstring; Type: DOMAIN; Schema: uninadelivery; Owner: riccardoelena
 --
 
-CREATE DOMAIN uninadelivery.alphnumstring AS text
-	CONSTRAINT alphnumstring_check CHECK ((VALUE ~ '^\w*$'::text));
+CREATE DOMAIN uninadelivery.alphanumstring AS text
+	CONSTRAINT alphanumstring_check CHECK ((VALUE ~ '^\w+[\s\w\.]*$'::text));
 
 
-ALTER DOMAIN uninadelivery.alphnumstring OWNER TO riccardoelena;
+ALTER DOMAIN uninadelivery.alphanumstring OWNER TO riccardoelena;
 
 --
 -- Name: deposittype; Type: TYPE; Schema: uninadelivery; Owner: riccardoelena
@@ -141,28 +141,256 @@ CREATE TYPE uninadelivery.worldzone AS ENUM (
 ALTER TYPE uninadelivery.worldzone OWNER TO riccardoelena;
 
 --
+-- Name: correcttransportassignment_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.correcttransportassignment_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  Dtype Deposit.DepositType%TYPE;
+BEGIN
+
+  SELECT DepositType
+  INTO Dtype
+  FROM Deposit
+  WHERE depositid = NEW.depositid;
+
+  IF NEW.TransportType = 'WheeledLarge' AND Dtype = 'City' THEN
+    perform raise_custom_error('E0010');
+  END IF;
+  IF NEW.TransportType = 'Rails' AND (Dtype = 'City' OR Dtype = 'State') THEN
+    perform raise_custom_error('E0010');
+  END IF;
+  IF (NEW.TransportType = 'Air' OR NEW.TransportType = 'Water') AND (Dtype = 'City' OR Dtype = 'State' OR Dtype = 'Country') THEN
+    perform raise_custom_error('E0010');
+  END IF;
+
+  RETURN NEW;
+
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.correcttransportassignment_func() OWNER TO riccardoelena;
+
+--
+-- Name: correcttransportfordrivinglicence_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.correcttransportfordrivinglicence_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  drivinglicence Driver.drivinglicencetype%TYPE;
+  Ttype Transport.transporttype%TYPE;
+BEGIN
+
+  SELECT drivinglicencetype
+  INTO drivinglicence
+  FROM driver
+  WHERE BusinessMail = NEW.BusinessMail;
+
+
+  SELECT transporttype
+  INTO Ttype
+  FROM transport
+  WHERE transportid = NEW.transportid;
+
+  IF Ttype = 'WheeledSmall' THEN
+    RETURN NEW;
+  END IF;
+  IF Ttype = 'WheeledLarge' AND drivinglicence = 'CE' THEN
+    RETURN NEW;
+  END IF;
+
+  perform raise_custom_error('E0009');
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.correcttransportfordrivinglicence_func() OWNER TO riccardoelena;
+
+--
+-- Name: createcoversforshipment(uninadelivery.numericstring, uninadelivery.letterstring, integer, date); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.createcoversforshipment(zc uninadelivery.numericstring, cy uninadelivery.letterstring, tid integer, d date) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF NOT EXISTS (
+      SELECT 1
+      FROM Covers
+      WHERE ZipCode = ZC
+        AND Country = Cy
+        AND transportid = Tid
+        AND Date = D
+    ) THEN
+      INSERT INTO Covers
+        VALUES (Tid, Zc, Cy, D);
+  END IF;
+
+EXCEPTION
+  WHEN unique_violation THEN 
+    perform raise_custom_error('E0006');
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.createcoversforshipment(zc uninadelivery.numericstring, cy uninadelivery.letterstring, tid integer, d date) OWNER TO riccardoelena;
+
+--
+-- Name: formatdriverbusinessmail_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.formatdriverbusinessmail_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  name_initial text;
+  surname text;
+  omoniums_num integer;
+  new_mail text;
+BEGIN
+
+  SELECT Name, surname
+  INTO name_initial, surname
+  FROM Account
+  WHERE email=new.email;
+
+  name_initial = SUBSTR(name_initial, 1,1);
+
+  new_mail = name_initial || '.' || surname;
+
+  SELECT COUNT(*)
+  INTO omoniums_num
+  FROM Driver
+  WHERE businessmail LIKE (new_mail || '%');
+
+  IF omoniums_num > 0 THEN
+    new_mail = new_mail || omoniums_num::text;
+  END IF;
+
+  new_mail = new_mail || '@uninadelivery.Driver.com';
+
+  IF NEW.businessmail <> new_mail THEN
+    RAISE NOTICE 'Non standard businessmail inserted. Substituting it with %', new_mail;
+  END IF;
+
+  NEW.businessmail = new_mail;
+
+  RETURN NEW;
+
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.formatdriverbusinessmail_func() OWNER TO riccardoelena;
+
+--
+-- Name: formatoperatorbusinessmail_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.formatoperatorbusinessmail_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  name_initial text;
+  surname text;
+  omoniums_num integer;
+  new_mail text;
+BEGIN
+
+  SELECT Name, surname
+  INTO name_initial, surname
+  FROM Account
+  WHERE email=new.email;
+
+  name_initial = SUBSTR(name_initial, 1,1);
+
+  new_mail = name_initial || '.' || surname;
+
+  SELECT COUNT(*)
+  INTO omoniums_num
+  FROM operator
+  WHERE businessmail LIKE (new_mail || '%');
+
+  IF omoniums_num > 0 THEN
+    new_mail = new_mail || omoniums_num::text;
+  END IF;
+
+  new_mail = new_mail || '@uninadelivery.operator.com';
+
+  IF NEW.businessmail <> new_mail THEN
+    RAISE NOTICE 'Non standard businessmail inserted. Substituting it with %', new_mail;
+  END IF;
+
+  NEW.businessmail = new_mail;
+
+  RETURN NEW;
+
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.formatoperatorbusinessmail_func() OWNER TO riccardoelena;
+
+--
+-- Name: isaccountreachable_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.isaccountreachable_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  acc_city Area.City%TYPE;
+  acc_state Area.State%TYPE;
+  acc_worldZone Area.WorldZone%TYPE;
+BEGIN
+
+  SELECT City, State, WorldZone
+  INTO acc_city, acc_state, acc_worldZone
+  FROM Area
+  WHERE ZipCode = New.ZipCode AND Country = NEW.Country;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM Area NATURAL JOIN Deposit
+    WHERE City=acc_city AND State = acc_state AND Country = NEW.Country AND WorldZone = acc_worldZone
+  ) THEN
+    perform raise_custom_error('E0007');
+  END IF;
+
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.isaccountreachable_func() OWNER TO riccardoelena;
+
+--
 -- Name: isaddressforsomethingspecific_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
 --
 
 CREATE FUNCTION uninadelivery.isaddressforsomethingspecific_func() RETURNS trigger
     LANGUAGE plpgsql
-    AS $$
+    AS $_$
   DECLARE 
     flag integer;
-    query text = 'SELECT COUNT(*) 
-                  INTO flag
-                  FROM ? 
-                  WHERE AddressNo = NEW.AddressNo AND 
-                        Street = NEW.Street AND 
-                        ZipCode = NEW.ZipCode AND  
-                        Country = NEW.Country';
+    queryp1 text = 'SELECT COUNT(*) 
+                  FROM ';
+    queryp2 text = ' 
+                  WHERE (AddressNo = $1 AND 
+                        Street = $2 AND 
+                        ZipCode = $3 AND  
+                        Country = $4';
     tableName text;
 BEGIN
     FOREACH tableName IN ARRAY TG_ARGV LOOP
 
-      IF tableName == 'Deposit' THEN
-        query = query || " AND DepositType <> 'City'";
-      ELSIF tableName == 'Account' THEN
+      IF tableName = 'Deposit' THEN
+        queryp2 = queryp2 || ' AND DepositType <> ''City'' ';
+      ELSIF tableName = 'Account' THEN
         IF NEW.DepositType = 'City' THEN
           RETURN NEW;
         END IF;
@@ -170,7 +398,8 @@ BEGIN
         perform raise_custom_error('E0003');
       END IF;
           
-      EXECUTE IMMEDIATE query USING tableName;
+      queryp1 = queryp1 || tableName || queryp2 || ')';
+      EXECUTE queryp1 into flag USING NEW.AddressNo, NEW.Street, NEW.ZipCode, NEW.Country;
       IF flag > 0 THEN
         perform raise_custom_error('E0002');
       END IF;
@@ -178,10 +407,179 @@ BEGIN
 
     RETURN NEW;
   END;
-$$;
+$_$;
 
 
 ALTER FUNCTION uninadelivery.isaddressforsomethingspecific_func() OWNER TO riccardoelena;
+
+--
+-- Name: iscitydepositshippingtoclient(uninadelivery.numericstring, uninadelivery.letterstring, integer); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.iscitydepositshippingtoclient(zc uninadelivery.numericstring, cy uninadelivery.letterstring, did integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+  a_city Area.City%TYPE;
+  a_state Area.State%TYPE;
+  a_worldzone Area.WorldZone%TYPE;
+  d_city Area.City%TYPE;
+  d_state Area.State%TYPE;
+  d_country Area.Country%TYPE;
+  d_worldzone Area.WorldZone%TYPE;
+BEGIN
+
+  SELECT City, State, WorldZone
+  INTO a_city, a_state, a_worldzone
+  FROM Area
+  WHERE ZipCode=Zc AND Country=Cy;
+
+  SELECT City, State, Country, WorldZone
+  INTO d_city, d_state, d_country, d_worldzone
+  FROM deposit NATURAL JOIN area
+  WHERE depositid=Did;
+
+
+  IF d_city <> a_city OR d_state <> a_state OR d_country <> Cy OR d_worldzone <> a_worldd_worldzone THEN
+    perform raise_custom_error('E0008');
+  END IF; 
+
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.iscitydepositshippingtoclient(zc uninadelivery.numericstring, cy uninadelivery.letterstring, did integer) OWNER TO riccardoelena;
+
+--
+-- Name: isdriverassignedtovalidtransport_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.isdriverassignedtovalidtransport_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE  
+  d_deposit Driver.DepositID%TYPE;
+  t_deposit Transport.DepositID%TYPE;
+BEGIN
+  SELECT DepositID
+    INTO d_deposit
+    FROM Driver
+    WHERE BusinessMail = NEW.BusinessMail;
+
+  SELECT DepositID
+    INTO t_deposit
+    FROM Transport
+    WHERE TransportID = NEW.Transportid;
+
+  IF d_deposit <> t_deposit THEN
+    perform raise_custom_error('E0004');
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.isdriverassignedtovalidtransport_func() OWNER TO riccardoelena;
+
+--
+-- Name: isshipmentassignedtovalidtransport_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.isshipmentassignedtovalidtransport_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  t_deposit Transport.DepositID%TYPE;
+BEGIN
+  SELECT DepositID
+  INTO t_deposit
+  FROM Transport
+  WHERE TransportID = NEW.TransportID;
+
+  IF t_deposit <> NEW.ShippedFrom THEN
+    perform raise_custom_error('E0005');
+  END IF;
+
+  RETURN NEW;
+
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.isshipmentassignedtovalidtransport_func() OWNER TO riccardoelena;
+
+--
+-- Name: isshipmentdirectedincorrectareaaccount_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.isshipmentdirectedincorrectareaaccount_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+  DECLARE 
+    ZCode Account.ZipCode%TYPE;
+    Cy Account.Country%TYPE;
+    Tid Shipment.transportId%TYPE;
+    D Shipment.ShippingDate%TYPE;
+  BEGIN 
+    -- Assuring it's the correct case
+    IF EXISTS (
+      SELECT 1
+      FROM Shipment
+      WHERE ShipmentID=NEW.ShipmentID AND DirectedTo IS NOT NULL
+    ) THEN
+      RETURN NEW;
+    END IF;
+
+    -- Retrieving the data needed
+    SELECT ZipCode, Country 
+    INTO ZCode, Cy
+    FROM "Order" NATURAL JOIN Account
+    WHERE OrderId = NEW.OrderID;
+
+    -- calling the function to check isCityDepositShippingToClient constraint
+    perform isCityDepositShippingToClient(ZCode, Cy, NEW.shippedfrom);
+  
+    SELECT transportId, ShippingDate
+    INTO Tid, D
+    FROM shipment
+    WHERE shipmentid = NEW.shipmentid;
+  
+    -- Calling the function to insert the cover
+    perform createCoversForShipment(ZCode, Cy, Tid, D);
+    RETURN NEW;
+  END;
+  $$;
+
+
+ALTER FUNCTION uninadelivery.isshipmentdirectedincorrectareaaccount_func() OWNER TO riccardoelena;
+
+--
+-- Name: isshipmentdirectedincorrectareadeposit_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.isshipmentdirectedincorrectareadeposit_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+  ZCode Deposit.ZipCode%TYPE;
+  Cy Deposit.Country%TYPE;
+BEGIN 
+  IF NEW.DirectedTo IS NULL THEN 
+    RETURN NEW;
+  END IF;
+  SELECT ZipCode, Country 
+  INTO ZCode, Cy
+  FROM deposit
+  WHERE depositid = NEW.DirectedTo;
+
+  perform createCoversForShipment(ZCode, Cy, NEW.transportId, NEW.ShippingDate);
+  RETURN NEW;
+
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.isshipmentdirectedincorrectareadeposit_func() OWNER TO riccardoelena;
 
 --
 -- Name: raise_custom_error(text); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
@@ -292,12 +690,12 @@ CREATE TABLE uninadelivery.account (
     birthdate date NOT NULL,
     propic text,
     password text,
-    addressno uninadelivery.alphnumstring NOT NULL,
-    street uninadelivery.alphnumstring NOT NULL,
+    addressno uninadelivery.alphanumstring NOT NULL,
+    street uninadelivery.alphanumstring NOT NULL,
     zipcode uninadelivery.numericstring NOT NULL,
     country uninadelivery.letterstring NOT NULL,
     CONSTRAINT formataccountaddressno CHECK (((addressno)::text ~ '^[1-9]\d*[a-z]?(?:BIS)?$'::text)),
-    CONSTRAINT formataccountpassword CHECK ((password ~ '\b[A-Fa-f0-9]{64}\b'::text)),
+    CONSTRAINT formataccountpassword CHECK ((password ~ '^[A-Fa-f0-9]{64}$'::text)),
     CONSTRAINT formataccountpropic CHECK ((propic ~ '^\/9j\/4AAQSkZJRg[-A-Za-z0-9+\/]*={0,2}$'::text)),
     CONSTRAINT validaccountbirthdate CHECK ((EXTRACT(year FROM age((birthdate)::timestamp with time zone)) >= (16)::numeric))
 );
@@ -327,7 +725,7 @@ ALTER TABLE uninadelivery.area OWNER TO riccardoelena;
 CREATE TABLE uninadelivery.contains (
     orderid integer NOT NULL,
     name text,
-    supplier uninadelivery.alphnumstring,
+    supplier uninadelivery.alphanumstring,
     issent boolean,
     quantity smallint NOT NULL,
     CONSTRAINT formatcontainsquantity CHECK ((quantity > 0))
@@ -371,8 +769,8 @@ CREATE TABLE uninadelivery.deposit (
     occupiedspace real NOT NULL,
     maxcapacity real NOT NULL,
     deposittype uninadelivery.deposittype,
-    addressno uninadelivery.alphnumstring NOT NULL,
-    street uninadelivery.alphnumstring NOT NULL,
+    addressno uninadelivery.alphanumstring NOT NULL,
+    street uninadelivery.alphanumstring NOT NULL,
     zipcode uninadelivery.numericstring NOT NULL,
     country uninadelivery.letterstring NOT NULL,
     CONSTRAINT checkdepositfullness CHECK ((occupiedspace <= maxcapacity)),
@@ -453,7 +851,7 @@ ALTER TABLE uninadelivery.operator OWNER TO riccardoelena;
 CREATE TABLE uninadelivery.product (
     category uninadelivery.letterstring NOT NULL,
     name text NOT NULL,
-    supplier uninadelivery.alphnumstring DEFAULT 'UninaDelivery'::text NOT NULL,
+    supplier uninadelivery.alphanumstring DEFAULT 'UninaDelivery'::text NOT NULL,
     description text NOT NULL,
     packagesizeliters real NOT NULL,
     isfragile boolean,
@@ -480,7 +878,8 @@ CREATE TABLE uninadelivery.shipment (
     directedto integer,
     businessmail uninadelivery.emailstring NOT NULL,
     transportid integer NOT NULL,
-    CONSTRAINT checkdifferentstartenddeposits CHECK ((shippedfrom <> directedto))
+    CONSTRAINT checkdifferentstartenddeposits CHECK ((shippedfrom <> directedto)),
+    CONSTRAINT validshipmentdate CHECK ((shippingdate >= CURRENT_DATE))
 );
 
 
@@ -652,6 +1051,13 @@ COPY uninadelivery.custom_error_messages (error_code, error_message) FROM stdin;
 E0001	Account birthdate is too young to be an employee
 E0002	This address is already occupied
 E0003	Incompatible table in input
+E0004	Driver's working place and Transport's deposit not matching
+E0005	The transport of this shipment don't belongs to the correct deposit
+E0006	Shipment assigned to a transport already occupied with diffrent location
+E0007	Account not reachable by any deposit
+E0008	Shipment towords accounts must takes off from the same city of the arrival
+E0009	This driver has not a valid Driving Licence for this vehicle
+E0010	This transport cannot belong to this type of deposit
 \.
 
 
@@ -892,6 +1298,41 @@ ALTER TABLE ONLY uninadelivery.transport
 
 
 --
+-- Name: transport correcttransportassignment; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER correcttransportassignment BEFORE INSERT ON uninadelivery.transport FOR EACH ROW EXECUTE FUNCTION uninadelivery.correcttransportassignment_func();
+
+
+--
+-- Name: drives correcttransportfordrivinglicence; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER correcttransportfordrivinglicence BEFORE INSERT ON uninadelivery.drives FOR EACH ROW EXECUTE FUNCTION uninadelivery.correcttransportfordrivinglicence_func();
+
+
+--
+-- Name: driver formatdriverbusinessmail; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER formatdriverbusinessmail BEFORE INSERT ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.formatdriverbusinessmail_func();
+
+
+--
+-- Name: operator formatoperatorbusinessmail; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER formatoperatorbusinessmail BEFORE INSERT ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.formatoperatorbusinessmail_func();
+
+
+--
+-- Name: account isaccountreachable; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isaccountreachable BEFORE INSERT ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaccountreachable_func();
+
+
+--
 -- Name: account isaddressforsomethingspecificaccount; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
 --
 
@@ -903,6 +1344,34 @@ CREATE TRIGGER isaddressforsomethingspecificaccount BEFORE INSERT ON uninadelive
 --
 
 CREATE TRIGGER isaddressforsomethingspecificdeposit BEFORE INSERT ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func('Account');
+
+
+--
+-- Name: drives isdriverassignedtovalidtransport; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isdriverassignedtovalidtransport BEFORE INSERT ON uninadelivery.drives FOR EACH ROW EXECUTE FUNCTION uninadelivery.isdriverassignedtovalidtransport_func();
+
+
+--
+-- Name: shipment isshipmentassignedtovalidtransport; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isshipmentassignedtovalidtransport BEFORE INSERT ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentassignedtovalidtransport_func();
+
+
+--
+-- Name: ships isshipmentdirectedincorrectareaaccount; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isshipmentdirectedincorrectareaaccount BEFORE INSERT ON uninadelivery.ships FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentdirectedincorrectareaaccount_func();
+
+
+--
+-- Name: shipment isshipmentdirectedincorrectareadeposit; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isshipmentdirectedincorrectareadeposit BEFORE INSERT ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentdirectedincorrectareadeposit_func();
 
 
 --
