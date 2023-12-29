@@ -50,7 +50,15 @@ In tali casi si è utilizzata la molteplicità \textbf{[\(0..1\)]} esclusivament
 \newpage
 
 \section{Ristrutturazione del Diagramma UML}
-
+% TODO @zGenny 
+% [ ] update all diagram making contains a 1:N relationship and adding quantity to order. IsSent will disappear.
+% [ ] remove all the reference to contains in dictonary (chapter 2). NOT ONLY BLINDLY DELETION CHECK IF SOMETHING BROKE
+% [ ] remove all the reference to contains in the logic scheme (chapter 3) and change the mapping strategy to a foreign key migration
+% [ ] remove contains from the db and the documentation of it (chapter 4). Tecnically you should simply need to drop the table and insert the 2 
+% new column in order TRANSFERING ALL CONTRAINTS PRESENT IN CONTAINS FOR THE MOVED ROWS TO ORDER;
+% [ ] implement isShipmentContainingValidOrders constraint in the db AND ADD THE PROCESS TO THE DOCUMENTATION (chapter 4)
+% you can take as reference the constraint already present in the db and in the docs
+% [ ] populate the db and play around with it to see if everything works as expected. You can try violating the constraint in the dictonary and see if the db blocks you
 \subsection{Considerazioni sulla Ristrutturazione}
 
 \subsubsection{Attributi Multipli e Multivalore}
@@ -487,7 +495,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
   \textbf{formatTransportOccupiedSpace} & Dominio &
   {\footnotesize
-  Il campo \textbf{OccupiedSpace} della classe \textbf{Transport} dev'essere positivo.
+  Il campo \textbf{OccupiedSpace} della classe \textbf{Transport} dev'essere non negativo.
   }\\
 
   \textbf{formatOrderExtraWarranty} & Dominio &
@@ -506,7 +514,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   }\\
   \textbf{formatAddressStreet} & Dominio &
   {\footnotesize
-  Il campo \textbf{Street} della classe \textbf{Address} può contenere solo caratteri alfanumerici.
+  Il campo \textbf{Street} della classe \textbf{Address} può contenere solo caratteri alfanumerici o al più il carattere \textit{`.'}.
   }\\
   
   \textbf{formatDepositOccupiedSpace} & Dominio & 
@@ -570,17 +578,17 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
   \textbf{formatAreaCity} & Dominio & 
   {\footnotesize
-  Il campo \textbf{City} della classe Area deve contenere solo caratteri alfabetici.
+  Il campo \textbf{City} della classe \textbf{Area} deve contenere solo caratteri alfabetici.
   }\\
   
   \textbf{formatAreaState} & Dominio & 
   {\footnotesize
-  Il campo \textbf{State} della classe Area deve contenere solo caratteri alfabetici.
+  Il campo \textbf{State} della classe \textbf{Area} deve contenere solo caratteri alfabetici.
   }\\
   
   \textbf{formatAreaCountry} & Dominio & 
   {\footnotesize
-  Il campo \textbf{Country} della classe Area deve contenere solo caratteri alfabetici.
+  Il campo \textbf{Country} della classe \textbf{Area} deve contenere solo caratteri alfabetici.
   }\\
   
   \textbf{checkDepositFullness} & N-upla & 
@@ -636,7 +644,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   {\footnotesize
   Un \textbf{Address}, non può non corrispondere né a un \textbf{Deposit}, né a degli \textbf{Account}.
   }\\
-
+  %TODO zgenny modify this and make it a domain constraint as we discussed yesyerday. Already implemented in db
   \textbf{validShipmentDate} & Interrelazionale & 
   {\footnotesize
   Il Campo \textbf{ShipmentDate} deve essere una data successiva a tutte le date dei campi \textbf{EmissionDate} delle classi \textbf{Order} associate con quello \textbf{Shipment}
@@ -688,4 +696,34 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   {\footnotesize
   Un \textbf{Account} deve avere almeno un \textbf{Deposit} nella stessa \textbf{City}. Le \textbf{City} in cui non è presente un \textbf{Deposit} sono da considerare non ancora raggiungibili dal servizio.
   }\\
+
+  \textbf{isCityDepositShippingToClient} & Interrelazionale &
+  {\footnotesize
+  Se una \textbf{Shipment} è diretta a un \textbf{Account}, il \textbf{Deposit} di partenza della spedizione deve essere nella stessa \textbf{City}.
+  }\\
+
+}
+
+\customTable{ccY}[Dizionario dei vincoli Sesta Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
+    
+  \textbf{correctTransportForDrivingLicence} & Interrelazionale &
+  {\footnotesize
+  Un \textbf{Driver} con \textbf{DrivingLicenceType} uguale a \textbf{BE} può guidare solo \textbf{Transport} di tipo \textbf{WheeledSmall}, mentre se di tipo \textbf{CE} può guidare anche \textbf{Transport} di tipo \textbf{WheeledLarge}. Un \textbf{Driver} con \textbf{DrivingLicenceType} uguale a \textbf{DE} può guidare solo \textbf{Transport} di tipo \textbf{WheeledLarge}.
+  }\\
+
+  \textbf{correctTransportAssignment} & Interrelazionale &
+  {\footnotesize
+  Un \textbf{Transport} di tipo \textbf{WheeledSmall} può appartenere a ogni tipo di deposito, uno di tipo \textbf{WheeledLarge} non può appartenre a depositi di tipo \textbf{City}, uno di tipo \textbf{Rails} non può appartenere a depositi di tipo \textbf{City} o \textbf{State}, mentre quelli di tipo \textbf{Air} e \textbf{Water} possono solo appartenre a depositi di tipo \textbf{Central}.
+  }\\
+
+  \textbf{onlyOneJobPerAccount} & Interrelazionale &
+  {\footnotesize
+  Un \textbf{Account} non può essere contemporaneamente un \textbf{Driver} e un \textbf{Operator}.
+  }\\
+
+  \textbf{correctOccupiedSpaceForShipment} & Interrelazionale &
+  {\footnotesize
+  Il campo \textbf{OccupiedSpace} di un \textbf{Transport} deve essere maggiore o uguale alla somma dei campi \textbf{PackageSizeLiters} dei \textbf{Product} contenuti negli \textbf{Order} associati alla \textbf{Shipment} che lo trasporta.
+  }\\
+
 }
