@@ -86,7 +86,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   );
   ALTER TABLE Account ADD CONSTRAINT account_fk FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
 \end{lstlisting}
-   % TODO define a trigger to avoid manual insertion of null email
+  % TODO define a trigger to avoid manual insertion of null email
 
 \newpage
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Order}}]
@@ -96,7 +96,8 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
     IsExpress boolean,
     ExtraWarranty smallint NOT NULL,
     IsCompleted boolean,
-    Email emailString
+    Email emailString,
+    Quantity integer NOT NULL
   );
   ALTER TABLE "Order" ADD CONSTRAINT Order_pk PRIMARY KEY (OrderID);
   ALTER TABLE "Order" ADD CONSTRAINT formatOrderExtraWarranty CHECK (
@@ -105,6 +106,9 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   ALTER TABLE "Order" ADD CONSTRAINT Order_fk FOREIGN KEY (Email) REFERENCES Account(Email) ON DELETE SET NULL ON UPDATE CASCADE;
   ALTER TABLE "Order" ADD CONSTRAINT formatOrderEmissionDate CHECK (
     EmissionDate <= current_date
+  );
+  ALTER TABLE "Order" ADD CONSTRAINT formatOrderQuantity CHECK (
+    Quantity > 0
   );
 \end{lstlisting}
 
@@ -137,20 +141,6 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 \end{lstlisting}
 % TODO define a trigger to avoid manual insertion of null name or supplier
 
-\newpage
-\begin{lstlisting}[caption={Creazione della tabella \textbf{Contains}}]
-  CREATE TABLE Contains (
-    OrderID integer NOT NULL,
-    Name text ,
-    Supplier alphNumString ,
-    IsSent boolean,
-    Quantity smallint NOT NULL
-  );
-  ALTER TABLE contains ADD CONSTRAINT noDuplicateProductPerOrder UNIQUE(OrderID, Name, Supplier);
-  ALTER TABLE contains ADD CONSTRAINT formatContainsQuantity CHECK (Quantity > 0);
-  ALTER TABLE contains ADD CONSTRAINT contains_fk_order FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID) ON DELETE CASCADE ON UPDATE CASCADE;
-  ALTER TABLE contains ADD CONSTRAINT contains_fk_product FOREIGN KEY (Name,Supplier) REFERENCES Product(Name, Supplier) ON DELETE RESTRICT ON UPDATE CASCADE;
-\end{lstlisting}
 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Deposit}}]
   CREATE TABLE Deposit (

@@ -51,11 +51,6 @@ In tali casi si è utilizzata la molteplicità \textbf{[\(0..1\)]} esclusivament
 
 \section{Ristrutturazione del Diagramma UML}
 % TODO @zGenny 
-% [ ] update all diagram making contains a 1:N relationship and adding quantity to order. IsSent will disappear.
-% [ ] remove all the reference to contains in dictonary (chapter 2). NOT ONLY BLINDLY DELETION CHECK IF SOMETHING BROKE
-% [ ] remove all the reference to contains in the logic scheme (chapter 3) and change the mapping strategy to a foreign key migration
-% [ ] remove contains from the db and the documentation of it (chapter 4). Tecnically you should simply need to drop the table and insert the 2 
-% new column in order TRANSFERING ALL CONTRAINTS PRESENT IN CONTAINS FOR THE MOVED ROWS TO ORDER;
 % [ ] implement isShipmentContainingValidOrders constraint in the db AND ADD THE PROCESS TO THE DOCUMENTATION (chapter 4)
 % you can take as reference the constraint already present in the db and in the docs
 % [ ] populate the db and play around with it to see if everything works as expected. You can try violating the constraint in the dictonary and see if the db blocks you
@@ -289,17 +284,14 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
   \textbf{Contains} &
   {\footnotesize
-  Esprime la relazione tra \textbf{Order} e \textbf{Product}. Un \textbf{Order} può contenere più \textbf{Product} e un \textbf{Product} può essere contenuto in più \textbf{Order}. 
-  
+  Esprime la relazione tra \textbf{Order} e \textbf{Product}. Un \textbf{Order} può contenere una quantità N di \textbf{Product} e un \textbf{Product} può essere contenuto in più \textbf{Order}. 
   } &
-  {\footnotesize
-  \text{\textbf{IsSent}} (\textit{bool}) Indica se un dato prodotto in un dato ordine è stato spedito al cliente; 
-
-  \textbf{Quantity} (\textit{integer}): Numero di pezzi di un dato prodotto contenuti in un ordine;} &
+  --- 
+  &
   {\footnotesize
   \textbf{Order \([*]\)} (\textit{contains}): Gli ordini che contengono un dato prodotto;
 
-  \textbf{Product \([*]\)} (\textit{is contained}): I prodotti contenuti in un dato ordine;
+  \textbf{Product \([1]\)} (\textit{is contained}): Il prodotto contenuto in un dato ordine;
   }\\
 }
 \customTable{cYYY}[Dizionario delle associazioni Seconda Parte]{\textbfB{Associazione} & \textbfB{Descrizione} & \textbfB{Attributi} & \textbfB{Classi Coinvolte}}{
@@ -566,9 +558,9 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   Il campo \textbf{Quantity} della classe d'associazione \textbf{Stores} deve essere non negativo.
   }\\ % ! we have to define a trigger that delete the product if quantity is 0
 
-  \textbf{formatContainsQuantity} & Dominio & 
+  \textbf{formatOrderQuantity} & Dominio & 
   {\footnotesize
-  Il campo \textbf{Quantity} della classe d'associazione \textbf{Contains} deve essere positivo.
+  Il campo \textbf{Quantity} della classe \textbf{Order} deve essere positivo.
   }\\
 
   \textbf{formatAreaZipCode} & Dominio & 
@@ -601,6 +593,11 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   Nella classe \textbf{Transport} il campo \textbf{OccupiedSpace} può avere valori solo minori o uguali al campo \textbf{MaxCapacity}
   }\\
   
+  \textbf{validShipmentDate} & Dominio & 
+  {\footnotesize
+  Il Campo \textbf{ShipmentDate} deve essere una data successiva alla data dell'inserimento.
+  }\\
+
   \textbf{checkProductDescriptionOnTopic} & N-upla &
   {\footnotesize
   Nella classe \textbf{Product} il campo \textbf{Description} dev'essere una stringa che contenga le stringhe presenti nei campi \textbf{Category}, \textbf{Name} e \textbf{Supplier}
@@ -615,10 +612,6 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
 \customTable{ccY}[Dizionario dei vincoli Quarta Parte]{\textbfB{Vincolo} & \textbfB{Tipologia} & \textbfB{Descrizione}}{
   
-  \textbf{noDuplicateProductPerOrder} & Intrarelazionale &
-  {\footnotesize
-  Nella classe d'associazione \textbf{Contains} un \textbf{Product} non può essere contenuto più volte nello stesso \textbf{Order}
-  }\\
 
   \textbf{onlyOneTravelPerDayTransport} & Intrarelazionale & 
   {\footnotesize
@@ -643,11 +636,6 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   \textbf{isAddressForSomethingGeneral}\label{isAddressForSomethingGeneral} & Interrelazionale &
   {\footnotesize
   Un \textbf{Address}, non può non corrispondere né a un \textbf{Deposit}, né a degli \textbf{Account}.
-  }\\
-  %TODO zgenny modify this and make it a domain constraint as we discussed yesyerday. Already implemented in db
-  \textbf{validShipmentDate} & Interrelazionale & 
-  {\footnotesize
-  Il Campo \textbf{ShipmentDate} deve essere una data successiva a tutte le date dei campi \textbf{EmissionDate} delle classi \textbf{Order} associate con quello \textbf{Shipment}
   }\\
 
   \textbf{isAddressForSomethingSpecific} & Interrelazionale &
