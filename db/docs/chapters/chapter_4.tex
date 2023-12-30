@@ -301,6 +301,8 @@ ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES A
 
 Sono riportati alcuni dei trigger e delle funzioni creati per la gestione dei vincoli individuati e più in generale del database.
 
+Dei vari trigger riportati si farà riferimento alla sola versione per \lstinline{INSERT}, poiché la versione per \lstinline{UPDATE} è analoga.
+
 \subsection{Exception Handling}
 
 Per una gestione più pulita degli errori si è deciso di creare una funzione che lanciasse tutte le eccezioni personalizzate, ricavandole da un'apposita tabella \textbf{custom\_error\_messages}.
@@ -364,12 +366,12 @@ Iterando tra gli elementi di questo array si può ottenere il tipo di tabella su
 \end{lstlisting}
 
 \begin{lstlisting}[caption={Creazione dei trigger per il vincolo \textbf{isAddressForSomethingSpecific}}]
-  CREATE OR REPLACE TRIGGER isAddressForSomethingSpecificAccount
+  CREATE OR REPLACE TRIGGER isAddressForSomethingSpecificAccount_in
   BEFORE INSERT ON Account
   FOR EACH ROW
   EXECUTE PROCEDURE isAddressForSomethingSpecific_func('Deposit');
 
-  CREATE OR REPLACE TRIGGER isAddressForSomethingSpecificDeposit
+  CREATE OR REPLACE TRIGGER isAddressForSomethingSpecificDeposit_in
   BEFORE INSERT ON Deposit
   FOR EACH ROW
   EXECUTE PROCEDURE isAddressForSomethingSpecific_func('Account');
@@ -493,12 +495,12 @@ Questo avviene in questa stessa \textit{trigger function} poiché l'evento di in
 Per questo vincolo è sufficiente controllare che, nel secondo caso di quelli trattati l'\textbf{Account} sia nella stessa \textbf{City} del \textbf{Deposit} di partenza della spedizione. 
 
 \begin{lstlisting}[caption={Trigger per il vincolo \textbf{isShipmentDirectedInCorrectArea}}]
-  CREATE OR REPLACE TRIGGER isShipmentDirectedInCorrectAreaDeposit 
+  CREATE OR REPLACE TRIGGER isShipmentDirectedInCorrectAreaDeposit_in
   BEFORE INSERT ON Shipment 
   FOR EACH ROW 
   EXECUTE PROCEDURE isShipmentDirectedInCorrectAreaDeposit_func();
 
-  CREATE OR REPLACE TRIGGER isShipmentDirectedInCorrectAreaAccount 
+  CREATE OR REPLACE TRIGGER isShipmentDirectedInCorrectAreaAccount_in
   BEFORE INSERT ON Ships
   FOR EACH ROW 
   EXECUTE PROCEDURE isShipmentDirectedInCorrectAreaAccount_func();
@@ -569,5 +571,8 @@ Per questo vincolo è sufficiente controllare che, nel secondo caso di quelli tr
   $$ LANGUAGE plpgsql;
 \end{lstlisting}
 
-% TODO @zGenny last two constraints yet to be implemented. i'm trying to do them tomorrow
-% TODO @RiccardoElena all the trigger must be copied for update
+% TODO @zGenny last constraints require your update to be done, I can't write it now. Can you do it?
+% TODO @zGenny remember to add an 'ON UPDATE' VERSION for all trigger you make using the same function
+
+% TODO @zGenny @RiccardoElena basic structure of db should work just fine. we need to refine update and delete behaviour to maintain consistency
+% [ ] in particular about isshipmentdirectedincorrectareaaccount. We need to check for update in shipment to.

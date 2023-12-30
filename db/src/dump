@@ -582,6 +582,39 @@ $$;
 ALTER FUNCTION uninadelivery.isshipmentdirectedincorrectareadeposit_func() OWNER TO riccardoelena;
 
 --
+-- Name: onlyonejobperaccount_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.onlyonejobperaccount_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $_$
+DECLARE
+  flag integer;
+  tableName text;
+BEGIN
+
+  FOREACH tableName IN ARRAY TG_ARGV LOOP
+    IF tableName = 'driver' OR tableName = 'operator' THEN
+      EXECUTE format('SELECT count(*) FROM %I WHERE Email=$1', tableName) 
+      INTO flag USING NEW.Email;
+    ELSE
+      perform raise_custom_error('E0012');
+    END IF;
+  END LOOP;
+
+  IF flag > 0 THEN
+    perform raise_custom_error('E0011');
+  END IF;
+
+  RETURN NEW;
+
+END;
+$_$;
+
+
+ALTER FUNCTION uninadelivery.onlyonejobperaccount_func() OWNER TO riccardoelena;
+
+--
 -- Name: raise_custom_error(text); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
 --
 
@@ -1058,6 +1091,8 @@ E0007	Account not reachable by any deposit
 E0008	Shipment towords accounts must takes off from the same city of the arrival
 E0009	This driver has not a valid Driving Licence for this vehicle
 E0010	This transport cannot belong to this type of deposit
+E0011	This account is already emplyeed
+E0012	Cannot check this field for the given table. Are you sure you are calling the function for the correct table?
 \.
 
 
@@ -1298,94 +1333,220 @@ ALTER TABLE ONLY uninadelivery.transport
 
 
 --
--- Name: transport correcttransportassignment; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: transport correcttransportassignment_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
 --
 
-CREATE TRIGGER correcttransportassignment BEFORE INSERT ON uninadelivery.transport FOR EACH ROW EXECUTE FUNCTION uninadelivery.correcttransportassignment_func();
-
-
---
--- Name: drives correcttransportfordrivinglicence; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
---
-
-CREATE TRIGGER correcttransportfordrivinglicence BEFORE INSERT ON uninadelivery.drives FOR EACH ROW EXECUTE FUNCTION uninadelivery.correcttransportfordrivinglicence_func();
+CREATE TRIGGER correcttransportassignment_in BEFORE INSERT ON uninadelivery.transport FOR EACH ROW EXECUTE FUNCTION uninadelivery.correcttransportassignment_func();
 
 
 --
--- Name: driver formatdriverbusinessmail; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: transport correcttransportassignment_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
 --
 
-CREATE TRIGGER formatdriverbusinessmail BEFORE INSERT ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.formatdriverbusinessmail_func();
-
-
---
--- Name: operator formatoperatorbusinessmail; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
---
-
-CREATE TRIGGER formatoperatorbusinessmail BEFORE INSERT ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.formatoperatorbusinessmail_func();
+CREATE TRIGGER correcttransportassignment_up BEFORE UPDATE ON uninadelivery.transport FOR EACH ROW EXECUTE FUNCTION uninadelivery.correcttransportassignment_func();
 
 
 --
--- Name: account isaccountreachable; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: drives correcttransportfordrivinglicence_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
 --
 
-CREATE TRIGGER isaccountreachable BEFORE INSERT ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaccountreachable_func();
-
-
---
--- Name: account isaddressforsomethingspecificaccount; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
---
-
-CREATE TRIGGER isaddressforsomethingspecificaccount BEFORE INSERT ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func('Deposit');
+CREATE TRIGGER correcttransportfordrivinglicence_in BEFORE INSERT ON uninadelivery.drives FOR EACH ROW EXECUTE FUNCTION uninadelivery.correcttransportfordrivinglicence_func();
 
 
 --
--- Name: deposit isaddressforsomethingspecificdeposit; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: drives correcttransportfordrivinglicence_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
 --
 
-CREATE TRIGGER isaddressforsomethingspecificdeposit BEFORE INSERT ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func('Account');
-
-
---
--- Name: drives isdriverassignedtovalidtransport; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
---
-
-CREATE TRIGGER isdriverassignedtovalidtransport BEFORE INSERT ON uninadelivery.drives FOR EACH ROW EXECUTE FUNCTION uninadelivery.isdriverassignedtovalidtransport_func();
+CREATE TRIGGER correcttransportfordrivinglicence_up BEFORE UPDATE ON uninadelivery.drives FOR EACH ROW EXECUTE FUNCTION uninadelivery.correcttransportfordrivinglicence_func();
 
 
 --
--- Name: shipment isshipmentassignedtovalidtransport; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: driver formatdriverbusinessmail_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
 --
 
-CREATE TRIGGER isshipmentassignedtovalidtransport BEFORE INSERT ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentassignedtovalidtransport_func();
-
-
---
--- Name: ships isshipmentdirectedincorrectareaaccount; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
---
-
-CREATE TRIGGER isshipmentdirectedincorrectareaaccount BEFORE INSERT ON uninadelivery.ships FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentdirectedincorrectareaaccount_func();
+CREATE TRIGGER formatdriverbusinessmail_in BEFORE INSERT ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.formatdriverbusinessmail_func();
 
 
 --
--- Name: shipment isshipmentdirectedincorrectareadeposit; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: driver formatdriverbusinessmail_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
 --
 
-CREATE TRIGGER isshipmentdirectedincorrectareadeposit BEFORE INSERT ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentdirectedincorrectareadeposit_func();
-
-
---
--- Name: driver validdriverbirthdate; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
---
-
-CREATE TRIGGER validdriverbirthdate BEFORE INSERT ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.validemployeebirthdate_func();
+CREATE TRIGGER formatdriverbusinessmail_up BEFORE UPDATE ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.formatdriverbusinessmail_func();
 
 
 --
--- Name: operator validoperatorbirthdate; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: operator formatoperatorbusinessmail_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
 --
 
-CREATE TRIGGER validoperatorbirthdate BEFORE INSERT ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.validemployeebirthdate_func();
+CREATE TRIGGER formatoperatorbusinessmail_in BEFORE INSERT ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.formatoperatorbusinessmail_func();
+
+
+--
+-- Name: operator formatoperatorbusinessmail_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER formatoperatorbusinessmail_up BEFORE UPDATE ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.formatoperatorbusinessmail_func();
+
+
+--
+-- Name: account isaccountreachable_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isaccountreachable_in BEFORE INSERT ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaccountreachable_func();
+
+
+--
+-- Name: account isaccountreachable_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isaccountreachable_up BEFORE UPDATE ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaccountreachable_func();
+
+
+--
+-- Name: account isaddressforsomethingspecificaccount_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isaddressforsomethingspecificaccount_in BEFORE INSERT ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func();
+
+
+--
+-- Name: account isaddressforsomethingspecificaccount_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isaddressforsomethingspecificaccount_up BEFORE UPDATE ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func();
+
+
+--
+-- Name: deposit isaddressforsomethingspecificdeposit_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isaddressforsomethingspecificdeposit_in BEFORE INSERT ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func();
+
+
+--
+-- Name: deposit isaddressforsomethingspecificdeposit_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isaddressforsomethingspecificdeposit_up BEFORE UPDATE ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func();
+
+
+--
+-- Name: drives isdriverassignedtovalidtransport_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isdriverassignedtovalidtransport_in BEFORE INSERT ON uninadelivery.drives FOR EACH ROW EXECUTE FUNCTION uninadelivery.isdriverassignedtovalidtransport_func();
+
+
+--
+-- Name: drives isdriverassignedtovalidtransport_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isdriverassignedtovalidtransport_up BEFORE UPDATE ON uninadelivery.drives FOR EACH ROW EXECUTE FUNCTION uninadelivery.isdriverassignedtovalidtransport_func();
+
+
+--
+-- Name: shipment isshipmentassignedtovalidtransport_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isshipmentassignedtovalidtransport_in BEFORE INSERT ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentassignedtovalidtransport_func();
+
+
+--
+-- Name: shipment isshipmentassignedtovalidtransport_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isshipmentassignedtovalidtransport_up BEFORE UPDATE ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentassignedtovalidtransport_func();
+
+
+--
+-- Name: ships isshipmentdirectedincorrectareaaccount_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isshipmentdirectedincorrectareaaccount_in BEFORE INSERT ON uninadelivery.ships FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentdirectedincorrectareaaccount_func();
+
+
+--
+-- Name: ships isshipmentdirectedincorrectareaaccount_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isshipmentdirectedincorrectareaaccount_up BEFORE UPDATE ON uninadelivery.ships FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentdirectedincorrectareaaccount_func();
+
+
+--
+-- Name: shipment isshipmentdirectedincorrectareadeposit_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isshipmentdirectedincorrectareadeposit_in BEFORE INSERT ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentdirectedincorrectareadeposit_func();
+
+
+--
+-- Name: shipment isshipmentdirectedincorrectareadeposit_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER isshipmentdirectedincorrectareadeposit_up BEFORE UPDATE ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentdirectedincorrectareadeposit_func();
+
+
+--
+-- Name: driver onlyonejobperaccountdriver_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER onlyonejobperaccountdriver_in BEFORE INSERT ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('operator');
+
+
+--
+-- Name: driver onlyonejobperaccountdriver_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER onlyonejobperaccountdriver_up BEFORE UPDATE ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('operator');
+
+
+--
+-- Name: operator onlyonejobperaccountdriver_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER onlyonejobperaccountdriver_up BEFORE UPDATE ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('operator');
+
+
+--
+-- Name: operator onlyonejobperaccountoperator_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER onlyonejobperaccountoperator_in BEFORE INSERT ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('driver');
+
+
+--
+-- Name: operator onlyonejobperaccountoperator_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER onlyonejobperaccountoperator_up BEFORE UPDATE ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('driver');
+
+
+--
+-- Name: driver validdriverbirthdate_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER validdriverbirthdate_in BEFORE INSERT ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.validemployeebirthdate_func();
+
+
+--
+-- Name: driver validdriverbirthdate_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER validdriverbirthdate_up BEFORE UPDATE ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.validemployeebirthdate_func();
+
+
+--
+-- Name: operator validoperatorbirthdate_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER validoperatorbirthdate_in BEFORE INSERT ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.validemployeebirthdate_func();
+
+
+--
+-- Name: operator validoperatorbirthdate_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE TRIGGER validoperatorbirthdate_up BEFORE UPDATE ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.validemployeebirthdate_func();
 
 
 --
