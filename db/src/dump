@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 15.4 (Homebrew)
--- Dumped by pg_dump version 15.4 (Homebrew)
+-- Dumped from database version 14.10 (Ubuntu 14.10-0ubuntu0.22.04.1)
+-- Dumped by pg_dump version 14.10 (Ubuntu 14.10-0ubuntu0.22.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -26,27 +26,27 @@ CREATE SCHEMA uninadelivery;
 ALTER SCHEMA uninadelivery OWNER TO zgenny;
 
 --
--- Name: alphanumericstring; Type: DOMAIN; Schema: uninadelivery; Owner: riccardoelena
+-- Name: alphanumericstring; Type: DOMAIN; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE DOMAIN uninadelivery.alphanumericstring AS text
 	CONSTRAINT alphanumericstring_check CHECK ((VALUE ~ '^\w+$'::text));
 
 
-ALTER DOMAIN uninadelivery.alphanumericstring OWNER TO riccardoelena;
+ALTER DOMAIN uninadelivery.alphanumericstring OWNER TO zgenny;
 
 --
--- Name: alphanumstring; Type: DOMAIN; Schema: uninadelivery; Owner: riccardoelena
+-- Name: alphanumstring; Type: DOMAIN; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE DOMAIN uninadelivery.alphanumstring AS text
 	CONSTRAINT alphanumstring_check CHECK ((VALUE ~ '^\w+[\s\w\.]*$'::text));
 
 
-ALTER DOMAIN uninadelivery.alphanumstring OWNER TO riccardoelena;
+ALTER DOMAIN uninadelivery.alphanumstring OWNER TO zgenny;
 
 --
--- Name: deposittype; Type: TYPE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: deposittype; Type: TYPE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TYPE uninadelivery.deposittype AS ENUM (
@@ -57,10 +57,10 @@ CREATE TYPE uninadelivery.deposittype AS ENUM (
 );
 
 
-ALTER TYPE uninadelivery.deposittype OWNER TO riccardoelena;
+ALTER TYPE uninadelivery.deposittype OWNER TO zgenny;
 
 --
--- Name: drivinglicencetype; Type: TYPE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: drivinglicencetype; Type: TYPE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TYPE uninadelivery.drivinglicencetype AS ENUM (
@@ -69,40 +69,40 @@ CREATE TYPE uninadelivery.drivinglicencetype AS ENUM (
 );
 
 
-ALTER TYPE uninadelivery.drivinglicencetype OWNER TO riccardoelena;
+ALTER TYPE uninadelivery.drivinglicencetype OWNER TO zgenny;
 
 --
--- Name: emailstring; Type: DOMAIN; Schema: uninadelivery; Owner: riccardoelena
+-- Name: emailstring; Type: DOMAIN; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE DOMAIN uninadelivery.emailstring AS text
 	CONSTRAINT emailstring_check CHECK ((VALUE ~ '^[a-zA-Z0-9]+[a-zA-Z0-9.]*[a-zA-Z0-9]+@[a-zA-Z.]+\.[a-zA-Z]{2,}$'::text));
 
 
-ALTER DOMAIN uninadelivery.emailstring OWNER TO riccardoelena;
+ALTER DOMAIN uninadelivery.emailstring OWNER TO zgenny;
 
 --
--- Name: letterstring; Type: DOMAIN; Schema: uninadelivery; Owner: riccardoelena
+-- Name: letterstring; Type: DOMAIN; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE DOMAIN uninadelivery.letterstring AS text
 	CONSTRAINT letterstring_check CHECK ((VALUE ~ '^[a-zA-Z]+$'::text));
 
 
-ALTER DOMAIN uninadelivery.letterstring OWNER TO riccardoelena;
+ALTER DOMAIN uninadelivery.letterstring OWNER TO zgenny;
 
 --
--- Name: numericstring; Type: DOMAIN; Schema: uninadelivery; Owner: riccardoelena
+-- Name: numericstring; Type: DOMAIN; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE DOMAIN uninadelivery.numericstring AS text
 	CONSTRAINT numericstring_check CHECK ((VALUE ~ '^\d*$'::text));
 
 
-ALTER DOMAIN uninadelivery.numericstring OWNER TO riccardoelena;
+ALTER DOMAIN uninadelivery.numericstring OWNER TO zgenny;
 
 --
--- Name: transporttype; Type: TYPE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: transporttype; Type: TYPE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TYPE uninadelivery.transporttype AS ENUM (
@@ -114,10 +114,10 @@ CREATE TYPE uninadelivery.transporttype AS ENUM (
 );
 
 
-ALTER TYPE uninadelivery.transporttype OWNER TO riccardoelena;
+ALTER TYPE uninadelivery.transporttype OWNER TO zgenny;
 
 --
--- Name: worldzone; Type: TYPE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: worldzone; Type: TYPE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TYPE uninadelivery.worldzone AS ENUM (
@@ -138,10 +138,10 @@ CREATE TYPE uninadelivery.worldzone AS ENUM (
 );
 
 
-ALTER TYPE uninadelivery.worldzone OWNER TO riccardoelena;
+ALTER TYPE uninadelivery.worldzone OWNER TO zgenny;
 
 --
--- Name: correcttransportassignment_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+-- Name: correcttransportassignment_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE FUNCTION uninadelivery.correcttransportassignment_func() RETURNS trigger
@@ -172,10 +172,10 @@ END;
 $$;
 
 
-ALTER FUNCTION uninadelivery.correcttransportassignment_func() OWNER TO riccardoelena;
+ALTER FUNCTION uninadelivery.correcttransportassignment_func() OWNER TO zgenny;
 
 --
--- Name: correcttransportfordrivinglicence_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+-- Name: correcttransportfordrivinglicence_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE FUNCTION uninadelivery.correcttransportfordrivinglicence_func() RETURNS trigger
@@ -209,10 +209,10 @@ END;
 $$;
 
 
-ALTER FUNCTION uninadelivery.correcttransportfordrivinglicence_func() OWNER TO riccardoelena;
+ALTER FUNCTION uninadelivery.correcttransportfordrivinglicence_func() OWNER TO zgenny;
 
 --
--- Name: createcoversforshipment(uninadelivery.numericstring, uninadelivery.letterstring, integer, date); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+-- Name: createcoversforshipment(uninadelivery.numericstring, uninadelivery.letterstring, integer, date); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE FUNCTION uninadelivery.createcoversforshipment(zc uninadelivery.numericstring, cy uninadelivery.letterstring, tid integer, d date) RETURNS void
@@ -238,10 +238,10 @@ END;
 $$;
 
 
-ALTER FUNCTION uninadelivery.createcoversforshipment(zc uninadelivery.numericstring, cy uninadelivery.letterstring, tid integer, d date) OWNER TO riccardoelena;
+ALTER FUNCTION uninadelivery.createcoversforshipment(zc uninadelivery.numericstring, cy uninadelivery.letterstring, tid integer, d date) OWNER TO zgenny;
 
 --
--- Name: formatdriverbusinessmail_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+-- Name: formatdriverbusinessmail_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE FUNCTION uninadelivery.formatdriverbusinessmail_func() RETURNS trigger
@@ -286,10 +286,10 @@ END;
 $$;
 
 
-ALTER FUNCTION uninadelivery.formatdriverbusinessmail_func() OWNER TO riccardoelena;
+ALTER FUNCTION uninadelivery.formatdriverbusinessmail_func() OWNER TO zgenny;
 
 --
--- Name: formatoperatorbusinessmail_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+-- Name: formatoperatorbusinessmail_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE FUNCTION uninadelivery.formatoperatorbusinessmail_func() RETURNS trigger
@@ -334,10 +334,10 @@ END;
 $$;
 
 
-ALTER FUNCTION uninadelivery.formatoperatorbusinessmail_func() OWNER TO riccardoelena;
+ALTER FUNCTION uninadelivery.formatoperatorbusinessmail_func() OWNER TO zgenny;
 
 --
--- Name: isaccountreachable_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+-- Name: isaccountreachable_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE FUNCTION uninadelivery.isaccountreachable_func() RETURNS trigger
@@ -366,10 +366,10 @@ END;
 $$;
 
 
-ALTER FUNCTION uninadelivery.isaccountreachable_func() OWNER TO riccardoelena;
+ALTER FUNCTION uninadelivery.isaccountreachable_func() OWNER TO zgenny;
 
 --
--- Name: isaddressforsomethingspecific_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+-- Name: isaddressforsomethingspecific_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE FUNCTION uninadelivery.isaddressforsomethingspecific_func() RETURNS trigger
@@ -410,10 +410,10 @@ BEGIN
 $_$;
 
 
-ALTER FUNCTION uninadelivery.isaddressforsomethingspecific_func() OWNER TO riccardoelena;
+ALTER FUNCTION uninadelivery.isaddressforsomethingspecific_func() OWNER TO zgenny;
 
 --
--- Name: iscitydepositshippingtoclient(uninadelivery.numericstring, uninadelivery.letterstring, integer); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+-- Name: iscitydepositshippingtoclient(uninadelivery.numericstring, uninadelivery.letterstring, integer); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE FUNCTION uninadelivery.iscitydepositshippingtoclient(zc uninadelivery.numericstring, cy uninadelivery.letterstring, did integer) RETURNS void
@@ -448,10 +448,10 @@ END;
 $$;
 
 
-ALTER FUNCTION uninadelivery.iscitydepositshippingtoclient(zc uninadelivery.numericstring, cy uninadelivery.letterstring, did integer) OWNER TO riccardoelena;
+ALTER FUNCTION uninadelivery.iscitydepositshippingtoclient(zc uninadelivery.numericstring, cy uninadelivery.letterstring, did integer) OWNER TO zgenny;
 
 --
--- Name: isdriverassignedtovalidtransport_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+-- Name: isdriverassignedtovalidtransport_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE FUNCTION uninadelivery.isdriverassignedtovalidtransport_func() RETURNS trigger
@@ -479,10 +479,10 @@ END;
 $$;
 
 
-ALTER FUNCTION uninadelivery.isdriverassignedtovalidtransport_func() OWNER TO riccardoelena;
+ALTER FUNCTION uninadelivery.isdriverassignedtovalidtransport_func() OWNER TO zgenny;
 
 --
--- Name: isshipmentassignedtovalidtransport_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+-- Name: isshipmentassignedtovalidtransport_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE FUNCTION uninadelivery.isshipmentassignedtovalidtransport_func() RETURNS trigger
@@ -506,10 +506,10 @@ END;
 $$;
 
 
-ALTER FUNCTION uninadelivery.isshipmentassignedtovalidtransport_func() OWNER TO riccardoelena;
+ALTER FUNCTION uninadelivery.isshipmentassignedtovalidtransport_func() OWNER TO zgenny;
 
 --
--- Name: isshipmentdirectedincorrectareaaccount_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+-- Name: isshipmentdirectedincorrectareaaccount_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE FUNCTION uninadelivery.isshipmentdirectedincorrectareaaccount_func() RETURNS trigger
@@ -551,10 +551,10 @@ CREATE FUNCTION uninadelivery.isshipmentdirectedincorrectareaaccount_func() RETU
   $$;
 
 
-ALTER FUNCTION uninadelivery.isshipmentdirectedincorrectareaaccount_func() OWNER TO riccardoelena;
+ALTER FUNCTION uninadelivery.isshipmentdirectedincorrectareaaccount_func() OWNER TO zgenny;
 
 --
--- Name: isshipmentdirectedincorrectareadeposit_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+-- Name: isshipmentdirectedincorrectareadeposit_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE FUNCTION uninadelivery.isshipmentdirectedincorrectareadeposit_func() RETURNS trigger
@@ -579,10 +579,10 @@ END;
 $$;
 
 
-ALTER FUNCTION uninadelivery.isshipmentdirectedincorrectareadeposit_func() OWNER TO riccardoelena;
+ALTER FUNCTION uninadelivery.isshipmentdirectedincorrectareadeposit_func() OWNER TO zgenny;
 
 --
--- Name: onlyonejobperaccount_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+-- Name: onlyonejobperaccount_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE FUNCTION uninadelivery.onlyonejobperaccount_func() RETURNS trigger
@@ -612,10 +612,10 @@ END;
 $_$;
 
 
-ALTER FUNCTION uninadelivery.onlyonejobperaccount_func() OWNER TO riccardoelena;
+ALTER FUNCTION uninadelivery.onlyonejobperaccount_func() OWNER TO zgenny;
 
 --
--- Name: raise_custom_error(text); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+-- Name: raise_custom_error(text); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE FUNCTION uninadelivery.raise_custom_error(p_error_code text) RETURNS void
@@ -641,10 +641,10 @@ END;
 $$;
 
 
-ALTER FUNCTION uninadelivery.raise_custom_error(p_error_code text) OWNER TO riccardoelena;
+ALTER FUNCTION uninadelivery.raise_custom_error(p_error_code text) OWNER TO zgenny;
 
 --
--- Name: validemployeebirthdate_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+-- Name: validemployeebirthdate_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE FUNCTION uninadelivery.validemployeebirthdate_func() RETURNS trigger
@@ -666,14 +666,14 @@ CREATE FUNCTION uninadelivery.validemployeebirthdate_func() RETURNS trigger
 $$;
 
 
-ALTER FUNCTION uninadelivery.validemployeebirthdate_func() OWNER TO riccardoelena;
+ALTER FUNCTION uninadelivery.validemployeebirthdate_func() OWNER TO zgenny;
 
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: Order; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: Order; Type: TABLE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TABLE uninadelivery."Order" (
@@ -683,15 +683,17 @@ CREATE TABLE uninadelivery."Order" (
     extrawarranty smallint NOT NULL,
     iscompleted boolean,
     email uninadelivery.emailstring,
+    quantity integer NOT NULL,
     CONSTRAINT formatorderemissiondate CHECK ((emissiondate <= CURRENT_DATE)),
-    CONSTRAINT formatorderextrawarranty CHECK ((extrawarranty >= 0))
+    CONSTRAINT formatorderextrawarranty CHECK ((extrawarranty >= 0)),
+    CONSTRAINT formatorderquantity CHECK ((quantity > 0))
 );
 
 
-ALTER TABLE uninadelivery."Order" OWNER TO riccardoelena;
+ALTER TABLE uninadelivery."Order" OWNER TO zgenny;
 
 --
--- Name: Order_orderid_seq; Type: SEQUENCE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: Order_orderid_seq; Type: SEQUENCE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE SEQUENCE uninadelivery."Order_orderid_seq"
@@ -703,17 +705,17 @@ CREATE SEQUENCE uninadelivery."Order_orderid_seq"
     CACHE 1;
 
 
-ALTER TABLE uninadelivery."Order_orderid_seq" OWNER TO riccardoelena;
+ALTER TABLE uninadelivery."Order_orderid_seq" OWNER TO zgenny;
 
 --
--- Name: Order_orderid_seq; Type: SEQUENCE OWNED BY; Schema: uninadelivery; Owner: riccardoelena
+-- Name: Order_orderid_seq; Type: SEQUENCE OWNED BY; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER SEQUENCE uninadelivery."Order_orderid_seq" OWNED BY uninadelivery."Order".orderid;
 
 
 --
--- Name: account; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: account; Type: TABLE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TABLE uninadelivery.account (
@@ -734,10 +736,10 @@ CREATE TABLE uninadelivery.account (
 );
 
 
-ALTER TABLE uninadelivery.account OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.account OWNER TO zgenny;
 
 --
--- Name: area; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: area; Type: TABLE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TABLE uninadelivery.area (
@@ -749,26 +751,10 @@ CREATE TABLE uninadelivery.area (
 );
 
 
-ALTER TABLE uninadelivery.area OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.area OWNER TO zgenny;
 
 --
--- Name: contains; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
---
-
-CREATE TABLE uninadelivery.contains (
-    orderid integer NOT NULL,
-    name text,
-    supplier uninadelivery.alphanumstring,
-    issent boolean,
-    quantity smallint NOT NULL,
-    CONSTRAINT formatcontainsquantity CHECK ((quantity > 0))
-);
-
-
-ALTER TABLE uninadelivery.contains OWNER TO riccardoelena;
-
---
--- Name: covers; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: covers; Type: TABLE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TABLE uninadelivery.covers (
@@ -779,10 +765,10 @@ CREATE TABLE uninadelivery.covers (
 );
 
 
-ALTER TABLE uninadelivery.covers OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.covers OWNER TO zgenny;
 
 --
--- Name: custom_error_messages; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: custom_error_messages; Type: TABLE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TABLE uninadelivery.custom_error_messages (
@@ -791,10 +777,10 @@ CREATE TABLE uninadelivery.custom_error_messages (
 );
 
 
-ALTER TABLE uninadelivery.custom_error_messages OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.custom_error_messages OWNER TO zgenny;
 
 --
--- Name: deposit; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: deposit; Type: TABLE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TABLE uninadelivery.deposit (
@@ -813,10 +799,10 @@ CREATE TABLE uninadelivery.deposit (
 );
 
 
-ALTER TABLE uninadelivery.deposit OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.deposit OWNER TO zgenny;
 
 --
--- Name: deposit_depositid_seq; Type: SEQUENCE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: deposit_depositid_seq; Type: SEQUENCE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE SEQUENCE uninadelivery.deposit_depositid_seq
@@ -828,17 +814,17 @@ CREATE SEQUENCE uninadelivery.deposit_depositid_seq
     CACHE 1;
 
 
-ALTER TABLE uninadelivery.deposit_depositid_seq OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.deposit_depositid_seq OWNER TO zgenny;
 
 --
--- Name: deposit_depositid_seq; Type: SEQUENCE OWNED BY; Schema: uninadelivery; Owner: riccardoelena
+-- Name: deposit_depositid_seq; Type: SEQUENCE OWNED BY; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER SEQUENCE uninadelivery.deposit_depositid_seq OWNED BY uninadelivery.deposit.depositid;
 
 
 --
--- Name: driver; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: driver; Type: TABLE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TABLE uninadelivery.driver (
@@ -850,10 +836,10 @@ CREATE TABLE uninadelivery.driver (
 );
 
 
-ALTER TABLE uninadelivery.driver OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.driver OWNER TO zgenny;
 
 --
--- Name: drives; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: drives; Type: TABLE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TABLE uninadelivery.drives (
@@ -863,10 +849,10 @@ CREATE TABLE uninadelivery.drives (
 );
 
 
-ALTER TABLE uninadelivery.drives OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.drives OWNER TO zgenny;
 
 --
--- Name: operator; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: operator; Type: TABLE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TABLE uninadelivery.operator (
@@ -875,10 +861,10 @@ CREATE TABLE uninadelivery.operator (
 );
 
 
-ALTER TABLE uninadelivery.operator OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.operator OWNER TO zgenny;
 
 --
--- Name: product; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: product; Type: TABLE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TABLE uninadelivery.product (
@@ -897,10 +883,10 @@ CREATE TABLE uninadelivery.product (
 );
 
 
-ALTER TABLE uninadelivery.product OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.product OWNER TO zgenny;
 
 --
--- Name: shipment; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: shipment; Type: TABLE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TABLE uninadelivery.shipment (
@@ -916,10 +902,10 @@ CREATE TABLE uninadelivery.shipment (
 );
 
 
-ALTER TABLE uninadelivery.shipment OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.shipment OWNER TO zgenny;
 
 --
--- Name: shipment_shipmentid_seq; Type: SEQUENCE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: shipment_shipmentid_seq; Type: SEQUENCE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE SEQUENCE uninadelivery.shipment_shipmentid_seq
@@ -931,17 +917,17 @@ CREATE SEQUENCE uninadelivery.shipment_shipmentid_seq
     CACHE 1;
 
 
-ALTER TABLE uninadelivery.shipment_shipmentid_seq OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.shipment_shipmentid_seq OWNER TO zgenny;
 
 --
--- Name: shipment_shipmentid_seq; Type: SEQUENCE OWNED BY; Schema: uninadelivery; Owner: riccardoelena
+-- Name: shipment_shipmentid_seq; Type: SEQUENCE OWNED BY; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER SEQUENCE uninadelivery.shipment_shipmentid_seq OWNED BY uninadelivery.shipment.shipmentid;
 
 
 --
--- Name: ships; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: ships; Type: TABLE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TABLE uninadelivery.ships (
@@ -950,10 +936,10 @@ CREATE TABLE uninadelivery.ships (
 );
 
 
-ALTER TABLE uninadelivery.ships OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.ships OWNER TO zgenny;
 
 --
--- Name: stores; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: stores; Type: TABLE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TABLE uninadelivery.stores (
@@ -965,10 +951,10 @@ CREATE TABLE uninadelivery.stores (
 );
 
 
-ALTER TABLE uninadelivery.stores OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.stores OWNER TO zgenny;
 
 --
--- Name: transport; Type: TABLE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: transport; Type: TABLE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TABLE uninadelivery.transport (
@@ -984,10 +970,10 @@ CREATE TABLE uninadelivery.transport (
 );
 
 
-ALTER TABLE uninadelivery.transport OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.transport OWNER TO zgenny;
 
 --
--- Name: transport_transportid_seq; Type: SEQUENCE; Schema: uninadelivery; Owner: riccardoelena
+-- Name: transport_transportid_seq; Type: SEQUENCE; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE SEQUENCE uninadelivery.transport_transportid_seq
@@ -999,53 +985,53 @@ CREATE SEQUENCE uninadelivery.transport_transportid_seq
     CACHE 1;
 
 
-ALTER TABLE uninadelivery.transport_transportid_seq OWNER TO riccardoelena;
+ALTER TABLE uninadelivery.transport_transportid_seq OWNER TO zgenny;
 
 --
--- Name: transport_transportid_seq; Type: SEQUENCE OWNED BY; Schema: uninadelivery; Owner: riccardoelena
+-- Name: transport_transportid_seq; Type: SEQUENCE OWNED BY; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER SEQUENCE uninadelivery.transport_transportid_seq OWNED BY uninadelivery.transport.transportid;
 
 
 --
--- Name: Order orderid; Type: DEFAULT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: Order orderid; Type: DEFAULT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery."Order" ALTER COLUMN orderid SET DEFAULT nextval('uninadelivery."Order_orderid_seq"'::regclass);
 
 
 --
--- Name: deposit depositid; Type: DEFAULT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: deposit depositid; Type: DEFAULT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.deposit ALTER COLUMN depositid SET DEFAULT nextval('uninadelivery.deposit_depositid_seq'::regclass);
 
 
 --
--- Name: shipment shipmentid; Type: DEFAULT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: shipment shipmentid; Type: DEFAULT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.shipment ALTER COLUMN shipmentid SET DEFAULT nextval('uninadelivery.shipment_shipmentid_seq'::regclass);
 
 
 --
--- Name: transport transportid; Type: DEFAULT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: transport transportid; Type: DEFAULT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.transport ALTER COLUMN transportid SET DEFAULT nextval('uninadelivery.transport_transportid_seq'::regclass);
 
 
 --
--- Data for Name: Order; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+-- Data for Name: Order; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
-COPY uninadelivery."Order" (orderid, emissiondate, isexpress, extrawarranty, iscompleted, email) FROM stdin;
+COPY uninadelivery."Order" (orderid, emissiondate, isexpress, extrawarranty, iscompleted, email, quantity) FROM stdin;
 \.
 
 
 --
--- Data for Name: account; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+-- Data for Name: account; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
 COPY uninadelivery.account (name, surname, email, birthdate, propic, password, addressno, street, zipcode, country) FROM stdin;
@@ -1053,23 +1039,26 @@ COPY uninadelivery.account (name, surname, email, birthdate, propic, password, a
 
 
 --
--- Data for Name: area; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+-- Data for Name: area; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
 COPY uninadelivery.area (zipcode, city, state, country, worldzone) FROM stdin;
+00123	Roma	RM	Italy	EUW
+20145	Milano	MI	Italy	EUW
+40122	Bologna	BO	Italy	EUW
+70100	Bari	BA	Italy	EUW
+50123	Firenze	FI	Italy	EUW
+10100	Torino	TO	Italy	EUW
+25121	Brescia	BS	Italy	EUW
+34100	Trieste	TS	Italy	EUW
+61100	Pesaro	PU	Italy	EUW
+20100	Monza	MB	Italy	EUW
+80100	Napoli	NA	Italy	EUW
 \.
 
 
 --
--- Data for Name: contains; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
---
-
-COPY uninadelivery.contains (orderid, name, supplier, issent, quantity) FROM stdin;
-\.
-
-
---
--- Data for Name: covers; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+-- Data for Name: covers; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
 COPY uninadelivery.covers (transportid, zipcode, country, date) FROM stdin;
@@ -1077,7 +1066,7 @@ COPY uninadelivery.covers (transportid, zipcode, country, date) FROM stdin;
 
 
 --
--- Data for Name: custom_error_messages; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+-- Data for Name: custom_error_messages; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
 COPY uninadelivery.custom_error_messages (error_code, error_message) FROM stdin;
@@ -1097,15 +1086,20 @@ E0012	Cannot check this field for the given table. Are you sure you are calling 
 
 
 --
--- Data for Name: deposit; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+-- Data for Name: deposit; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
 COPY uninadelivery.deposit (depositid, occupiedspace, maxcapacity, deposittype, addressno, street, zipcode, country) FROM stdin;
+1	0	10000	City	1	Via Roma	00123	Italy
+2	0	80000	Central	7BIS	Corso Umberto I	20145	Italy
+3	0	12000	City	23	Via Roma	00123	Italy
+4	0	15000	State	6	Viale Delle Rose	25121	Italy
+5	0	25000	Country	22	Corso Stretto	50123	Italy
 \.
 
 
 --
--- Data for Name: driver; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+-- Data for Name: driver; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
 COPY uninadelivery.driver (businessmail, drivinglicencetype, isavailable, email, depositid) FROM stdin;
@@ -1113,7 +1107,7 @@ COPY uninadelivery.driver (businessmail, drivinglicencetype, isavailable, email,
 
 
 --
--- Data for Name: drives; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+-- Data for Name: drives; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
 COPY uninadelivery.drives (transportid, businessmail, date) FROM stdin;
@@ -1121,7 +1115,7 @@ COPY uninadelivery.drives (transportid, businessmail, date) FROM stdin;
 
 
 --
--- Data for Name: operator; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+-- Data for Name: operator; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
 COPY uninadelivery.operator (email, businessmail) FROM stdin;
@@ -1129,7 +1123,7 @@ COPY uninadelivery.operator (email, businessmail) FROM stdin;
 
 
 --
--- Data for Name: product; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+-- Data for Name: product; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
 COPY uninadelivery.product (category, name, supplier, description, packagesizeliters, isfragile, price) FROM stdin;
@@ -1137,7 +1131,7 @@ COPY uninadelivery.product (category, name, supplier, description, packagesizeli
 
 
 --
--- Data for Name: shipment; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+-- Data for Name: shipment; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
 COPY uninadelivery.shipment (shipmentid, shippingdate, hasarrived, shippedfrom, directedto, businessmail, transportid) FROM stdin;
@@ -1145,7 +1139,7 @@ COPY uninadelivery.shipment (shipmentid, shippingdate, hasarrived, shippedfrom, 
 
 
 --
--- Data for Name: ships; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+-- Data for Name: ships; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
 COPY uninadelivery.ships (shipmentid, orderid) FROM stdin;
@@ -1153,7 +1147,7 @@ COPY uninadelivery.ships (shipmentid, orderid) FROM stdin;
 
 
 --
--- Data for Name: stores; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+-- Data for Name: stores; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
 COPY uninadelivery.stores (name, supplier, depositid, quantity) FROM stdin;
@@ -1161,7 +1155,7 @@ COPY uninadelivery.stores (name, supplier, depositid, quantity) FROM stdin;
 
 
 --
--- Data for Name: transport; Type: TABLE DATA; Schema: uninadelivery; Owner: riccardoelena
+-- Data for Name: transport; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
 COPY uninadelivery.transport (transportid, occupiedspace, maxcapacity, isavailable, transporttype, depositid) FROM stdin;
@@ -1169,35 +1163,35 @@ COPY uninadelivery.transport (transportid, occupiedspace, maxcapacity, isavailab
 
 
 --
--- Name: Order_orderid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: riccardoelena
+-- Name: Order_orderid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: zgenny
 --
 
 SELECT pg_catalog.setval('uninadelivery."Order_orderid_seq"', 1, false);
 
 
 --
--- Name: deposit_depositid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: riccardoelena
+-- Name: deposit_depositid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: zgenny
 --
 
 SELECT pg_catalog.setval('uninadelivery.deposit_depositid_seq', 1, false);
 
 
 --
--- Name: shipment_shipmentid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: riccardoelena
+-- Name: shipment_shipmentid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: zgenny
 --
 
 SELECT pg_catalog.setval('uninadelivery.shipment_shipmentid_seq', 1, false);
 
 
 --
--- Name: transport_transportid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: riccardoelena
+-- Name: transport_transportid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: zgenny
 --
 
 SELECT pg_catalog.setval('uninadelivery.transport_transportid_seq', 1, false);
 
 
 --
--- Name: account account_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: account account_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.account
@@ -1205,7 +1199,7 @@ ALTER TABLE ONLY uninadelivery.account
 
 
 --
--- Name: area area_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: area area_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.area
@@ -1213,7 +1207,7 @@ ALTER TABLE ONLY uninadelivery.area
 
 
 --
--- Name: custom_error_messages custom_error_messages_pkey; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: custom_error_messages custom_error_messages_pkey; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.custom_error_messages
@@ -1221,7 +1215,7 @@ ALTER TABLE ONLY uninadelivery.custom_error_messages
 
 
 --
--- Name: deposit deposit_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: deposit deposit_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.deposit
@@ -1229,7 +1223,7 @@ ALTER TABLE ONLY uninadelivery.deposit
 
 
 --
--- Name: driver driver_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: driver driver_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.driver
@@ -1237,7 +1231,7 @@ ALTER TABLE ONLY uninadelivery.driver
 
 
 --
--- Name: ships noduplicateorderinshipment; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: ships noduplicateorderinshipment; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.ships
@@ -1245,7 +1239,7 @@ ALTER TABLE ONLY uninadelivery.ships
 
 
 --
--- Name: stores noduplicateproductindeposit; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: stores noduplicateproductindeposit; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.stores
@@ -1253,15 +1247,7 @@ ALTER TABLE ONLY uninadelivery.stores
 
 
 --
--- Name: contains noduplicateproductperorder; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
---
-
-ALTER TABLE ONLY uninadelivery.contains
-    ADD CONSTRAINT noduplicateproductperorder UNIQUE (orderid, name, supplier);
-
-
---
--- Name: covers onlyoneareaperday; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: covers onlyoneareaperday; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.covers
@@ -1269,7 +1255,7 @@ ALTER TABLE ONLY uninadelivery.covers
 
 
 --
--- Name: deposit onlyonedepositperaddress; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: deposit onlyonedepositperaddress; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.deposit
@@ -1277,7 +1263,7 @@ ALTER TABLE ONLY uninadelivery.deposit
 
 
 --
--- Name: drives onlyonetravelperdaydriver; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: drives onlyonetravelperdaydriver; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.drives
@@ -1285,7 +1271,7 @@ ALTER TABLE ONLY uninadelivery.drives
 
 
 --
--- Name: drives onlyonetravelperdaytransport; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: drives onlyonetravelperdaytransport; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.drives
@@ -1293,7 +1279,7 @@ ALTER TABLE ONLY uninadelivery.drives
 
 
 --
--- Name: operator operator_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: operator operator_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.operator
@@ -1301,7 +1287,7 @@ ALTER TABLE ONLY uninadelivery.operator
 
 
 --
--- Name: Order order_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: Order order_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery."Order"
@@ -1309,7 +1295,7 @@ ALTER TABLE ONLY uninadelivery."Order"
 
 
 --
--- Name: product product_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: product product_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.product
@@ -1317,7 +1303,7 @@ ALTER TABLE ONLY uninadelivery.product
 
 
 --
--- Name: shipment shipment_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: shipment shipment_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.shipment
@@ -1325,7 +1311,7 @@ ALTER TABLE ONLY uninadelivery.shipment
 
 
 --
--- Name: transport transport_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: transport transport_pk; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.transport
@@ -1333,224 +1319,224 @@ ALTER TABLE ONLY uninadelivery.transport
 
 
 --
--- Name: transport correcttransportassignment_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: transport correcttransportassignment_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER correcttransportassignment_in BEFORE INSERT ON uninadelivery.transport FOR EACH ROW EXECUTE FUNCTION uninadelivery.correcttransportassignment_func();
 
 
 --
--- Name: transport correcttransportassignment_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: transport correcttransportassignment_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER correcttransportassignment_up BEFORE UPDATE ON uninadelivery.transport FOR EACH ROW EXECUTE FUNCTION uninadelivery.correcttransportassignment_func();
 
 
 --
--- Name: drives correcttransportfordrivinglicence_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: drives correcttransportfordrivinglicence_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER correcttransportfordrivinglicence_in BEFORE INSERT ON uninadelivery.drives FOR EACH ROW EXECUTE FUNCTION uninadelivery.correcttransportfordrivinglicence_func();
 
 
 --
--- Name: drives correcttransportfordrivinglicence_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: drives correcttransportfordrivinglicence_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER correcttransportfordrivinglicence_up BEFORE UPDATE ON uninadelivery.drives FOR EACH ROW EXECUTE FUNCTION uninadelivery.correcttransportfordrivinglicence_func();
 
 
 --
--- Name: driver formatdriverbusinessmail_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: driver formatdriverbusinessmail_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER formatdriverbusinessmail_in BEFORE INSERT ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.formatdriverbusinessmail_func();
 
 
 --
--- Name: driver formatdriverbusinessmail_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: driver formatdriverbusinessmail_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER formatdriverbusinessmail_up BEFORE UPDATE ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.formatdriverbusinessmail_func();
 
 
 --
--- Name: operator formatoperatorbusinessmail_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: operator formatoperatorbusinessmail_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER formatoperatorbusinessmail_in BEFORE INSERT ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.formatoperatorbusinessmail_func();
 
 
 --
--- Name: operator formatoperatorbusinessmail_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: operator formatoperatorbusinessmail_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER formatoperatorbusinessmail_up BEFORE UPDATE ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.formatoperatorbusinessmail_func();
 
 
 --
--- Name: account isaccountreachable_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: account isaccountreachable_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER isaccountreachable_in BEFORE INSERT ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaccountreachable_func();
 
 
 --
--- Name: account isaccountreachable_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: account isaccountreachable_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER isaccountreachable_up BEFORE UPDATE ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaccountreachable_func();
 
 
 --
--- Name: account isaddressforsomethingspecificaccount_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: account isaddressforsomethingspecificaccount_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER isaddressforsomethingspecificaccount_in BEFORE INSERT ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func();
 
 
 --
--- Name: account isaddressforsomethingspecificaccount_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: account isaddressforsomethingspecificaccount_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER isaddressforsomethingspecificaccount_up BEFORE UPDATE ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func();
 
 
 --
--- Name: deposit isaddressforsomethingspecificdeposit_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: deposit isaddressforsomethingspecificdeposit_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER isaddressforsomethingspecificdeposit_in BEFORE INSERT ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func();
+CREATE TRIGGER isaddressforsomethingspecificdeposit_in BEFORE INSERT ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func('Account');
 
 
 --
--- Name: deposit isaddressforsomethingspecificdeposit_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: deposit isaddressforsomethingspecificdeposit_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER isaddressforsomethingspecificdeposit_up BEFORE UPDATE ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func();
 
 
 --
--- Name: drives isdriverassignedtovalidtransport_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: drives isdriverassignedtovalidtransport_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER isdriverassignedtovalidtransport_in BEFORE INSERT ON uninadelivery.drives FOR EACH ROW EXECUTE FUNCTION uninadelivery.isdriverassignedtovalidtransport_func();
 
 
 --
--- Name: drives isdriverassignedtovalidtransport_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: drives isdriverassignedtovalidtransport_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER isdriverassignedtovalidtransport_up BEFORE UPDATE ON uninadelivery.drives FOR EACH ROW EXECUTE FUNCTION uninadelivery.isdriverassignedtovalidtransport_func();
 
 
 --
--- Name: shipment isshipmentassignedtovalidtransport_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: shipment isshipmentassignedtovalidtransport_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER isshipmentassignedtovalidtransport_in BEFORE INSERT ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentassignedtovalidtransport_func();
 
 
 --
--- Name: shipment isshipmentassignedtovalidtransport_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: shipment isshipmentassignedtovalidtransport_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER isshipmentassignedtovalidtransport_up BEFORE UPDATE ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentassignedtovalidtransport_func();
 
 
 --
--- Name: ships isshipmentdirectedincorrectareaaccount_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: ships isshipmentdirectedincorrectareaaccount_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER isshipmentdirectedincorrectareaaccount_in BEFORE INSERT ON uninadelivery.ships FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentdirectedincorrectareaaccount_func();
 
 
 --
--- Name: ships isshipmentdirectedincorrectareaaccount_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: ships isshipmentdirectedincorrectareaaccount_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER isshipmentdirectedincorrectareaaccount_up BEFORE UPDATE ON uninadelivery.ships FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentdirectedincorrectareaaccount_func();
 
 
 --
--- Name: shipment isshipmentdirectedincorrectareadeposit_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: shipment isshipmentdirectedincorrectareadeposit_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER isshipmentdirectedincorrectareadeposit_in BEFORE INSERT ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentdirectedincorrectareadeposit_func();
 
 
 --
--- Name: shipment isshipmentdirectedincorrectareadeposit_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: shipment isshipmentdirectedincorrectareadeposit_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER isshipmentdirectedincorrectareadeposit_up BEFORE UPDATE ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentdirectedincorrectareadeposit_func();
 
 
 --
--- Name: driver onlyonejobperaccountdriver_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: driver onlyonejobperaccountdriver_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER onlyonejobperaccountdriver_in BEFORE INSERT ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('operator');
 
 
 --
--- Name: driver onlyonejobperaccountdriver_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: driver onlyonejobperaccountdriver_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER onlyonejobperaccountdriver_up BEFORE UPDATE ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('operator');
 
 
 --
--- Name: operator onlyonejobperaccountdriver_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: operator onlyonejobperaccountdriver_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER onlyonejobperaccountdriver_up BEFORE UPDATE ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('operator');
 
 
 --
--- Name: operator onlyonejobperaccountoperator_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: operator onlyonejobperaccountoperator_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER onlyonejobperaccountoperator_in BEFORE INSERT ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('driver');
 
 
 --
--- Name: operator onlyonejobperaccountoperator_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: operator onlyonejobperaccountoperator_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER onlyonejobperaccountoperator_up BEFORE UPDATE ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('driver');
 
 
 --
--- Name: driver validdriverbirthdate_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: driver validdriverbirthdate_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER validdriverbirthdate_in BEFORE INSERT ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.validemployeebirthdate_func();
 
 
 --
--- Name: driver validdriverbirthdate_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: driver validdriverbirthdate_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER validdriverbirthdate_up BEFORE UPDATE ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.validemployeebirthdate_func();
 
 
 --
--- Name: operator validoperatorbirthdate_in; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: operator validoperatorbirthdate_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER validoperatorbirthdate_in BEFORE INSERT ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.validemployeebirthdate_func();
 
 
 --
--- Name: operator validoperatorbirthdate_up; Type: TRIGGER; Schema: uninadelivery; Owner: riccardoelena
+-- Name: operator validoperatorbirthdate_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER validoperatorbirthdate_up BEFORE UPDATE ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.validemployeebirthdate_func();
 
 
 --
--- Name: account account_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: account account_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.account
@@ -1558,23 +1544,7 @@ ALTER TABLE ONLY uninadelivery.account
 
 
 --
--- Name: contains contains_fk_order; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
---
-
-ALTER TABLE ONLY uninadelivery.contains
-    ADD CONSTRAINT contains_fk_order FOREIGN KEY (orderid) REFERENCES uninadelivery."Order"(orderid) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: contains contains_fk_product; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
---
-
-ALTER TABLE ONLY uninadelivery.contains
-    ADD CONSTRAINT contains_fk_product FOREIGN KEY (name, supplier) REFERENCES uninadelivery.product(name, supplier) ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
---
--- Name: covers covers_fk_area; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: covers covers_fk_area; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.covers
@@ -1582,7 +1552,7 @@ ALTER TABLE ONLY uninadelivery.covers
 
 
 --
--- Name: covers covers_fk_transport; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: covers covers_fk_transport; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.covers
@@ -1590,7 +1560,7 @@ ALTER TABLE ONLY uninadelivery.covers
 
 
 --
--- Name: deposit deposit_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: deposit deposit_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.deposit
@@ -1598,7 +1568,7 @@ ALTER TABLE ONLY uninadelivery.deposit
 
 
 --
--- Name: driver driver_fk_account; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: driver driver_fk_account; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.driver
@@ -1606,7 +1576,7 @@ ALTER TABLE ONLY uninadelivery.driver
 
 
 --
--- Name: driver driver_fk_deposit; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: driver driver_fk_deposit; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.driver
@@ -1614,7 +1584,7 @@ ALTER TABLE ONLY uninadelivery.driver
 
 
 --
--- Name: drives drives_fk_driver; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: drives drives_fk_driver; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.drives
@@ -1622,7 +1592,7 @@ ALTER TABLE ONLY uninadelivery.drives
 
 
 --
--- Name: drives drives_fk_transport; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: drives drives_fk_transport; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.drives
@@ -1630,7 +1600,7 @@ ALTER TABLE ONLY uninadelivery.drives
 
 
 --
--- Name: Order order_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: Order order_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery."Order"
@@ -1638,7 +1608,7 @@ ALTER TABLE ONLY uninadelivery."Order"
 
 
 --
--- Name: shipment shipment_fk_arrivaldeposit; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: shipment shipment_fk_arrivaldeposit; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.shipment
@@ -1646,7 +1616,7 @@ ALTER TABLE ONLY uninadelivery.shipment
 
 
 --
--- Name: shipment shipment_fk_operator; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: shipment shipment_fk_operator; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.shipment
@@ -1654,7 +1624,7 @@ ALTER TABLE ONLY uninadelivery.shipment
 
 
 --
--- Name: shipment shipment_fk_startdeposit; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: shipment shipment_fk_startdeposit; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.shipment
@@ -1662,7 +1632,7 @@ ALTER TABLE ONLY uninadelivery.shipment
 
 
 --
--- Name: shipment shipment_fk_transport; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: shipment shipment_fk_transport; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.shipment
@@ -1670,7 +1640,7 @@ ALTER TABLE ONLY uninadelivery.shipment
 
 
 --
--- Name: ships ships_fk_order; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: ships ships_fk_order; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.ships
@@ -1678,7 +1648,7 @@ ALTER TABLE ONLY uninadelivery.ships
 
 
 --
--- Name: ships ships_fk_shipment; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: ships ships_fk_shipment; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.ships
@@ -1686,7 +1656,7 @@ ALTER TABLE ONLY uninadelivery.ships
 
 
 --
--- Name: stores stores_fk_deposit; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: stores stores_fk_deposit; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.stores
@@ -1694,7 +1664,7 @@ ALTER TABLE ONLY uninadelivery.stores
 
 
 --
--- Name: stores stores_fk_product; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: stores stores_fk_product; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.stores
@@ -1702,7 +1672,7 @@ ALTER TABLE ONLY uninadelivery.stores
 
 
 --
--- Name: transport transport_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: riccardoelena
+-- Name: transport transport_fk; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
 ALTER TABLE ONLY uninadelivery.transport
