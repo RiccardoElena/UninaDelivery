@@ -141,6 +141,41 @@ CREATE TYPE uninadelivery.worldzone AS ENUM (
 ALTER TYPE uninadelivery.worldzone OWNER TO zgenny;
 
 --
+-- Name: correctoccupiedspaceforshipment_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE FUNCTION uninadelivery.correctoccupiedspaceforshipment_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE
+ShipID shipment.ShipmentID%TYPE;
+SumOfProduct product.PackageSizeLiters%TYPE;
+
+BEGIN
+SELECT ShipmentID
+  INTO ShipID
+  FROM shipment
+  WHERE TransportID = NEW.TransportID
+  ORDER BY ShippingDate DESC LIMIT 1;
+
+SELECT sum(PackageSizeLiters*quantity)
+  INTO SumOfProduct
+  FROM product NATURAL JOIN "Order" NATURAL JOIN Ships
+  WHERE shipmentID = ShipID;
+
+IF SumOfProduct < NEW.OccupiedSpace THEN
+  perform raise_custom_error('E0014');
+END IF;
+RETURN NEW;
+END;
+
+$$;
+
+
+ALTER FUNCTION uninadelivery.correctoccupiedspaceforshipment_func() OWNER TO zgenny;
+
+--
 -- Name: correcttransportassignment_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
@@ -361,7 +396,7 @@ BEGIN
   ) THEN
     perform raise_custom_error('E0007');
   END IF;
-
+  RETURN NEW;
 END;
 $$;
 
@@ -507,6 +542,51 @@ $$;
 
 
 ALTER FUNCTION uninadelivery.isshipmentassignedtovalidtransport_func() OWNER TO zgenny;
+
+--
+-- Name: isshipmentcontainingvalidorders_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE FUNCTION uninadelivery.isshipmentcontainingvalidorders_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+QTY stores.quantity%TYPE;
+PName product.name%TYPE;
+PSupply product.supplier%TYPE;
+DID deposit.depositid%TYPE;
+
+BEGIN
+
+SELECT quantity , name , supplier 
+  INTO QTY , PName , PSupply
+  FROM "Order" NATURAL JOIN PRODUCT
+  WHERE OrderID = NEW.OrderID;
+
+SELECT shippedfrom
+  INTO DID
+  FROM shipment
+  WHERE shipmentID = NEW.shipmentID;
+
+IF NOT EXISTS (
+  SELECT 1
+    FROM stores
+    WHERE depositid = DID AND name = PName AND supplier = PSupply AND quantity >= QTY
+) THEN
+  perform raise_custom_error('E0013');
+END IF;
+
+UPDATE stores
+  SET quantity = quantity - QTY
+  WHERE depositid = DID AND name = PName AND supplier = PSupply;
+
+RETURN NEW;
+END;
+
+$$;
+
+
+ALTER FUNCTION uninadelivery.isshipmentcontainingvalidorders_func() OWNER TO zgenny;
 
 --
 -- Name: isshipmentdirectedincorrectareaaccount_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
@@ -684,6 +764,8 @@ CREATE TABLE uninadelivery."Order" (
     iscompleted boolean,
     email uninadelivery.emailstring,
     quantity integer NOT NULL,
+    name text,
+    supplier text,
     CONSTRAINT formatorderemissiondate CHECK ((emissiondate <= CURRENT_DATE)),
     CONSTRAINT formatorderextrawarranty CHECK ((extrawarranty >= 0)),
     CONSTRAINT formatorderquantity CHECK ((quantity > 0))
@@ -785,9 +867,9 @@ ALTER TABLE uninadelivery.custom_error_messages OWNER TO zgenny;
 
 CREATE TABLE uninadelivery.deposit (
     depositid integer NOT NULL,
-    occupiedspace real NOT NULL,
+    occupiedspace real DEFAULT 0 NOT NULL,
     maxcapacity real NOT NULL,
-    deposittype uninadelivery.deposittype,
+    deposittype uninadelivery.deposittype NOT NULL,
     addressno uninadelivery.alphanumstring NOT NULL,
     street uninadelivery.alphanumstring NOT NULL,
     zipcode uninadelivery.numericstring NOT NULL,
@@ -959,7 +1041,7 @@ ALTER TABLE uninadelivery.stores OWNER TO zgenny;
 
 CREATE TABLE uninadelivery.transport (
     transportid integer NOT NULL,
-    occupiedspace real NOT NULL,
+    occupiedspace real DEFAULT 0 NOT NULL,
     maxcapacity real NOT NULL,
     isavailable boolean,
     transporttype uninadelivery.transporttype NOT NULL,
@@ -1026,7 +1108,9 @@ ALTER TABLE ONLY uninadelivery.transport ALTER COLUMN transportid SET DEFAULT ne
 -- Data for Name: Order; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
-COPY uninadelivery."Order" (orderid, emissiondate, isexpress, extrawarranty, iscompleted, email, quantity) FROM stdin;
+COPY uninadelivery."Order" (orderid, emissiondate, isexpress, extrawarranty, iscompleted, email, quantity, name, supplier) FROM stdin;
+1	2023-12-31	\N	0	\N	luca@gmail.com	3	Penna	Bic
+2	2023-12-31	\N	0	\N	luca@gmail.com	2	Gomma	Bic
 \.
 
 
@@ -1035,6 +1119,7 @@ COPY uninadelivery."Order" (orderid, emissiondate, isexpress, extrawarranty, isc
 --
 
 COPY uninadelivery.account (name, surname, email, birthdate, propic, password, addressno, street, zipcode, country) FROM stdin;
+Luca	Bianchi	luca@gmail.com	1998-05-12	/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAZABkDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABwYI/8QAPhAAAAQEAwUDAxUAAAAAAAAAAQIDEQQFBhIABxMIFBUWIRcxUSIjQTM2N0JFUlNhYnFzdYSSlKGztMPR0v/EABgBAAMBAQAAAAAAAAAAAAAAAAQGBwMI/8QAJxEAAgAFAwMFAQEAAAAAAAAAAQIDBAURIQAGEgciQRMxUVJhobH/2gAMAwEAAhEDEQA/ACef7Mde5qwZKep6byCHiYdUI0xo2IWIQSFASCACRIwu6gehmfrjRuWtUy/Z/wBnTsLrJGIjJ9JpZNEl4iWFKpBmGJUXXTsOoJDiAEXIAuQOoGZwYRgK/rGpqXkyMfk9MRUnKkSVFcIBFOOU3USHEzpmKcALeVPym72B+vWR5nqeqpKqFZRR1qqmCKiCsKogRGJUUFyJEBApSjcJdMAACuLgPV8Bbhr89vqQl5ueQpKmMoKsvCJgMCbZFrE2N9GdI9uTVbhmc3QyqihiqglHDqy8SQQO23LznGNIGVFeSeZcU0IaMLp6D3kKHff4G+LCBzRL/gYj7pf7wfbN1DqS7mLnyno2W6m6bpxBNWF1G1r7brbmcj97OHjhr5aoD3kL+NN/vE53tGoNFrseRoaRDLLx43sxyilshjfuJ/zSL1J6bLujc81Veat6nDIY27YaL4Ujx86y7Mpt2TIFqPd+K7ycILRv0LbgE91zGf1Nmb09/TFjlplh2pTmns5eOcM3uYoRPDd21rd2XBO3VvK92i72dLm6s4n2enrShPrFP9JXD3ss+xRSX08R+9VxUd5Vidn4MVZh7gKT7AZ4n4A11P1NoVPgSRqcOHaMx4FrtleLG1r29wM2v+6vcyoLhfDvOaurre1tZrPn8cRG8/I/PCBnB7kfaP48HONuk+yaFXtnydQqEDnFf1Lnk4vaK6jCsB7ADA/ukDZFIkmoMAlPt5P3b91//9k=	e0e6097a6f8af07daf5fc7244336ba37133713a8fc7345c36d667dfa513fabaa	123	Via Roma	00123	Italy
 \.
 
 
@@ -1082,6 +1167,8 @@ E0009	This driver has not a valid Driving Licence for this vehicle
 E0010	This transport cannot belong to this type of deposit
 E0011	This account is already emplyeed
 E0012	Cannot check this field for the given table. Are you sure you are calling the function for the correct table?
+E0013	You cannot ship from this deposit
+E0014	Are you trying to transport negative volume of goods?
 \.
 
 
@@ -1127,6 +1214,8 @@ COPY uninadelivery.operator (email, businessmail) FROM stdin;
 --
 
 COPY uninadelivery.product (category, name, supplier, description, packagesizeliters, isfragile, price) FROM stdin;
+Cancelleria	Penna	Bic	La famosa Penna nera della Bic che migliorera la tua Cancelleria a casa.	0.5	\N	1.00
+Cancelleria	Gomma	Bic	La famosa gomma nera della bic che migliorera la tua cancelleria a casa.	0.8	\N	1.00
 \.
 
 
@@ -1166,7 +1255,7 @@ COPY uninadelivery.transport (transportid, occupiedspace, maxcapacity, isavailab
 -- Name: Order_orderid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: zgenny
 --
 
-SELECT pg_catalog.setval('uninadelivery."Order_orderid_seq"', 1, false);
+SELECT pg_catalog.setval('uninadelivery."Order_orderid_seq"', 2, true);
 
 
 --
@@ -1263,6 +1352,14 @@ ALTER TABLE ONLY uninadelivery.deposit
 
 
 --
+-- Name: shipment onlyonetravelperday; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
+--
+
+ALTER TABLE ONLY uninadelivery.shipment
+    ADD CONSTRAINT onlyonetravelperday UNIQUE (shippingdate, transportid);
+
+
+--
 -- Name: drives onlyonetravelperdaydriver; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
 --
 
@@ -1316,6 +1413,13 @@ ALTER TABLE ONLY uninadelivery.shipment
 
 ALTER TABLE ONLY uninadelivery.transport
     ADD CONSTRAINT transport_pk PRIMARY KEY (transportid);
+
+
+--
+-- Name: transport correctoccupiedspaceforshipment_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER correctoccupiedspaceforshipment_up BEFORE UPDATE ON uninadelivery.transport FOR EACH ROW EXECUTE FUNCTION uninadelivery.correctoccupiedspaceforshipment_func();
 
 
 --
@@ -1392,7 +1496,7 @@ CREATE TRIGGER isaccountreachable_up BEFORE UPDATE ON uninadelivery.account FOR 
 -- Name: account isaddressforsomethingspecificaccount_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER isaddressforsomethingspecificaccount_in BEFORE INSERT ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func();
+CREATE TRIGGER isaddressforsomethingspecificaccount_in BEFORE INSERT ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func('Deposit');
 
 
 --
@@ -1442,6 +1546,20 @@ CREATE TRIGGER isshipmentassignedtovalidtransport_in BEFORE INSERT ON uninadeliv
 --
 
 CREATE TRIGGER isshipmentassignedtovalidtransport_up BEFORE UPDATE ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentassignedtovalidtransport_func();
+
+
+--
+-- Name: ships isshipmentcontainingvalidorders_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER isshipmentcontainingvalidorders_in BEFORE INSERT ON uninadelivery.ships FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentcontainingvalidorders_func();
+
+
+--
+-- Name: ships isshipmentcontainingvalidorders_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER isshipmentcontainingvalidorders_up BEFORE UPDATE ON uninadelivery.ships FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentcontainingvalidorders_func();
 
 
 --
@@ -1605,6 +1723,14 @@ ALTER TABLE ONLY uninadelivery.drives
 
 ALTER TABLE ONLY uninadelivery."Order"
     ADD CONSTRAINT order_fk FOREIGN KEY (email) REFERENCES uninadelivery.account(email) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- Name: Order order_fk_product; Type: FK CONSTRAINT; Schema: uninadelivery; Owner: zgenny
+--
+
+ALTER TABLE ONLY uninadelivery."Order"
+    ADD CONSTRAINT order_fk_product FOREIGN KEY (name, supplier) REFERENCES uninadelivery.product(name, supplier);
 
 
 --

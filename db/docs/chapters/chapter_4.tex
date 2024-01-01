@@ -145,9 +145,9 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Deposit}}]
   CREATE TABLE Deposit (
     DepositID SERIAL NOT NULL,
-    OccupiedSpace real NOT NULL,
+    OccupiedSpace real NOT NULL DEFAULT 0,
     MaxCapacity real NOT NULL,
-    DepositType DepositType,
+    DepositType DepositType NOT NULL,
     AddressNo alphNumString NOT NULL,
     Street alphNumString NOT NULL,
     ZipCode numericString NOT NULL,
@@ -174,7 +174,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Transport}}]
   CREATE TABLE Transport (
     TransportID Serial NOT NULL,
-    OccupiedSpace real NOT NULL,
+    OccupiedSpace real NOT NULL DEFAULT 0,
     MaxCapacity real NOT NULL,
     IsAvailable boolean, 
     TransportType TransportType NOT NULL,
@@ -228,6 +228,7 @@ ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES A
   ALTER TABLE Shipment ADD CONSTRAINT Shipment_pk PRIMARY KEY (ShipmentID);
   ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_startDeposit FOREIGN KEY (ShippedFrom) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE;
   ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_arrivalDeposit FOREIGN KEY (DirectedTo) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE shipment ADD CONSTRAINT onlyOneTravelPerDay UNIQUE ( ShippingDate, TransportID ) ;
   ALTER TABLE Shipment ADD CONSTRAINT checkDifferentStartEndDeposits CHECK (
     ShippedFrom <> DirectedTo
   );
@@ -561,8 +562,71 @@ Per questo vincolo è sufficiente controllare che, nel secondo caso di quelli tr
   $$ LANGUAGE plpgsql;
 \end{lstlisting}
 
-% TODO @zGenny last constraints require your update to be done, I can't write it now. Can you do it?
-% TODO @zGenny remember to add an 'ON UPDATE' VERSION for all trigger you make using the same function
+\subsection{Trigger per il vincolo \textbf{isShipmentContainingValidOrders}}
+
+Il vincolo si assicura che non venga spedito un prodotto da un deposito nel quale quest ultimo non sia presente.
+
+Il trigger controlla se esista una riga in \textbf{Stores} con lo stesso \textit{Name}, \textit{Supplier} e \textit{DepositID} della spedizione e che si cia una quantità maggiore o uguale a quella richiesta nella spedizione.
+
+Successivamente se tutto è andato bene, decrementa la quantità del prodotto nel deposito.
+
+\begin{lstlisting}[caption={Creazione errore personalizzato per \textbf{isShipmentContainingValidOrders}}]
+  INSERT INTO custom_error_messages VALUES (
+    'E0013','You cannot ship from this deposit'
+  );
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Creazione funzione \textbf{isShipmentContainingValidOrders_func}}]
+  CREATE OR REPLACE FUNCTION isShipmentContainingValidOrders_func()
+    RETURNS TRIGGER
+    AS $$
+    DECLARE
+    QTY stores.quantity%TYPE;
+    PName product.name%TYPE;
+    PSupply product.supplier%TYPE;
+    DID deposit.depositid%TYPE;
+
+    BEGIN 
+
+    SELECT quantity , name , supplier 
+      INTO QTY , PName , PSupply
+      FROM "Order" NATURAL JOIN PRODUCT
+      WHERE OrderID = NEW.OrderID;
+
+    SELECT shippedfrom
+      INTO DID
+      FROM shipment
+      WHERE shipmentID = NEW.shipmentID;
+
+    IF NOT EXISTS (
+      SELECT 1
+        FROM stores
+        WHERE depositid = DID AND name = PName AND supplier = PSupply AND quantity >= QTY
+    ) THEN
+      perform raise_custom_error('E0013');
+    END IF;
+
+    UPDATE stores
+      SET quantity = quantity - QTY
+      WHERE depositid = DID AND name = PName AND supplier = PSupply;
+
+    RETURN NEW;
+    END;
+
+$$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Creazione trigger \textbf{isShipmentContainingValidOrders}}]
+  CREATE OR REPLACE TRIGGER isShipmentContainingValidOrders_in
+  BEFORE INSERT ON ships
+  FOR EACH ROW
+  EXECUTE PROCEDURE isShipmentContainingValidOrders_func();
+
+  CREATE OR REPLACE TRIGGER isShipmentContainingValidOrders_up
+  BEFORE UPDATE ON ships
+  FOR EACH ROW
+  EXECUTE PROCEDURE isShipmentContainingValidOrders_func();
+\end{lstlisting}
 
 % TODO @zGenny @RiccardoElena basic structure of db should work just fine. we need to refine update and delete behaviour to maintain consistency
 % [ ] in particular about isshipmentdirectedincorrectareaaccount. We need to check for update in shipment to.
