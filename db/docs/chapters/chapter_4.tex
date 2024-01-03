@@ -192,11 +192,15 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
     TransportID integer NOT NULL,
     ZipCode numericString NOT NULL,
     Country letterString NOT NULL,
-    Date date
+    Date date NOT NULL,
+    OccupiedSpace real NOT NULL DEFAULT 0
   );
   ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE CASCADE ON UPDATE CASCADE;
   ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Area FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
   ALTER TABLE Covers ADD CONSTRAINT onlyOneAreaPerDay UNIQUE (TransportID, Date);
+  ALTER TABLE Covers ADD CONSTRAINT formatCoversOccupiedSpace CHECK (
+    OccupiedSpace >=0
+  );
 \end{lstlisting}
 
 \newpage
@@ -213,9 +217,6 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   ALTER TABLE Transport ADD CONSTRAINT Transport_fk FOREIGN KEY(DepositID) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE; 
   ALTER TABLE Transport ADD CONSTRAINT formatTransportMaxCapacity CHECK (
     MaxCapacity >0
-  );
-  ALTER TABLE Transport ADD CONSTRAINT formatTransportOccupiedSpace CHECK (
-    OccupiedSpace >=0
   );
   ALTER TABLE Transport ADD CONSTRAINT checkTransportFullness CHECK(
     OccupiedSpace <= MaxCapacity

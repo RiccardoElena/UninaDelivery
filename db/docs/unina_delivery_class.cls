@@ -180,7 +180,7 @@
   autogobble=true,
   mathescape=false,
   captionpos=b,
-  basicstyle=\linespread{1.2}\color{white!80!gray}\FiraCode\footnotesize,
+  basicstyle=\linespread{1.2}\color{white!80!gray}\FiraCode\fontsize{10pt}{11pt}\selectfont,
   numbers=left,
   numberstyle=\color{CONTRAST},
   xleftmargin=1cm,
