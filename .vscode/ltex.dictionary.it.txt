@@ -232,3 +232,4 @@ Handling
 customerrormessages
 function
 array
+Triggers
