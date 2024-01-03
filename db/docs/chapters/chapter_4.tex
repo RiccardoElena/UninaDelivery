@@ -1,6 +1,6 @@
-\chapter{Implementazione del Database}
+\chapter{Implementazione delle Tabelle}
 
-In conclusione si riportano le istruzioni per la creazione del database e la sua popolazione.
+In conclusione si riportano le istruzioni per l'implementazione fisica del database.
 
 Come DBMS provider si è scelto di utilizzare PostgreSQL, per la sua facilità di utilizzo e la sua affidabilità.
 
@@ -112,35 +112,20 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   );
 \end{lstlisting}
 
-\begin{lstlisting}[caption={Creazione della tabella \textbf{Product}}]
-  CREATE TABLE Product (
-    Category letterString NOT NULL,
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Stores}}]
+  CREATE TABLE Stores(
     Name text NOT NULL,
-    Supplier alphNumString NOT NULL,
-    Description text NOT NULL,
-    PackageSizeLiters real NOT NULL,
-    IsFragile boolean,
-    Price numeric(100,2)
+    Supplier text NOT NULL,
+    DepositID integer NOT NULL,
+    Quantity integer NOT NULL
   );
-  ALTER TABLE Product ADD CONSTRAINT Product_pk PRIMARY KEY (Name,Supplier);
-  ALTER TABLE Product ADD CONSTRAINT formatProductName CHECK(
-    Name ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]*$'
-  );
-  ALTER TABLE Product ADD CONSTRAINT formatProductDescription CHECK(
-    Description ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]*$'
-  );
-  ALTER TABLE Product ADD CONSTRAINT formatProductPackageSizeLiters CHECK(
-    PackageSizeLiters > 0
-  );
-  ALTER TABLE Product ADD CONSTRAINT formatProductPrice CHECK(
-    Price > 0
-  );
-  ALTER TABLE Product ADD CONSTRAINT checkProductDescriptionOnTopic CHECK(
-    (Description ILIKE ('% ' || Category || ' %')) AND (Description ILIKE ('% ' || Name || ' %')) AND (Description ILIKE ('% ' || Supplier || ' %'))
-  );
+  ALTER TABLE Stores ADD CONSTRAINT noDuplicateProductInDeposit UNIQUE (Name, Supplier, DepositID);
+  ALTER TABLE Stores ADD CONSTRAINT Stores_fk_Product FOREIGN KEY (Name, Supplier) REFERENCES Product(Name, Supplier) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Stores ADD CONSTRAINT Stores_fk_Deposit FOREIGN KEY (DepositID) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Stores ADD CONSTRAINT formatStoresQuantity CHECK(Quantity > 0);
 \end{lstlisting}
-% TODO define a trigger to avoid manual insertion of null name or supplier
 
+\newpage
 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Deposit}}]
   CREATE TABLE Deposit (
@@ -168,6 +153,50 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   );
   ALTER TABLE Deposit ADD CONSTRAINT Deposit_fk FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
   ALTER TABLE deposit ADD CONSTRAINT onlyOneDepositPerAddress UNIQUE(AddressNo, Street, ZipCode, Country);
+\end{lstlisting}
+
+\newpage
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Product}}]
+  CREATE TABLE Product (
+    Category letterString NOT NULL,
+    Name text NOT NULL,
+    Supplier alphNumString NOT NULL,
+    Description text NOT NULL,
+    PackageSizeLiters real NOT NULL,
+    IsFragile boolean,
+    Price numeric(100,2)
+  );
+  ALTER TABLE Product ADD CONSTRAINT Product_pk PRIMARY KEY (Name,Supplier);
+  ALTER TABLE Product ADD CONSTRAINT formatProductName CHECK(
+    Name ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]*$'
+  );
+  ALTER TABLE Product ADD CONSTRAINT formatProductDescription CHECK(
+    Description ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]*$'
+  );
+  ALTER TABLE Product ADD CONSTRAINT formatProductPackageSizeLiters CHECK(
+    PackageSizeLiters > 0
+  );
+  ALTER TABLE Product ADD CONSTRAINT formatProductPrice CHECK(
+    Price > 0
+  );
+  ALTER TABLE Product ADD CONSTRAINT checkProductDescriptionOnTopic CHECK(
+    (Description ILIKE ('% ' || Category || '%')) AND 
+    (Description ILIKE ('% ' || Name || '%')) AND 
+    (Description ILIKE ('% ' || Supplier || '%'))
+  )
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Covers}}]
+  CREATE TABLE Covers (
+    TransportID integer NOT NULL,
+    ZipCode numericString NOT NULL,
+    Country letterString NOT NULL,
+    Date date
+  );
+  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Area FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Covers ADD CONSTRAINT onlyOneAreaPerDay UNIQUE (TransportID, Date);
 \end{lstlisting}
 
 \newpage
@@ -202,16 +231,15 @@ ALTER TABLE Operator ADD CONSTRAINT Operator_pk PRIMARY KEY (BusinessMail);
 ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES Account(Email) ON DELETE CASCADE ON UPDATE CASCADE;
 \end{lstlisting}
 
-\begin{lstlisting}[caption={Creazione della tabella \textbf{Covers}}]
-  CREATE TABLE Covers (
-    TransportID integer NOT NULL,
-    ZipCode numericString NOT NULL,
-    Country letterString NOT NULL,
-    Date date
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Ships}}]
+  CREATE TABLE Ships ( 
+    ShipmentID integer NOT NULL,
+    OrderID integer NOT NULL
   );
-  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE CASCADE ON UPDATE CASCADE;
-  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Area FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
-  ALTER TABLE Covers ADD CONSTRAINT onlyOneAreaPerDay UNIQUE (TransportID, Date);
+  ALTER TABLE Ships ADD CONSTRAINT noDuplicateOrderInShipment UNIQUE (ShipmentID, OrderID);
+  ALTER TABLE Ships ADD CONSTRAINT Ships_fk_Shipment FOREIGN KEY (ShipmentID) REFERENCES Shipment(ShipmentID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Ships ADD CONSTRAINT Ships_fk_Order FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID) ON DELETE CASCADE ON UPDATE CASCADE;
 \end{lstlisting}
 
 \newpage
@@ -239,17 +267,6 @@ ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES A
   ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_operator FOREIGN KEY (BusinessMail) REFERENCES Operator(Businessmail) ON DELETE CASCADE ON UPDATE CASCADE;
 \end{lstlisting} % TODO make a trigger that block delete operator if exists unfinsihed shipment and set false to transport on his delete
 
-\begin{lstlisting}[caption={Creazione della tabella \textbf{Ships}}]
-  CREATE TABLE Ships ( 
-    ShipmentID integer NOT NULL,
-    OrderID integer NOT NULL
-  );
-  ALTER TABLE Ships ADD CONSTRAINT noDuplicateOrderInShipment UNIQUE (ShipmentID, OrderID);
-  ALTER TABLE Ships ADD CONSTRAINT Ships_fk_Shipment FOREIGN KEY (ShipmentID) REFERENCES Shipment(ShipmentID) ON DELETE CASCADE ON UPDATE CASCADE;
-  ALTER TABLE Ships ADD CONSTRAINT Ships_fk_Order FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID) ON DELETE CASCADE ON UPDATE CASCADE;
-\end{lstlisting}
-
-\newpage
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Driver}}]
   CREATE TABLE Driver (
     BusinessMail emailString NOT NULL,
@@ -263,6 +280,8 @@ ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES A
   ALTER TABLE Driver ADD CONSTRAINT Driver_fk_Deposit FOREIGN KEY (DepositID) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE;
 \end{lstlisting}
 
+\newpage
+
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Drives}}]
   CREATE TABLE Drives(
     TransportID integer NOT NULL,
@@ -274,359 +293,3 @@ ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES A
   ALTER TABLE Drives ADD CONSTRAINT onlyOneTravelPerDayTransport UNIQUE (TransportID, Date);
   ALTER TABLE Drives ADD CONSTRAINT onlyOneTravelPerDayDriver UNIQUE (BusinessMail, Date);
 \end{lstlisting}
-
-\begin{lstlisting}[caption={Creazione della tabella \textbf{Stores}}]
-  CREATE TABLE Stores(
-    Name text NOT NULL,
-    Supplier text NOT NULL,
-    DepositID integer NOT NULL,
-    Quantity integer NOT NULL
-  );
-  ALTER TABLE Stores ADD CONSTRAINT noDuplicateProductInDeposit UNIQUE (Name, Supplier, DepositID);
-  ALTER TABLE Stores ADD CONSTRAINT Stores_fk_Product FOREIGN KEY (Name, Supplier) REFERENCES Product(Name, Supplier) ON DELETE CASCADE ON UPDATE CASCADE;
-  ALTER TABLE Stores ADD CONSTRAINT Stores_fk_Deposit FOREIGN KEY (DepositID) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE;
-  ALTER TABLE Stores ADD CONSTRAINT formatStoresQuantity CHECK(Quantity > 0);
-\end{lstlisting}
-
-\section{Creazione di Trigger e Funzioni}
-
-Sono riportati alcuni dei trigger e delle funzioni creati per la gestione dei vincoli individuati e più in generale del database.
-
-Dei vari trigger riportati si farà riferimento alla sola versione per \lstinline{INSERT}, poiché la versione per \lstinline{UPDATE} è analoga.
-
-\subsection{Exception Handling}
-
-Per una gestione più pulita degli errori si è deciso di creare una funzione che lanciasse tutte le eccezioni personalizzate, ricavandole da un'apposita tabella \textbf{custom\_error\_messages}.
-
-Questa tabella si occupa di tener traccia dei codici di errore e dei messaggi di errore associati.
-
-\begin{lstlisting}[caption={Creazione della tabella \textbf{custom\_error\_messages}}]
-  CREATE TABLE custom_error_messages (
-    error_code integer NOT NULL PRIMARY KEY,
-    error_message text NOT NULL
-  );
-\end{lstlisting}
-
-\begin{lstlisting}[caption={Creazione della funzione per gestire le eccezioni}]
-  CREATE OR REPLACE FUNCTION raise_custom_error(p_error_code TEXT)
-  RETURNS VOID AS $$
-  DECLARE
-    v_error_message TEXT;
-  BEGIN
-    -- Find error message in the custom_error_messages table 
-    SELECT error_message INTO v_error_message
-    FROM custom_error_messages
-    WHERE error_code = p_error_code;
-  
-    -- Raise exception with the retrieved error message
-    RAISE EXCEPTION USING 
-              ERRCODE = p_error_code, 
-              MESSAGE = v_error_message;
-    
-    -- If the error code given does not exist in the table, raise an exception to notify the user
-    EXCEPTION
-      WHEN NO_DATA_FOUND THEN
-        RAISE EXCEPTION 'Error % not found', p_error_code;
-  END;
-  $$ LANGUAGE plpgsql;
-\end{lstlisting}
-
-Prima di ogni implementazione seguente, verranno riportati eventuali inserimenti nella tabella \textbf{custom\_error\_messages} per dare maggior contesto sulla gestione delle eccezioni interna ai frammenti di codice.
-
-\subsection{Trigger per il vincolo \textbf{isAddressForSomethingSpecific}}
-
-Per gestire questo vincolo sono necessari due trigger, uno per la tabella \textbf{Account} e uno per la tabella \textbf{Deposit}.
-
-Nonostante ciò, la funzione che dovranno eseguire è praticamente analoga, fatto salvo per dei dettagli inerenti alla tabella su cui si sta lavorando.
-
-Si avrà infatti in entrambi i casi che la funzione dovrà controllare nella tabella tra le due in cui non è chiamato se esistono righe con lo stesso \textit{AddressNo}, \textit{Street}, \textit{ZipCode} e \textit{Country}.
-
-Dovrà inoltre tenere di conto del tipo di deposito. Infatti se si sta lavorando su \textbf{Account} si dovranno escludere dalla ricerca i \textbf{Deposit} di tipo \textit{City}, mentre se si sta lavorando su \textbf{Deposit} si dovrà controllare che il tipo di deposito inserito non sia \textit{City}.
-
-Si può dunque utilizzare \textbf{SQL Dinamico} per generalizzare la funzione e utilizzarla in entrambi i trigger.
-
-Le \textit{trigger function} però non possono accettare argomenti in ingresso. Per ovviare a ciò si è utilizzata la variabile \lstinline{TG_ARGV}, un array speciale messo a disposizione da PostgreSQL che contiene gli argomenti passati alla funzione all'interno di un trigger.
-
-Iterando tra gli elementi di questo array si può ottenere il tipo di tabella su cui si sta lavorando e passarlo alla funzione.
-
-\begin{lstlisting}[caption={Creazione errori personalizzati per \textbf{isAddressForSomethingSpecific}}]
-  -- Insert custom error messages
-  INSERT INTO custom_error_messages VALUES 
-    ('E0002', 'This address is already occupied'),
-    ('E0003', 'Incompatible table in input');
-\end{lstlisting}
-
-\begin{lstlisting}[caption={Creazione dei trigger per il vincolo \textbf{isAddressForSomethingSpecific}}]
-  CREATE OR REPLACE TRIGGER isAddressForSomethingSpecificAccount_in
-  BEFORE INSERT ON Account
-  FOR EACH ROW
-  EXECUTE PROCEDURE isAddressForSomethingSpecific_func('Deposit');
-
-  CREATE OR REPLACE TRIGGER isAddressForSomethingSpecificDeposit_in
-  BEFORE INSERT ON Deposit
-  FOR EACH ROW
-  EXECUTE PROCEDURE isAddressForSomethingSpecific_func('Account');
-\end{lstlisting}
-
-\newpage
-\begin{lstlisting}[caption={Creazione della funzione \textbf{isAddressForSomethingSpecific\_func}}]
-  CREATE OR REPLACE FUNCTION isAddressForSomethingSpecific_func()
-  RETURNS TRIGGER
-  AS 
-  $$
-    DECLARE 
-      flag integer;
-      queryp1 text = 'SELECT COUNT(*) 
-                    FROM ';
-      queryp2 text = ' 
-                    WHERE (AddressNo = $1 AND 
-                          Street = $2 AND 
-                          ZipCode = $3 AND  
-                          Country = $4';
-      tableName text;
-  BEGIN
-      FOREACH tableName IN ARRAY TG_ARGV LOOP
-  
-        IF tableName = 'Deposit' THEN
-          queryp2 = queryp2 || ' AND DepositType <> ''City'' ';
-        ELSIF tableName = 'Account' THEN
-          IF NEW.DepositType = 'City' THEN
-            RETURN NEW;
-          END IF;
-        ELSE 
-          perform raise_custom_error('E0003');
-        END IF;
-            
-        queryp1 = queryp1 || tableName || queryp2 || ')';
-        EXECUTE queryp1 into flag USING NEW.AddressNo, NEW.Street, NEW.ZipCode, NEW.Country;
-        IF flag > 0 THEN
-          perform raise_custom_error('E0002');
-        END IF;
-      END LOOP;
-  
-      RETURN NEW;
-    END;
-  $$ LANGUAGE plpgsql;
-\end{lstlisting}
-
-\subsection{Trigger per il vincolo \textbf{isShipmentDirectedInCorrectArea}}
-
-Il vincolo è diviso in due casi, uno per le spedizioni dirette ai clienti e uno per le spedizioni dirette ai depositi.
-
-In entrambi i casi però è necessario controllare che il trasporto associato alla spedizione abbia in programma per la data di spedizione la copertura della zona di destinazione.
-
-In particolare il trasporto è adatto se non ha ancora zone programmate per quel giorno, oppure se ha come zona programmata proprio quella di destinazione.
-
-In tal senso è possibile implementare questo vincolo utilizzando un corretto \textit{Exception Handling}.
-
-Una volta recuperati i dati necessari a determinare la zona da coprire infatti possiamo dividere il problema in tre casi:
-
-\begin{enumerate}
-  \item Il trasporto non ha zone programmate per quel giorno: la spedizione è valida e va inserita la copertura per la zona della spedizione in \textbf{Covers}.
-  \item Il trasporto ha come zona programmata proprio quella della spedizione: la spedizione è valida e non va inserita nessuna copertura.
-  \item Il trasporto ha zone programmate per quel giorno ma non quella della spedizione: la spedizione non è valida e va lanciata un'eccezione.
-\end{enumerate}
-
-Possiamo notare ora che, fatta eccezione per il caso \(2\) risolvibile con un banale \lstinline{IF EXISTS}, gli altri due casi possono essere accorpati.
-
-Infatti grazie al vincolo di unicità \textbf{onlyOneAreaPerDay} possiamo non preoccuparci di controllare se il trasporto è già impegnato in altra zona nella data di spedizione prima di inserire, poichè se ne occuperà \textbf{onlyOneAreaPerDay} lanciando un eccezione.
-
-Trattando dunque separatamente il caso \(2\), che fortunamente è il più banale non dovendo fare nulla, possiamo accorpare i casi \(1\) e \(3\).
-
-Per fare ciò andiamo a definire una funzione che si occupi di inserire la copertura per la zona di destinazione della spedizione, e che lanci un'eccezione se il trasporto è già impegnato in altra zona nella data di spedizione.
-
-\begin{lstlisting}[caption={funzione per inserimento in \textbf{Covers}}]
-  INSERT INTO custom_error_messages
-      VALUES (
-        'E0006',
-        'Shipment assigned to a transport already occupied with diffrent location'
-      );
-  
-  CREATE OR REPLACE FUNCTION createCoversForShipment(Zc Covers.ZipCode%TYPE, Cy Covers.Country%TYPE, Tid Covers.transportId%TYPE, D Covers.Date%TYPE)
-  RETURNS VOID AS $$
-  BEGIN
-    -- Excluding Case 2 where nothig has to be done
-    IF NOT EXISTS (
-        SELECT 1
-        FROM Covers
-        WHERE ZipCode = ZC
-          AND Country = Cy
-          AND transportid = Tid
-          AND Date = D
-      ) THEN
-        -- Trying to insert the new cover
-        INSERT INTO Covers
-          VALUES (Tid, Zc, Cy, D);
-    END IF;
-    -- If It's Case 1 the function will end here
-  EXCEPTION
-    WHEN unique_violation THEN 
-      -- Otherwise if it's Case 3 an exception will be raised
-      perform raise_custom_error('E0006');
-  END;
-  $$ LANGUAGE plpgsql;
-\end{lstlisting}
-
-È necessario adesso individuare il modo di raccogliere i dati necessari alla funzione nei due casi descritti sopra.
-
-Nel caso in cui la spedizione sia diretta verso un deposito, i dati relativi alla zona da coprire sono accessibili direttamente con l'utilizzo della chiave esterna, mentre i dati realtivi a data e trasporto sono presenti nella riga da inserire.
-
-Per quanto riguarda spedizioni dirette ai clienti invece, i dati relativi alla zona da coprire vanno recuperati nella tabella \textbf{Account}, passando per la tabella \textbf{Order} tramite la tabella \textbf{Ships}.
-
-Avendo però \textbf{Ships} delle chiavi esterne verso \textbf{Order} e \textbf{Shipment}, non è possibile far attivare il trigger con un inserimento su \textbf{Shipment}, poiché questo stesso trigger dovrebbe andare a cercare i dati in \textbf{Ships} che non è ancora stata popolata.
-
-Di conseguenza è necessario che il trigger si attivi su \textbf{Ships}, recuperando eventualmente i dati da \textbf{Shipment}.
-
-Vediamo dunque prima i due trigger e successivamente le funzioni associate. 
-
-La seconda delle due inoltre chiamerà una funzione che implementa il vincolo \textbf{isCityDepositShippingToClient}. 
-
-Questo avviene in questa stessa \textit{trigger function} poiché l'evento di innesco è lo stesso, e quindi è possibile evitare di creare un ulteriore trigger.
-
-Per questo vincolo è sufficiente controllare che, nel secondo caso di quelli trattati l'\textbf{Account} sia nella stessa \textbf{City} del \textbf{Deposit} di partenza della spedizione. 
-
-\begin{lstlisting}[caption={Trigger per il vincolo \textbf{isShipmentDirectedInCorrectArea}}]
-  CREATE OR REPLACE TRIGGER isShipmentDirectedInCorrectAreaDeposit_in
-  BEFORE INSERT ON Shipment 
-  FOR EACH ROW 
-  EXECUTE PROCEDURE isShipmentDirectedInCorrectAreaDeposit_func();
-
-  CREATE OR REPLACE TRIGGER isShipmentDirectedInCorrectAreaAccount_in
-  BEFORE INSERT ON Ships
-  FOR EACH ROW 
-  EXECUTE PROCEDURE isShipmentDirectedInCorrectAreaAccount_func();
-\end{lstlisting}
-
-\begin{lstlisting}[caption={Funzione per le spedizioni verso depositi}]
-  CREATE OR REPLACE FUNCTION isShipmentDirectedInCorrectAreaDeposit_func() 
-  RETURNS TRIGGER AS $$
-  DECLARE 
-    ZCode Deposit.ZipCode%TYPE;
-    Cy Deposit.Country%TYPE;
-  BEGIN 
-    -- Assuring it's the correct case
-    IF NEW.DirectedTo IS NULL THEN 
-      RETURN NEW;
-    END IF;
-
-    -- Retrieving the data needed
-    SELECT ZipCode, Country 
-    INTO ZCode, Cy
-    FROM deposit
-    WHERE depositid = NEW.DirectedTo;
-
-    -- Calling the function to insert the cover
-    perform createCoversForShipment(ZCode, Cy, NEW.transportId, NEW.ShippingDate);
-    RETURN NEW;
-
-  END;
-  $$ LANGUAGE plpgsql;
-\end{lstlisting}
-
-\begin{lstlisting}[caption={Funzione per le spedizioni verso clienti}]
-  CREATE OR REPLACE FUNCTION isShipmentDirectedInCorrectAreaAccount_func() 
-  RETURNS TRIGGER AS $$
-  DECLARE 
-    ZCode Account.ZipCode%TYPE;
-    Cy Account.Country%TYPE;
-    Tid Shipment.transportId%TYPE;
-    D Shipment.ShippingDate%TYPE;
-  BEGIN 
-    -- Assuring it's the correct case
-    IF EXISTS (
-      SELECT 1
-      FROM Shipment
-      WHERE ShipmentID=NEW.ShipmentID AND DirectedTo IS NOT NULL
-    ) THEN
-      RETURN NEW;
-    END IF;
-  
-    -- Retrieving the data needed
-    SELECT ZipCode, Country 
-    INTO ZCode, Cy
-    FROM "Order" NATURAL JOIN Account
-    WHERE OrderId = NEW.OrderID;
-
-    -- calling the function to check isCityDepositShippingToClient constraint
-    perform isCityDepositShippingToClient(ZCode, Cy, NEW.shippedfrom);
-  
-    SELECT transportId, ShippingDate
-    INTO Tid, D
-    FROM shipment
-    WHERE shipmentid = NEW.shipmentid;
-  
-    -- Calling the function to insert the cover
-    perform createCoversForShipment(ZCode, Cy, Tid, D);
-    RETURN NEW;
-  END;
-  $$ LANGUAGE plpgsql;
-\end{lstlisting}
-
-\subsection{Trigger per il vincolo \textbf{isShipmentContainingValidOrders}}
-
-Il vincolo si assicura che non venga spedito un prodotto da un deposito nel quale quest ultimo non sia presente.
-
-Il trigger controlla se esista una riga in \textbf{Stores} con lo stesso \textit{Name}, \textit{Supplier} e \textit{DepositID} della spedizione e che si cia una quantità maggiore o uguale a quella richiesta nella spedizione.
-
-Successivamente se tutto è andato bene, decrementa la quantità del prodotto nel deposito.
-
-\begin{lstlisting}[caption={Creazione errore personalizzato per \textbf{isShipmentContainingValidOrders}}]
-  INSERT INTO custom_error_messages VALUES (
-    'E0013','You cannot ship from this deposit'
-  );
-\end{lstlisting}
-
-\begin{lstlisting}[caption={Creazione funzione \textbf{isShipmentContainingValidOrders_func}}]
-  CREATE OR REPLACE FUNCTION isShipmentContainingValidOrders_func()
-    RETURNS TRIGGER
-    AS $$
-    DECLARE
-    QTY stores.quantity%TYPE;
-    PName product.name%TYPE;
-    PSupply product.supplier%TYPE;
-    DID deposit.depositid%TYPE;
-
-    BEGIN 
-
-    SELECT quantity , name , supplier 
-      INTO QTY , PName , PSupply
-      FROM "Order" NATURAL JOIN PRODUCT
-      WHERE OrderID = NEW.OrderID;
-
-    SELECT shippedfrom
-      INTO DID
-      FROM shipment
-      WHERE shipmentID = NEW.shipmentID;
-
-    IF NOT EXISTS (
-      SELECT 1
-        FROM stores
-        WHERE depositid = DID AND name = PName AND supplier = PSupply AND quantity >= QTY
-    ) THEN
-      perform raise_custom_error('E0013');
-    END IF;
-
-    UPDATE stores
-      SET quantity = quantity - QTY
-      WHERE depositid = DID AND name = PName AND supplier = PSupply;
-
-    RETURN NEW;
-    END;
-
-$$ LANGUAGE plpgsql;
-\end{lstlisting}
-
-\begin{lstlisting}[caption={Creazione trigger \textbf{isShipmentContainingValidOrders}}]
-  CREATE OR REPLACE TRIGGER isShipmentContainingValidOrders_in
-  BEFORE INSERT ON ships
-  FOR EACH ROW
-  EXECUTE PROCEDURE isShipmentContainingValidOrders_func();
-
-  CREATE OR REPLACE TRIGGER isShipmentContainingValidOrders_up
-  BEFORE UPDATE ON ships
-  FOR EACH ROW
-  EXECUTE PROCEDURE isShipmentContainingValidOrders_func();
-\end{lstlisting}
-
-% TODO @zGenny @RiccardoElena basic structure of db should work just fine. we need to refine update and delete behaviour to maintain consistency
-% [ ] in particular about isshipmentdirectedincorrectareaaccount. We need to check for update in shipment to.
