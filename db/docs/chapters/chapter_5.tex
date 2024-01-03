@@ -183,6 +183,7 @@ poiché l'evento d'innesco è lo stesso, nonché i dati necessari alla sua imple
 
 Vediamo dunque innanzitutto la funzione che implementa il vincolo \textbf{isCityDepositShippingToClient}, per poi passare all'implementazione dei trigger e delle trigger function.
 
+\newpage
 \begin{lstlisting}[caption={Funzione per il vincolo \textbf{isCityDepositShippingToClient}}]
   CREATE OR REPLACE FUNCTION isCityDepositShippingToClient(Zc Covers.ZipCode%TYPE, Cy Covers.Country%TYPE, Did Covers.transportId%TYPE)
   RETURNS VOID AS $$
@@ -196,17 +197,19 @@ Vediamo dunque innanzitutto la funzione che implementa il vincolo \textbf{isCity
       d_worldzone Area.WorldZone%TYPE;
     BEGIN
 
+      -- retriving account location data
       SELECT City, State, WorldZone
       INTO a_city, a_state, a_worldzone
       FROM Area
       WHERE ZipCode=Zc AND Country=Cy;
 
+      -- retriving deposit location data
       SELECT City, State, Country, WorldZone
       INTO d_city, d_state, d_country, d_worldzone
       FROM deposit NATURAL JOIN area
       WHERE depositid=Did;
 
-
+      -- checking if cities matches
       IF d_city <> a_city OR d_state <> a_state OR d_country <> Cy OR d_worldzone <> a_worldd_worldzone THEN
         perform raise_custom_error('E0008');
       END IF; 
@@ -300,14 +303,6 @@ Vediamo in ultimo le \textit{trigger function} che implementano il vincolo.
   $$ LANGUAGE plpgsql;
 \end{lstlisting}
 
-% TODO @RiccardoElena insert here the other trigger activated on Ships
-
-
-\section{Triggers per \textit{UPDATE ON Ships}}
-
-Avendo questo vincolo la particolarità di essere attivato da due tabelle diverse in casi differenti, non è sufficiente la \textit{trigger function} definita per l'\lstinline{INSERT} per gestire anche gli \lstinline{UPDATE}.
-
-Infatti nel caso si andasse a modificare una \textbf{Shipment} si potrebbero alterare dati utili alla funzione \textbf{isShipmentDirectedInCorrectAreaAccount\_func}, che non verrebbe richiamata, o ancora peggio si potrebbe passare da un caso all'altro. 
 
 \section{\textbf{isShipmentContainingValidOrders}}
 
@@ -324,6 +319,8 @@ Successivamente se tutto è andato bene, decrementa la quantità del prodotto ne
   EXECUTE PROCEDURE isShipmentContainingValidOrders_func();
 \end{lstlisting}
 
+\newpage
+
 \begin{lstlisting}[caption={Creazione funzione \textbf{isShipmentContainingValidOrders\_func}}]
   CREATE OR REPLACE FUNCTION isShipmentContainingValidOrders_func()
   RETURNS TRIGGER AS $$
@@ -333,33 +330,247 @@ Successivamente se tutto è andato bene, decrementa la quantità del prodotto ne
     PSupply product.supplier%TYPE;
     DID deposit.depositid%TYPE;
   BEGIN 
+    -- retrieving order data
     SELECT quantity , name , supplier 
       INTO QTY , PName , PSupply
       FROM "Order" NATURAL JOIN PRODUCT
       WHERE OrderID = NEW.OrderID;
-
+    
+    -- retrieving deposit data
     SELECT shippedfrom
       INTO DID
       FROM shipment
       WHERE shipmentID = NEW.shipmentID;
-
+  
+    -- checking if the deposit has enough quantity of the product
     IF NOT EXISTS (
-      SELECT 1
-        FROM stores
-        WHERE depositid = DID AND name = PName AND supplier = PSupply AND quantity >= QTY
-    ) THEN
+        SELECT 1
+          FROM stores
+          WHERE depositid = DID AND 
+                name = PName AND 
+                supplier = PSupply 
+                AND quantity >= QTY
+      ) THEN
+      -- if not, raise an exception
       perform raise_custom_error('E0013');
     END IF;
-
+    
+    -- Otherwise decrement the quantity of the product in the deposit
     UPDATE stores
       SET quantity = quantity - QTY
-      WHERE depositid = DID AND name = PName AND supplier = PSupply;
-
+      WHERE depositid = DID AND 
+            name = PName AND 
+            supplier = PSupply;
+    
     RETURN NEW;
   END;
   $$ LANGUAGE plpgsql;
 \end{lstlisting}
 
+\newpage
+\section{Triggers per \textit{UPDATE ON Shipment}}
 
+Gli ultimi due trigger visti sono entrambi vincoli che, completamente o in parte, sono relativi alla tabella \textbf{Shipment} ma che si attivano sulla tabella \textbf{Ships}.
+
+In questi due casi specifici inoltre, la specifica \lstinline{ON UPDATE CASCADE} della \lstinline{FOREIGN KEY} non è sufficiente a garantire la consistenza dei dati in caso di aggiornamento della tabella \textbf{Shipment}, facendo i trigger affidamento a campi diversi da \textbf{ShipmentID}.
+
+Infatti nel caso si andasse a modificare una \textbf{Shipment} si potrebbero alterare dati utili alla funzione \textbf{isShipmentDirectedInCorrectAreaAccount\_func}, che non verrebbe richiamata, o ancora peggio si potrebbe passare da un caso all'altro. 
+
+Di conseguenza, per l'\lstinline{UPDATE ON} \textbf{Shipment} è necessario definire una funzione ad hoc che si occupi di controllare i vincoli precedenti sia per quanto riguarda \textbf{Shipment} che per quanto riguarda \textbf{Ships}.
+
+In particolare questa funzione, dopo aver controllata che la spedizione non sia ancora arrivata, andrà a chiamare due \textbf{procedure} che si occuperanno di verificare i vincoli visti in precedenza, fornendo alla funzione i dati necessari alla modifica di altre tabelle se non ci sono stati errori.
+\subsection{Procedura \textbf{checkCorrectArea}}
+
+Questa procedura si occupa di verificare che l'\textbf{Area} in cui la \textbf{Shipment} è diretta sia ancora coerente coi dati inseriti.
+
+Per fare ciò la funzione si avvale di un altra funzione analoga a \textbf{createCoversForShipment} ma che si occupa dell'update, ovvero \textbf{updateCoversForShipment}.
+
+I parametri necessari a questa procedura sono tutti recuperabili grazie all'utilizzo del record \textbf{NEW}, tranne che per quelli relativi ad \textbf{Area}, che dipendono dal caso in cui ci troviamo.
+
+Nel caso la spedizione sia diretta verso un \textbf{Deposit}, sarà sufficiente recuperare i dati relativi all'\textbf{Area} del deposito \textbf{DirectedTo}.
+
+Altrimenti, sarà necessario innanzitutto controllare se sono stati già inseriti ordini per quella spedizione. In caso negativo l'unica cosa da fare sarà eliminare eventuali coperture precedenti non più valide.
+Se invece esistono già degli ordini relativi a quella spedizione, bisognerà innanzitutto controllare che tutti gli ordini siano diretti verso clienti nella stessa area, potendo i mezzi di trasporto coprirne una sola per spedizione.
+
+A quel punto sarà necessario controllare che il deposito di partenza si trovi nella stessa città di destinazione della spedizione, e in caso negativo lanciare l'eccezione utilizzata in \textbf{isCityDepositShippingToClient}.
+Ciò è fatto tramite l'utilizzo della funzione \textbf{isSameCity} che, dati in input le \lstinline{PRIMARY KEY} di due \textbf{Area} verifica che appartengano alla stessa città.
+
+I dati relativi all'\textbf{Area} di destinazione verranno infine restituiti dalla procedura tramite \lstinline{OUT} per permettere alla funzione di aggiornare i dati di \textbf{Covers}.
+\newpage
+\begin{lstlisting}[caption={Procedure \textbf{checkCorrectArea}}]
+  CREATE OR REPLACE PROCEDURE checkCorrectArea( New IN Shipment, Zcode OUT area.zipcode%TYPE, Cy OUT area.country%TYPE, coverNeedsUpdate OUT BOOLEAN)
+  AS $$
+  DECLARE
+    Zcode2 area.zipcode%TYPE;
+    Cy2 area.country%TYPE;
+  BEGIN 
+    IF NEW.DirectedTo IS NOT NULL THEN
+      SELECT ZipCode, Country 
+        INTO ZCode, Cy
+        FROM Deposit
+        WHERE DepositID = NEW.DirectedTo;
+    ELSE
+    -- for shipments to clients, all orders must be directed to the same area
+    -- at first I check if there are at least one order for that shipment
+      IF NOT EXISTS (
+        SELECT 1
+          FROM Ships 
+          WHERE ShipmentID = NEW.ShipmentID
+      ) THEN
+        -- if not, I don't have to update the covers table
+        coverNeedsUpdate = FALSE;
+      ELSE
+        -- When it's assured that at least one order exists I can pick one random order and check if all the others are directed to the same area
+        SELECT ZipCode, Country 
+          INTO ZCode, Cy
+          FROM Ships NATURAL JOIN "Order" NATURAL JOIN Account
+          WHERE ShipmentID = NEW.ShipmentID
+          LIMIT 1;
+        IF EXISTS (
+          SELECT 1
+            FROM Ships NATURAL JOIN "Order" NATURAL JOIN Account
+            WHERE ShipmentID = NEW.ShipmentID AND
+                  (ZipCode <> ZCode OR Country <> Cy)
+        ) THEN
+          perform raise_custom_error('E0016');
+        END IF;
+        -- now, I have to check if the new deposit is in the same city
+        SELECT ZipCode, Country 
+          INTO ZCode2, Cy2
+          FROM deposit
+          WHERE DepositID = NEW.ShippedFrom;
+        IF NOT isSameCity(ZCode, Cy, ZCode2, Cy2) THEN
+          perform raise_custom_error('E0008');
+        END IF;
+      END IF;
+    END IF;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{Verifica Valid Orders}
+
+La seconda procedura si occupa di controllare che la spedizione contenga ancora ordini validi, ovvero che il \textit{nuovo \textbf{ShippedFrom}} contenga tutti i prodotti in quantità sufficiente per essere spediti.
+
+Per fare ciò è sufficiente controllare che per ogni prodotto presente nella spedizione, il deposito di partenza abbia una quantità sufficiente a soddisfare quella richiesta, in caso contrario si dovrà sollevare un eccezione.
+
+Anche in questo caso tutti i dati necessari alla procedura sono recuperabili dal record \textbf{NEW}, non dovendo restituire nulla in questo caso alla funzione, dovendo in ogni caso reiterare tra i prodotti per aggioranre \textbf{Stores}.
+
+\begin{lstlisting}[caption={Procedure \textbf{checkValidOrder}}]
+  CREATE OR REPLACE PROCEDURE checkValidOrder( New IN Shipment)
+  LANGUAGE plpgsql
+  AS $$
+    DECLARE
+      QTY stores.quantity%TYPE;
+      PName product.name%TYPE;
+      PSupply product.supplier%TYPE;
+      shipped_order Ships%ROWTYPE;
+    BEGIN
+      FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
+  
+          -- for each order ...
+          SELECT quantity , name , supplier 
+            INTO QTY , PName , PSupply
+            FROM "Order" NATURAL JOIN PRODUCT
+            WHERE OrderID = shipped_order.OrderID;
+  
+          -- the new deposit has to have enough products to satisfy the order?
+          IF NOT EXISTS (
+            SELECT 1
+              FROM stores
+              WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = PSupply AND quantity >= QTY
+          ) THEN
+            -- if not, raise error
+            perform raise_custom_error('E0015');
+          END IF;
+        END LOOP;
+    END;
+  $$;
+\end{lstlisting}
+
+\newpage
+\subsection{Aggiornamenti conclusivi}
+
+Conclusi tutti controlli, se nessuna eccezione è stata sollevata, è necessario aggiornare le tabelle \textbf{Covers} e \textbf{Stores}.
+
+\begin{lstlisting}[caption={Sezione di aggiornamento finale}]
+  -- if everything is ok, function can procede to the updates
+  IF coverNeedsUpdate THEN
+    -- try to update the covers table, if fails, raise error
+    -- In case shipment is directed to clients ZCode and Cy are the one from clients, otherwise they are the one from directedTo deposit
+    perform updateCoversForShipment( OLD.ShippingDate, OLD.TransportID, ZCode, Cy, NEW.ShippingDate, NEW.TransportID);
+  ELSE 
+    DELETE FROM covers 
+            WHERE shippingdate = OLD.ShippingDate AND 
+                  transportid = OLD.TransportID;
+  END IF;
+
+  FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
+      -- for each order ...
+      SELECT quantity , name , supplier 
+        INTO QTY , PName , PSupply
+        FROM "Order" NATURAL JOIN PRODUCT
+        WHERE OrderID = shipped_order.OrderID;
+
+      -- restore the products in the old deposit
+      UPDATE stores
+        SET quantity = quantity + QTY
+        WHERE depositid = OLD.ShippedFrom AND name = PName AND supplier = PSupply;
+      -- remove the products from the new deposit
+      UPDATE stores
+        SET quantity = quantity - QTY
+        WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = PSupply;
+  END LOOP;
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[caption={Funzione completa}]
+  CREATE OR REPLACE FUNCTION uninadelivery.shipmentdataconsistency_func() RETURNS trigger
+  AS $$
+  DECLARE
+    QTY stores.quantity%TYPE;
+    PName product.name%TYPE;
+    PSupply product.supplier%TYPE;
+    ZCode area.zipcode%TYPE;
+    Cy area.country%TYPE;
+    coverNeedsUpdate BOOLEAN = TRUE;
+    shipped_order Ships%ROWTYPE;
+  BEGIN
+    -- if the shipment has already arrived, cannot be modified
+    IF OLD.HasArrived = TRUE THEN
+      perform raise_custom_error('E0017');
+    END IF;
+    -- check for correct area
+    call checkCorrectArea(NEW, OLD, ZCode, Cy, coverNeedsUpdate);
+    -- if the starting deposit has changed, check for order validity
+    IF NEW.ShippedFrom <> OLD.ShippedFrom THEN
+      call checkValidOrder(NEW);
+    END IF;
+    -- if everything is ok, function can procede to the updates
+    IF coverNeedsUpdate THEN
+      -- try to update the covers table, if fails, raise error
+      perform updateCoversForShipment( OLD.ShippingDate, OLD.TransportID, ZCode, Cy, NEW.ShippingDate, NEW.TransportID);
+    ELSE 
+      DELETE FROM covers 
+              WHERE shippingdate = OLD.ShippingDate AND 
+                    transportid = OLD.TransportID;
+    END IF;
+    FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
+        SELECT quantity , name , supplier 
+          INTO QTY , PName , PSupply
+          FROM "Order" NATURAL JOIN PRODUCT
+          WHERE OrderID = shipped_order.OrderID;
+        -- restore the products in the old deposit
+        UPDATE stores
+          SET quantity = quantity + QTY
+          WHERE depositid = OLD.ShippedFrom AND name = PName AND supplier = PSupply;
+        -- remove the products from the new deposit
+        UPDATE stores
+          SET quantity = quantity - QTY
+          WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = PSupply;
+    END LOOP;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
 % TODO @zGenny @RiccardoElena basic structure of db should work just fine. we need to refine update and delete behaviour to maintain consistency
-% [ ] in particular about isshipmentdirectedincorrectareaaccount. We need to check for update in shipment too.
+% [ ] in particular the triggger to autmatically update occupiedspace in deposit or transport
