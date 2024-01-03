@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 14.10 (Ubuntu 14.10-0ubuntu0.22.04.1)
--- Dumped by pg_dump version 14.10 (Ubuntu 14.10-0ubuntu0.22.04.1)
+-- Dumped from database version 15.4 (Homebrew)
+-- Dumped by pg_dump version 15.4 (Homebrew)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -464,17 +464,19 @@ DECLARE
   d_worldzone Area.WorldZone%TYPE;
 BEGIN
 
+  -- retriving account location data
   SELECT City, State, WorldZone
   INTO a_city, a_state, a_worldzone
   FROM Area
   WHERE ZipCode=Zc AND Country=Cy;
 
+  -- retriving deposit location data
   SELECT City, State, Country, WorldZone
   INTO d_city, d_state, d_country, d_worldzone
   FROM deposit NATURAL JOIN area
   WHERE depositid=Did;
 
-
+  -- checking if cities matches
   IF d_city <> a_city OR d_state <> a_state OR d_country <> Cy OR d_worldzone <> a_worldd_worldzone THEN
     perform raise_custom_error('E0008');
   END IF; 
@@ -515,6 +517,44 @@ $$;
 
 
 ALTER FUNCTION uninadelivery.isdriverassignedtovalidtransport_func() OWNER TO zgenny;
+
+--
+-- Name: issamecity(uninadelivery.numericstring, uninadelivery.letterstring, uninadelivery.numericstring, uninadelivery.letterstring); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.issamecity(zcode1 uninadelivery.numericstring, cy1 uninadelivery.letterstring, zcode2 uninadelivery.numericstring, cy2 uninadelivery.letterstring) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  C1 area.city%TYPE;
+  C2 area.city%TYPE;
+  S1 area.state%TYPE;
+  S2 area.state%TYPE;
+  Wz1 area.worldzone%TYPE;
+  Wz2 area.worldzone%TYPE;
+BEGIN
+
+  -- being the couple (zipcode, country) unique, they're enough to identify a city
+  SELECT city, state, worldzone
+    INTO C1, S1, Wz1
+    FROM area
+    WHERE zipcode = ZCode1 AND country = Cy1;
+
+  SELECT city, state, worldzone
+    INTO C2, S2, Wz2
+    FROM area
+    WHERE zipcode = ZCode2 AND country = Cy2;
+
+  IF C1 = C2 AND S1 = S2 AND Wz1 = Wz2 THEN
+    RETURN TRUE;
+  ELSE
+    RETURN FALSE;
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.issamecity(zcode1 uninadelivery.numericstring, cy1 uninadelivery.letterstring, zcode2 uninadelivery.numericstring, cy2 uninadelivery.letterstring) OWNER TO riccardoelena;
 
 --
 -- Name: isshipmentassignedtovalidtransport_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
@@ -599,33 +639,36 @@ CREATE FUNCTION uninadelivery.isshipmentdirectedincorrectareaaccount_func() RETU
     ZCode Account.ZipCode%TYPE;
     Cy Account.Country%TYPE;
     Tid Shipment.transportId%TYPE;
-    D Shipment.ShippingDate%TYPE;
+    SDate Shipment.ShippingDate%TYPE;
+    Sdeposit Shipment.ShippedFrom%TYPE;
   BEGIN 
     -- Assuring it's the correct case
     IF EXISTS (
       SELECT 1
-      FROM Shipment
-      WHERE ShipmentID=NEW.ShipmentID AND DirectedTo IS NOT NULL
+        FROM Shipment
+        WHERE ShipmentID=NEW.ShipmentID AND DirectedTo IS NOT NULL
     ) THEN
       RETURN NEW;
     END IF;
-
+  
     -- Retrieving the data needed
     SELECT ZipCode, Country 
-    INTO ZCode, Cy
-    FROM "Order" NATURAL JOIN Account
-    WHERE OrderId = NEW.OrderID;
+      INTO ZCode, Cy
+      FROM "Order" NATURAL JOIN Account
+      WHERE OrderId = NEW.OrderID;
 
+      
+    SELECT transportId, ShippingDate, ShippedFrom
+      INTO Tid, Sdate, Sdeposit
+      FROM shipment
+      WHERE shipmentid = NEW.shipmentid;
+        
     -- calling the function to check isCityDepositShippingToClient constraint
-    perform isCityDepositShippingToClient(ZCode, Cy, NEW.shippedfrom);
-  
-    SELECT transportId, ShippingDate
-    INTO Tid, D
-    FROM shipment
-    WHERE shipmentid = NEW.shipmentid;
-  
+    perform isCityDepositShippingToClient(ZCode, Cy, Sdeposit);
+
     -- Calling the function to insert the cover
     perform createCoversForShipment(ZCode, Cy, Tid, D);
+    
     RETURN NEW;
   END;
   $$;
@@ -722,6 +765,127 @@ $$;
 
 
 ALTER FUNCTION uninadelivery.raise_custom_error(p_error_code text) OWNER TO zgenny;
+
+--
+-- Name: shipmentdataconsistency_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.shipmentdataconsistency_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  QTY stores.quantity%TYPE;
+  PName product.name%TYPE;
+  PSupply product.supplier%TYPE;
+  ZCode area.zipcode%TYPE;
+  Cy area.country%TYPE;
+  ZCode2 area.zipcode%TYPE;
+  Cy2 area.country%TYPE;
+  isCorrectCity BOOLEAN;
+  shipped_order Ships%ROWTYPE;
+BEGIN
+  -- if the shipment has already arrived, cannot be modified
+  IF OLD.HasArrived = TRUE THEN
+    perform raise_custom_error('E0017');
+  END IF;
+
+  -- I have to check if shipment is still directed to the correct area
+  IF NEW.DirectedTo IS NOT NULL THEN
+    SELECT ZipCode, Country 
+      INTO ZCode, Cy
+      FROM Deposit
+      WHERE DepositID = NEW.DirectedTo;
+  ELSE
+  -- if the shipment is now towards a client, all the orders have to be directed to the same zip code 
+
+    -- So I can pick one random order and check if all the others are directed to the same area
+    SELECT ZipCode, Country 
+      INTO ZCode, Cy
+      FROM Ships NATURAL JOIN "Order" NATURAL JOIN Account
+      WHERE ShipmentID = NEW.ShipmentID
+      LIMIT 1;
+
+    IF EXISTS (
+      SELECT 1
+        FROM Ships NATURAL JOIN "Order" NATURAL JOIN Account
+        WHERE ShipmentID = NEW.ShipmentID AND
+              (ZipCode <> ZCode OR Country <> Cy)
+    ) THEN
+      perform raise_custom_error('E0016');
+    END IF;
+
+    -- now, i I have to check if the new deposit is in the same city of the clients
+    SELECT ZipCode, Country 
+      INTO ZCode2, Cy2
+      FROM deposit
+      WHERE DepositID = NEW.ShippedFrom;
+
+    IF NOT isSameCity(ZCode, Cy, ZCode2, Cy2) THEN
+      perform raise_custom_error('E0008');
+    END IF;
+
+  END IF;
+
+  -- try to update the covers table, if fails, raise error
+  -- In case shipment is directed to clients ZCode and Cy are the one from clients, otherwise they are the one from directedTo deposit
+  perform updateCoversForShipment( OLD.ShippingDate, OLD.TransportID, ZCode, Cy, NEW.ShippingDate, NEW.TransportID);
+
+  
+  -- if the starting deposit has changed, i have to check if the new deposit has enough products to satisfy the orders
+  IF NEW.ShippedFrom <> OLD.ShippedFrom THEN
+
+    FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
+
+      -- for each order ...
+      SELECT quantity , name , supplier 
+        INTO QTY , PName , PSupply
+        FROM "Order" NATURAL JOIN PRODUCT
+        WHERE OrderID = shipped_order.OrderID;
+
+      -- the new deposit has to have enough products to satisfy the order?
+      IF NOT EXISTS (
+        SELECT 1
+          FROM stores
+          WHERE depositid = DID AND name = PName AND supplier = PSupply AND quantity >= QTY
+      ) THEN
+        -- if not, raise error
+        perform raise_custom_error('E0015');
+      END IF;
+    END LOOP;
+
+  END IF;
+
+  RETURN NEW;
+  
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.shipmentdataconsistency_func() OWNER TO riccardoelena;
+
+--
+-- Name: updatecoversforshipment(date, integer, uninadelivery.numericstring, uninadelivery.letterstring, date, integer); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.updatecoversforshipment(odate date, otransportid integer, nzc uninadelivery.numericstring, ncy uninadelivery.letterstring, ndate date, ntransportid integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  UPDATE Covers 
+    SET Date = NDate,
+        TransportID = NTransportID,
+        ZipCode = NZc,
+        Country = NCy
+    WHERE Date = ODate AND 
+          TransportID = OTransportID;
+EXCEPTION
+  WHEN unique_violation THEN 
+    perform raise_custom_error('E0006');
+END
+$$;
+
+
+ALTER FUNCTION uninadelivery.updatecoversforshipment(odate date, otransportid integer, nzc uninadelivery.numericstring, ncy uninadelivery.letterstring, ndate date, ntransportid integer) OWNER TO riccardoelena;
 
 --
 -- Name: validemployeebirthdate_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
@@ -957,7 +1121,7 @@ CREATE TABLE uninadelivery.product (
     packagesizeliters real NOT NULL,
     isfragile boolean,
     price numeric(100,2),
-    CONSTRAINT checkproductdescriptionontopic CHECK (((description ~~* (('% '::text || (category)::text) || ' %'::text)) AND (description ~~* (('% '::text || name) || ' %'::text)) AND (description ~~* (('% '::text || (supplier)::text) || ' %'::text)))),
+    CONSTRAINT checkproductdescriptionontopic CHECK (((description ~~* (('% '::text || (category)::text) || '%'::text)) AND (description ~~* (('% '::text || name) || '%'::text)) AND (description ~~* (('% '::text || (supplier)::text) || '%'::text)))),
     CONSTRAINT formatproductdescription CHECK ((description ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]*$'::text)),
     CONSTRAINT formatproductname CHECK ((name ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]*$'::text)),
     CONSTRAINT formatproductpackagesizeliters CHECK ((packagesizeliters > (0)::double precision)),
@@ -1139,6 +1303,7 @@ COPY uninadelivery.area (zipcode, city, state, country, worldzone) FROM stdin;
 61100	Pesaro	PU	Italy	EUW
 20100	Monza	MB	Italy	EUW
 80100	Napoli	NA	Italy	EUW
+80136	Napoli	NA	Italy	EUW
 \.
 
 
@@ -1169,6 +1334,9 @@ E0011	This account is already emplyeed
 E0012	Cannot check this field for the given table. Are you sure you are calling the function for the correct table?
 E0013	You cannot ship from this deposit
 E0014	Are you trying to transport negative volume of goods?
+E0015	This update conflict with preavious inserted data
+E0016	In a shipment directed to client the order must have the same city destination
+E0017	Cannot modify a shipment that has already arrived
 \.
 
 
@@ -1587,7 +1755,7 @@ CREATE TRIGGER isshipmentdirectedincorrectareadeposit_in BEFORE INSERT ON uninad
 -- Name: shipment isshipmentdirectedincorrectareadeposit_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER isshipmentdirectedincorrectareadeposit_up BEFORE UPDATE ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.isshipmentdirectedincorrectareadeposit_func();
+CREATE TRIGGER isshipmentdirectedincorrectareadeposit_up BEFORE UPDATE ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.shipmentdataconsistency_func();
 
 
 --
