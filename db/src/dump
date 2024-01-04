@@ -86,7 +86,7 @@ ALTER DOMAIN uninadelivery.emailstring OWNER TO zgenny;
 --
 
 CREATE DOMAIN uninadelivery.letterstring AS text
-	CONSTRAINT letterstring_check CHECK ((VALUE ~ '^[a-zA-Z]+$'::text));
+	CONSTRAINT letterstring_check CHECK ((VALUE ~ '^[A-Za-zÀ-ÿ]+[A-Za-zÀ-ÿ\s\.]*$'::text));
 
 
 ALTER DOMAIN uninadelivery.letterstring OWNER TO zgenny;
@@ -352,7 +352,7 @@ CREATE FUNCTION uninadelivery.coversoccupiedspaceupdate_func() RETURNS trigger
     IF OLD IS NOT NULL THEN
 
       -- retrieve data to identify the covers row
-      SELECT shipmentdate, transportID
+      SELECT shippingdate, transportID
         INTO Sdate, Tid
         FROM shipment
         WHERE shipmentID = OLD.shipmentID;
@@ -371,7 +371,7 @@ CREATE FUNCTION uninadelivery.coversoccupiedspaceupdate_func() RETURNS trigger
     IF NEW IS NOT NULL THEN
 
       -- retrieve data to identify the covers row
-      SELECT shipmentdate, transportID
+      SELECT shippingdate, transportID
         INTO Sdate, Tid
         FROM shipment
         WHERE shipmentID = NEW.shipmentID;
@@ -383,7 +383,7 @@ CREATE FUNCTION uninadelivery.coversoccupiedspaceupdate_func() RETURNS trigger
 
       UPDATE covers
         SET occupiedspace = occupiedspace + (Qty * Psize)
-        WHERE shipmentdate = Sdate AND transportID = Tid;
+        WHERE date = Sdate AND transportID = Tid;
     END IF;
     RETURN NEW;
 
@@ -774,10 +774,11 @@ CREATE FUNCTION uninadelivery.isshipmentcontainingvalidorders_func() RETURNS tri
     AS $$
 DECLARE
 QTY stores.quantity%TYPE;
+QTY2 stores.quantity%TYPE;
 PName product.name%TYPE;
 PSupply product.supplier%TYPE;
-DID deposit.depositid%TYPE;
-
+DIDstart deposit.depositid%TYPE;
+DIDend deposit.depositid%TYPE;
 BEGIN
 
 SELECT quantity , product.name , product.supplier 
@@ -786,23 +787,32 @@ SELECT quantity , product.name , product.supplier
   ON "Order".name = PRODUCT.name AND "Order".supplier = PRODUCT.supplier
   WHERE OrderID = NEW.OrderID;
 
-SELECT shippedfrom
-  INTO DID
+SELECT shippedfrom, directedto
+  INTO DIDstart, DIDend
   FROM shipment
   WHERE shipmentID = NEW.shipmentID;
 
-IF NOT EXISTS (
-  SELECT 1
+IF DIDend = NULL THEN
+  IF NOT EXISTS (
+    SELECT 1
+      FROM stores
+      WHERE depositid = DIDstart AND name = PName AND supplier = PSupply AND quantity >= QTY
+  ) THEN
+    perform raise_custom_error('E0013');
+  END IF;
+ELSE
+  SELECT quantity
+    INTO Qty2
     FROM stores
-    WHERE depositid = DID AND name = PName AND supplier = PSupply AND quantity >= QTY
-) THEN
-  RAISE NOTICE '% % % %', DID, PName, PSupply, QTY;
-  perform raise_custom_error('E0013');
+    WHERE depositid = DIDstart AND name = PName AND supplier = PSupply;
+  INSERT INTO stores (name, supplier, depositid, quantity)
+    VALUES (PName, PSupply, DIDend, LEAST(QTY, QTY2))
+  ON CONFLICT (name, supplier, depositid) DO UPDATE
+    SET quantity = stores.quantity + LEAST(QTY, QTY2);
 END IF;
-
 UPDATE stores
-  SET quantity = quantity - QTY
-  WHERE depositid = DID AND name = PName AND supplier = PSupply;
+  SET quantity = GREATEST(quantity - QTY, 0)
+  WHERE depositid = DIDstart AND name = PName AND supplier = PSupply;
 
 RETURN NEW;
 END;
@@ -958,7 +968,7 @@ DECLARE
   NPsize Product.PackageSizeLiters%TYPE;
   cover Covers%ROWTYPE;
 BEGIN
-  -- it the oreder is already arrived to client can't be modified
+  -- if the oreder is already arrived to client can't be modified
   IF EXISTS ( 
     SELECT 1 
     FROM ships NATURAL JOIN shipment
@@ -982,15 +992,16 @@ BEGIN
   FOR cover IN (
     SELECT * 
       FROM (ships NATURAL JOIN shipment) JOIN covers
-      ON (shipmentdate = date AND transportid = transportid)
+      ON (shippingdate = date AND shipment.transportid = shipment.transportid)
       WHERE orderid = NEW.orderid AND 
           hasarrived = false
   ) LOOP
 
     UPDATE covers
       SET occupiedspace = occupiedspace + (NEW.quantity * NPsize) - (OLD.quantity * OPsize)
-      WHERE shipmentdate = cover.shipmentdate AND transportid = cover.transportid;
+      WHERE date = cover.date AND transportid = cover.transportid;
   END LOOP;
+  RETURN NEW;
 END;
 $$;
 
@@ -1305,7 +1316,6 @@ ALTER SEQUENCE uninadelivery.deposit_depositid_seq OWNED BY uninadelivery.deposi
 CREATE TABLE uninadelivery.driver (
     businessmail uninadelivery.emailstring NOT NULL,
     drivinglicencetype uninadelivery.drivinglicencetype NOT NULL,
-    isavailable boolean,
     email uninadelivery.emailstring,
     depositid integer NOT NULL
 );
@@ -1345,16 +1355,17 @@ ALTER TABLE uninadelivery.operator OWNER TO zgenny;
 CREATE TABLE uninadelivery.product (
     category uninadelivery.letterstring NOT NULL,
     name text NOT NULL,
-    supplier uninadelivery.alphanumstring DEFAULT 'UninaDelivery'::text NOT NULL,
+    supplier text DEFAULT 'UninaDelivery'::text NOT NULL,
     description text NOT NULL,
     packagesizeliters real NOT NULL,
     isfragile boolean,
     price numeric(100,2),
-    CONSTRAINT checkproductdescriptionontopic CHECK (((description ~~* (('% '::text || (category)::text) || '%'::text)) AND (description ~~* (('% '::text || name) || '%'::text)) AND (description ~~* (('% '::text || (supplier)::text) || '%'::text)))),
-    CONSTRAINT formatproductdescription CHECK ((description ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]*$'::text)),
-    CONSTRAINT formatproductname CHECK ((name ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]*$'::text)),
+    CONSTRAINT checkproductdescriptionontopic CHECK (((description ~~* (('%'::text || name) || '%'::text)) AND (description ~~* (('%'::text || supplier) || '%'::text)))),
+    CONSTRAINT formatproductdescription CHECK ((description ~ '^[a-zA-ZÀ-ÿ0-9]+[\ a-zA-ZÀ-ÿ0-9!@#$%^&*()_+{}\[\]:;<>,.?''~\\\/-]*$'::text)),
+    CONSTRAINT formatproductname CHECK ((description ~ '^[a-zA-ZÀ-ÿ0-9]+[\ a-zA-ZÀ-ÿ0-9!@#$%^&*()_+{}\[\]:;<>,.?''~\\\/-]*$'::text)),
     CONSTRAINT formatproductpackagesizeliters CHECK ((packagesizeliters > (0)::double precision)),
-    CONSTRAINT formatproductprice CHECK ((price > (0)::numeric))
+    CONSTRAINT formatproductprice CHECK ((price > (0)::numeric)),
+    CONSTRAINT formatproductsupplier CHECK ((description ~ '^[a-zA-ZÀ-ÿ0-9]+[\ a-zA-ZÀ-ÿ0-9!@#$%^&*()_+{}\[\]:;<>,.?''~\\\/-]*$'::text))
 );
 
 
@@ -1403,7 +1414,7 @@ CREATE TABLE uninadelivery.stores (
     supplier text NOT NULL,
     depositid integer NOT NULL,
     quantity integer NOT NULL,
-    CONSTRAINT formatstoresquantity CHECK ((quantity > 0))
+    CONSTRAINT formatstoresquantity CHECK ((quantity >= 0))
 );
 
 
@@ -1480,10 +1491,20 @@ ALTER TABLE ONLY uninadelivery.transport ALTER COLUMN transportid SET DEFAULT ne
 --
 
 COPY uninadelivery."Order" (orderid, emissiondate, isexpress, extrawarranty, iscompleted, email, quantity, name, supplier) FROM stdin;
-1	2023-12-31	\N	0	\N	lucabest@gmali.com	3	Penna	Bic
-2	2023-12-31	\N	0	\N	lucabest@gmali.com	2	Gomma	Bic
 5	2024-01-03	\N	0	\N	relena@gmail.com	1	Penna	Bic
 6	2024-01-03	\N	0	\N	relena@gmail.com	100	Penna	Bic
+1	2023-12-31	\N	0	\N	lucabest@gmail.com	3	Penna	Bic
+2	2023-12-31	\N	0	\N	lucabest@gmail.com	2	Gomma	Bic
+41	2024-01-04	t	0	\N	lucabest@gmail.com	2	Smartphone	Samsung
+44	2024-01-02	\N	1	t	jane.smith@example.com	1	Laptop	Dell
+46	2024-01-03	\N	1	t	ivanov@example.com	1	Scarpe da Ginnastica	Nike
+50	2024-01-01	\N	1	t	lucabest@gmail.com	1	Aspirapolvere Robot	iRobot
+43	2022-05-06	t	0	t	john.doe@example.com	3	Tavolo da Pranzo	IKEA
+45	2020-12-08	t	0	t	mike.johnson@example.com	2	Frigorifero	Whirlpool
+47	2019-06-10	t	0	t	patel@example.com	1	Smart TV	Sony
+49	2023-09-12	t	0	t	yamamoto@example.com	1	Collana di Perle	Tiffany & Co.
+42	2023-02-05	\N	1	t	relena@gmail.com	1	Maglione	Gucci
+48	2020-04-11	\N	2	t	mthembu@example.com	2	Forno a Microonde	Panasonic
 \.
 
 
@@ -1492,8 +1513,15 @@ COPY uninadelivery."Order" (orderid, emissiondate, isexpress, extrawarranty, isc
 --
 
 COPY uninadelivery.account (name, surname, email, birthdate, propic, password, addressno, street, zipcode, country) FROM stdin;
-Luca	Bianchi	lucabest@gmali.com	1998-05-12	/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAZABkDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABwYI/8QAPhAAAAQEAwUDAxUAAAAAAAAAAQIDEQQFBhIABxMIFBUWIRcxUSIjQTM2N0JFUlNhYnFzdYSSlKGztMPR0v/EABgBAAMBAQAAAAAAAAAAAAAAAAQGBwMI/8QAJxEAAgAFAwMFAQEAAAAAAAAAAQIDBAURIQAGEgciQRMxUVJhobH/2gAMAwEAAhEDEQA/ACef7Mde5qwZKep6byCHiYdUI0xo2IWIQSFASCACRIwu6gehmfrjRuWtUy/Z/wBnTsLrJGIjJ9JpZNEl4iWFKpBmGJUXXTsOoJDiAEXIAuQOoGZwYRgK/rGpqXkyMfk9MRUnKkSVFcIBFOOU3USHEzpmKcALeVPym72B+vWR5nqeqpKqFZRR1qqmCKiCsKogRGJUUFyJEBApSjcJdMAACuLgPV8Bbhr89vqQl5ueQpKmMoKsvCJgMCbZFrE2N9GdI9uTVbhmc3QyqihiqglHDqy8SQQO23LznGNIGVFeSeZcU0IaMLp6D3kKHff4G+LCBzRL/gYj7pf7wfbN1DqS7mLnyno2W6m6bpxBNWF1G1r7brbmcj97OHjhr5aoD3kL+NN/vE53tGoNFrseRoaRDLLx43sxyilshjfuJ/zSL1J6bLujc81Veat6nDIY27YaL4Ujx86y7Mpt2TIFqPd+K7ycILRv0LbgE91zGf1Nmb09/TFjlplh2pTmns5eOcM3uYoRPDd21rd2XBO3VvK92i72dLm6s4n2enrShPrFP9JXD3ss+xRSX08R+9VxUd5Vidn4MVZh7gKT7AZ4n4A11P1NoVPgSRqcOHaMx4FrtleLG1r29wM2v+6vcyoLhfDvOaurre1tZrPn8cRG8/I/PCBnB7kfaP48HONuk+yaFXtnydQqEDnFf1Lnk4vaK6jCsB7ADA/ukDZFIkmoMAlPt5P3b91//9k=	e0e6097a6f8af07daf5fc7244336ba37133713a8fc7345c36d667dfa513fabaa	123	Via Roma	00123	Italy
-Riccardo	Elena	relena@gmail.com	2003-06-28	\N	e0e6097a6f8af07daf5fc7244336ba37133713a8fc7345c36d667dfa513fabaa	12	Via A. A. Pelliccia	00123	Italy
+Riccardo	Elena	relena@gmail.com	2003-06-28	\N	e0e6097a6f8af07daf5fc7244336ba37133713a8fc7345c36d667dfa513fabaa	12	Via A. A. Pelliccia	00123	Italia
+John	Doe	john.doe@example.com	1990-01-01	\N	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	111	Main Street	54321	Canada
+Jane	Smith	jane.smith@example.com	1995-02-15	\N	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	222	Oak Avenue	98765	Australia
+Mike	Johnson	mike.johnson@example.com	1985-05-10	\N	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	333	Elm Road	12345	Germania
+Ivan	Ivanov	ivanov@example.com	1990-01-01	\N	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	123	Main Street	67890	Russia
+Rajesh	Patel	patel@example.com	1992-05-15	\N	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	456	Gandhi Road	54321	India
+Sipho	Mthembu	mthembu@example.com	1988-09-30	\N	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	789	Nelson Mandela Avenue	98765	Sudafrica
+Takeshi	Yamamoto	yamamoto@example.com	1995-03-20	\N	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	321	Sakura Street	98765	Giappone
+Luca	Bianchi	lucabest@gmail.com	1998-05-12	/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAZABkDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABwYI/8QAPhAAAAQEAwUDAxUAAAAAAAAAAQIDEQQFBhIABxMIFBUWIRcxUSIjQTM2N0JFUlNhYnFzdYSSlKGztMPR0v/EABgBAAMBAQAAAAAAAAAAAAAAAAQGBwMI/8QAJxEAAgAFAwMFAQEAAAAAAAAAAQIDBAURIQAGEgciQRMxUVJhobH/2gAMAwEAAhEDEQA/ACef7Mde5qwZKep6byCHiYdUI0xo2IWIQSFASCACRIwu6gehmfrjRuWtUy/Z/wBnTsLrJGIjJ9JpZNEl4iWFKpBmGJUXXTsOoJDiAEXIAuQOoGZwYRgK/rGpqXkyMfk9MRUnKkSVFcIBFOOU3USHEzpmKcALeVPym72B+vWR5nqeqpKqFZRR1qqmCKiCsKogRGJUUFyJEBApSjcJdMAACuLgPV8Bbhr89vqQl5ueQpKmMoKsvCJgMCbZFrE2N9GdI9uTVbhmc3QyqihiqglHDqy8SQQO23LznGNIGVFeSeZcU0IaMLp6D3kKHff4G+LCBzRL/gYj7pf7wfbN1DqS7mLnyno2W6m6bpxBNWF1G1r7brbmcj97OHjhr5aoD3kL+NN/vE53tGoNFrseRoaRDLLx43sxyilshjfuJ/zSL1J6bLujc81Veat6nDIY27YaL4Ujx86y7Mpt2TIFqPd+K7ycILRv0LbgE91zGf1Nmb09/TFjlplh2pTmns5eOcM3uYoRPDd21rd2XBO3VvK92i72dLm6s4n2enrShPrFP9JXD3ss+xRSX08R+9VxUd5Vidn4MVZh7gKT7AZ4n4A11P1NoVPgSRqcOHaMx4FrtleLG1r29wM2v+6vcyoLhfDvOaurre1tZrPn8cRG8/I/PCBnB7kfaP48HONuk+yaFXtnydQqEDnFf1Lnk4vaK6jCsB7ADA/ukDZFIkmoMAlPt5P3b91//9k=	e0e6097a6f8af07daf5fc7244336ba37133713a8fc7345c36d667dfa513fabaa	123	Via Roma	00123	Italia
 \.
 
 
@@ -1502,18 +1530,84 @@ Riccardo	Elena	relena@gmail.com	2003-06-28	\N	e0e6097a6f8af07daf5fc7244336ba3713
 --
 
 COPY uninadelivery.area (zipcode, city, state, country, worldzone) FROM stdin;
-00123	Roma	RM	Italy	EUW
-20145	Milano	MI	Italy	EUW
-40122	Bologna	BO	Italy	EUW
-70100	Bari	BA	Italy	EUW
-50123	Firenze	FI	Italy	EUW
-10100	Torino	TO	Italy	EUW
-25121	Brescia	BS	Italy	EUW
-34100	Trieste	TS	Italy	EUW
-61100	Pesaro	PU	Italy	EUW
-20100	Monza	MB	Italy	EUW
-80100	Napoli	NA	Italy	EUW
-80136	Napoli	NA	Italy	EUW
+10001	New York City	NY	USA	NA
+10002	Los Angeles	CA	USA	NA
+10003	Chicago	IL	USA	NA
+10004	Houston	TX	USA	NA
+10005	Philadelphia	PA	USA	NA
+10006	Phoenix	AZ	USA	NA
+10007	San Antonio	TX	USA	NA
+10008	San Diego	CA	USA	NA
+10009	Dallas	TX	USA	NA
+10010	San Jose	CA	USA	NA
+10011	Austin	TX	USA	NA
+10012	Jacksonville	FL	USA	NA
+10013	San Francisco	CA	USA	NA
+10014	Indianapolis	IN	USA	NA
+10015	Columbus	OH	USA	NA
+10016	Fort Worth	TX	USA	NA
+10017	Charlotte	NC	USA	NA
+10018	Detroit	MI	USA	NA
+10019	El Paso	TX	USA	NA
+10020	Memphis	TN	USA	NA
+10021	Boston	MA	USA	NA
+10022	Seattle	WA	USA	NA
+10023	Denver	CO	USA	NA
+10024	Washington	DC	USA	NA
+10025	Nashville	TN	USA	NA
+10026	Baltimore	MD	USA	NA
+10027	Louisville	KY	USA	NA
+10028	Portland	OR	USA	NA
+10029	Oklahoma City	OK	USA	NA
+11111	Roma	Lazio	Italia	EUW
+22222	Roma	Lazio	Italia	EUW
+33333	Roma	Lazio	Italia	EUW
+44444	Parigi	IDF	Francia	EUW
+55555	Parigi	IDF	Francia	EUW
+66666	Parigi	IDF	Francia	EUW
+77777	Londra	ENG	Regno Unito	EUW
+88888	Londra	ENG	Regno Unito	EUW
+99999	Londra	ENG	Regno Unito	EUW
+00000	Tokyo	Tokyo	Giappone	CKJ
+11111	Tokyo	Tokyo	Giappone	CKJ
+22222	Tokyo	Tokyo	Giappone	CKJ
+54321	New York	NY	Stati Uniti	NA
+98765	New York	NY	Stati Uniti	NA
+12345	Los Angeles	CA	Stati Uniti	NA
+67890	Chicago	IL	Stati Uniti	NA
+54321	Toronto	ON	Canada	NA
+98765	Sydney	NSW	Australia	OC
+67890	Londra	ENG	Regno Unito	EUW
+54321	Parigi	IDF	Francia	EUW
+98765	Tokyo	Tokyo	Giappone	CKJ
+12345	Berlino	Berlin	Germania	EUW
+67890	Mosca	Moscow	Russia	RUS
+54321	Il Cairo	Cairo	Egitto	AFN
+98765	Mumbai	Maharashtra	India	IND
+12345	Johannesburg	Gauteng	Sudafrica	AFS
+67890	Nairobi	Nairobi	Kenya	AFS
+54321	São Paulo	SP	Brasile	LATAM
+98765	Città del Messico	CDMX	Messico	LATAM
+12345	Seoul	Seoul	Corea del Sud	CKJ
+67890	Shanghai	Shanghai	Cina	CKJ
+54321	Roma	Lazio	Italia	EUW
+98765	Atene	Attica	Grecia	EUW
+12345	Dubai	Dubai	Emirati Arabi Uniti	MIDEAST
+67890	Singapore	Singapore	Singapore	SEA
+54321	Delhi	Delhi	India	IND
+98765	Città del Capo	Western Cape	Sudafrica	AFS
+00123	Roma	RM	Italia	EUW
+20145	Milano	MI	Italia	EUW
+40122	Bologna	BO	Italia	EUW
+70100	Bari	BA	Italia	EUW
+50123	Firenze	FI	Italia	EUW
+10100	Torino	TO	Italia	EUW
+25121	Brescia	BS	Italia	EUW
+34100	Trieste	TS	Italia	EUW
+61100	Pesaro	PU	Italia	EUW
+20100	Monza	MB	Italia	EUW
+80100	Napoli	NA	Italia	EUW
+80136	Napoli	NA	Italia	EUW
 \.
 
 
@@ -1522,8 +1616,11 @@ COPY uninadelivery.area (zipcode, city, state, country, worldzone) FROM stdin;
 --
 
 COPY uninadelivery.covers (transportid, zipcode, country, date, occupiedspace) FROM stdin;
-1	00123	Italy	2024-03-01	0
-1	00123	Italy	2024-01-03	0
+1	00123	Italia	2024-03-01	0
+1	00123	Italia	2024-01-03	0
+1	00123	Italia	2024-01-04	4.6
+15	00123	Italia	2024-01-04	50
+17	98765	India	2024-01-04	10
 \.
 
 
@@ -1558,11 +1655,44 @@ E0018	The transport capacity is exeeded
 --
 
 COPY uninadelivery.deposit (depositid, occupiedspace, maxcapacity, deposittype, addressno, street, zipcode, country) FROM stdin;
-1	0	10000	City	1	Via Roma	00123	Italy
-2	0	80000	Central	7BIS	Corso Umberto I	20145	Italy
-3	0	12000	City	23	Via Roma	00123	Italy
-4	0	15000	State	6	Viale Delle Rose	25121	Italy
-5	0	25000	Country	22	Corso Stretto	50123	Italy
+150	25	10000	City	999	Plum Boulevard	67890	Regno Unito
+151	25	10500	City	888	Pear Street	54321	Francia
+152	25	11000	City	777	Mango Drive	98765	Giappone
+153	25	11500	City	666	Avocado Lane	12345	Germania
+154	25	12000	City	555	Papaya Road	67890	Russia
+155	25	12500	City	444	Kiwi Court	54321	Egitto
+156	25	13000	City	333	Pineapple Avenue	98765	India
+157	25	13500	City	222	Watermelon Boulevard	12345	Sudafrica
+158	25	14000	City	111	Blueberry Drive	67890	Kenya
+159	25	14500	City	999	Raspberry Street	54321	Brasile
+162	25	16000	City	666	Grapefruit Court	67890	Cina
+164	25	17500	City	333	Pomegranate Drive	12345	Emirati Arabi Uniti
+165	25	18000	City	222	Mango Boulevard	67890	Singapore
+18	25	100	City	123	Main Street	54321	Stati Uniti
+19	25	200	State	456	Oak Avenue	22222	Italia
+21	25	400	Central	987	Elm Street	11111	Giappone
+166	25	18500	City	111	Dragonfruit Avenue	54321	India
+167	25	19000	City	999	Passionfruit Street	98765	Sudafrica
+177	25	1000	Central	12BIS	Pele Street	54321	Brasile
+179	25	1000	Central	41BIS	Fiscal Paradise Square	12345	Emirati Arabi Uniti
+180	25	1000	Central	4nBIS	Orus Boulevard	54321	Egitto
+182	25	1000	Central	789	Main Street	67890	Kenya
+185	25	1000	Central	789	Main Street	54321	Stati Uniti
+186	25	1000	Central	789	Koala Street	98765	Australia
+4	92.5	15000	State	6	Viale Delle Rose	25121	Italia
+5	72.8	25000	Country	22	Corso Stretto	50123	Italia
+148	65	9000	City	222	Coconut Court	54321	Canada
+149	91	9500	City	111	Peach Avenue	98765	Australia
+147	51	8500	City	333	Lime Road	67890	Stati Uniti
+163	30	17000	City	444	Honeydew Boulevard	98765	Grecia
+20	32.5	300	Country	789	Maple Road	99999	Regno Unito
+178	56.800003	1000	Central	28	Lotus Street	67890	Singapore
+160	50	15000	City	888	Strawberry Lane	98765	Messico
+161	129.6	15500	City	777	Blackberry Road	12345	Corea del Sud
+1	31	10000	City	1	Via Roma	00123	Italia
+3	3	12000	City	23	Via Roma	00123	Italia
+187	35	1000	Central	456	Gandhi Road	98765	India
+2	125	80000	Central	7BIS	Corso Umberto I	20145	Italia
 \.
 
 
@@ -1570,8 +1700,9 @@ COPY uninadelivery.deposit (depositid, occupiedspace, maxcapacity, deposittype, 
 -- Data for Name: driver; Type: TABLE DATA; Schema: uninadelivery; Owner: zgenny
 --
 
-COPY uninadelivery.driver (businessmail, drivinglicencetype, isavailable, email, depositid) FROM stdin;
-L.Bianchi@uninadelivery.driver.com	BE	t	lucabest@gmali.com	1
+COPY uninadelivery.driver (businessmail, drivinglicencetype, email, depositid) FROM stdin;
+I.Ivanov@uninadelivery.driver.com	CE	ivanov@example.com	154
+L.Bianchi1@uninadelivery.driver.com	BE	lucabest@gmail.com	1
 \.
 
 
@@ -1589,6 +1720,8 @@ COPY uninadelivery.drives (transportid, businessmail, date) FROM stdin;
 
 COPY uninadelivery.operator (email, businessmail) FROM stdin;
 relena@gmail.com	R.Elena@uninadelivery.operator.com
+yamamoto@example.com	T.Yamamoto@uninadelivery.operator.com
+patel@example.com	R.Patel@uninadelivery.operator.com
 \.
 
 
@@ -1599,6 +1732,16 @@ relena@gmail.com	R.Elena@uninadelivery.operator.com
 COPY uninadelivery.product (category, name, supplier, description, packagesizeliters, isfragile, price) FROM stdin;
 Cancelleria	Penna	Bic	La famosa Penna nera della Bic che migliorera la tua Cancelleria a casa.	0.5	\N	1.00
 Cancelleria	Gomma	Bic	La famosa gomma nera della bic che migliorera la tua cancelleria a casa.	0.8	\N	1.00
+Elettronica	Smartphone	Samsung	Smartphone Samsung avanzato con fotocamera di qualità	0.5	f	699.99
+Abbigliamento	Maglione	Gucci	Maglione di lusso in lana merino del brand Gucci	4	f	499.99
+Casa e Giardino	Tavolo da Pranzo	IKEA	Tavolo da pranzo moderno per la sala da pranzo prodotto da IKEA	1.2	f	299.99
+Elettronica	Laptop	Dell	Potente laptop Dell per le esigenze professionali	4	f	1099.99
+Cucina	Frigorifero	Whirlpool	Frigorifero Whirlpool con tecnologia di raffreddamento avanzata	2	f	899.99
+Abbigliamento	Scarpe da Ginnastica	Nike	Scarpe da ginnastica sportive Nike con suola ammortizzante	0.8	f	129.99
+Elettronica	Smart TV	Sony	Smart TV Sony con schermo 4K e funzionalità smart integrate	10	f	799.99
+Cucina	Forno a Microonde	Panasonic	Forno a microonde Panasonic con diverse modalità di cottura	0.5	f	149.99
+Gioielli	Collana di Perle	Tiffany & Co.	Elegante collana di perle di acqua dolce di Tiffany & Co.	2.5	f	599.99
+Casa e Giardino	Aspirapolvere Robot	iRobot	Aspirapolvere robot iRobot con navigazione intelligente	5.3	f	349.99
 \.
 
 
@@ -1607,7 +1750,9 @@ Cancelleria	Gomma	Bic	La famosa gomma nera della bic che migliorera la tua cance
 --
 
 COPY uninadelivery.shipment (shipmentid, shippingdate, hasarrived, shippedfrom, directedto, businessmail, transportid) FROM stdin;
-4	2024-01-03	\N	1	3	R.Elena@uninadelivery.operator.com	1
+7	2024-01-04	\N	1	\N	R.Elena@uninadelivery.operator.com	1
+8	2024-01-04	\N	3	1	R.Elena@uninadelivery.operator.com	15
+13	2024-01-04	\N	2	187	R.Patel@uninadelivery.operator.com	17
 \.
 
 
@@ -1616,6 +1761,12 @@ COPY uninadelivery.shipment (shipmentid, shippingdate, hasarrived, shippedfrom, 
 --
 
 COPY uninadelivery.ships (shipmentid, orderid) FROM stdin;
+7	1
+7	2
+7	5
+7	41
+8	6
+13	47
 \.
 
 
@@ -1624,10 +1775,67 @@ COPY uninadelivery.ships (shipmentid, orderid) FROM stdin;
 --
 
 COPY uninadelivery.stores (name, supplier, depositid, quantity) FROM stdin;
-Gomma	Bic	1	20
+Penna	Bic	1	31
+Penna	Bic	3	0
+Smart TV	Sony	187	1
+Smart TV	Sony	2	6
 Gomma	Bic	3	18
-Penna	Bic	3	16
-Penna	Bic	1	19
+Maglione	Gucci	2	10
+Tavolo da Pranzo	IKEA	3	5
+Laptop	Dell	4	15
+Frigorifero	Whirlpool	5	8
+Scarpe da Ginnastica	Nike	1	12
+Forno a Microonde	Panasonic	3	10
+Collana di Perle	Tiffany & Co.	4	3
+Aspirapolvere Robot	iRobot	5	6
+Smartphone	Samsung	147	20
+Maglione	Gucci	148	10
+Tavolo da Pranzo	IKEA	149	5
+Laptop	Dell	149	15
+Frigorifero	Whirlpool	147	8
+Scarpe da Ginnastica	Nike	161	12
+Smart TV	Sony	161	7
+Forno a Microonde	Panasonic	163	10
+Collana di Perle	Tiffany & Co.	20	3
+Aspirapolvere Robot	iRobot	178	6
+Penna	Bic	150	50
+Penna	Bic	151	50
+Penna	Bic	152	50
+Penna	Bic	153	50
+Penna	Bic	154	50
+Penna	Bic	155	50
+Penna	Bic	156	50
+Penna	Bic	157	50
+Penna	Bic	158	50
+Penna	Bic	159	50
+Penna	Bic	162	50
+Penna	Bic	164	50
+Penna	Bic	165	50
+Penna	Bic	18	50
+Penna	Bic	19	50
+Penna	Bic	21	50
+Penna	Bic	166	50
+Penna	Bic	167	50
+Penna	Bic	177	50
+Penna	Bic	179	50
+Penna	Bic	180	50
+Penna	Bic	182	50
+Penna	Bic	185	50
+Penna	Bic	186	50
+Penna	Bic	187	50
+Penna	Bic	2	50
+Penna	Bic	4	50
+Penna	Bic	5	50
+Penna	Bic	148	50
+Penna	Bic	149	50
+Penna	Bic	147	50
+Penna	Bic	163	50
+Penna	Bic	20	50
+Penna	Bic	178	50
+Penna	Bic	160	100
+Penna	Bic	161	100
+Gomma	Bic	1	18
+Smartphone	Samsung	1	18
 \.
 
 
@@ -1637,6 +1845,19 @@ Penna	Bic	1	19
 
 COPY uninadelivery.transport (transportid, maxcapacity, isavailable, transporttype, depositid) FROM stdin;
 1	100	t	WheeledSmall	1
+5	600	t	WheeledSmall	147
+6	700	t	WheeledLarge	19
+7	800	t	Rails	20
+8	900	t	Water	178
+9	1000	t	Air	21
+10	100	t	WheeledSmall	187
+11	200	t	WheeledLarge	19
+12	300	t	Rails	177
+13	400	t	Water	21
+14	500	t	Air	178
+15	100	t	WheeledSmall	3
+16	1000	t	Air	187
+17	1000	t	Water	2
 \.
 
 
@@ -1644,28 +1865,28 @@ COPY uninadelivery.transport (transportid, maxcapacity, isavailable, transportty
 -- Name: Order_orderid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: zgenny
 --
 
-SELECT pg_catalog.setval('uninadelivery."Order_orderid_seq"', 6, true);
+SELECT pg_catalog.setval('uninadelivery."Order_orderid_seq"', 50, true);
 
 
 --
 -- Name: deposit_depositid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: zgenny
 --
 
-SELECT pg_catalog.setval('uninadelivery.deposit_depositid_seq', 1, false);
+SELECT pg_catalog.setval('uninadelivery.deposit_depositid_seq', 187, true);
 
 
 --
 -- Name: shipment_shipmentid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: zgenny
 --
 
-SELECT pg_catalog.setval('uninadelivery.shipment_shipmentid_seq', 5, true);
+SELECT pg_catalog.setval('uninadelivery.shipment_shipmentid_seq', 13, true);
 
 
 --
 -- Name: transport_transportid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: zgenny
 --
 
-SELECT pg_catalog.setval('uninadelivery.transport_transportid_seq', 1, true);
+SELECT pg_catalog.setval('uninadelivery.transport_transportid_seq', 17, true);
 
 
 --
@@ -1906,7 +2127,7 @@ CREATE TRIGGER isaddressforsomethingspecificdeposit_in BEFORE INSERT ON uninadel
 -- Name: deposit isaddressforsomethingspecificdeposit_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER isaddressforsomethingspecificdeposit_up BEFORE UPDATE ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func();
+CREATE TRIGGER isaddressforsomethingspecificdeposit_up BEFORE UPDATE ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func('Account');
 
 
 --
@@ -1991,13 +2212,6 @@ CREATE TRIGGER onlyonejobperaccountdriver_in BEFORE INSERT ON uninadelivery.driv
 --
 
 CREATE TRIGGER onlyonejobperaccountdriver_up BEFORE UPDATE ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('operator');
-
-
---
--- Name: operator onlyonejobperaccountdriver_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
---
-
-CREATE TRIGGER onlyonejobperaccountdriver_up BEFORE UPDATE ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('operator');
 
 
 --

@@ -161,7 +161,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   CREATE TABLE Product (
     Category letterString NOT NULL,
     Name text NOT NULL,
-    Supplier alphNumString NOT NULL,
+    Supplier text NOT NULL,
     Description text NOT NULL,
     PackageSizeLiters real NOT NULL,
     IsFragile boolean,
@@ -169,10 +169,13 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   );
   ALTER TABLE Product ADD CONSTRAINT Product_pk PRIMARY KEY (Name,Supplier);
   ALTER TABLE Product ADD CONSTRAINT formatProductName CHECK(
-    Name ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]*$'
+    Name ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?''~\\\/-]*$'
   );
   ALTER TABLE Product ADD CONSTRAINT formatProductDescription CHECK(
-    Description ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]*$'
+    Description ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?''~\\\/-]*$'
+  );
+  ALTER TABLE Product ADD CONSTRAINT formatProductSupplier CHECK(
+    Supplier ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?''~\\\/-]*$'
   );
   ALTER TABLE Product ADD CONSTRAINT formatProductPackageSizeLiters CHECK(
     PackageSizeLiters > 0
@@ -181,7 +184,6 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
     Price > 0
   );
   ALTER TABLE Product ADD CONSTRAINT checkProductDescriptionOnTopic CHECK(
-    (Description ILIKE ('% ' || Category || '%')) AND 
     (Description ILIKE ('% ' || Name || '%')) AND 
     (Description ILIKE ('% ' || Supplier || '%'))
   )
