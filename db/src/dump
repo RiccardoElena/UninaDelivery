@@ -186,71 +186,6 @@ CREATE TABLE uninadelivery.shipment (
 ALTER TABLE uninadelivery.shipment OWNER TO zgenny;
 
 --
--- Name: checkcorrectarea(uninadelivery.shipment); Type: PROCEDURE; Schema: uninadelivery; Owner: riccardoelena
---
-
-CREATE PROCEDURE uninadelivery.checkcorrectarea(IN new uninadelivery.shipment, OUT zcode uninadelivery.numericstring, OUT cy uninadelivery.letterstring, OUT coverneedsupdate boolean)
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  Zcode2 area.zipcode%TYPE;
-  Cy2 area.country%TYPE;
-BEGIN 
--- I have to check if shipment is still directed to the correct area
-  IF NEW.DirectedTo IS NOT NULL THEN
-    raise notice 'shipment is directed to a deposit';
-    SELECT ZipCode, Country 
-      INTO ZCode, Cy
-      FROM Deposit
-      WHERE DepositID = NEW.DirectedTo;
-  ELSE
-  -- if the shipment is now towards a client, all the orders have to be directed to the same zip code 
-  -- at first I check if there are at least one order for that shipment
-    IF NOT EXISTS (
-      SELECT 1
-        FROM Ships 
-        WHERE ShipmentID = NEW.ShipmentID
-    ) THEN
-      raise notice 'nonono';
-      -- if not, I don't have to update the covers table
-      coverNeedsUpdate = FALSE;
-    ELSE
-      -- When it's assured that at least one order exists I can pick one random order and check if all the others are directed to the same area
-      SELECT ZipCode, Country 
-        INTO ZCode, Cy
-        FROM Ships NATURAL JOIN "Order" JOIN Account
-        on Account.Email = "Order".Email
-        WHERE ShipmentID = NEW.ShipmentID
-        LIMIT 1;
-
-      IF EXISTS (
-        SELECT 1
-          FROM Ships NATURAL JOIN "Order" JOIN Account
-          on Account.Email = "Order".Email
-          WHERE ShipmentID = NEW.ShipmentID AND
-                (ZipCode <> ZCode OR Country <> Cy)
-      ) THEN
-        perform raise_custom_error('E0016');
-      END IF;
-
-      -- now, I have to check if the new deposit is in the same city of the clients
-      SELECT ZipCode, Country 
-        INTO ZCode2, Cy2
-        FROM deposit
-        WHERE DepositID = NEW.ShippedFrom;
-
-      IF NOT isSameCity(ZCode, Cy, ZCode2, Cy2) THEN
-        perform raise_custom_error('E0008');
-      END IF;
-    END IF;
-  END IF;
-END;
-$$;
-
-
-ALTER PROCEDURE uninadelivery.checkcorrectarea(IN new uninadelivery.shipment, OUT zcode uninadelivery.numericstring, OUT cy uninadelivery.letterstring, OUT coverneedsupdate boolean) OWNER TO riccardoelena;
-
---
 -- Name: checkcorrectarea(uninadelivery.shipment, boolean); Type: PROCEDURE; Schema: uninadelivery; Owner: riccardoelena
 --
 
@@ -1224,6 +1159,9 @@ BEGIN
     perform raise_custom_error('E0017');
   END IF;
 
+  IF TG_OP = 'DELETE' THEN
+    coverNeedsUpdate = FALSE;
+  END IF;
   -- check for correct area
 
   call checkCorrectArea(NEW, ZCode, Cy, coverNeedsUpdate);
@@ -1234,7 +1172,7 @@ BEGIN
   END IF;
 
   -- if everything is ok, function can procede to the updates
-  IF coverNeedsUpdate = TRUE THEN
+  IF coverNeedsUpdate THEN
     raise notice '%' , coverNeedsUpdate;
     -- try to update the covers table, if fails, raise error
     -- In case shipment is directed to clients ZCode and Cy are the one from clients, otherwise they are the one from directedTo deposit
@@ -1263,6 +1201,9 @@ BEGIN
         WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = PSupply;
   END LOOP;
 
+  IF TG_OP = 'DELETE' THEN
+    RETURN OLD;
+  END IF;
   RETURN NEW;
   
 END;
@@ -1787,7 +1728,6 @@ COPY uninadelivery.covers (transportid, zipcode, country, date, occupiedspace) F
 1	00123	Italia	2024-03-01	0
 1	00123	Italia	2024-01-03	0
 1	00123	Italia	2024-02-04	4.6
-15	00123	Italia	2024-02-04	50
 \.
 
 
@@ -1859,8 +1799,8 @@ COPY uninadelivery.deposit (depositid, occupiedspace, maxcapacity, deposittype, 
 178	56.800003	1000	Central	28	Lotus Street	67890	Singapore
 160	50	15000	City	888	Strawberry Lane	98765	Messico
 161	129.6	15500	City	777	Blackberry Road	12345	Corea del Sud
-1	826.4	10000	City	1	Via Roma	00123	Italia
 3	3	12000	City	23	Via Roma	00123	Italia
+1	1026.4	10000	City	1	Via Roma	00123	Italia
 \.
 
 
@@ -1920,7 +1860,6 @@ Casa e Giardino	Aspirapolvere Robot	iRobot	Aspirapolvere robot iRobot con naviga
 
 COPY uninadelivery.shipment (shipmentid, shippingdate, hasarrived, shippedfrom, directedto, businessmail, transportid) FROM stdin;
 7	2024-02-04	\N	1	\N	R.Elena@uninadelivery.operator.com	1
-8	2024-02-04	\N	3	1	R.Elena@uninadelivery.operator.com	15
 \.
 
 
@@ -1933,7 +1872,6 @@ COPY uninadelivery.ships (shipmentid, orderid) FROM stdin;
 7	2
 7	5
 7	41
-8	6
 \.
 
 
@@ -1965,7 +1903,7 @@ Aspirapolvere Robot	iRobot	178	6
 Smartphone	Samsung	1	16
 Smart TV	Sony	187	2
 Smart TV	Sony	2	5
-Penna	Bic	1	827
+Penna	Bic	1	1027
 Penna	Bic	150	50
 Penna	Bic	151	50
 Penna	Bic	152	50
@@ -2441,6 +2379,13 @@ CREATE TRIGGER onlyonejobperaccountoperator_in BEFORE INSERT ON uninadelivery.op
 --
 
 CREATE TRIGGER onlyonejobperaccountoperator_up BEFORE UPDATE ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('driver');
+
+
+--
+-- Name: shipment shipmentdataconsistency; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER shipmentdataconsistency BEFORE DELETE ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.shipmentdataconsistency_func();
 
 
 --
