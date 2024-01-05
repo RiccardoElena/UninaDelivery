@@ -269,12 +269,11 @@ ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES A
   ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE RESTRICT ON UPDATE CASCADE;
   ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_operator FOREIGN KEY (BusinessMail) REFERENCES Operator(Businessmail) ON DELETE CASCADE ON UPDATE CASCADE;
 \end{lstlisting} % TODO make a trigger that block delete operator if exists unfinsihed shipment and set false to transport on his delete
-
+% BUG i removed IsAvailable from here. 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Driver}}]
   CREATE TABLE Driver (
     BusinessMail emailString NOT NULL,
     DrivingLicenceType DrivingLicenceType NOT NULL,
-    IsAvailable boolean,
     Email emailString, 
     DepositID integer NOT NULL 
   );

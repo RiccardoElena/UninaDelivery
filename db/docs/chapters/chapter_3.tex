@@ -20,7 +20,7 @@
   \textbf{sited} & {\footnotesize Accorpamento delle classi coinvolte nella classe \textbf{Deposit}.}\\
   \textbf{located} & {\footnotesize Migrazione della \underline{chiave primaria} di \textbf{Address} in \textbf{Area}.} \\
 }
-% TODO @zGenny change occupiedSpace from transport to covers
+
 \section{Traduzione delle Classi}
 
 \subsection{Considerazioni sulla Traduzione delle Classi}
@@ -87,20 +87,18 @@ Per mantenere la consistenza del database, va anche introdotto un vincolo di uni
 }
 
 \customTableLogic{|Y|Y|Y|}{3}{Transport}{
-  \underline{TransportID} & MaxCapacity & OccupiedSpace \\
-  \hline IsAvailable & TransportType & \textit{DepositID}
+  \underline{TransportID} & MaxCapacity & IsAvailable \\
+  \hline TransportType & \textit{DepositID} & ---
 }
 
 \customTableLogic{|Y|Y|Y|}{3}{Drives}{
   \textit{TransportID} & \textit{BusinessMail} & Date
 }
 
-\customTableLogic{|Y|Y|Y|}{3}{Driver}{
-  \underline{BusinessMail} & DrivingLincenceType & IsAvailable \\
-  \hline
-  \textit{Email} & \textit{DepositID} & ---
+\customTableLogic{|Y|Y|Y|Y|}{4}{Driver}{
+  \underline{BusinessMail} & DrivingLincenceType & \textit{Email} & \textit{DepositID}
 }
 
-\customTableLogic{|Y|Y|Y|Y|}{4}{Covers}{
-  \textit{TransportID} & \textit{ZipCode} & \textit{Country} & Date
+\customTableLogic{|Y|Y|Y|Y|Y|}{5}{Covers}{
+  \textit{TransportID} & \textit{ZipCode} & \textit{Country} & Date & OccupiedSpace
 }
