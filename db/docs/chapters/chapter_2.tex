@@ -11,8 +11,10 @@ Questa fase di progettazione è stata svolta utilizzando, oltre che il modello \
 \subsection{Precisazioni sui Diagrammi}
 
 \subsubsection{EER Diagram}
+% TODO @zGenny you should update EER too.
+% TODO @zGenny isCompleted field should not be derived anymore. To be updated EER, UML and UML Restructured
 % TODO @zGenny remove isavailable field from operator too, it's useless. Do this in chapter 3 too.
-% BUG : @RiccardoElena isAvaiable field from driver right? (Removed)
+% BUG : @RiccardoElena isAvaiable field from driver right? (Removed) Yes it was from driver, but it's not removed yet or am I missing something? 
 Vista la densità del diagramma \textbf{EER}, si è deciso d'introdurre un \textbf{color coding} per facilitarne la lettura:
 
 \begin{itemize}
@@ -60,12 +62,11 @@ Nello schema concettuale non sono presenti attributi \textbf{Multipli} o \textbf
 
 \subsubsection{Attributi Derivati}
 
-Nello schema concettuale sono presenti tre attributi \textbf{Derivati}:
+Nello schema concettuale sono presenti due attributi \textbf{Derivati}:
 
 \begin{itemize}
   \item L'attributo \textbf{Price} dell'entità \textbf{Shipment}, il quale però non ha necessità di essere conservato, non essendo un attributo di frequente richiesta per il sistema richiesto, e che quindi può essere eventualmente calcolato \textit{on-the-fly} in fase d'interrogazione del database basandosi sugli indirizzi di partenza e arrivo della spedizione e sulle eventuali modalità extra di consegna specificate in \textbf{Order}, come \textit{ExtraWarranty} e \textit{IsExpress}.
-  \item L'attributo \textbf{IsCompleted} dell'entità \textbf{Order}, invece, si è scelto di conservarlo, in quanto è un attributo che può essere richiesto frequentemente dal sistema, e richiede un controllo relativamente complesso per essere valorizzato. Un ordine è considerato \textit{completato} se tutti i prodotti che contiene sono stati consegnati all'utente, dunque sarebbe necessario infatti controllare che tutti i prodotti dell'ordine siano stati spediti al destinatario, e che tali spedizioni siano andate a buon fine, coinvolgendo ben quattro entità: \textbf{Order}, \textbf{Product}, \textbf{Shipment} e \textbf{Account}. % * We should add a trigger that does this the first time
-  \item L'attributo \textbf{OccupiedSpace} sia dell'entità \textbf{Deposit} che della classe d'associazione di \textbf{Covers}, infine, è stato anch'esso conservato, in quanto è un attributo che può essere richiesto frequentemente dal sistema, e richiede un interrogazione con risultato potenzialmente molto grande per essere valorizzata. % * this can be a cool trigger too.
+  \item L'attributo \textbf{OccupiedSpace} sia dell'entità \textbf{Deposit} che della classe d'associazione di \textbf{Covers}, infine, è stato anch'esso conservato, in quanto è un attributo che può essere richiesto frequentemente dal sistema, e richiede un interrogazione con risultato potenzialmente molto grande per essere valorizzata. 
 \end{itemize}
 
 \subsubsection{Generalizzazioni e Specializzazioni}
@@ -481,7 +482,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   Il campo \textbf{MaxCapacity} della classe \textbf{Transport} dev'essere positivo.
   }\\
 
-  \textbf{formatCoversOccupiedSpace} & Dominio & % BUG : @RiccardoElena i changed this from Transport to Covers. Or we can just delete    
+  \textbf{formatCoversOccupiedSpace} & Dominio & 
   {\footnotesize
   Il campo \textbf{OccupiedSpace} della classe \textbf{Covers} dev'essere non negativo.
   }\\
@@ -552,7 +553,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   \textbf{formatStoresQuantity} & Dominio & 
   {\footnotesize
   Il campo \textbf{Quantity} della classe d'associazione \textbf{Stores} deve essere non negativo.
-  }\\ % ! we have to define a trigger that delete the product if quantity is 0
+  }\\ 
 
   \textbf{formatOrderQuantity} & Dominio & 
   {\footnotesize
@@ -584,7 +585,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   Nella classe \textbf{Deposit} il campo \textbf{OccupiedSpace} può avere valori solo minori o uguali al campo \textbf{MaxCapacity}
   }\\
   
-  \textbf{checkTransportFullness} & Relazionale & % BUG: @RiccardoElena is the name of the trigger correct?
+  \textbf{checkTransportFullness} & Relazionale & 
   {\footnotesize
   Nella classe d'associazione \textbf{Cover} il campo \textbf{OccupiedSpace} può avere valori solo minori o uguali al campo \textbf{MaxCapacity} della classe \textbf{Transport}
   }\\

@@ -140,6 +140,28 @@ CREATE TYPE uninadelivery.worldzone AS ENUM (
 
 ALTER TYPE uninadelivery.worldzone OWNER TO zgenny;
 
+--
+-- Name: blockoperatordeletion_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.blockoperatordeletion_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    IF EXISTS (
+      SELECT 1
+        FROM shipment
+        WHERE businessmail = OLD.email AND hasarrived <> TRUE
+    ) THEN
+      perform raise_custom_error('E0019');
+    END IF;
+    RETURN OLD;
+  END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.blockoperatordeletion_func() OWNER TO riccardoelena;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -176,6 +198,7 @@ DECLARE
 BEGIN 
 -- I have to check if shipment is still directed to the correct area
   IF NEW.DirectedTo IS NOT NULL THEN
+    raise notice 'shipment is directed to a deposit';
     SELECT ZipCode, Country 
       INTO ZCode, Cy
       FROM Deposit
@@ -188,6 +211,7 @@ BEGIN
         FROM Ships 
         WHERE ShipmentID = NEW.ShipmentID
     ) THEN
+      raise notice 'nonono';
       -- if not, I don't have to update the covers table
       coverNeedsUpdate = FALSE;
     ELSE
@@ -227,6 +251,71 @@ $$;
 ALTER PROCEDURE uninadelivery.checkcorrectarea(IN new uninadelivery.shipment, OUT zcode uninadelivery.numericstring, OUT cy uninadelivery.letterstring, OUT coverneedsupdate boolean) OWNER TO riccardoelena;
 
 --
+-- Name: checkcorrectarea(uninadelivery.shipment, boolean); Type: PROCEDURE; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE PROCEDURE uninadelivery.checkcorrectarea(IN new uninadelivery.shipment, OUT zcode uninadelivery.numericstring, OUT cy uninadelivery.letterstring, INOUT coverneedsupdate boolean)
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  Zcode2 area.zipcode%TYPE;
+  Cy2 area.country%TYPE;
+BEGIN 
+-- I have to check if shipment is still directed to the correct area
+  IF NEW.DirectedTo IS NOT NULL THEN
+    raise notice 'shipment is directed to a deposit';
+    SELECT ZipCode, Country 
+      INTO ZCode, Cy
+      FROM Deposit
+      WHERE DepositID = NEW.DirectedTo;
+  ELSE
+  -- if the shipment is now towards a client, all the orders have to be directed to the same zip code 
+  -- at first I check if there are at least one order for that shipment
+    IF NOT EXISTS (
+      SELECT 1
+        FROM Ships 
+        WHERE ShipmentID = NEW.ShipmentID
+    ) THEN
+      raise notice 'nonono';
+      -- if not, I don't have to update the covers table
+      coverNeedsUpdate = FALSE;
+    ELSE
+      -- When it's assured that at least one order exists I can pick one random order and check if all the others are directed to the same area
+      SELECT ZipCode, Country 
+        INTO ZCode, Cy
+        FROM Ships NATURAL JOIN "Order" JOIN Account
+        on Account.Email = "Order".Email
+        WHERE ShipmentID = NEW.ShipmentID
+        LIMIT 1;
+
+      IF EXISTS (
+        SELECT 1
+          FROM Ships NATURAL JOIN "Order" JOIN Account
+          on Account.Email = "Order".Email
+          WHERE ShipmentID = NEW.ShipmentID AND
+                (ZipCode <> ZCode OR Country <> Cy)
+      ) THEN
+        perform raise_custom_error('E0016');
+      END IF;
+
+      -- now, I have to check if the new deposit is in the same city of the clients
+      SELECT ZipCode, Country 
+        INTO ZCode2, Cy2
+        FROM deposit
+        WHERE DepositID = NEW.ShippedFrom;
+
+      IF NOT isSameCity(ZCode, Cy, ZCode2, Cy2) THEN
+        perform raise_custom_error('E0008');
+      END IF;
+    END IF;
+  END IF;
+END;
+$$;
+
+
+ALTER PROCEDURE uninadelivery.checkcorrectarea(IN new uninadelivery.shipment, OUT zcode uninadelivery.numericstring, OUT cy uninadelivery.letterstring, INOUT coverneedsupdate boolean) OWNER TO riccardoelena;
+
+--
 -- Name: checkvalidorder(uninadelivery.shipment); Type: PROCEDURE; Schema: uninadelivery; Owner: riccardoelena
 --
 
@@ -264,6 +353,28 @@ $$;
 ALTER PROCEDURE uninadelivery.checkvalidorder(IN new uninadelivery.shipment) OWNER TO riccardoelena;
 
 --
+-- Name: completedorder_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.completedorder_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    UPDATE "Order" 
+      SET iscompleted = TRUE 
+      WHERE OrderID IN (
+        SELECT OrderID 
+          FROM ships 
+          WHERE shipmentID = NEW.shipmentID
+      );
+    RETURN NEW;
+  END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.completedorder_func() OWNER TO riccardoelena;
+
+--
 -- Name: correcttransportassignment_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
@@ -274,18 +385,20 @@ DECLARE
   Dtype Deposit.DepositType%TYPE;
 BEGIN
 
+  -- retrieve the depositType of the deposit the transport is assigned to
   SELECT DepositType
   INTO Dtype
   FROM Deposit
   WHERE depositid = NEW.depositid;
 
+  -- checking the error combinations
   IF NEW.TransportType = 'WheeledLarge' AND Dtype = 'City' THEN
     perform raise_custom_error('E0010');
   END IF;
   IF NEW.TransportType = 'Rails' AND (Dtype = 'City' OR Dtype = 'State') THEN
     perform raise_custom_error('E0010');
   END IF;
-  IF (NEW.TransportType = 'Air' OR NEW.TransportType = 'Water') AND (Dtype = 'City' OR Dtype = 'State' OR Dtype = 'Country') THEN
+  IF (NEW.TransportType = 'Air' OR NEW.TransportType = 'Water') AND Dtype <> 'Central' THEN
     perform raise_custom_error('E0010');
   END IF;
 
@@ -304,32 +417,35 @@ ALTER FUNCTION uninadelivery.correcttransportassignment_func() OWNER TO zgenny;
 CREATE FUNCTION uninadelivery.correcttransportfordrivinglicence_func() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-DECLARE
-  drivinglicence Driver.drivinglicencetype%TYPE;
-  Ttype Transport.transporttype%TYPE;
-BEGIN
+  DECLARE
+    drivinglicence Driver.drivinglicencetype%TYPE;
+    Ttype Transport.transporttype%TYPE;
+  BEGIN
 
-  SELECT drivinglicencetype
-  INTO drivinglicence
-  FROM driver
-  WHERE BusinessMail = NEW.BusinessMail;
+    -- retriving data needed
+    SELECT drivinglicencetype
+    INTO drivinglicence
+    FROM driver
+    WHERE BusinessMail = NEW.BusinessMail;
 
 
-  SELECT transporttype
-  INTO Ttype
-  FROM transport
-  WHERE transportid = NEW.transportid;
+    SELECT transporttype
+    INTO Ttype
+    FROM transport
+    WHERE transportid = NEW.transportid;
 
-  IF Ttype = 'WheeledSmall' THEN
-    RETURN NEW;
-  END IF;
-  IF Ttype = 'WheeledLarge' AND drivinglicence = 'CE' THEN
-    RETURN NEW;
-  END IF;
+    -- checking the correct cases
+    IF Ttype = 'WheeledSmall' THEN
+      RETURN NEW;
+    END IF;
+    IF Ttype = 'WheeledLarge' AND drivinglicence = 'CE' THEN
+      RETURN NEW;
+    END IF;
 
-  perform raise_custom_error('E0009');
-END;
-$$;
+    -- if it's none of the correct cases, raise error
+    perform raise_custom_error('E0009');
+  END;
+  $$;
 
 
 ALTER FUNCTION uninadelivery.correcttransportfordrivinglicence_func() OWNER TO zgenny;
@@ -344,8 +460,7 @@ CREATE FUNCTION uninadelivery.coversoccupiedspaceupdate_func() RETURNS trigger
   DECLARE
     Sdate Shipment.shippingdate%TYPE;
     Tid Transport.transportID%TYPE;
-    Qty "Order".quantity%TYPE;
-    Psize Product.PackageSizeLiters%TYPE;
+    Qty real;
   BEGIN
 
     -- check if it's an update/delete
@@ -357,14 +472,17 @@ CREATE FUNCTION uninadelivery.coversoccupiedspaceupdate_func() RETURNS trigger
         FROM shipment
         WHERE shipmentID = OLD.shipmentID;
       -- retrieve the quantity of the order
-      SELECT quantity, PackageSizeLiters
-        INTO Qty, Psize
+      SELECT quantity * PackageSizeLiters
+        INTO Qty
         FROM "Order" JOIN PRODUCT USING (name, supplier)
         WHERE orderID = OLD.orderID;
 
       UPDATE covers
-        SET occupiedspace = occupiedspace - (Qty * Psize)
+        SET occupiedspace = occupiedspace - Qty
         WHERE date = Sdate AND transportID = Tid;
+        IF TG_OP = 'DELETE' THEN
+          RETURN OLD;
+        END IF;
     END IF;
 
     -- check if it's an update/insert
@@ -376,19 +494,19 @@ CREATE FUNCTION uninadelivery.coversoccupiedspaceupdate_func() RETURNS trigger
         FROM shipment
         WHERE shipmentID = NEW.shipmentID;
       -- retrieve the quantity of the order
-      SELECT quantity, PackageSizeLiters
-        INTO Qty, Psize
+      SELECT quantity * PackageSizeLiters
+        INTO Qty
         FROM "Order" JOIN PRODUCT USING (name, supplier)
         WHERE orderID = NEW.orderID;
 
       UPDATE covers
-        SET occupiedspace = occupiedspace + (Qty * Psize)
+        SET occupiedspace = occupiedspace + Qty
         WHERE date = Sdate AND transportID = Tid;
     END IF;
     RETURN NEW;
 
   END;
-$$;
+  $$;
 
 
 ALTER FUNCTION uninadelivery.coversoccupiedspaceupdate_func() OWNER TO riccardoelena;
@@ -423,6 +541,23 @@ $$;
 ALTER FUNCTION uninadelivery.createcoversforshipment(zc uninadelivery.numericstring, cy uninadelivery.letterstring, tid integer, d date) OWNER TO zgenny;
 
 --
+-- Name: deletestoredproducts_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.deletestoredproducts_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  DELETE FROM stores
+    WHERE depositid = new.depositid AND name = new.name AND supplier = new.supplier;
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.deletestoredproducts_func() OWNER TO riccardoelena;
+
+--
 -- Name: depositoccupiedspaceupdate_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
 --
 
@@ -432,20 +567,28 @@ CREATE FUNCTION uninadelivery.depositoccupiedspaceupdate_func() RETURNS trigger
 DECLARE
   Psize Product.PackageSizeLiters%TYPE;
 BEGIN
+
+  -- check if it's an update/delete 
+  IF OLD IS NOT NULL THEN
   -- retrieve the package size of the product
   SELECT PackageSizeLiters
     INTO Psize
     FROM Product
-    WHERE name = NEW.name AND supplier = NEW.supplier;
-
-  -- check if it's an update/delete 
-  IF OLD IS NOT NULL THEN 
+    WHERE name = OLD.name AND supplier = OLD.supplier;
     UPDATE deposit
       SET occupiedspace = occupiedspace - (OLD.quantity * Psize)
       WHERE depositID = OLD.depositID;
+    IF TG_OP = 'DELETE' THEN
+      RETURN OLD;
+    END IF;
   END IF;
   -- check if it's an update/insert
   IF NEW IS NOT NULL THEN
+    -- retrieve the package size of the product
+  SELECT PackageSizeLiters
+    INTO Psize
+    FROM Product
+    WHERE name = NEW.name AND supplier = NEW.supplier;
     UPDATE deposit
       SET occupiedspace = occupiedspace + (NEW.quantity * Psize)
       WHERE depositID = NEW.depositID;
@@ -464,43 +607,51 @@ ALTER FUNCTION uninadelivery.depositoccupiedspaceupdate_func() OWNER TO riccardo
 CREATE FUNCTION uninadelivery.formatdriverbusinessmail_func() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-DECLARE
-  name_initial text;
-  acc_surname text;
-  omoniums_num integer;
-  new_mail text;
-BEGIN
+  DECLARE
+    name_initial text;
+    acc_surname text;
+    omoniums_num integer;
+    new_mail text;
+  BEGIN
 
-  SELECT Name, surname
-  INTO name_initial, acc_surname
-  FROM Account
-  WHERE email=new.email;
+    -- retriving account data
+    SELECT Name, surname
+    INTO name_initial, acc_surname
+    FROM Account
+    WHERE email=new.email;
 
-  name_initial = SUBSTR(name_initial, 1,1);
+    -- extracting the initial of the name
+    name_initial = SUBSTR(name_initial, 1,1);
 
-  new_mail = name_initial || '.' || acc_surname;
+    -- generating first part of the new businessmail
+    new_mail = name_initial || '.' || acc_surname;
 
-  SELECT COUNT(*)
-  INTO omoniums_num
-  FROM Driver
-  WHERE businessmail LIKE (new_mail || '%');
+    -- looking for omoniums
+    SELECT COUNT(*)
+    INTO omoniums_num
+    FROM Driver
+    WHERE businessmail LIKE (new_mail || '%');
 
-  IF omoniums_num > 0 THEN
-    new_mail = new_mail || omoniums_num::text;
-  END IF;
+    -- adding omoniums number if needed
+    IF omoniums_num > 0 THEN
+      new_mail = new_mail || omoniums_num::text;
+    END IF;
 
-  new_mail = new_mail || '@uninadelivery.driver.com';
+    -- completing businessmail with domain if needed
+    new_mail = new_mail || '@uninadelivery.driver.com';
 
-  IF NEW.businessmail <> new_mail THEN
-    RAISE NOTICE 'Non standard businessmail inserted. Substituting it with %', new_mail;
-  END IF;
+    -- if the inserted mail was not correct, notify the user
+    IF NEW.businessmail <> new_mail THEN
+      RAISE NOTICE 'Non standard businessmail inserted. Substituting it with %', new_mail;
+    END IF;
 
-  NEW.businessmail = new_mail;
+    -- inserting the new businessmail
+    NEW.businessmail = new_mail;
 
-  RETURN NEW;
+    RETURN NEW;
 
-END;
-$$;
+  END;
+  $$;
 
 
 ALTER FUNCTION uninadelivery.formatdriverbusinessmail_func() OWNER TO zgenny;
@@ -512,43 +663,51 @@ ALTER FUNCTION uninadelivery.formatdriverbusinessmail_func() OWNER TO zgenny;
 CREATE FUNCTION uninadelivery.formatoperatorbusinessmail_func() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-DECLARE
-  name_initial text;
-  acc_surname text;
-  omoniums_num integer;
-  new_mail text;
-BEGIN
+  DECLARE
+    name_initial text;
+    acc_surname text;
+    omoniums_num integer;
+    new_mail text;
+  BEGIN
 
-  SELECT Name, surname
-  INTO name_initial, acc_surname
-  FROM Account
-  WHERE email=new.email;
+    -- retriving account data
+    SELECT Name, surname
+    INTO name_initial, acc_surname
+    FROM Account
+    WHERE email=new.email;
 
-  name_initial = SUBSTR(name_initial, 1,1);
+    -- extracting the initial of the name
+    name_initial = SUBSTR(name_initial, 1,1);
 
-  new_mail = name_initial || '.' || acc_surname;
+    -- generating first part of the new businessmail
+    new_mail = name_initial || '.' || acc_surname;
 
-  SELECT COUNT(*)
-  INTO omoniums_num
-  FROM operator
-  WHERE businessmail LIKE (new_mail || '%');
+    -- looking for omoniums
+    SELECT COUNT(*)
+    INTO omoniums_num
+    FROM Operator
+    WHERE businessmail LIKE (new_mail || '%');
 
-  IF omoniums_num > 0 THEN
-    new_mail = new_mail || omoniums_num::text;
-  END IF;
+    -- adding omoniums number if needed
+    IF omoniums_num > 0 THEN
+      new_mail = new_mail || omoniums_num::text;
+    END IF;
 
-  new_mail = new_mail || '@uninadelivery.operator.com';
+    -- completing businessmail with domain if needed
+    new_mail = new_mail || '@uninadelivery.operator.com';
 
-  IF NEW.businessmail <> new_mail THEN
-    RAISE NOTICE 'Non standard businessmail inserted. Substituting it with %', new_mail;
-  END IF;
+    -- if the inserted mail was not correct, notify the user
+    IF NEW.businessmail <> new_mail THEN
+      RAISE NOTICE 'Non standard businessmail inserted. Substituting it with %', new_mail;
+    END IF;
 
-  NEW.businessmail = new_mail;
+    -- inserting the new businessmail
+    NEW.businessmail = new_mail;
 
-  RETURN NEW;
+    RETURN NEW;
 
-END;
-$$;
+  END;
+  $$;
 
 
 ALTER FUNCTION uninadelivery.formatoperatorbusinessmail_func() OWNER TO zgenny;
@@ -560,27 +719,19 @@ ALTER FUNCTION uninadelivery.formatoperatorbusinessmail_func() OWNER TO zgenny;
 CREATE FUNCTION uninadelivery.isaccountreachable_func() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-DECLARE
-  acc_city Area.City%TYPE;
-  acc_state Area.State%TYPE;
-  acc_worldZone Area.WorldZone%TYPE;
-BEGIN
+  BEGIN
 
-  SELECT City, State, WorldZone
-  INTO acc_city, acc_state, acc_worldZone
-  FROM Area
-  WHERE ZipCode = New.ZipCode AND Country = NEW.Country;
+    IF NOT EXISTS (
+      SELECT 1
+      FROM Deposit
+      WHERE isSameCity(NEW.ZipCode, NEW.Country, ZipCode, Country)
+    ) THEN
+      perform raise_custom_error('E0007');
+    END IF;
+    RETURN NEW;
 
-  IF NOT EXISTS (
-    SELECT 1
-    FROM Area NATURAL JOIN Deposit
-    WHERE City=acc_city AND State = acc_state AND Country = NEW.Country AND WorldZone = acc_worldZone
-  ) THEN
-    perform raise_custom_error('E0007');
-  END IF;
-  RETURN NEW;
-END;
-$$;
+  END;
+  $$;
 
 
 ALTER FUNCTION uninadelivery.isaccountreachable_func() OWNER TO zgenny;
@@ -603,8 +754,13 @@ CREATE FUNCTION uninadelivery.isaddressforsomethingspecific_func() RETURNS trigg
                         Country = $4';
     tableName text;
 BEGIN
-    FOREACH tableName IN ARRAY TG_ARGV LOOP
 
+      IF TG_TABLE_NAME::text = 'account' THEN
+        tableName = 'Deposit';
+      ELSIF TG_TABLE_NAME::text = 'deposit' THEN
+        tableName = 'Account';
+      END IF; 
+      
       IF tableName = 'Deposit' THEN
         queryp2 = queryp2 || ' AND DepositType <> ''City'' ';
       ELSIF tableName = 'Account' THEN
@@ -620,7 +776,6 @@ BEGIN
       IF flag > 0 THEN
         perform raise_custom_error('E0002');
       END IF;
-    END LOOP;
 
     RETURN NEW;
   END;
@@ -676,26 +831,29 @@ ALTER FUNCTION uninadelivery.iscitydepositshippingtoclient(zc uninadelivery.nume
 CREATE FUNCTION uninadelivery.isdriverassignedtovalidtransport_func() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-DECLARE  
-  d_deposit Driver.DepositID%TYPE;
-  t_deposit Transport.DepositID%TYPE;
-BEGIN
-  SELECT DepositID
-    INTO d_deposit
-    FROM Driver
-    WHERE BusinessMail = NEW.BusinessMail;
+  DECLARE
+    d_deposit Driver.DepositID%TYPE;
+    t_deposit Transport.DepositID%TYPE;
+  BEGIN
 
-  SELECT DepositID
-    INTO t_deposit
-    FROM Transport
-    WHERE TransportID = NEW.Transportid;
+    -- retriving data needed
+    SELECT DepositID
+      INTO d_deposit
+      FROM Driver
+      WHERE BusinessMail = NEW.BusinessMail;
 
-  IF d_deposit <> t_deposit THEN
-    perform raise_custom_error('E0004');
-  END IF;
-  RETURN NEW;
-END;
-$$;
+    SELECT DepositID
+      INTO t_deposit
+      FROM Transport
+      WHERE TransportID = NEW.Transportid;
+
+    -- if deposits don't match, raise error
+    IF d_deposit <> t_deposit THEN
+      perform raise_custom_error('E0004');
+    END IF;
+    RETURN NEW;
+  END;
+  $$;
 
 
 ALTER FUNCTION uninadelivery.isdriverassignedtovalidtransport_func() OWNER TO zgenny;
@@ -792,7 +950,7 @@ SELECT shippedfrom, directedto
   FROM shipment
   WHERE shipmentID = NEW.shipmentID;
 
-IF DIDend = NULL THEN
+IF DIDend IS NULL THEN
   IF NOT EXISTS (
     SELECT 1
       FROM stores
@@ -906,19 +1064,21 @@ ALTER FUNCTION uninadelivery.isshipmentdirectedincorrectareadeposit_func() OWNER
 CREATE FUNCTION uninadelivery.notexeedtransportcapacity_func() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-BEGIN
+  BEGIN
+     
+    IF EXISTS (
+      -- this select works for both cases, using from NEW only the common field
+      SELECT 1
+      FROM Covers NATURAL JOIN Transport
+      WHERE TransportID = NEW.TransportID AND
+            OccupiedSpace > MaxCapacity
+    ) THEN
+      perform raise_custom_error('E0018');
+    END IF;
+    RETURN NEW;
 
-  IF EXISTS (
-    SELECT 1
-      FROM covers NATURAL JOIN transport
-      WHERE transportID = NEW.transportID
-        AND occupiedspace > maxcapacity
-  ) THEN
-    perform raise_exception('E0018');
-  END IF;
-  RETURN NEW;
-END;
-$$;
+  END;
+  $$;
 
 
 ALTER FUNCTION uninadelivery.notexeedtransportcapacity_func() OWNER TO riccardoelena;
@@ -930,28 +1090,32 @@ ALTER FUNCTION uninadelivery.notexeedtransportcapacity_func() OWNER TO riccardoe
 CREATE FUNCTION uninadelivery.onlyonejobperaccount_func() RETURNS trigger
     LANGUAGE plpgsql
     AS $_$
-DECLARE
-  flag integer;
-  tableName text;
-BEGIN
-
-  FOREACH tableName IN ARRAY TG_ARGV LOOP
-    IF tableName = 'driver' OR tableName = 'operator' THEN
-      EXECUTE format('SELECT count(*) FROM %I WHERE Email=$1', tableName) 
-      INTO flag USING NEW.Email;
-    ELSE
+  DECLARE
+    flag integer;
+    tableName text;
+  BEGIN
+    -- retrieving other table name, if TG_TABLE_NAME is not an expected table raise an exception
+    IF TG_TABLE_NAME = 'driver' THEN
+      tableName = 'operator';
+    ELSIF TG_TABLE_NAME = 'operator' THEN
+      tableName = 'driver';
+    ELSE 
       perform raise_custom_error('E0012');
     END IF;
-  END LOOP;
 
-  IF flag > 0 THEN
-    perform raise_custom_error('E0011');
-  END IF;
+    -- counting rows with the same email
+    EXECUTE format('SELECT count(*) FROM %I WHERE Email=$1', tableName) 
+    INTO flag USING NEW.Email;
 
-  RETURN NEW;
+    -- if there is at least one row, raise error
+    IF flag > 0 THEN
+      perform raise_custom_error('E0011');
+    END IF;
 
-END;
-$_$;
+    RETURN NEW;
+
+  END;
+  $_$;
 
 
 ALTER FUNCTION uninadelivery.onlyonejobperaccount_func() OWNER TO zgenny;
@@ -1070,11 +1234,13 @@ BEGIN
   END IF;
 
   -- if everything is ok, function can procede to the updates
-  IF coverNeedsUpdate THEN
+  IF coverNeedsUpdate = TRUE THEN
+    raise notice '%' , coverNeedsUpdate;
     -- try to update the covers table, if fails, raise error
     -- In case shipment is directed to clients ZCode and Cy are the one from clients, otherwise they are the one from directedTo deposit
     perform updateCoversForShipment( OLD.ShippingDate, OLD.TransportID, ZCode, Cy, NEW.ShippingDate, NEW.TransportID);
   ELSE 
+    raise notice '%', coverNeedsUpdate;
     DELETE FROM covers 
             WHERE date = OLD.ShippingDate AND 
                   transportid = OLD.TransportID;
@@ -1314,7 +1480,7 @@ ALTER SEQUENCE uninadelivery.deposit_depositid_seq OWNED BY uninadelivery.deposi
 --
 
 CREATE TABLE uninadelivery.driver (
-    businessmail uninadelivery.emailstring NOT NULL,
+    businessmail uninadelivery.emailstring DEFAULT 'tobechanged@example.com'::text NOT NULL,
     drivinglicencetype uninadelivery.drivinglicencetype NOT NULL,
     email uninadelivery.emailstring,
     depositid integer NOT NULL
@@ -1342,7 +1508,7 @@ ALTER TABLE uninadelivery.drives OWNER TO zgenny;
 
 CREATE TABLE uninadelivery.operator (
     email uninadelivery.emailstring NOT NULL,
-    businessmail uninadelivery.emailstring NOT NULL
+    businessmail uninadelivery.emailstring DEFAULT 'tobechanged@example.com'::text NOT NULL
 );
 
 
@@ -1522,6 +1688,8 @@ Rajesh	Patel	patel@example.com	1992-05-15	\N	5e884898da28047151d0e56f8dc62927736
 Sipho	Mthembu	mthembu@example.com	1988-09-30	\N	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	789	Nelson Mandela Avenue	98765	Sudafrica
 Takeshi	Yamamoto	yamamoto@example.com	1995-03-20	\N	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	321	Sakura Street	98765	Giappone
 Luca	Bianchi	lucabest@gmail.com	1998-05-12	/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAZABkDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABwYI/8QAPhAAAAQEAwUDAxUAAAAAAAAAAQIDEQQFBhIABxMIFBUWIRcxUSIjQTM2N0JFUlNhYnFzdYSSlKGztMPR0v/EABgBAAMBAQAAAAAAAAAAAAAAAAQGBwMI/8QAJxEAAgAFAwMFAQEAAAAAAAAAAQIDBAURIQAGEgciQRMxUVJhobH/2gAMAwEAAhEDEQA/ACef7Mde5qwZKep6byCHiYdUI0xo2IWIQSFASCACRIwu6gehmfrjRuWtUy/Z/wBnTsLrJGIjJ9JpZNEl4iWFKpBmGJUXXTsOoJDiAEXIAuQOoGZwYRgK/rGpqXkyMfk9MRUnKkSVFcIBFOOU3USHEzpmKcALeVPym72B+vWR5nqeqpKqFZRR1qqmCKiCsKogRGJUUFyJEBApSjcJdMAACuLgPV8Bbhr89vqQl5ueQpKmMoKsvCJgMCbZFrE2N9GdI9uTVbhmc3QyqihiqglHDqy8SQQO23LznGNIGVFeSeZcU0IaMLp6D3kKHff4G+LCBzRL/gYj7pf7wfbN1DqS7mLnyno2W6m6bpxBNWF1G1r7brbmcj97OHjhr5aoD3kL+NN/vE53tGoNFrseRoaRDLLx43sxyilshjfuJ/zSL1J6bLujc81Veat6nDIY27YaL4Ujx86y7Mpt2TIFqPd+K7ycILRv0LbgE91zGf1Nmb09/TFjlplh2pTmns5eOcM3uYoRPDd21rd2XBO3VvK92i72dLm6s4n2enrShPrFP9JXD3ss+xRSX08R+9VxUd5Vidn4MVZh7gKT7AZ4n4A11P1NoVPgSRqcOHaMx4FrtleLG1r29wM2v+6vcyoLhfDvOaurre1tZrPn8cRG8/I/PCBnB7kfaP48HONuk+yaFXtnydQqEDnFf1Lnk4vaK6jCsB7ADA/ukDZFIkmoMAlPt5P3b91//9k=	e0e6097a6f8af07daf5fc7244336ba37133713a8fc7345c36d667dfa513fabaa	123	Via Roma	00123	Italia
+Riccardo	Elena	witherheart63@gmail.com	2003-06-28	\N	e0e6097a6f8af07daf5fc7244336ba37133713a8fc7345c36d667dfa513fabaa	12	Via A. A. Pelliccia	00123	Italia
+Yu	Ngest	test@gmail.com	2007-06-28	\N	e0e6097a6f8af07daf5fc7244336ba37133713a8fc7345c36d667dfa513fabaa	666	Tiananmen Square	67890	Cina
 \.
 
 
@@ -1618,9 +1786,8 @@ COPY uninadelivery.area (zipcode, city, state, country, worldzone) FROM stdin;
 COPY uninadelivery.covers (transportid, zipcode, country, date, occupiedspace) FROM stdin;
 1	00123	Italia	2024-03-01	0
 1	00123	Italia	2024-01-03	0
-1	00123	Italia	2024-01-04	4.6
-15	00123	Italia	2024-01-04	50
-17	98765	India	2024-01-04	10
+1	00123	Italia	2024-02-04	4.6
+15	00123	Italia	2024-02-04	50
 \.
 
 
@@ -1639,7 +1806,6 @@ E0007	Account not reachable by any deposit
 E0008	Shipment towords accounts must takes off from the same city of the arrival
 E0009	This driver has not a valid Driving Licence for this vehicle
 E0010	This transport cannot belong to this type of deposit
-E0011	This account is already emplyeed
 E0012	Cannot check this field for the given table. Are you sure you are calling the function for the correct table?
 E0013	You cannot ship from this deposit
 E0014	Are you trying to transport negative volume of goods?
@@ -1647,6 +1813,8 @@ E0015	This update conflict with preavious inserted data
 E0016	In a shipment directed to client the order must have the same city destination
 E0017	Cannot modify a shipment that has already arrived
 E0018	The transport capacity is exeeded
+E0019	Cannot delete operator with active shipments
+E0011	This account is already employed
 \.
 
 
@@ -1655,11 +1823,13 @@ E0018	The transport capacity is exeeded
 --
 
 COPY uninadelivery.deposit (depositid, occupiedspace, maxcapacity, deposittype, addressno, street, zipcode, country) FROM stdin;
+187	55	1000	Central	456	Gandhi Road	98765	India
 150	25	10000	City	999	Plum Boulevard	67890	Regno Unito
 151	25	10500	City	888	Pear Street	54321	Francia
 152	25	11000	City	777	Mango Drive	98765	Giappone
 153	25	11500	City	666	Avocado Lane	12345	Germania
 154	25	12000	City	555	Papaya Road	67890	Russia
+2	115	80000	Central	7BIS	Corso Umberto I	20145	Italia
 155	25	12500	City	444	Kiwi Court	54321	Egitto
 156	25	13000	City	333	Pineapple Avenue	98765	India
 157	25	13500	City	222	Watermelon Boulevard	12345	Sudafrica
@@ -1689,10 +1859,8 @@ COPY uninadelivery.deposit (depositid, occupiedspace, maxcapacity, deposittype, 
 178	56.800003	1000	Central	28	Lotus Street	67890	Singapore
 160	50	15000	City	888	Strawberry Lane	98765	Messico
 161	129.6	15500	City	777	Blackberry Road	12345	Corea del Sud
-1	31	10000	City	1	Via Roma	00123	Italia
+1	826.4	10000	City	1	Via Roma	00123	Italia
 3	3	12000	City	23	Via Roma	00123	Italia
-187	35	1000	Central	456	Gandhi Road	98765	India
-2	125	80000	Central	7BIS	Corso Umberto I	20145	Italia
 \.
 
 
@@ -1722,6 +1890,7 @@ COPY uninadelivery.operator (email, businessmail) FROM stdin;
 relena@gmail.com	R.Elena@uninadelivery.operator.com
 yamamoto@example.com	T.Yamamoto@uninadelivery.operator.com
 patel@example.com	R.Patel@uninadelivery.operator.com
+witherheart63@gmail.com	R.Elena1@uninadelivery.operator.com
 \.
 
 
@@ -1750,9 +1919,8 @@ Casa e Giardino	Aspirapolvere Robot	iRobot	Aspirapolvere robot iRobot con naviga
 --
 
 COPY uninadelivery.shipment (shipmentid, shippingdate, hasarrived, shippedfrom, directedto, businessmail, transportid) FROM stdin;
-7	2024-01-04	\N	1	\N	R.Elena@uninadelivery.operator.com	1
-8	2024-01-04	\N	3	1	R.Elena@uninadelivery.operator.com	15
-13	2024-01-04	\N	2	187	R.Patel@uninadelivery.operator.com	17
+7	2024-02-04	\N	1	\N	R.Elena@uninadelivery.operator.com	1
+8	2024-02-04	\N	3	1	R.Elena@uninadelivery.operator.com	15
 \.
 
 
@@ -1766,7 +1934,6 @@ COPY uninadelivery.ships (shipmentid, orderid) FROM stdin;
 7	5
 7	41
 8	6
-13	47
 \.
 
 
@@ -1775,11 +1942,8 @@ COPY uninadelivery.ships (shipmentid, orderid) FROM stdin;
 --
 
 COPY uninadelivery.stores (name, supplier, depositid, quantity) FROM stdin;
-Penna	Bic	1	31
-Penna	Bic	3	0
-Smart TV	Sony	187	1
-Smart TV	Sony	2	6
 Gomma	Bic	3	18
+Gomma	Bic	1	16
 Maglione	Gucci	2	10
 Tavolo da Pranzo	IKEA	3	5
 Laptop	Dell	4	15
@@ -1798,6 +1962,10 @@ Smart TV	Sony	161	7
 Forno a Microonde	Panasonic	163	10
 Collana di Perle	Tiffany & Co.	20	3
 Aspirapolvere Robot	iRobot	178	6
+Smartphone	Samsung	1	16
+Smart TV	Sony	187	2
+Smart TV	Sony	2	5
+Penna	Bic	1	827
 Penna	Bic	150	50
 Penna	Bic	151	50
 Penna	Bic	152	50
@@ -1834,8 +2002,6 @@ Penna	Bic	20	50
 Penna	Bic	178	50
 Penna	Bic	160	100
 Penna	Bic	161	100
-Gomma	Bic	1	18
-Smartphone	Samsung	1	18
 \.
 
 
@@ -2026,10 +2192,31 @@ ALTER TABLE ONLY uninadelivery.transport
 
 
 --
+-- Name: operator blockoperatordeletion; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER blockoperatordeletion BEFORE DELETE ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.blockoperatordeletion_func();
+
+
+--
 -- Name: covers checktransportcapacity; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
 CREATE TRIGGER checktransportcapacity BEFORE INSERT OR UPDATE ON uninadelivery.covers FOR EACH ROW EXECUTE FUNCTION uninadelivery.notexeedtransportcapacity_func();
+
+
+--
+-- Name: transport checktransportcapacity; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER checktransportcapacity BEFORE UPDATE ON uninadelivery.transport FOR EACH ROW EXECUTE FUNCTION uninadelivery.notexeedtransportcapacity_func();
+
+
+--
+-- Name: shipment completedorder; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER completedorder AFTER INSERT OR UPDATE ON uninadelivery.shipment FOR EACH ROW WHEN (((new.directedto IS NULL) AND (new.hasarrived = true))) EXECUTE FUNCTION uninadelivery.completedorder_func();
 
 
 --
@@ -2058,6 +2245,20 @@ CREATE TRIGGER correcttransportfordrivinglicence_in BEFORE INSERT ON uninadelive
 --
 
 CREATE TRIGGER correcttransportfordrivinglicence_up BEFORE UPDATE ON uninadelivery.drives FOR EACH ROW EXECUTE FUNCTION uninadelivery.correcttransportfordrivinglicence_func();
+
+
+--
+-- Name: ships coversoccupiedspaceupdate; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER coversoccupiedspaceupdate AFTER INSERT OR DELETE OR UPDATE ON uninadelivery.ships FOR EACH ROW EXECUTE FUNCTION uninadelivery.coversoccupiedspaceupdate_func();
+
+
+--
+-- Name: stores deletestoredproducts; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER deletestoredproducts AFTER INSERT OR UPDATE ON uninadelivery.stores FOR EACH ROW WHEN ((new.quantity = 0)) EXECUTE FUNCTION uninadelivery.deletestoredproducts_func();
 
 
 --
@@ -2201,10 +2402,24 @@ CREATE TRIGGER isshipmentdirectedincorrectareadeposit_up BEFORE UPDATE ON uninad
 
 
 --
+-- Name: driver onlyonejobperaccount_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER onlyonejobperaccount_in BEFORE INSERT ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func();
+
+
+--
+-- Name: operator onlyonejobperaccount_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER onlyonejobperaccount_in BEFORE INSERT ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func();
+
+
+--
 -- Name: driver onlyonejobperaccountdriver_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER onlyonejobperaccountdriver_in BEFORE INSERT ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('operator');
+CREATE TRIGGER onlyonejobperaccountdriver_in BEFORE INSERT ON uninadelivery.driver FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func();
 
 
 --
@@ -2218,7 +2433,7 @@ CREATE TRIGGER onlyonejobperaccountdriver_up BEFORE UPDATE ON uninadelivery.driv
 -- Name: operator onlyonejobperaccountoperator_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER onlyonejobperaccountoperator_in BEFORE INSERT ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('driver');
+CREATE TRIGGER onlyonejobperaccountoperator_in BEFORE INSERT ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func();
 
 
 --
@@ -2226,27 +2441,6 @@ CREATE TRIGGER onlyonejobperaccountoperator_in BEFORE INSERT ON uninadelivery.op
 --
 
 CREATE TRIGGER onlyonejobperaccountoperator_up BEFORE UPDATE ON uninadelivery.operator FOR EACH ROW EXECUTE FUNCTION uninadelivery.onlyonejobperaccount_func('driver');
-
-
---
--- Name: ships updatecoversoccupiedspacedl; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
---
-
-CREATE TRIGGER updatecoversoccupiedspacedl BEFORE DELETE ON uninadelivery.ships FOR EACH ROW EXECUTE FUNCTION uninadelivery.coversoccupiedspaceupdate_func();
-
-
---
--- Name: ships updatecoversoccupiedspacein; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
---
-
-CREATE TRIGGER updatecoversoccupiedspacein BEFORE INSERT ON uninadelivery.ships FOR EACH ROW EXECUTE FUNCTION uninadelivery.coversoccupiedspaceupdate_func();
-
-
---
--- Name: ships updatecoversoccupiedspaceup; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
---
-
-CREATE TRIGGER updatecoversoccupiedspaceup BEFORE UPDATE ON uninadelivery.ships FOR EACH ROW EXECUTE FUNCTION uninadelivery.coversoccupiedspaceupdate_func();
 
 
 --

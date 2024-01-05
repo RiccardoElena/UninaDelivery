@@ -25,7 +25,7 @@ Vista la vasta gamma di vincoli di dominio simili su vari campi, si è deciso di
 \end{lstlisting}
 
 Inoltre per i campi che nel diagramma ristrutturato sono stati definiti come \textbf{enumerazioni}, si è deciso di utilizzare dei tipi enumerati personalizzati.
-% TODO @zGenny @RiccardoElena we need to stlye this part
+
 \begin{lstlisting}
   CREATE TYPE WorldZone AS ENUM (
     'NA', 'EUW', 'EUNE', 'LATAM', 'MIDEAST', 'CKJ', 'SEA', 'IND', 'RUS', 'STAN', 
@@ -86,7 +86,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   );
   ALTER TABLE Account ADD CONSTRAINT account_fk FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
 \end{lstlisting}
-  % TODO define a trigger to avoid manual insertion of null email
+  
 
 \newpage
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Order}}]
@@ -228,7 +228,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Operator}}]
   CREATE TABLE Operator (
   Email emailString NOT NULL,
-  BusinessMail emailString NOT NULL
+  BusinessMail emailString NOT NULL DEFAULT 'tobechanged@example.com'
 );
 ALTER TABLE Operator ADD CONSTRAINT Operator_pk PRIMARY KEY (BusinessMail);
 ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES Account(Email) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -268,11 +268,11 @@ ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES A
   );
   ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE RESTRICT ON UPDATE CASCADE;
   ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_operator FOREIGN KEY (BusinessMail) REFERENCES Operator(Businessmail) ON DELETE CASCADE ON UPDATE CASCADE;
-\end{lstlisting} % TODO make a trigger that block delete operator if exists unfinsihed shipment and set false to transport on his delete
-% BUG i removed IsAvailable from here. 
+\end{lstlisting} 
+ 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Driver}}]
   CREATE TABLE Driver (
-    BusinessMail emailString NOT NULL,
+    BusinessMail emailString NOT NULL DEFAULT 'tobechanged@example.com',
     DrivingLicenceType DrivingLicenceType NOT NULL,
     Email emailString, 
     DepositID integer NOT NULL 
