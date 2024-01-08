@@ -49,10 +49,10 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Area}}]
   CREATE TABLE Area (
-    ZipCode numericString NOT NULL,
-    City letterString NOT NULL,
-    State letterString NOT NULL,
-    Country letterString NOT NULL,
+    ZipCode numericString NOT NULL ,
+    City letterString NOT NULL ,
+    State letterString NOT NULL ,
+    Country letterString NOT NULL ,
     WorldZone WorldZone NOT NULL
   );
   ALTER TABLE Area ADD CONSTRAINT Area_pk PRIMARY KEY (ZipCode, Country);
@@ -60,15 +60,15 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Account}}]
   CREATE TABLE Account (
-    Name letterString NOT NULL,
-    Surname letterString NOT NULL,
-    Email emailString NOT NULL,
-    Birthdate date NOT NULL,
-    ProPic text,
-    Password text NOT NULL,
-    AddressNo alphNumString NOT NULL,
-    Street alphNumString NOT NULL,
-    ZipCode numericString NOT NULL,
+    Name letterString NOT NULL ,
+    Surname letterString NOT NULL ,
+    Email emailString NOT NULL ,
+    Birthdate date NOT NULL ,
+    ProPic text ,
+    Password text NOT NULL ,
+    AddressNo alphNumString NOT NULL ,
+    Street alphNumString NOT NULL ,
+    ZipCode numericString NOT NULL ,
     Country letterString NOT NULL
   );
   ALTER TABLE account ADD CONSTRAINT Account_pk PRIMARY KEY (Email);
@@ -92,10 +92,10 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Order}}]
   CREATE TABLE "Order"(
     OrderID SERIAL, 
-    EmissionDate Date NOT NULL,
-    IsExpress boolean,
-    ExtraWarranty smallint NOT NULL,
-    IsCompleted boolean,
+    EmissionDate Date NOT NULL ,
+    IsExpress boolean ,
+    ExtraWarranty smallint NOT NULL ,
+    IsCompleted boolean ,
     Email emailString,
     Quantity integer NOT NULL
   );
@@ -114,9 +114,9 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Stores}}]
   CREATE TABLE Stores(
-    Name text NOT NULL,
-    Supplier text NOT NULL,
-    DepositID integer NOT NULL,
+    Name text NOT NULL ,
+    Supplier text NOT NULL ,
+    DepositID integer NOT NULL ,
     Quantity integer NOT NULL
   );
   ALTER TABLE Stores ADD CONSTRAINT noDuplicateProductInDeposit UNIQUE (Name, Supplier, DepositID);
@@ -129,13 +129,13 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Deposit}}]
   CREATE TABLE Deposit (
-    DepositID SERIAL NOT NULL,
+    DepositID SERIAL NOT NULL ,
     OccupiedSpace real NOT NULL DEFAULT 0,
-    MaxCapacity real NOT NULL,
-    DepositType DepositType NOT NULL,
-    AddressNo alphNumString NOT NULL,
-    Street alphNumString NOT NULL,
-    ZipCode numericString NOT NULL,
+    MaxCapacity real NOT NULL ,
+    DepositType DepositType NOT NULL ,
+    AddressNo alphNumString NOT NULL ,
+    Street alphNumString NOT NULL ,
+    ZipCode numericString NOT NULL ,
     Country letterString NOT NULL
   );
   ALTER TABLE Deposit ADD CONSTRAINT Deposit_pk PRIMARY KEY ( DepositID);
@@ -159,13 +159,13 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Product}}]
   CREATE TABLE Product (
-    Category letterString NOT NULL,
-    Name text NOT NULL,
-    Supplier text NOT NULL,
-    Description text NOT NULL,
-    PackageSizeLiters real NOT NULL,
-    IsFragile boolean,
-    Price numeric(100,2)
+    Category letterString NOT NULL ,
+    Name text NOT NULL ,
+    Supplier text NOT NULL ,
+    Description text NOT NULL ,
+    PackageSizeLiters real NOT NULL ,
+    IsFragile boolean ,
+    Price numeric ( 100 , 2 ) NOT NULL
   );
   ALTER TABLE Product ADD CONSTRAINT Product_pk PRIMARY KEY (Name,Supplier);
   ALTER TABLE Product ADD CONSTRAINT formatProductName CHECK(
@@ -191,10 +191,10 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Covers}}]
   CREATE TABLE Covers (
-    TransportID integer NOT NULL,
-    ZipCode numericString NOT NULL,
-    Country letterString NOT NULL,
-    Date date NOT NULL,
+    TransportID integer NOT NULL ,
+    ZipCode numericString NOT NULL ,
+    Country letterString NOT NULL ,
+    Date date NOT NULL ,
     OccupiedSpace real NOT NULL DEFAULT 0
   );
   ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -208,11 +208,11 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 \newpage
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Transport}}]
   CREATE TABLE Transport (
-    TransportID Serial NOT NULL,
+    TransportID Serial NOT NULL ,
     OccupiedSpace real NOT NULL DEFAULT 0,
-    MaxCapacity real NOT NULL,
-    IsAvailable boolean, 
-    TransportType TransportType NOT NULL,
+    MaxCapacity real NOT NULL ,
+    IsAvailable boolean , 
+    TransportType TransportType NOT NULL ,
     DepositID integer NOT NULL
   );
   ALTER TABLE Transport ADD CONSTRAINT Transport_pk PRIMARY KEY(TransportID);
@@ -227,17 +227,18 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Operator}}]
   CREATE TABLE Operator (
-  Email emailString NOT NULL,
+  Email emailString NOT NULL ,
   BusinessMail emailString NOT NULL DEFAULT 'tobechanged@example.com'
 );
 ALTER TABLE Operator ADD CONSTRAINT Operator_pk PRIMARY KEY (BusinessMail);
 ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES Account(Email) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE ONLY Operator ADD CONSTRAINT unique_Account_Operator UNIQUE (Email)
 \end{lstlisting}
 
 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Ships}}]
   CREATE TABLE Ships ( 
-    ShipmentID integer NOT NULL,
+    ShipmentID integer NOT NULL ,
     OrderID integer NOT NULL
   );
   ALTER TABLE Ships ADD CONSTRAINT noDuplicateOrderInShipment UNIQUE (ShipmentID, OrderID);
@@ -248,12 +249,12 @@ ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES A
 \newpage
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Shipment}}]
   CREATE TABLE Shipment (
-    ShipmentID Serial NOT NULL,
-    ShippingDate date NOT NULL,
-    HasArrived boolean,
-    ShippedFrom integer NOT NULL,
-    DirectedTo integer,
-    BusinessMail emailString NOT NULL,
+    ShipmentID Serial NOT NULL ,
+    ShippingDate date NOT NULL ,
+    HasArrived boolean ,
+    ShippedFrom integer NOT NULL ,
+    DirectedTo integer ,
+    BusinessMail emailString NOT NULL ,
     TransportID integer NOT NULL
   );
   ALTER TABLE Shipment ADD CONSTRAINT Shipment_pk PRIMARY KEY (ShipmentID);
@@ -273,21 +274,22 @@ ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES A
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Driver}}]
   CREATE TABLE Driver (
     BusinessMail emailString NOT NULL DEFAULT 'tobechanged@example.com',
-    DrivingLicenceType DrivingLicenceType NOT NULL,
+    DrivingLicenceType DrivingLicenceType NOT NULL ,
     Email emailString, 
     DepositID integer NOT NULL 
   );
   ALTER TABLE Driver ADD CONSTRAINT Driver_pk PRIMARY KEY (BusinessMail);
   ALTER TABLE Driver ADD CONSTRAINT Driver_fk_Account FOREIGN KEY (Email) REFERENCES Account(Email) ON DELETE CASCADE ON UPDATE CASCADE;
   ALTER TABLE Driver ADD CONSTRAINT Driver_fk_Deposit FOREIGN KEY (DepositID) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE ONLY Driver ADD CONSTRAINT unique_Account_Driver UNIQUE (Email)
 \end{lstlisting}
 
 \newpage
 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Drives}}]
   CREATE TABLE Drives(
-    TransportID integer NOT NULL,
-    BusinessMail emailString NOT NULL,
+    TransportID integer NOT NULL ,
+    BusinessMail emailString NOT NULL ,
     Date date NOT NULL
   );
   ALTER TABLE Drives ADD CONSTRAINT Drives_fk_Driver FOREIGN KEY (BusinessMail) REFERENCES Driver(BusinessMail) ON DELETE CASCADE ON UPDATE CASCADE;
