@@ -1,0 +1,125 @@
+\chapter{Codici d'Errore Personalizzati}
+
+Sono riportati di seguito i codici d'errore personalizzati utilizzati nel progetto, insieme al messaggio d'errore associato e una breve descrizione del loro significato.
+
+\customTable{cYY}[Custom Error Codes Part 1]{\textbfB{Codice d'Errore} & \textbfB{Messaggio d'Errore} & \textbfB{Descrizione}}{
+
+  \textbf{E0001} &
+  {\footnotesize
+    \textit{Account birthdate is too young to be an employee} } & 
+  {\footnotesize 
+    L'età dell'impiegato è inferiore a 18 anni.} \\
+
+  \textbf{E0002} &
+  {\footnotesize
+    \textit{This address is already occupied} } &
+  {\footnotesize
+    L'indirizzo inserito è già utilizzato da un \textbf{Account} o da un \textbf{Deposit} non \textit{City}.} \\
+
+  \textbf{E0003} &
+  {\footnotesize
+    \textit{Incompatible table in input} } &
+  {\footnotesize
+    Una funzione che utilizza SQL Dinamico è stata attivata da un trigger su una tabella non prevista dall'implementazione.} \\
+
+  \textbf{E0004} &
+  {\footnotesize
+    \textit{Driver's working place and Transport's deposit not matching} } &
+  {\footnotesize 
+    Si è assegnato a un \textbf{Driver} un \textbf{Transport} che non appartiene al \textbf{Deposit} in cui lavora il \textbf{Driver}.} \\
+
+  \textbf{E0005} &
+  {\footnotesize
+    \textit{The transport of this shipment don't belongs to the correct deposit} } &
+  {\footnotesize 
+    Si è assegnato a una \textbf{Shipment} un \textbf{Transport} che non appartiene al \textbf{Deposit} di partenza di \textbf{Shipment}.} \\
+
+  \textbf{E0006} &
+  {\footnotesize
+    \textit{Shipment assigned to a transport already occupied with diffrent location} } &
+  {\footnotesize
+    Si è assegnato a una \textbf{Shipment} un \textbf{Transport} che è già occupato da un'altra \textbf{Shipment} con destinazione diversa in quella data.} \\
+
+  \textbf{E0007} &
+  {\footnotesize
+    \textit{Account not reachable by any deposit} } &
+  {\footnotesize
+    L'\textbf{Account} inserito ha residenza in un \textbf{Area} non coperta dal servizio.} \\
+
+  \textbf{E0008} &
+  {\footnotesize
+    \textit{Shipment towords accounts must takes off from the same city of the arrival} } &
+  {\footnotesize
+    Si è assegnato a una \textbf{Shipment} verso \textbf{Account} degli \textbf{Order} indirizzati ad \textbf{Account} di una città diversa da quella di partenza.} \\
+
+  \textbf{E0009} &
+  {\footnotesize
+    \textit{This driver has not a valid Driving Licence for this vehicle} } &
+  {\footnotesize
+    Si è assegnato a un \textbf{Driver} un \textbf{Transport} che non è abilitato a guidare.} \\
+    
+}
+
+\customTable{cYY}[Custom Error Codes Part 2]{\textbfB{Codice d'Errore} & \textbfB{Messaggio d'Errore} & \textbfB{Descrizione}}{
+
+  \textbf{E0010} &
+  {\footnotesize
+    \textit{This transport cannot belong to this type of deposit} } &
+  {\footnotesize
+    Si è assegnato a un \textbf{Transport} come \textbf{Deposit} che lo possiede un \textbf{Deposit} non abilitato a possederlo.} \\
+
+  \textbf{E0011} &
+  {\footnotesize
+    \textit{This account is already employed} } &
+  {\footnotesize  
+    Si è tentato di rendere \textbf{Operator} un \textbf{Account} già \textbf{Driver} o \textbf{Driver} un \textbf{Account} già \textbf{Operator}.} \\
+
+  \textbf{E0012} &
+  {\footnotesize
+    \textit{ Cannot modify an order that is already arrived to client.} } &
+  {\footnotesize
+    Si è tentato di modificare un \textbf{Order} che è già arrivato a destinazione.} \\
+
+  \textbf{E0013} &
+  {\footnotesize 
+    \textit{You cannot ship from this deposit} } &
+  {\footnotesize
+    Il deposito di partenza di una \textbf{Shipment} non ha prodotti sufficienti per soddisfare la spedizione.} \\  
+
+  \textbf{E0014} &
+  {\footnotesize
+    \textit{Are you trying to transport negative volume of goods?} } &
+  {\footnotesize
+    La somma dello spazio occupato dai prodotti di una \textbf{Shipment} è minore dell'\textbf{OccupiedSpace} del \textbf{Transport} assegnato.} \\
+
+  \textbf{E0015} &
+  {\footnotesize
+    \textit{This update conflict with preavious inserted data}} &
+  {\footnotesize
+    L'aggiornamento di una \textbf{Shipment} collide con dati preesistenti e non modificabili in maniera automatica.} \\
+
+  \textbf{E0016} &
+  {\footnotesize
+    \textit{In a shipment directed to client the order must have the same city destination}
+  } &
+  {\footnotesize
+    Si è assegnato a una \textbf{Shipment} verso \textbf{Account} un \textbf{Order} diretto in un \textbf{Area} diversa da quella di destinazione.} \\
+
+  \textbf{E0017} &
+  {\footnotesize
+    \textit{Cannot modify a shipment that has already arrived} } &
+  {\footnotesize
+    Si è tentato di modificare una shipment che è già arrivata a destinazione.} \\
+
+  \textbf{E0018} &
+  {\footnotesize
+    \textit{The transport capacity is exeeded} } &
+  {\footnotesize
+    Si è tentato di assegnare un volume di \textbf{Product} a un \textbf{Transport} superiore alla sua \textbf{MaxCapacity}.} \\
+
+  \textbf{E0019} &
+  {\footnotesize
+    \textit{Cannot delete operator with active shipments} } &
+  {\footnotesize
+    Si è tentato di eliminare un \textbf{Operator} che ha \textbf{Shipment} attive.} \\
+}

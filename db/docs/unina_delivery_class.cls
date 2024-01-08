@@ -63,6 +63,13 @@
     {\normalfont\normalsize\bfseries\color{PRIMARY}}
     {\textbullet}{20pt}{\normalsize}
 
+  % Appendices
+  \newcommand{\startappendices}{
+    \titleformat{\chapter}[display]
+      {\normalfont\huge\bfseries\color{PRIMARY}}{\textcolor{black}{\appendixname}\ \thechapter}{20pt}{\Huge}
+    \appendix
+  }
+
 
 % Header and footer
   
@@ -126,7 +133,7 @@
 % Custom table definition
 \newcolumntype{Y}{>{\centering\arraybackslash}X}
 \newcommandx{\customTable}[5][2={},3={}]{
-  \renewcommand{\arraystretch}{2.1}
+  \renewcommand{\arraystretch}{1.9}
   \arrayrulecolor{PRIMARY}
   \begin{table}[H]
     \ifthenelse{\equal{#3}{}}{}{\label{#3}}
@@ -200,13 +207,13 @@
   stringstyle=\color{NEWGREEN},
   % Keywords
     %% all keywords ahve to be added here
-    alsoletter={*, ADD, TG_ARGV SELECT, FROM, WHERE, GROUP, BY, BEG, HAVING, ORDER, ASC, DESC, CASCADE, LIMIT, OFFSET, AS, INNER, JOIN, ON, LEFT, RIGHT, FULL, OUTER, UNION, ALL, NOT, NULL, IS, DISTINCT, CASE, FUNCTI, TRIGGER, WHEN, THEN, ELSE, END, CAST, IN, ANY, SOME, EXISTS, INSERT, INTO, VALUES, UPDATE, SET, DELETE, TRUNCATE, CREATE, TABLE, PRIMARY, KEY, FOREIGN, REFERENCES, CHECK, CONSTRAINT, UNIQUE, DEFAULT, ALTER, DROP, INDEX, VIEW, SEQUENCE, TRIGGER, FUNCTION, PROCEDURE, RETURNS, RETURN, TYPE, ENUM, DOMAIN, AGGREGATE, COLLATE, EXTENSION, IF, EXISTS, OWNER, MODE, TO, PUBLIC, GRANT, REVOKE, ROLE, USER, PASSWORD, LOGIN, CONNECTION, LIMIT, SESSION, ROLE, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, integer, boolean, float, text, varchar, char, date, time, timestamp, interval, numeric, money, bit, bytea, serial, bigserial, smallserial, smallint, bigint, real, double, precision, decimal, OR, REPLACE, FUNCTION, RETURNS, TABLE, BEGIN, END, LOOP, WHILE, FOR, DECLARE},
+    alsoletter={*, <>, LIKE, ILIKE ~ , =, AND, OR, PERFORM, CALL, EXCEPTION, \%TYPE, \%ROWTYPE OUT, TRUE, FALSE, ADD, TG_TABLE_NAME, TG_OP, SELECT, FROM, WHERE, GROUP, BY, BEG, HAVING, ORDER, ASC, DESC, CASCADE, LIMIT, OFFSET, AS, INNER, JOIN, ON, LEFT, RIGHT, FULL, OUTER, UNION, ALL, NOT, NULL, IS, DISTINCT, CASE, FUNCTI, TRIGGER, WHEN, THEN, ELSE, END, CAST, IN, ANY, SOME, EXISTS, INSERT, INTO, VALUES, UPDATE, SET, DELETE, TRUNCATE, CREATE, TABLE, PRIMARY, KEY, FOREIGN, REFERENCES, CHECK, CONSTRAINT, UNIQUE, DEFAULT, ALTER, DROP, INDEX, VIEW, SEQUENCE, TRIGGER, FUNCTION, PROCEDURE, RETURNS, RETURN, TYPE, ENUM, DOMAIN, AGGREGATE, COLLATE, EXTENSION, IF, EXISTS, OWNER, MODE, TO, PUBLIC, GRANT, REVOKE, ROLE, USER, PASSWORD, LOGIN, CONNECTION, LIMIT, SESSION, ROLE, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, integer, boolean, float, text, varchar, char, date, time, timestamp, interval, numeric, money, bit, bytea, serial, bigserial, smallserial, smallint, bigint, real, double, precision, decimal, OR, REPLACE, FUNCTION, RETURNS, TABLE, BEGIN, END, LOOP, WHILE, FOR, DECLARE},
     %% numeric keywords
-    keywords=[0]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0},
+    keywords=[0]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0, TRUE, FALSE},
     %% language keywords
-    keywords=[1]{*, ADD, DATABASE, SELECT, FROM, WHERE, GROUP, BY, BEG, HAVING, ORDER, ASC, CASCADE, DESC, LIMIT, OFFSET, AS, INNER, JOIN, ON, LEFT, RIGHT, FULL, OUTER, UNION, ALL, NOT, NULL, IS, DISTINCT, CASE, FUNCTI, TRIGGER, WHEN, THEN, ELSE, END, CAST, IN, ANY, SOME, EXISTS, INSERT, INTO, VALUES, UPDATE, SET, DELETE, TRUNCATE, CREATE, TABLE, PRIMARY, KEY, FOREIGN, REFERENCES, CHECK, CONSTRAINT, UNIQUE, DEFAULT, ALTER, DROP, INDEX, VIEW, SEQUENCE, TRIGGER, FUNCTION, PROCEDURE, RETURNS, RETURN, TYPE, ENUM, DOMAIN, AGGREGATE, COLLATE, EXTENSION, IF, EXISTS, OWNER, MODE, TO, PUBLIC, GRANT, REVOKE, ROLE, USER, PASSWORD, LOGIN, CONNECTION, LIMIT, SESSION, ROLE, OR, REPLACE, FUNCTION, RETURNS, TABLE, BEGIN, END, LOOP, WHILE, FOR, DECLARE},
+    keywords=[1]{*, <>, LIKE, ILIKE, PERFORM, AND, OR CALL, ~ , =, EXCEPTION, OUT, ADD, DATABASE, SELECT, FROM, WHERE, GROUP, BY, BEG, HAVING, ORDER, ASC, CASCADE, DESC, LIMIT, OFFSET, AS, INNER, JOIN, ON, LEFT, RIGHT, FULL, OUTER, UNION, ALL, NOT, NULL, IS, DISTINCT, CASE, FUNCTI, TRIGGER, WHEN, THEN, ELSE, END, CAST, IN, ANY, SOME, EXISTS, INSERT, INTO, VALUES, UPDATE, SET, DELETE, TRUNCATE, CREATE, TABLE, PRIMARY, KEY, FOREIGN, REFERENCES, CHECK, CONSTRAINT, UNIQUE, DEFAULT, ALTER, DROP, INDEX, VIEW, SEQUENCE, TRIGGER, FUNCTION, PROCEDURE, RETURNS, RETURN, TYPE, ENUM, DOMAIN, AGGREGATE, COLLATE, EXTENSION, IF, EXISTS, OWNER, MODE, TO, PUBLIC, GRANT, REVOKE, ROLE, USER, PASSWORD, LOGIN, CONNECTION, LIMIT, SESSION, ROLE, OR, REPLACE, FUNCTION, RETURNS, TABLE, BEGIN, END, LOOP, WHILE, FOR, DECLARE},
     %% data type keywords
-    keywords=[2]{integer, TG_ARGV, boolean, float, text, varchar, char, date, time, timestamp, interval, numeric, money, bit, bytea, serial, bigserial, smallserial, smallint, bigint, real, double, precision, decimal},
+    keywords=[2]{integer, NEW, OLD, \%TYPE, \%ROWTYPE, TG_TABLE_NAME, TG_OP, boolean, float, text, varchar, char, date, time, timestamp, interval, numeric, money, bit, bytea, serial, bigserial, smallserial, smallint, bigint, real, double, precision, decimal},
     %% Colors
     keywordstyle=[0]\color{CONTRAST},
     keywordstyle=[1]\color{PRIMARY},
