@@ -198,7 +198,6 @@ DECLARE
 BEGIN 
 -- I have to check if shipment is still directed to the correct area
   IF NEW.DirectedTo IS NOT NULL THEN
-    raise notice 'shipment is directed to a deposit';
     SELECT ZipCode, Country 
       INTO ZCode, Cy
       FROM Deposit
@@ -211,7 +210,6 @@ BEGIN
         FROM Ships 
         WHERE ShipmentID = NEW.ShipmentID
     ) THEN
-      raise notice 'nonono';
       -- if not, I don't have to update the covers table
       coverNeedsUpdate = FALSE;
     ELSE
@@ -249,6 +247,52 @@ $$;
 
 
 ALTER PROCEDURE uninadelivery.checkcorrectarea(IN new uninadelivery.shipment, OUT zcode uninadelivery.numericstring, OUT cy uninadelivery.letterstring, INOUT coverneedsupdate boolean) OWNER TO riccardoelena;
+
+--
+-- Name: checkdeposithasenoughproducts(integer, integer, text, text, integer); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.checkdeposithasenoughproducts(didend integer, didstart integer, pname text, psupply text, qty integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+  DECLARE
+    QTY2 stores.quantity %TYPE;
+  BEGIN
+    -- if shipment is towards a client then
+    IF DIDend IS NULL THEN
+      IF NOT EXISTS (
+        SELECT 1
+          FROM stores
+          WHERE depositid = DIDstart AND name = PName AND supplier = PSupply AND quantity >= QTY
+      ) THEN
+        -- all the products must be in the same deposit
+        perform raise_custom_error('E0013');
+      END IF;
+    ELSE -- otherwise
+        -- retrieve maximum quantity of the product in the starting deposit
+      SELECT quantity
+        INTO Qty2
+        FROM stores
+        WHERE depositid = DIDstart AND name = PName AND supplier = PSupply;
+      -- if there is no product exception 'E0013' is raised otherwise
+      -- transfer the maximum quantity possible to the new deposit
+      INSERT INTO stores (name, supplier, depositid, quantity)
+        VALUES (PName, PSupply, DIDend, LEAST(QTY, QTY2)) -- if the product already exists in the deposit, update the quantity
+      ON CONFLICT (name, supplier, depositid) DO UPDATE
+        SET quantity = stores.quantity + LEAST(QTY, QTY2);
+    END IF;
+    -- if nothing went wrong, decrement the quantity in the starting deposit
+    UPDATE stores
+      SET quantity = GREATEST(quantity - QTY, 0)
+      WHERE depositid = DIDstart AND name = PName AND supplier = PSupply;
+  EXCEPTION
+    WHEN no_data_found THEN
+      perform raise_custom_error('E0013');
+  END;
+  $$;
+
+
+ALTER FUNCTION uninadelivery.checkdeposithasenoughproducts(didend integer, didstart integer, pname text, psupply text, qty integer) OWNER TO riccardoelena;
 
 --
 -- Name: checkvalidorder(uninadelivery.shipment); Type: PROCEDURE; Schema: uninadelivery; Owner: riccardoelena
@@ -358,12 +402,13 @@ CREATE FUNCTION uninadelivery.correcttransportfordrivinglicence_func() RETURNS t
   BEGIN
 
     -- retriving data needed
+    -- retrieving the driving licence of the driver
     SELECT drivinglicencetype
     INTO drivinglicence
     FROM driver
     WHERE BusinessMail = NEW.BusinessMail;
 
-
+    -- retrieving the transport type of the transport
     SELECT transporttype
     INTO Ttype
     FROM transport
@@ -454,6 +499,7 @@ CREATE FUNCTION uninadelivery.createcoversforshipment(zc uninadelivery.numericst
     LANGUAGE plpgsql
     AS $$
 BEGIN
+  -- check if the cover already exists
   IF NOT EXISTS (
       SELECT 1
       FROM Covers
@@ -462,11 +508,13 @@ BEGIN
         AND transportid = Tid
         AND Date = D
     ) THEN
+      -- if not, try to create one
       INSERT INTO Covers
         VALUES (Tid, Zc, Cy, D);
   END IF;
-
+  -- if transport is not occupied in that date insert went well
 EXCEPTION
+  -- otherwise insert is blocked by unique constraint, notify to the user
   WHEN unique_violation THEN 
     perform raise_custom_error('E0006');
 END;
@@ -690,30 +738,37 @@ CREATE FUNCTION uninadelivery.isaddressforsomethingspecific_func() RETURNS trigg
     tableName text;
 BEGIN
 
-      IF TG_TABLE_NAME::text = 'account' THEN
-        tableName = 'Deposit';
-      ELSIF TG_TABLE_NAME::text = 'deposit' THEN
-        tableName = 'Account';
-      END IF; 
-      
-      IF tableName = 'Deposit' THEN
-        queryp2 = queryp2 || ' AND DepositType <> ''City'' ';
-      ELSIF tableName = 'Account' THEN
-        IF NEW.DepositType = 'City' THEN
-          RETURN NEW;
-        END IF;
-      ELSE 
-        perform raise_custom_error('E0003');
+    -- Checking if the trigger table is Account or Deposit and chosing where to search
+    IF TG_TABLE_NAME::text = 'account' THEN
+      tableName = 'Deposit';
+    ELSIF TG_TABLE_NAME::text = 'deposit' THEN
+      tableName = 'Account';
+    END IF; 
+
+    -- Excluding City Deposits from the search if the trigger table is Account
+    IF tableName = 'Deposit' THEN
+      queryp2 = queryp2 || ' AND DepositType <> ''City'' ';
+    ELSIF tableName = 'Account' THEN
+    -- If the inserted deposit is a City Deposit, there's no need to search
+      IF NEW.DepositType = 'City' THEN
+        RETURN NEW;
       END IF;
-          
-      queryp1 = queryp1 || tableName || queryp2 || ')';
-      EXECUTE queryp1 into flag USING NEW.AddressNo, NEW.Street, NEW.ZipCode, NEW.Country;
-      IF flag > 0 THEN
-        perform raise_custom_error('E0002');
-      END IF;
+    ELSE 
+      -- If the trigger table is neither Account nor Deposit, raise an exception
+      perform raise_custom_error('E0003');
+    END IF;
+        
+    -- Completing the query
+    queryp1 = queryp1 || tableName || queryp2 || ')';
+    -- Executing the query
+    EXECUTE queryp1 into flag USING NEW.AddressNo, NEW.Street, NEW.ZipCode, NEW.Country;
+    -- If already exists someone at that address, raise an exception
+    IF flag > 0 THEN
+      perform raise_custom_error('E0002');
+    END IF;
 
     RETURN NEW;
-  END;
+    END;
 $_$;
 
 
@@ -726,35 +781,23 @@ ALTER FUNCTION uninadelivery.isaddressforsomethingspecific_func() OWNER TO zgenn
 CREATE FUNCTION uninadelivery.iscitydepositshippingtoclient(zc uninadelivery.numericstring, cy uninadelivery.letterstring, did integer) RETURNS void
     LANGUAGE plpgsql
     AS $$
-DECLARE 
-  a_city Area.City%TYPE;
-  a_state Area.State%TYPE;
-  a_worldzone Area.WorldZone%TYPE;
-  d_city Area.City%TYPE;
-  d_state Area.State%TYPE;
-  d_country Area.Country%TYPE;
-  d_worldzone Area.WorldZone%TYPE;
-BEGIN
+    DECLARE 
+      d_zipcode Area.ZipCode%TYPE;
+      d_country Area.Country%TYPE;
+    BEGIN
 
-  -- retriving account location data
-  SELECT City, State, WorldZone
-  INTO a_city, a_state, a_worldzone
-  FROM Area
-  WHERE ZipCode=Zc AND Country=Cy;
+      -- retriving deposit location data
+      SELECT ZipCode, Country 
+        INTO d_zipcode, d_country
+        FROM deposit
+        WHERE depositid = Did;
 
-  -- retriving deposit location data
-  SELECT City, State, Country, WorldZone
-  INTO d_city, d_state, d_country, d_worldzone
-  FROM deposit NATURAL JOIN area
-  WHERE depositid=Did;
-
-  -- checking if cities matches
-  IF d_city <> a_city OR d_state <> a_state OR d_country <> Cy OR d_worldzone <> a_worldzone THEN
-    perform raise_custom_error('E0008');
-  END IF; 
-
-END;
-$$;
+      -- checking if cities matches
+      IF NOT isSameCity(Zc, Cy, d_zipcode, d_country) THEN
+        perform raise_custom_error('E0008');
+      END IF;
+    END;
+  $$;
 
 
 ALTER FUNCTION uninadelivery.iscitydepositshippingtoclient(zc uninadelivery.numericstring, cy uninadelivery.letterstring, did integer) OWNER TO zgenny;
@@ -865,52 +908,29 @@ ALTER FUNCTION uninadelivery.isshipmentassignedtovalidtransport_func() OWNER TO 
 CREATE FUNCTION uninadelivery.isshipmentcontainingvalidorders_func() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-DECLARE
-QTY stores.quantity%TYPE;
-QTY2 stores.quantity%TYPE;
-PName product.name%TYPE;
-PSupply product.supplier%TYPE;
-DIDstart deposit.depositid%TYPE;
-DIDend deposit.depositid%TYPE;
-BEGIN
-
-SELECT quantity , product.name , product.supplier 
-  INTO QTY , PName , PSupply
-  FROM "Order" JOIN PRODUCT
-  ON "Order".name = PRODUCT.name AND "Order".supplier = PRODUCT.supplier
-  WHERE OrderID = NEW.OrderID;
-
-SELECT shippedfrom, directedto
-  INTO DIDstart, DIDend
-  FROM shipment
-  WHERE shipmentID = NEW.shipmentID;
-
-IF DIDend IS NULL THEN
-  IF NOT EXISTS (
-    SELECT 1
-      FROM stores
-      WHERE depositid = DIDstart AND name = PName AND supplier = PSupply AND quantity >= QTY
-  ) THEN
-    perform raise_custom_error('E0013');
-  END IF;
-ELSE
-  SELECT quantity
-    INTO Qty2
-    FROM stores
-    WHERE depositid = DIDstart AND name = PName AND supplier = PSupply;
-  INSERT INTO stores (name, supplier, depositid, quantity)
-    VALUES (PName, PSupply, DIDend, LEAST(QTY, QTY2))
-  ON CONFLICT (name, supplier, depositid) DO UPDATE
-    SET quantity = stores.quantity + LEAST(QTY, QTY2);
-END IF;
-UPDATE stores
-  SET quantity = GREATEST(quantity - QTY, 0)
-  WHERE depositid = DIDstart AND name = PName AND supplier = PSupply;
-
-RETURN NEW;
-END;
-
-$$;
+  DECLARE
+    QTY stores.quantity%TYPE;
+    PName product.name%TYPE;
+    PSupply product.supplier%TYPE;
+    DIDstart deposit.depositid%TYPE;
+    DIDend deposit.depositid%TYPE;
+  BEGIN
+    -- retriving product data
+    SELECT quantity , product.name , product.supplier 
+      INTO QTY , PName , PSupply
+      FROM "Order" JOIN PRODUCT
+      ON "Order".name = PRODUCT.name AND "Order".supplier = PRODUCT.supplier
+      WHERE OrderID = NEW.OrderID;
+    -- retriving shipment data
+    SELECT shippedfrom, directedto
+      INTO DIDstart, DIDend
+      FROM shipment
+      WHERE shipmentID = NEW.shipmentID;
+    -- check if the deposit has enough products
+    PERFORM checkdeposithasenoughproducts(DIDend, DIDstart, PName, PSupply, QTY);
+    RETURN NEW;
+  END;
+  $$;
 
 
 ALTER FUNCTION uninadelivery.isshipmentcontainingvalidorders_func() OWNER TO zgenny;
@@ -1035,7 +1055,7 @@ CREATE FUNCTION uninadelivery.onlyonejobperaccount_func() RETURNS trigger
     ELSIF TG_TABLE_NAME = 'operator' THEN
       tableName = 'driver';
     ELSE 
-      perform raise_custom_error('E0012');
+      perform raise_custom_error('E0003');
     END IF;
 
     -- counting rows with the same email
@@ -1062,47 +1082,53 @@ ALTER FUNCTION uninadelivery.onlyonejobperaccount_func() OWNER TO zgenny;
 CREATE FUNCTION uninadelivery.orderquantityupdate_func() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-DECLARE
-  OPsize Product.PackageSizeLiters%TYPE;
-  NPsize Product.PackageSizeLiters%TYPE;
-  cover Covers%ROWTYPE;
-BEGIN
-  -- if the oreder is already arrived to client can't be modified
-  IF EXISTS ( 
-    SELECT 1 
-    FROM ships NATURAL JOIN shipment
-    WHERE orderid = NEW.orderid AND 
-          hasarrived = true AND
-          directedto = NULL
-  ) THEN 
-    RETURN NEW;
-  END IF;
-
-  SELECT PackageSizeLiters
-    INTO OPsize
-    FROM Product
-    WHERE name = OLD.name AND supplier = OLD.supplier;
-
-  SELECT PackageSizeLiters
-    INTO NPsize
-    FROM Product
-    WHERE name = NEW.name AND supplier = NEW.supplier;
+  DECLARE
+    OPsize Product.PackageSizeLiters%TYPE;
+    NPsize Product.PackageSizeLiters%TYPE;
+    cover Covers%ROWTYPE;
+    o_shipment Shipment%ROWTYPE;
+  BEGIN
+    -- if the oreder is already arrived to client can't be modified
+    IF OLD.iscompleted = true THEN
+      perform raise_custom_error('E0012');
+    END IF;
+    -- retriving the old and new package size
+    SELECT PackageSizeLiters
+      INTO OPsize
+      FROM Product
+      WHERE name = OLD.name AND supplier = OLD.supplier;
+    SELECT PackageSizeLiters
+      INTO NPsize
+      FROM Product
+      WHERE name = NEW.name AND supplier = NEW.supplier;
   
-  FOR cover IN (
-    SELECT * 
-      FROM (ships NATURAL JOIN shipment) JOIN covers
-      ON (shippingdate = date AND shipment.transportid = shipment.transportid)
-      WHERE orderid = NEW.orderid AND 
-          hasarrived = false
-  ) LOOP
+      -- for each unfinished shipment that ships the order, starting from the oldest
+      FOR o_shipment IN (
+        SELECT shipment.*
+          FROM ships NATURAL JOIN shipment
+          WHERE orderid = NEW.orderid AND (hasarrived = false OR hasarrived IS NULL)
+          ORDER BY shippingdate ASC
+      )
+      LOOP
+      -- check if the deposit can handle the new quantity
+        PERFORM checkdeposithasenoughproducts(o_shipment.directedto, o_shipment.shippedfrom, NEW.name, NEW.supplier, NEW.quantity);
+      END LOOP;
 
-    UPDATE covers
-      SET occupiedspace = occupiedspace + (NEW.quantity * NPsize) - (OLD.quantity * OPsize)
-      WHERE date = cover.date AND transportid = cover.transportid;
-  END LOOP;
-  RETURN NEW;
-END;
-$$;
+    -- try to update all the covers that ships the order and are not arrived
+    FOR cover IN (
+      SELECT covers.* 
+        FROM (ships NATURAL JOIN shipment) JOIN covers
+        ON (shippingdate = date AND shipment.transportid = shipment.transportid)
+        WHERE orderid = NEW.orderid AND 
+            (hasarrived = false OR hasarrived IS NULL)
+    ) LOOP
+      UPDATE covers
+        SET occupiedspace = occupiedspace + (NEW.quantity * NPsize) - (OLD.quantity * OPsize)
+        WHERE date = cover.date AND transportid = cover.transportid;
+    END LOOP;
+    RETURN NEW;
+  END;
+  $$;
 
 
 ALTER FUNCTION uninadelivery.orderquantityupdate_func() OWNER TO riccardoelena;
@@ -1146,11 +1172,9 @@ CREATE FUNCTION uninadelivery.shipmentdataconsistency_func() RETURNS trigger
 DECLARE
   QTY stores.quantity%TYPE;
   PName product.name%TYPE;
-  PSupply product.supplier%TYPE;
+  Psupp product.supplier%TYPE;
   ZCode area.zipcode%TYPE;
   Cy area.country%TYPE;
-  ZCode2 area.zipcode%TYPE;
-  Cy2 area.country%TYPE;
   coverNeedsUpdate BOOLEAN = TRUE;
   shipped_order Ships%ROWTYPE;
 BEGIN
@@ -1159,9 +1183,6 @@ BEGIN
     perform raise_custom_error('E0017');
   END IF;
 
-  IF TG_OP = 'DELETE' THEN
-    coverNeedsUpdate = FALSE;
-  END IF;
   -- check for correct area
 
   call checkCorrectArea(NEW, ZCode, Cy, coverNeedsUpdate);
@@ -1173,12 +1194,10 @@ BEGIN
 
   -- if everything is ok, function can procede to the updates
   IF coverNeedsUpdate THEN
-    raise notice '%' , coverNeedsUpdate;
     -- try to update the covers table, if fails, raise error
     -- In case shipment is directed to clients ZCode and Cy are the one from clients, otherwise they are the one from directedTo deposit
     perform updateCoversForShipment( OLD.ShippingDate, OLD.TransportID, ZCode, Cy, NEW.ShippingDate, NEW.TransportID);
   ELSE 
-    raise notice '%', coverNeedsUpdate;
     DELETE FROM covers 
             WHERE date = OLD.ShippingDate AND 
                   transportid = OLD.TransportID;
@@ -1187,18 +1206,18 @@ BEGIN
   FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
       -- for each order ...
       SELECT quantity , name , supplier 
-        INTO QTY , PName , PSupply
+        INTO QTY , PName , Psupp
         FROM "Order" NATURAL JOIN PRODUCT
         WHERE OrderID = shipped_order.OrderID;
 
       -- restore the products in the old deposit
       UPDATE stores
         SET quantity = quantity + QTY
-        WHERE depositid = OLD.ShippedFrom AND name = PName AND supplier = PSupply;
+        WHERE depositid = OLD.ShippedFrom AND name = PName AND supplier = Psupp;
       -- remove the products from the new deposit
       UPDATE stores
         SET quantity = quantity - QTY
-        WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = PSupply;
+        WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = Psupp;
   END LOOP;
 
   IF TG_OP = 'DELETE' THEN
@@ -1246,17 +1265,19 @@ CREATE FUNCTION uninadelivery.validemployeebirthdate_func() RETURNS trigger
   DECLARE
     employee_age integer;
   BEGIN
+    -- retrieving employee age
     SELECT EXTRACT( YEAR FROM age(Birthdate))
       INTO employee_age
       FROM account
       WHERE Email = NEW.Email;
 
+    -- if employee is not 18 or older, raise error
     IF employee_age < 18 THEN
-      perform raise_custom_error('E0001');
+      PERFORM raise_custom_error('E0001');
     END IF;
     RETURN NEW;
   END;
-$$;
+  $$;
 
 
 ALTER FUNCTION uninadelivery.validemployeebirthdate_func() OWNER TO zgenny;
@@ -1466,7 +1487,7 @@ CREATE TABLE uninadelivery.product (
     description text NOT NULL,
     packagesizeliters real NOT NULL,
     isfragile boolean,
-    price numeric(100,2),
+    price numeric(100,2) NOT NULL,
     CONSTRAINT checkproductdescriptionontopic CHECK (((description ~~* (('%'::text || name) || '%'::text)) AND (description ~~* (('%'::text || supplier) || '%'::text)))),
     CONSTRAINT formatproductdescription CHECK ((description ~ '^[a-zA-ZÀ-ÿ0-9]+[\ a-zA-ZÀ-ÿ0-9!@#$%^&*()_+{}\[\]:;<>,.?''~\\\/-]*$'::text)),
     CONSTRAINT formatproductname CHECK ((description ~ '^[a-zA-ZÀ-ÿ0-9]+[\ a-zA-ZÀ-ÿ0-9!@#$%^&*()_+{}\[\]:;<>,.?''~\\\/-]*$'::text)),
@@ -1601,6 +1622,7 @@ COPY uninadelivery."Order" (orderid, emissiondate, isexpress, extrawarranty, isc
 5	2024-01-03	\N	0	\N	relena@gmail.com	1	Penna	Bic
 6	2024-01-03	\N	0	\N	relena@gmail.com	100	Penna	Bic
 1	2023-12-31	\N	0	\N	lucabest@gmail.com	3	Penna	Bic
+52	2024-01-07	\N	0	\N	fiorosa@gmail.com	10000	Gomma	Bic
 2	2023-12-31	\N	0	\N	lucabest@gmail.com	2	Gomma	Bic
 41	2024-01-04	t	0	\N	lucabest@gmail.com	2	Smartphone	Samsung
 44	2024-01-02	\N	1	t	jane.smith@example.com	1	Laptop	Dell
@@ -1631,6 +1653,7 @@ Takeshi	Yamamoto	yamamoto@example.com	1995-03-20	\N	5e884898da28047151d0e56f8dc6
 Luca	Bianchi	lucabest@gmail.com	1998-05-12	/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAZABkDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABwYI/8QAPhAAAAQEAwUDAxUAAAAAAAAAAQIDEQQFBhIABxMIFBUWIRcxUSIjQTM2N0JFUlNhYnFzdYSSlKGztMPR0v/EABgBAAMBAQAAAAAAAAAAAAAAAAQGBwMI/8QAJxEAAgAFAwMFAQEAAAAAAAAAAQIDBAURIQAGEgciQRMxUVJhobH/2gAMAwEAAhEDEQA/ACef7Mde5qwZKep6byCHiYdUI0xo2IWIQSFASCACRIwu6gehmfrjRuWtUy/Z/wBnTsLrJGIjJ9JpZNEl4iWFKpBmGJUXXTsOoJDiAEXIAuQOoGZwYRgK/rGpqXkyMfk9MRUnKkSVFcIBFOOU3USHEzpmKcALeVPym72B+vWR5nqeqpKqFZRR1qqmCKiCsKogRGJUUFyJEBApSjcJdMAACuLgPV8Bbhr89vqQl5ueQpKmMoKsvCJgMCbZFrE2N9GdI9uTVbhmc3QyqihiqglHDqy8SQQO23LznGNIGVFeSeZcU0IaMLp6D3kKHff4G+LCBzRL/gYj7pf7wfbN1DqS7mLnyno2W6m6bpxBNWF1G1r7brbmcj97OHjhr5aoD3kL+NN/vE53tGoNFrseRoaRDLLx43sxyilshjfuJ/zSL1J6bLujc81Veat6nDIY27YaL4Ujx86y7Mpt2TIFqPd+K7ycILRv0LbgE91zGf1Nmb09/TFjlplh2pTmns5eOcM3uYoRPDd21rd2XBO3VvK92i72dLm6s4n2enrShPrFP9JXD3ss+xRSX08R+9VxUd5Vidn4MVZh7gKT7AZ4n4A11P1NoVPgSRqcOHaMx4FrtleLG1r29wM2v+6vcyoLhfDvOaurre1tZrPn8cRG8/I/PCBnB7kfaP48HONuk+yaFXtnydQqEDnFf1Lnk4vaK6jCsB7ADA/ukDZFIkmoMAlPt5P3b91//9k=	e0e6097a6f8af07daf5fc7244336ba37133713a8fc7345c36d667dfa513fabaa	123	Via Roma	00123	Italia
 Riccardo	Elena	witherheart63@gmail.com	2003-06-28	\N	e0e6097a6f8af07daf5fc7244336ba37133713a8fc7345c36d667dfa513fabaa	12	Via A. A. Pelliccia	00123	Italia
 Yu	Ngest	test@gmail.com	2007-06-28	\N	e0e6097a6f8af07daf5fc7244336ba37133713a8fc7345c36d667dfa513fabaa	666	Tiananmen Square	67890	Cina
+Rosa	Fiore	fiorosa@gmail.com	1990-01-01	\N	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	1	Via Roma	11111	Italia
 \.
 
 
@@ -1668,9 +1691,6 @@ COPY uninadelivery.area (zipcode, city, state, country, worldzone) FROM stdin;
 10027	Louisville	KY	USA	NA
 10028	Portland	OR	USA	NA
 10029	Oklahoma City	OK	USA	NA
-11111	Roma	Lazio	Italia	EUW
-22222	Roma	Lazio	Italia	EUW
-33333	Roma	Lazio	Italia	EUW
 44444	Parigi	IDF	Francia	EUW
 55555	Parigi	IDF	Francia	EUW
 66666	Parigi	IDF	Francia	EUW
@@ -1699,7 +1719,6 @@ COPY uninadelivery.area (zipcode, city, state, country, worldzone) FROM stdin;
 98765	Città del Messico	CDMX	Messico	LATAM
 12345	Seoul	Seoul	Corea del Sud	CKJ
 67890	Shanghai	Shanghai	Cina	CKJ
-54321	Roma	Lazio	Italia	EUW
 98765	Atene	Attica	Grecia	EUW
 12345	Dubai	Dubai	Emirati Arabi Uniti	MIDEAST
 67890	Singapore	Singapore	Singapore	SEA
@@ -1717,6 +1736,10 @@ COPY uninadelivery.area (zipcode, city, state, country, worldzone) FROM stdin;
 20100	Monza	MB	Italia	EUW
 80100	Napoli	NA	Italia	EUW
 80136	Napoli	NA	Italia	EUW
+11111	Roma	RM	Italia	EUW
+22222	Roma	RM	Italia	EUW
+33333	Roma	RM	Italia	EUW
+54321	Roma	RM	Italia	EUW
 \.
 
 
@@ -1725,8 +1748,6 @@ COPY uninadelivery.area (zipcode, city, state, country, worldzone) FROM stdin;
 --
 
 COPY uninadelivery.covers (transportid, zipcode, country, date, occupiedspace) FROM stdin;
-1	00123	Italia	2024-03-01	0
-1	00123	Italia	2024-01-03	0
 1	00123	Italia	2024-02-04	4.6
 \.
 
@@ -1746,15 +1767,15 @@ E0007	Account not reachable by any deposit
 E0008	Shipment towords accounts must takes off from the same city of the arrival
 E0009	This driver has not a valid Driving Licence for this vehicle
 E0010	This transport cannot belong to this type of deposit
-E0012	Cannot check this field for the given table. Are you sure you are calling the function for the correct table?
 E0013	You cannot ship from this deposit
 E0014	Are you trying to transport negative volume of goods?
 E0015	This update conflict with preavious inserted data
-E0016	In a shipment directed to client the order must have the same city destination
 E0017	Cannot modify a shipment that has already arrived
 E0018	The transport capacity is exeeded
 E0019	Cannot delete operator with active shipments
 E0011	This account is already employed
+E0016	In a shipment directed to client the orders must have the same area as destination
+E0012	 Cannot modify an order that is already arrived to client.
 \.
 
 
@@ -1763,13 +1784,12 @@ E0011	This account is already employed
 --
 
 COPY uninadelivery.deposit (depositid, occupiedspace, maxcapacity, deposittype, addressno, street, zipcode, country) FROM stdin;
-187	55	1000	Central	456	Gandhi Road	98765	India
 150	25	10000	City	999	Plum Boulevard	67890	Regno Unito
 151	25	10500	City	888	Pear Street	54321	Francia
 152	25	11000	City	777	Mango Drive	98765	Giappone
 153	25	11500	City	666	Avocado Lane	12345	Germania
 154	25	12000	City	555	Papaya Road	67890	Russia
-2	115	80000	Central	7BIS	Corso Umberto I	20145	Italia
+1	1022.6001	10000	City	1	Via Roma	00123	Italia
 155	25	12500	City	444	Kiwi Court	54321	Egitto
 156	25	13000	City	333	Pineapple Avenue	98765	India
 157	25	13500	City	222	Watermelon Boulevard	12345	Sudafrica
@@ -1800,7 +1820,8 @@ COPY uninadelivery.deposit (depositid, occupiedspace, maxcapacity, deposittype, 
 160	50	15000	City	888	Strawberry Lane	98765	Messico
 161	129.6	15500	City	777	Blackberry Road	12345	Corea del Sud
 3	3	12000	City	23	Via Roma	00123	Italia
-1	1026.4	10000	City	1	Via Roma	00123	Italia
+2	115.8	80000	Central	7BIS	Corso Umberto I	20145	Italia
+187	55	1000	Central	456	Ghandi Road	98765	India
 \.
 
 
@@ -1860,6 +1881,7 @@ Casa e Giardino	Aspirapolvere Robot	iRobot	Aspirapolvere robot iRobot con naviga
 
 COPY uninadelivery.shipment (shipmentid, shippingdate, hasarrived, shippedfrom, directedto, businessmail, transportid) FROM stdin;
 7	2024-02-04	\N	1	\N	R.Elena@uninadelivery.operator.com	1
+14	2024-02-05	\N	1	\N	R.Patel@uninadelivery.operator.com	1
 \.
 
 
@@ -1868,10 +1890,10 @@ COPY uninadelivery.shipment (shipmentid, shippingdate, hasarrived, shippedfrom, 
 --
 
 COPY uninadelivery.ships (shipmentid, orderid) FROM stdin;
-7	1
 7	2
 7	5
 7	41
+7	1
 \.
 
 
@@ -1886,7 +1908,6 @@ Maglione	Gucci	2	10
 Tavolo da Pranzo	IKEA	3	5
 Laptop	Dell	4	15
 Frigorifero	Whirlpool	5	8
-Scarpe da Ginnastica	Nike	1	12
 Forno a Microonde	Panasonic	3	10
 Collana di Perle	Tiffany & Co.	4	3
 Aspirapolvere Robot	iRobot	5	6
@@ -1903,7 +1924,9 @@ Aspirapolvere Robot	iRobot	178	6
 Smartphone	Samsung	1	16
 Smart TV	Sony	187	2
 Smart TV	Sony	2	5
-Penna	Bic	1	1027
+Scarpe da Ginnastica	Nike	2	1
+Scarpe da Ginnastica	Nike	1	11
+Penna	Bic	1	1021
 Penna	Bic	150	50
 Penna	Bic	151	50
 Penna	Bic	152	50
@@ -1969,7 +1992,7 @@ COPY uninadelivery.transport (transportid, maxcapacity, isavailable, transportty
 -- Name: Order_orderid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: zgenny
 --
 
-SELECT pg_catalog.setval('uninadelivery."Order_orderid_seq"', 50, true);
+SELECT pg_catalog.setval('uninadelivery."Order_orderid_seq"', 52, true);
 
 
 --
@@ -1983,7 +2006,7 @@ SELECT pg_catalog.setval('uninadelivery.deposit_depositid_seq', 187, true);
 -- Name: shipment_shipmentid_seq; Type: SEQUENCE SET; Schema: uninadelivery; Owner: zgenny
 --
 
-SELECT pg_catalog.setval('uninadelivery.shipment_shipmentid_seq', 13, true);
+SELECT pg_catalog.setval('uninadelivery.shipment_shipmentid_seq', 14, true);
 
 
 --
@@ -2130,6 +2153,22 @@ ALTER TABLE ONLY uninadelivery.transport
 
 
 --
+-- Name: driver unique_account_driver; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
+--
+
+ALTER TABLE ONLY uninadelivery.driver
+    ADD CONSTRAINT unique_account_driver UNIQUE (email);
+
+
+--
+-- Name: operator unique_account_operator; Type: CONSTRAINT; Schema: uninadelivery; Owner: zgenny
+--
+
+ALTER TABLE ONLY uninadelivery.operator
+    ADD CONSTRAINT unique_account_operator UNIQUE (email);
+
+
+--
 -- Name: operator blockoperatordeletion; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
@@ -2245,28 +2284,28 @@ CREATE TRIGGER isaccountreachable_up BEFORE UPDATE ON uninadelivery.account FOR 
 -- Name: account isaddressforsomethingspecificaccount_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER isaddressforsomethingspecificaccount_in BEFORE INSERT ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func('Deposit');
+CREATE TRIGGER isaddressforsomethingspecificaccount_in BEFORE INSERT ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func();
 
 
 --
 -- Name: account isaddressforsomethingspecificaccount_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER isaddressforsomethingspecificaccount_up BEFORE UPDATE ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func('Deposit');
+CREATE TRIGGER isaddressforsomethingspecificaccount_up BEFORE UPDATE ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func();
 
 
 --
 -- Name: deposit isaddressforsomethingspecificdeposit_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER isaddressforsomethingspecificdeposit_in BEFORE INSERT ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func('Account');
+CREATE TRIGGER isaddressforsomethingspecificdeposit_in BEFORE INSERT ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func();
 
 
 --
 -- Name: deposit isaddressforsomethingspecificdeposit_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER isaddressforsomethingspecificdeposit_up BEFORE UPDATE ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func('Account');
+CREATE TRIGGER isaddressforsomethingspecificdeposit_up BEFORE UPDATE ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.isaddressforsomethingspecific_func();
 
 
 --
@@ -2333,13 +2372,6 @@ CREATE TRIGGER isshipmentdirectedincorrectareadeposit_in BEFORE INSERT ON uninad
 
 
 --
--- Name: shipment isshipmentdirectedincorrectareadeposit_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
---
-
-CREATE TRIGGER isshipmentdirectedincorrectareadeposit_up BEFORE UPDATE ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.shipmentdataconsistency_func();
-
-
---
 -- Name: driver onlyonejobperaccount_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
@@ -2382,10 +2414,17 @@ CREATE TRIGGER onlyonejobperaccountoperator_up BEFORE UPDATE ON uninadelivery.op
 
 
 --
--- Name: shipment shipmentdataconsistency; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+-- Name: shipment shipmentdataconsisency_dl; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER shipmentdataconsistency BEFORE DELETE ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.shipmentdataconsistency_func();
+CREATE TRIGGER shipmentdataconsisency_dl BEFORE DELETE ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.shipmentdataconsistency_func();
+
+
+--
+-- Name: shipment shipmentdataconsisency_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER shipmentdataconsisency_up BEFORE UPDATE ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.shipmentdataconsistency_func();
 
 
 --
