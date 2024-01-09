@@ -92,18 +92,21 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Order}}]
   CREATE TABLE "Order"(
     OrderID SERIAL, 
-    EmissionDate Date NOT NULL ,
+    EmissionDate Date NOT NULL DEFAULT current_date,
     IsExpress boolean ,
-    ExtraWarranty smallint NOT NULL ,
+    ExtraWarranty smallint NOT NULL DEFAULT 0,
     IsCompleted boolean ,
     Email emailString,
-    Quantity integer NOT NULL
+    Quantity integer NOT NULL,
+    Name text NOT NULL,
+    Supplier text NOT NULL
   );
   ALTER TABLE "Order" ADD CONSTRAINT Order_pk PRIMARY KEY (OrderID);
   ALTER TABLE "Order" ADD CONSTRAINT formatOrderExtraWarranty CHECK (
     ExtraWarranty >=0
   );
-  ALTER TABLE "Order" ADD CONSTRAINT Order_fk FOREIGN KEY (Email) REFERENCES Account(Email) ON DELETE SET NULL ON UPDATE CASCADE;
+  ALTER TABLE "Order" ADD CONSTRAINT Order_fk_Product FOREIGN KEY (Name, Supplier) REFERENCES Product(Name, Supplier) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE "Order" ADD CONSTRAINT Order_fk FOREIGN KEY (Email) REFERENCES Account(Email) ON DELETE CASCADE ON UPDATE CASCADE;
   ALTER TABLE "Order" ADD CONSTRAINT formatOrderEmissionDate CHECK (
     EmissionDate <= current_date
   );
@@ -211,7 +214,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
     TransportID Serial NOT NULL ,
     OccupiedSpace real NOT NULL DEFAULT 0,
     MaxCapacity real NOT NULL ,
-    IsAvailable boolean , 
+    IsAvailable boolean DEFAULT true, 
     TransportType TransportType NOT NULL ,
     DepositID integer NOT NULL
   );

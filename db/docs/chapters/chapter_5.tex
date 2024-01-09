@@ -857,6 +857,46 @@ Le \textit{trigger function} si occuperanno, in maniera analoga l'una all'altra,
   $$ LANGUAGE plpgsql;
 \end{lstlisting}
 
+\subsection{\textbf{isDriverWorkingInCorrectCity}}
+
+Questo vincolo si assicura che, all'assegnazione di un \textbf{Driver} a un \textbf{Deposit}, contestuale all'inserimento di una riga in \textbf{Driver}, il \textbf{Driver} lavori per un \textbf{Deposit} corretto, ovvero che un \textbf{Deposit} sia nella stessa \textit{City} del \textbf{Driver}.
+
+In particolare la \textit{trigger function} si occuperà di sollevare un eccezione se, una volta recuperati i dati necessari alla verifica, la funzione \intlink{isSameCity}{isSameCity} restituisce \lstinline{FALSE}.
+
+\begin{lstlisting}[caption={Trigger per il vincolo \textbf{isDriverWorkingInCorrectCity}}]
+  CREATE OR REPLACE TRIGGER isDriverWorkingInCorrectCity_in
+  BEFORE INSERT ON Driver
+  FOR EACH ROW
+  EXECUTE PROCEDURE isDriverWorkingInCorrectCity_func();
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{isDriverWorkingInCorrectCity}}]
+  CREATE OR REPLACE FUNCTION isDriverWorkingInCorrectCity_func()
+  RETURNS TRIGGER AS $$
+  DECLARE
+    d_zp deposit.zipcode%TYPE;
+    d_cy deposit.country%TYPE;
+    a_zp account.zipcode%TYPE;
+    a_cy account.country%TYPE;
+  BEGIN
+    -- retrieving data needed
+    SELECT zipcode, country INTO d_zp, d_cy
+    FROM deposit
+    WHERE depositid = NEW.depositid;
+
+    SELECT zipcode, country INTO a_zp, a_cy
+    FROM account
+    WHERE email = NEW.email;
+    -- checking if the driver is working in the correct city
+    IF NOT isSameCity(d_zp, d_cy, a_zp, a_cy) THEN
+      perform raise_custom_error('E0020');
+    END IF;
+    
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
 \subsection{\textbf{formatEmployeeBusinessmail}}
 
 Vediamo ora i due trigger per controllare la formattazione corretta della \textbf{BusinessMail} per \textbf{Operator} e \textbf{Driver}.
@@ -986,7 +1026,7 @@ Viene in oltre notificato dal sistema se la sostituzione era necessaria e nel ca
 
 Questo vincolo si assicura che, all'inserimento di un \textbf{Account}, questo si trovi in una \textit{City} raggiungibile dal servizio, ovvero che sia presente almeno un \textbf{Deposit} nella stessa \textit{City}.
 
-Per fare ciò la \textit{trigger function} si limita a chiamare la funzione \intlink{isSameCity}{\textbf{isSameCity}} con i dati dell'\textbf{Account} inserito e di tutti i \textbf{Deposit}. Se nessuna di queste chiamate restituisce \lstinline{TRUE}, allora l'\textbf{Account} non è raggiungibile e viene sollevata un'eccezione.
+Per fare ciò la \textit{trigger function} si limita a chiamare la funzione \intlink{isSameCity}{isSameCity} con i dati dell'\textbf{Account} inserito e di tutti i \textbf{Deposit}. Se nessuna di queste chiamate restituisce \lstinline{TRUE}, allora l'\textbf{Account} non è raggiungibile e viene sollevata un'eccezione.
 
 \begin{lstlisting}[caption={Trigger per il vincolo \textbf{isAccountReachable}}]
   CREATE OR REPLACE TRIGGER isAccountReachable_in
