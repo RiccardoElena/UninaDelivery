@@ -40,7 +40,7 @@ ALTER DOMAIN uninadelivery.alphanumericstring OWNER TO zgenny;
 --
 
 CREATE DOMAIN uninadelivery.alphanumstring AS text
-	CONSTRAINT alphanumstring_check CHECK ((VALUE ~ '^\w+[\s\w\.]*$'::text));
+	CONSTRAINT alphanumstring_check CHECK ((VALUE ~ '^[\wÀ-ÿ]+[\s\wÀ-ÿ\.]*$'::text));
 
 
 ALTER DOMAIN uninadelivery.alphanumstring OWNER TO zgenny;
@@ -1691,6 +1691,7 @@ Rosa	Fiore	fiorosa@gmail.com	1990-01-01	\N	5e884898da28047151d0e56f8dc6292773603
 Alice	Johnson	alice.johnson@email.com	1988-03-25	\N	26eeb57586214e0e46df4e688071dca65262d6ebcda89513ccb58c00a371f9ae	234	Cedar St	98765	Australia
 Michael	Brown	michael.brown@email.com	1992-11-08	\N	26eeb57586214e0e46df4e688071dca65262d6ebcda89513ccb58c00a371f9ae	567	Pine St	67890	Nuova Zelanda
 Emily	Miller	emily.miller@email.com	1980-09-12	\N	26eeb57586214e0e46df4e688071dca65262d6ebcda89513ccb58c00a371f9ae	890	Friedrichstraße	12348	Germania
+Giorgio	Vanni	giorgionecapitone@gmail.com	1984-12-14	\N	231f96d8bbaf945f787f6dbbefa6a49476a8b00519387affc295c8d89ee6b701	23	ßßß	00123	Italia
 \.
 
 
