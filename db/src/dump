@@ -354,6 +354,29 @@ $$;
 ALTER FUNCTION uninadelivery.completedorder_func() OWNER TO zgenny;
 
 --
+-- Name: correctcoversdate_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.correctcoversdate_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF EXISTS (
+      select 1 
+      FROM Shipment
+      WHERE transportid = NEW.transportid
+        AND NEW.date = shippingdate
+  ) THEN
+    perform raise_custom_error('E0023');
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.correctcoversdate_func() OWNER TO riccardoelena;
+
+--
 -- Name: correctoccupiedspacefordeposit_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
 --
 
@@ -409,6 +432,81 @@ CREATE FUNCTION uninadelivery.correctoccupiedspaceforshipment_func() RETURNS tri
 
 
 ALTER FUNCTION uninadelivery.correctoccupiedspaceforshipment_func() OWNER TO riccardoelena;
+
+--
+-- Name: correctorderemissiondate_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.correctorderemissiondate_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF EXISTS (
+      select 1 
+      FROM Ships NATURAL JOIN shipment
+      WHERE orderid = NEW.orderid
+        AND shippingdate < NEW.emissiondate
+  ) THEN 
+    perform raise_custom_error('E0022');
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.correctorderemissiondate_func() OWNER TO riccardoelena;
+
+--
+-- Name: correctshippingdate_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.correctshippingdate_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF EXISTS (
+      select 1 
+      FROM Ships NATURAL JOIN "Order"
+      WHERE shipmentid = NEW.shipmentid
+        AND NEW.shippingdate < emissiondate
+  ) THEN
+    perform raise_custom_error('E0022');
+  END IF;
+  UPDATE covers 
+        SET date=NEW.shippingdate, 
+            transportid=NEW.transportid 
+      WHERE date=OLD.shippingdate 
+        AND transportid=OLD.transportid;
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.correctshippingdate_func() OWNER TO riccardoelena;
+
+--
+-- Name: correctshipsemissiondate_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.correctshipsemissiondate_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF EXISTS (
+      select 1 
+      FROM "Order" NATURAL JOIN Ships NATURAL JOIN shipment
+      WHERE shipmentid = NEW.shipmentid 
+        AND orderid = NEW.orderid
+        AND emissiondate > shippingdate
+  ) THEN
+    perform raise_custom_error('E0022');
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.correctshipsemissiondate_func() OWNER TO riccardoelena;
 
 --
 -- Name: correcttransportassignment_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
@@ -638,6 +736,38 @@ $$;
 
 
 ALTER FUNCTION uninadelivery.depositoccupiedspaceupdate_func() OWNER TO zgenny;
+
+--
+-- Name: employeebirthdateconsistency_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.employeebirthdateconsistency_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  acc_age integer;
+BEGIN
+
+  acc_age = (SELECT EXTRACT(YEAR FROM age(NEW.birthdate)));
+
+  IF EXISTS (
+      SELECT 1 
+      FROM driver
+      WHERE email = NEW.email
+      UNION 
+      SELECT 1
+      FROM operator
+      WHERE email = NEW.email
+  ) AND acc_age<18 THEN
+    perform raise_custom_error('E0001');
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.employeebirthdateconsistency_func() OWNER TO riccardoelena;
 
 --
 -- Name: formatdriverbusinessmail_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
@@ -1958,6 +2088,8 @@ E0016	In a shipment directed to client the orders must have the same area as des
 E0020	Driver cannot work in a different city than his own
 E0012	Cannot modify an order that is already arrived to client
 E0021	Are you trying to store negative volume of goods?
+E0022	Order Emission date must be before shipping date
+E0023	This covers does not match any shipment
 \.
 
 
@@ -2400,6 +2532,13 @@ CREATE TRIGGER completedorder AFTER INSERT OR UPDATE ON uninadelivery.shipment F
 
 
 --
+-- Name: covers correctcoversdate; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER correctcoversdate BEFORE INSERT OR UPDATE ON uninadelivery.covers FOR EACH ROW EXECUTE FUNCTION uninadelivery.correctcoversdate_func();
+
+
+--
 -- Name: covers correctoccupiedspaceforcovers_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
@@ -2425,6 +2564,27 @@ CREATE TRIGGER correctoccupiedspacefordeposit_in BEFORE INSERT ON uninadelivery.
 --
 
 CREATE TRIGGER correctoccupiedspacefordeposit_up BEFORE UPDATE ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.correctoccupiedspacefordeposit_func();
+
+
+--
+-- Name: Order correctorderemissiondate; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER correctorderemissiondate BEFORE INSERT OR UPDATE ON uninadelivery."Order" FOR EACH ROW EXECUTE FUNCTION uninadelivery.correctorderemissiondate_func();
+
+
+--
+-- Name: shipment correctshippingdate; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER correctshippingdate BEFORE INSERT OR UPDATE ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.correctshippingdate_func();
+
+
+--
+-- Name: ships correctshipsemissiondate; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER correctshipsemissiondate BEFORE INSERT OR UPDATE ON uninadelivery.ships FOR EACH ROW EXECUTE FUNCTION uninadelivery.correctshipsemissiondate_func();
 
 
 --
@@ -2467,6 +2627,13 @@ CREATE TRIGGER coversoccupiedspaceupdate AFTER INSERT OR DELETE OR UPDATE ON uni
 --
 
 CREATE TRIGGER deletestoredproducts AFTER INSERT OR UPDATE ON uninadelivery.stores FOR EACH ROW WHEN ((new.quantity = 0)) EXECUTE FUNCTION uninadelivery.deletestoredproducts_func();
+
+
+--
+-- Name: account employeebirthdateconsistency; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER employeebirthdateconsistency BEFORE UPDATE ON uninadelivery.account FOR EACH ROW EXECUTE FUNCTION uninadelivery.employeebirthdateconsistency_func();
 
 
 --
