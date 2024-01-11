@@ -11,10 +11,7 @@ Questa fase di progettazione è stata svolta utilizzando, oltre che il modello \
 \subsection{Precisazioni sui Diagrammi}
 
 \subsubsection{EER Diagram}
-% TODO @zGenny you should update EER too.
-% TODO @zGenny isCompleted field should not be derived anymore. To be updated EER, UML and UML Restructured
-% TODO @zGenny remove isavailable field from operator too, it's useless. Do this in chapter 3 too.
-% BUG : @RiccardoElena isAvaiable field from driver right? (Removed) Yes it was from driver, but it's not removed yet or am I missing something? 
+
 Vista la densità del diagramma \textbf{EER}, si è deciso d'introdurre un \textbf{color coding} per facilitarne la lettura:
 
 \begin{itemize}
@@ -709,6 +706,11 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   \textbf{correctOccupiedSpaceForShipment} & Interrelazionale &
   {\footnotesize
   Il campo \textbf{OccupiedSpace} di un \textbf{Covers} deve essere maggiore o uguale alla somma dei campi \textbf{PackageSizeLiters} dei \textbf{Product} contenuti negli \textbf{Order} associati alla \textbf{Shipment} che lo trasporta.
+  }\\
+
+  \textbf{correctOccupiedSpaceForDeposit} & Interrelazionale &
+  {\footnotesize
+  Il campo \textbf{OccupiedSpace} di un \textbf{Deposit} deve essere maggiore o uguale alla somma dei campi \textbf{PackageSizeLiters} dei \textbf{Product} che contiene.
   }\\
 
   \textbf{isDriverWorkingInCorrectCity} & Interrelazionale &

@@ -683,6 +683,72 @@ Conclusi tutti controlli, se nessuna eccezione è stata sollevata, è necessario
   $$ LANGUAGE plpgsql;
 \end{lstlisting}
 
+\subsection{\textbf{correctOccupiedSpace}}
+
+Vediamo ora i trigger che implementano i vincoli \textbf{correctOccupiedSpaceForShipment} e \textbf{correctOccupiedSpaceForDeposit}, che si occupano di verificare che i campi \textbf{OccupiedSpace} rispettivamente di \textbf{Covers} e \textbf{Deposit} abbiano un valore maggiore o ugale alla somma dei prodotti contenuti.
+
+Per questi due trigger, nonostante abbiano funzioni essenzialmente identiche, si è scelto di implementare due diverse \textit{trigger function}, poiché individuati inizialmente come due vincoli distinti.
+
+\begin{lstlisting}[caption={Trigger per i vincoli \textbf{correctOccupiedSpaceForShipment} e \textbf{correctOccupiedSpaceForDeposit}}]
+  CREATE OR REPLACE TRIGGER correctOccupiedSpaceForShipment_in
+  BEFORE INSERT ON Covers
+  FOR EACH ROW
+  EXECUTE PROCEDURE correctOccupiedSpaceForDeposit_func();
+
+  CREATE OR REPLACE TRIGGER correctOccupiedSpaceForDeposit_in
+  BEFORE INSERT ON Deposit
+  FOR EACH ROW
+  EXECUTE PROCEDURE correctOccupiedSpaceForDeposit_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{correctOccupiedSpaceForShipment}}]
+  CREATE OR REPLACE FUNCTION correctOccupiedSpaceForShipment_func() 
+  RETURNS trigger
+  AS $$
+  DECLARE
+    ShipID shipment.ShipmentID%TYPE;
+    SumOfProduct product.PackageSizeLiters%TYPE;
+  BEGIN
+    -- retrieving shipment reference to calculate total occupied space
+    SELECT ShipmentID
+      INTO ShipID
+      FROM shipment
+      WHERE TransportID = NEW.TransportID AND ShippingDate = NEW.Date;
+    -- calculating total occupied space by the product
+    SELECT sum(PackageSizeLiters*quantity)
+      INTO SumOfProduct
+      FROM product NATURAL JOIN "Order" NATURAL JOIN Ships
+      WHERE shipmentID = ShipID;
+    -- checking if the occupied space is enough, otherwise raise error
+    IF SumOfProduct > NEW.OccupiedSpace THEN
+      perform raise_custom_error('E0014');
+    END IF;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{correctOccupiedSpaceForDeposit}}]
+  CREATE OR REPLACE FUNCTION correctOccupiedSpaceForDeposit_func()
+  RETURNS trigger
+  AS $$
+  DECLARE
+    SumOfProduct product.PackageSizeLiters%TYPE;
+  BEGIN
+    -- calculating total occupied space by the product
+    SELECT sum(PackageSizeLiters*quantity)
+      INTO SumOfProduct
+      FROM product natural join stores
+      WHERE depositID = NEW.depositID;
+    -- checking if the occupied space is enough, otherwise raise error
+    IF SumOfProduct > NEW.OccupiedSpace THEN
+      perform raise_custom_error('E0021');
+    END IF;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
 \subsection{\textbf{correctTransportAssignment}}
 
 Questo vincolo molto semplice si assicura che, all'assegnazione di un \textbf{Transport} a un \textbf{Deposit}, contestuale all'inserimento del \textbf{Transport} stesso, il \textbf{Deposit} sia della tipologia giusta per possedere quel tipo di \textbf{Transport}.
@@ -832,7 +898,7 @@ Le \textit{trigger function} si occuperanno, in maniera analoga l'una all'altra,
   END;
   $$ LANGUAGE plpgsql;
 \end{lstlisting}
-
+\newpage
 \begin{lstlisting}[caption={Funzione per il vincolo \textbf{isShipmentAssignedToValidTransport}}]
   CREATE OR REPLACE FUNCTION isshipmentassignedtovalidtransport_func() 
   RETURNS trigger
@@ -902,7 +968,6 @@ In particolare la \textit{trigger function} si occuperà di sollevare un eccezio
 Vediamo ora i due trigger per controllare la formattazione corretta della \textbf{BusinessMail} per \textbf{Operator} e \textbf{Driver}.
 
 Per quanto sarebbe stato possibile ridursi a un unica funzione utilizzando SQL Dinamico, si è preferito tenere due funzioni separate essendo stati in primo luogo i vincoli associati a questi trigger individuati separatamente.
-
 Per entrambi però si seguirà la stessa strategia implementativa, ovvero essendo il formato della \textbf{BusinessMail} interamente calcolabile, viene generata una \textbf{BusinessMail} e inserita al posto di quella fornita all'inserimento. 
 Viene in oltre notificato dal sistema se la sostituzione era necessaria e nel caso qual è la nuova \textbf{BusinessMail}.
 
@@ -921,7 +986,7 @@ Viene in oltre notificato dal sistema se la sostituzione era necessaria e nel ca
 \newpage
 
 \begin{lstlisting}[caption={Funzione per il vincolo \textbf{formatDriverBusinessmail}}]
-  CREATE OR REPLACE FUNCTION formatdriverbusinessmail_func()
+  CREATE OR REPLACE FUNCTION formatDriverBusinessMail_func()
   RETURNS TRIGGER
   AS $$
   DECLARE
@@ -947,7 +1012,7 @@ Viene in oltre notificato dal sistema se la sostituzione era necessaria e nel ca
     SELECT COUNT(*)
     INTO omoniums_num
     FROM Driver
-    WHERE businessmail LIKE (new_mail || '%');
+    WHERE businessmail LIKE (new_mail || '%') AND businessmail <> new.businessmail;
 
     -- adding omoniums number if needed
     IF omoniums_num > 0 THEN
@@ -972,7 +1037,7 @@ Viene in oltre notificato dal sistema se la sostituzione era necessaria e nel ca
 \end{lstlisting}
 \newpage
 \begin{lstlisting}[caption={Funzione per il vincolo \textbf{formatOperatorBusinessmail}}]
-  CREATE OR REPLACE FUNCTION formatoperatorbusinessmail_func()
+  CREATE OR REPLACE FUNCTION formatOperatorBusinessMail_func()
   RETURNS TRIGGER
   AS $$
   DECLARE
@@ -998,7 +1063,7 @@ Viene in oltre notificato dal sistema se la sostituzione era necessaria e nel ca
     SELECT COUNT(*)
     INTO omoniums_num
     FROM Operator
-    WHERE businessmail LIKE (new_mail || '%');
+    WHERE businessmail LIKE (new_mail || '%') AND businessmail <> new.businessmail;
 
     -- adding omoniums number if needed
     IF omoniums_num > 0 THEN
@@ -1036,7 +1101,7 @@ Per fare ciò la \textit{trigger function} si limita a chiamare la funzione \int
 \end{lstlisting}
 
 \begin{lstlisting}[caption={Funzione per il vincolo \textbf{isAccountReachable}}]
-  CREATE OR REPLACE FUNCTION isaccountreachable_func()
+  CREATE OR REPLACE FUNCTION isAccountReachable_func()
   RETURNS TRIGGER
   AS $$
   BEGIN
@@ -1075,16 +1140,16 @@ Facendo infatti una \lstinline{NATURAL JOIN} tra le tabelle \textbf{Covers} e \t
   CREATE OR REPLACE TRIGGER checkTransportCapacity
   BEFORE INSERT OR UPDATE ON Covers
   FOR EACH ROW
-  EXECUTE PROCEDURE notexeedtransportcapacity_func();
+  EXECUTE PROCEDURE notExeedTransportCapacity_func();
 
   CREATE OR REPLACE TRIGGER checkTransportCapacity
   BEFORE UPDATE ON Transport
   FOR EACH ROW
-  EXECUTE PROCEDURE notexeedtransportcapacity_func();
+  EXECUTE PROCEDURE notExeedTransportCapacity_func();
 \end{lstlisting}
 
 \begin{lstlisting}[caption={Funzione per il vincolo \textbf{checkTransportCapacity}}]
-  CREATE OR REPLACE FUNCTION notexeedtransportcapacity_func()
+  CREATE OR REPLACE FUNCTION notExeedTransportCapacity_func()
   RETURNS TRIGGER
   AS $$
   BEGIN
@@ -1126,7 +1191,7 @@ Per fare ciò è necessario che il trigger si attivi sia sulla tabella \textbf{D
 \end{lstlisting}
 
 \begin{lstlisting}[caption={Funzione per il vincolo \textbf{onlyOneJobPerAccount}}]
-  CREATE OR REPLACE FUNCTION onlyonejobperaccount_func()
+  CREATE OR REPLACE FUNCTION onlyOneJobPerAccount_func()
   RETURNS TRIGGER
   AS $$
   DECLARE
@@ -1411,7 +1476,7 @@ Per fare ciò la \textit{trigger function} si limita a controllare dopo inserime
   $$ LANGUAGE plpgsql;
 \end{lstlisting}
 
-\subsection{\textbf{orderquantityupdate}}
+\subsection{\textbf{orderQuantityUpdate}}
 
 Questo trigger si occupa di aggiornare, se possibile, a seguito di un aggiornamento della quantità di prodotto di un \textbf{Order}, lo spazio occupato nella \textbf{Covers} e nei \textbf{Deposit} che lo riguardano.
 
@@ -1419,15 +1484,15 @@ Per fare ciò la \textit{trigger function} si avvale della funzione \intlink{che
 
 Successivamente con un meccanismo simile, la funzione aggiorna tutte le \textbf{Covers} riguardanti l'\textbf{Order} in questione e \textbf{Shipment} non ancora consegnate.
 
-\begin{lstlisting}[caption={Trigger per implementare \textbf{orderquantityupdate}}]
-  CREATE OR REPLACE TRIGGER orderquantityupdate
+\begin{lstlisting}[caption={Trigger per implementare \textbf{orderQuantityUpdate}}]
+  CREATE OR REPLACE TRIGGER orderQuantityUpdate
   AFTER UPDATE ON "Order"
   FOR EACH ROW
-  EXECUTE PROCEDURE orderquantityupdate_func();
+  EXECUTE PROCEDURE orderQuantityUpdate_func();
 \end{lstlisting}
 
-\begin{lstlisting}[caption={Funzione \textbf{orderquantityupdate}}]
-  CREATE OR REPLACE FUNCTION orderquantityupdate_func()
+\begin{lstlisting}[caption={Funzione \textbf{orderQuantityUpdate}}]
+  CREATE OR REPLACE FUNCTION orderQuantityUpdate_func()
   RETURNS TRIGGER
   AS $$
   DECLARE
@@ -1475,6 +1540,86 @@ Successivamente con un meccanismo simile, la funzione aggiorna tutte le \textbf{
         WHERE date = cover.date AND transportid = cover.transportid;
     END LOOP;
     RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{updateProductSize}}
+
+Questo trigger si occupa di aggiornare, se possibile, a seguito di un aggiornamento della dimensione di un prodotto, lo spazio occupato nella \textbf{Covers} e nei \textbf{Deposit} che lo riguardano.
+
+Per fare ciò la \textit{trigger function} utilizza una tecnica analoga a quella vista in \textbf{orderQuantityUpdate}, con l'unica differenza effettiva rappresentata dalle modalità di raccolta dei dati.
+
+In questo casi infatti sarà necessario di ben due cili \lstinline{FOR} per caso per aggiornare prima i \textbf{Deposit} e poi le \textbf{Covers}.
+
+\begin{lstlisting}[caption={Trigger per implementare \textbf{updateProductSize}}]
+  CREATE OR REPLACE TRIGGER updateProductSize
+  AFTER UPDATE OR DELETE ON Product
+  FOR EACH ROW
+  EXECUTE PROCEDURE updateProductSize_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{updateProductSize}}]
+  CREATE OR REPLACE FUNCTION updateProductSize_func()
+  RETURNS TRIGGER AS $$
+  DECLARE
+    record RECORD;
+  BEGIN
+      -- check if it's an update/delete
+      IF NOT (OLD IS NULL) THEN
+        -- update the occupied space of the deposit
+        FOR record IN (
+          SELECT quantity, depositID
+            FROM stores NATURAL JOIN deposit
+            WHERE name = OLD.name AND supplier = OLD.supplier
+        ) LOOP
+          UPDATE deposit
+            SET occupiedspace = occupiedspace - (OLD.PackageSizeLiters * record.quantity)
+            WHERE depositID = record.depositID;
+        END LOOP;
+        -- update the occupied space of the covers
+        FOR record IN (
+          SELECT quantity, date, covers.transportID
+            FROM "Order" NATURAL JOIN ships NATURAL JOIN shipment JOIN covers
+            ON date=shippingdate AND shipment.transportID = covers.transportID
+            WHERE name = OLD.name AND supplier = OLD.supplier
+        ) LOOP
+          UPDATE covers
+            SET occupiedspace = occupiedspace - (OLD.PackageSizeLiters * record.quantity)
+            WHERE transportID = record.transportID AND date = record.date;
+        END LOOP;
+        -- returning the correct record
+        IF TG_OP = 'DELETE' THEN
+          RETURN OLD;
+        END IF;
+      END IF;
+      -- check if it's an update/insert
+      IF NOT (NEW IS NULL) THEN
+        -- update the occupied space of the deposit
+        FOR record IN (
+          SELECT quantity, depositID
+            FROM stores NATURAL JOIN deposit
+            WHERE name = NEW.name AND supplier = NEW.supplier
+        ) LOOP
+    
+          UPDATE deposit
+            SET occupiedspace = occupiedspace + (NEW.PackageSizeLiters * record.quantity)
+            WHERE depositID = record.depositID;
+        END LOOP;
+        -- update the occupied space of the covers
+        FOR record IN (
+          SELECT quantity, date, covers.transportID
+            FROM "Order" NATURAL JOIN ships NATURAL JOIN shipment JOIN covers
+            ON date=shippingdate AND shipment.transportID = covers.transportID
+            WHERE name = NEW.name AND supplier = NEW.supplier
+        ) LOOP
+          UPDATE covers
+            SET occupiedspace = occupiedspace + (NEW.PackageSizeLiters * record.quantity)
+            WHERE transportID = record.transportID AND date = record.date;
+        END LOOP;
+      END IF;
+      -- returning the correct record
+      RETURN NEW;
   END;
   $$ LANGUAGE plpgsql;
 \end{lstlisting}

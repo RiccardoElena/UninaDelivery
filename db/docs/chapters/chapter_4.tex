@@ -91,14 +91,14 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 \newpage
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Order}}]
   CREATE TABLE "Order"(
-    OrderID SERIAL, 
+    OrderID SERIAL NOT NULL , 
     EmissionDate Date NOT NULL DEFAULT current_date,
     IsExpress boolean ,
     ExtraWarranty smallint NOT NULL DEFAULT 0,
     IsCompleted boolean ,
-    Email emailString,
-    Quantity integer NOT NULL,
-    Name text NOT NULL,
+    Email emailString NOT NULL ,
+    Quantity integer NOT NULL ,
+    Name text NOT NULL ,
     Supplier text NOT NULL
   );
   ALTER TABLE "Order" ADD CONSTRAINT Order_pk PRIMARY KEY (OrderID);
@@ -158,6 +158,22 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
   ALTER TABLE deposit ADD CONSTRAINT onlyOneDepositPerAddress UNIQUE(AddressNo, Street, ZipCode, Country);
 \end{lstlisting}
 
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Covers}}]
+  CREATE TABLE Covers (
+    TransportID integer NOT NULL ,
+    ZipCode numericString NOT NULL ,
+    Country letterString NOT NULL ,
+    Date date NOT NULL ,
+    OccupiedSpace real NOT NULL DEFAULT 0
+  );
+  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Area FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Covers ADD CONSTRAINT onlyOneAreaPerDay UNIQUE (TransportID, Date);
+  ALTER TABLE Covers ADD CONSTRAINT formatCoversOccupiedSpace CHECK (
+    OccupiedSpace >=0
+  );
+\end{lstlisting}
+
 \newpage
 
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Product}}]
@@ -190,22 +206,6 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
     (Description ILIKE ('% ' || Name || '%')) AND 
     (Description ILIKE ('% ' || Supplier || '%'))
   )
-\end{lstlisting}
-
-\begin{lstlisting}[caption={Creazione della tabella \textbf{Covers}}]
-  CREATE TABLE Covers (
-    TransportID integer NOT NULL ,
-    ZipCode numericString NOT NULL ,
-    Country letterString NOT NULL ,
-    Date date NOT NULL ,
-    OccupiedSpace real NOT NULL DEFAULT 0
-  );
-  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE CASCADE ON UPDATE CASCADE;
-  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Area FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
-  ALTER TABLE Covers ADD CONSTRAINT onlyOneAreaPerDay UNIQUE (TransportID, Date);
-  ALTER TABLE Covers ADD CONSTRAINT formatCoversOccupiedSpace CHECK (
-    OccupiedSpace >=0
-  );
 \end{lstlisting}
 
 \newpage
@@ -278,7 +278,7 @@ ALTER TABLE ONLY Operator ADD CONSTRAINT unique_Account_Operator UNIQUE (Email)
   CREATE TABLE Driver (
     BusinessMail emailString NOT NULL DEFAULT 'tobechanged@example.com',
     DrivingLicenceType DrivingLicenceType NOT NULL ,
-    Email emailString, 
+    Email emailString NOT NULL , 
     DepositID integer NOT NULL 
   );
   ALTER TABLE Driver ADD CONSTRAINT Driver_pk PRIMARY KEY (BusinessMail);
