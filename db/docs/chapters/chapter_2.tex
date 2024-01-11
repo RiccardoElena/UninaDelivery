@@ -59,10 +59,11 @@ Nello schema concettuale non sono presenti attributi \textbf{Multipli} o \textbf
 
 \subsubsection{Attributi Derivati}
 
-Nello schema concettuale sono presenti due attributi \textbf{Derivati}:
+Nello schema concettuale sono presenti essenzialmente quattro attributi \textbf{Derivati}:
 
 \begin{itemize}
   \item L'attributo \textbf{Price} dell'entità \textbf{Shipment}, il quale però non ha necessità di essere conservato, non essendo un attributo di frequente richiesta per il sistema richiesto, e che quindi può essere eventualmente calcolato \textit{on-the-fly} in fase d'interrogazione del database basandosi sugli indirizzi di partenza e arrivo della spedizione e sulle eventuali modalità extra di consegna specificate in \textbf{Order}, come \textit{ExtraWarranty} e \textit{IsExpress}.
+  \item L'attributo \textbf{IsCompleted} dell'entità \textbf{Order}, che è stato conservato in quanto è un attributo che può essere richiesto frequentemente dal sistema, e richiede un interrogazione con risultato potenzialmente molto grande per essere valorizzato.
   \item L'attributo \textbf{OccupiedSpace} sia dell'entità \textbf{Deposit} che della classe d'associazione di \textbf{Covers}, infine, è stato anch'esso conservato, in quanto è un attributo che può essere richiesto frequentemente dal sistema, e richiede un interrogazione con risultato potenzialmente molto grande per essere valorizzata. 
 \end{itemize}
 
@@ -148,6 +149,8 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
   \textbf{ExtraWarranty} (\textit{bool}): Indica se è stata acquistata una garanzia extra o meno;
 
+  \textbf{Quantity} (\textit{integer}): Quantità di prodotti acquistati;
+
   \textbf{IsCompleted} (\textit{bool}): Indica se l'ordine è stato completato o meno;
   }\\
 
@@ -165,7 +168,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 \customTable{cYY}[Dizionario delle classi Seconda Parte]{\textbfB{Classe} & \textbfB{Descrizione} & \textbfB{Attributi}}{
   \textbf{Product} & Prodotto acquistabile da un utente. Può essere conservato in più depositi. &
   { \footnotesize
-    \textbf{Type} (\textit{string}): Categoria del prodotto;
+    \textbf{Category} (\textit{string}): Categoria del prodotto;
 
     \textbf{Name} (\textit{string}): Chiave Primaria. Nome del prodotto;
 
@@ -253,7 +256,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
   \textbf{Sited} &
   {\footnotesize
-  Esprime la relazione tra un \textbf{Address} e un \textbf{Deposito}. Un \textbf{Address} può corrispondere a un solo \textbf{Deposit}, mentre un \textbf{Deposit} ha solo un \textbf{Address}.
+  Esprime la relazione tra un \textbf{Address} e un \textbf{Deposito}. Un \textbf{Address} può corrispondere al più a un \textbf{Deposit}, e un \textbf{Deposit} ha solo un \textbf{Address}.
   } &
   --- &
   {\footnotesize
@@ -265,7 +268,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   
   \textbf{Located} &
   {\footnotesize
-  Esprime la relazione tra \textbf{Area} e \textbf{Address}. Un \textbf{Area} può contenere più \textbf{Address}, e un \textbf{Address} appartiene a un'unica \textbf{Area}.
+  Esprime la relazione tra \textbf{Area} e \textbf{Address}. Un \textbf{Area} può contenere più \textbf{Address}, mentre un \textbf{Address} appartiene a un'unica \textbf{Area}.
   } &
   --- &
   {\footnotesize
@@ -276,7 +279,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
   \textbf{Contains} &
   {\footnotesize
-  Esprime la relazione tra \textbf{Order} e \textbf{Product}. Un \textbf{Order} può contenere una quantità N di \textbf{Product} e un \textbf{Product} può essere contenuto in più \textbf{Order}. 
+  Esprime la relazione tra \textbf{Order} e \textbf{Product}. Un \textbf{Order} contiene un \textbf{Product} e un \textbf{Product} può essere contenuto in più \textbf{Order}. 
   } &
   --- 
   &
@@ -313,10 +316,20 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
   \textbf{Deposit \([1]\)} (\textit{seder}): Il deposito mittente di una data spedizione; 
   }\\
+
+  \textbf{DirectedTo} &
+  {\footnotesize
+  Esprime la relazione tra \textbf{Shipment} e \textbf{Deposit} \textit{destinatario}. Una \textbf{Shipment} può avere al più un \textbf{Deposit} destinatario, mentre un \textbf{Deposit} può essere destinatario di più \textbf{Shipment}.
+  } &
+  --- &
+  {\footnotesize
+  \textbf{Shipment \([*]\)} (\textit{shipped}): Le spedizioni che raggiungono da un dato deposito; 
   
+  \textbf{Deposit \([0..1]\)} (\textit{reciever}): Il deposito destinatario di una data spedizione, se la spedizione non è diretta a clienti; 
+  }\\
   \textbf{Ships} &
   {\footnotesize
-  Esprime la relazione tra \textbf{Shipment} e \textbf{Order}. Una \textbf{Shipment} può contenere più \textbf{Order}, mentre un \textbf{Order} può essere contenuto in più \textbf{Shipment}.
+  Esprime la relazione tra \textbf{Shipment} e \textbf{Order}. Una \textbf{Shipment} può contenere più \textbf{Order}, e un \textbf{Order} può essere contenuto in più \textbf{Shipment}.
   } &
   --- &
   {\footnotesize
@@ -356,7 +369,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   } &
   --- &
   {\footnotesize
-  \textbf{Deposit \([1]\)} (\textit{is belonged}): Il deposito a cui appartiene un dato mezzo di trasporto; 
+  \textbf{Deposit \([1]\)} (\textit{owns}): Il deposito a cui appartiene un dato mezzo di trasporto; 
 
   \textbf{Transport \([*]\)} (\textit{belongs}): I mezzi di trasporto che appartengono a un dato deposito; 
   }\\
@@ -500,7 +513,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   }\\
   \textbf{formatAddressStreet} & Dominio &
   {\footnotesize
-  Il campo \textbf{Street} della classe \textbf{Address} può contenere solo caratteri alfanumerici o al più il carattere \textit{`.'}. %chktex 38
+  Il campo \textbf{Street} della classe \textbf{Address} può contenere solo caratteri alfanumerici o al più spazi e il carattere \textit{`.'}. %chktex 38
   }\\
   
   \textbf{formatDepositOccupiedSpace} & Dominio & 
@@ -580,11 +593,6 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   \textbf{checkDepositFullness} & N-upla & 
   {\footnotesize
   Nella classe \textbf{Deposit} il campo \textbf{OccupiedSpace} può avere valori solo minori o uguali al campo \textbf{MaxCapacity}
-  }\\
-  
-  \textbf{checkTransportFullness} & Relazionale & 
-  {\footnotesize
-  Nella classe d'associazione \textbf{Cover} il campo \textbf{OccupiedSpace} può avere valori solo minori o uguali al campo \textbf{MaxCapacity} della classe \textbf{Transport}
   }\\
   
   \textbf{validShipmentDate} & Dominio & 
@@ -716,5 +724,10 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   \textbf{isDriverWorkingInCorrectCity} & Interrelazionale &
   {\footnotesize
   Un \textbf{Driver} può lavorare solo in \textbf{Deposit} della stessa \textbf{City} in cui abita.
+  }\\
+
+  \textbf{checkTransportFullness} & Interrelazionale & 
+  {\footnotesize
+  Nella classe d'associazione \textbf{Cover} il campo \textbf{OccupiedSpace} può avere valori solo minori o uguali al campo \textbf{MaxCapacity} della classe \textbf{Transport}
   }\\
 }
