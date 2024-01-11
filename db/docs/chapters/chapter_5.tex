@@ -1623,3 +1623,146 @@ In questo casi infatti sarà necessario di ben due cili \lstinline{FOR} per caso
   END;
   $$ LANGUAGE plpgsql;
 \end{lstlisting}
+
+\subsection{\textbf{updateDates}}
+
+Vediamo ora l'insieme di funzioni che si occupano controllare la coerenza delle date inserite o aggiornate in \textbf{Shipment} e \textbf{Order}
+
+Per fare ciò è sufficiente controllare che la data di emissione di un \textbf{Order} sia antecedente a tutte le date di spedizione in cui quell'\textbf{Order} è coinvolto, controllando eventuali aggiornamenti o inserimenti su \textbf{Order}, \textbf{Shipment} e \textbf{Ships}.
+
+È inoltre importante assicurarsi anche che non vengano effettuati aggiornamenti o inserimenti su \textbf{Covers} che facciano collidere le date di spedizione e di emissione.
+
+Per questo è sufficiente controllare all'inserimento o aggiornamento di \textbf{Covers} che esista almeno una \textbf{Shipment} in quella data con quel \textbf{Transport}.
+
+La \textbf{Shipment} in questione sarà necessariamente quella giusta poiché, pur cambiando la data di una \textbf{Covers} inserendone una di una \textbf{Shipment} già esistente ma che non la riguarda, l'operazione sarà bloccata dal vincolo di unicità su \textbf{Covers}.
+
+\begin{lstlisting}[caption={Trigger per implementare \textbf{updateDates}}]
+  CREATE OR REPLACE TRIGGER correctOrderEmissionDate
+  BEFORE INSERT OR UPDATE ON "Order"
+  FOR EACH ROW EXECUTE PROCEDURE correctOrderEmissionDate_func();
+
+  CREATE OR REPLACE TRIGGER correctShippingDate
+  BEFORE INSERT OR UPDATE ON shipment
+  FOR EACH ROW EXECUTE PROCEDURE correctShippingDate_func();
+
+  CREATE OR REPLACE TRIGGER correctShipsEmissionDate
+  BEFORE INSERT OR UPDATE ON Ships
+  FOR EACH ROW EXECUTE PROCEDURE correctShipsEmissionDate_func();
+
+  CREATE OR REPLACE TRIGGER correctCoversDate
+  BEFORE INSERT OR UPDATE ON Covers
+  FOR EACH ROW EXECUTE PROCEDURE correctCoversDate_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{correctOrderEmissionDate}}]
+  CREATE OR REPLACE FUNCTION correctOrderEmissionDate_func()
+  RETURNS TRIGGER AS $$
+  BEGIN
+    IF EXISTS (
+        select 1 
+        FROM Ships NATURAL JOIN shipment
+        WHERE orderid = NEW.orderid
+          AND shippingdate < NEW.emissiondate
+    ) THEN 
+      perform raise_custom_error('E0022');
+    END IF;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{correctShippingDate}}]
+  CREATE OR REPLACE FUNCTION correctShippingDate_func()
+  RETURNS TRIGGER AS $$
+  BEGIN
+    IF EXISTS (
+        select 1 
+        FROM Ships NATURAL JOIN "Order"
+        WHERE shipmentid = NEW.shipmentid
+          AND NEW.shippingdate < emissiondate
+    ) THEN
+      perform raise_custom_error('E0022');
+    END IF;
+    UPDATE covers 
+          SET date=NEW.shippingdate, 
+              transportid=NEW.transportid 
+        WHERE date=OLD.shippingdate 
+          AND transportid=OLD.transportid;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{correctShipsEmissionDate}}]
+  CREATE OR REPLACE FUNCTION correctShipsEmissionDate_func()
+  RETURNS TRIGGER AS $$
+  BEGIN
+    IF EXISTS (
+        select 1 
+        FROM "Order" NATURAL JOIN Ships NATURAL JOIN shipment
+        WHERE shipmentid = NEW.shipmentid 
+          AND orderid = NEW.orderid
+          AND emissiondate > shippingdate
+    ) THEN
+      perform raise_custom_error('E0022');
+    END IF;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{correctCoversDate}}]
+  CREATE OR REPLACE FUNCTION correctCoversDate_func()
+  RETURNS TRIGGER AS $$
+  BEGIN
+    IF EXISTS (
+        select 1 
+        FROM Shipment
+        WHERE transportid = NEW.transportid
+          AND NEW.date = shippingdate
+    ) THEN
+      perform raise_custom_error('E0023');
+    END IF;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{checkAccountDataConsistency}}
+
+Questa funzione si occupa di controllare, in seguito ad un aggiornamento su \textbf{Account}, che la nuova età non sia inferiore a 18 anni se l'\textbf{Account} è un \textbf{Driver} o un \textbf{Operator}.
+
+Per fare ciò la funzione si limita a controllare se l'\textbf{Account} in questione è un \textbf{Driver} o un \textbf{Operator} e in tal caso controlla che la nuova età sia maggiore di 18 anni.
+
+\begin{lstlisting}[caption={Trigger per implementare \textbf{checkAccountDataConsistency}}]
+  CREATE OR REPLACE TRIGGER checkAccountDataConsistency
+  BEFORE UPDATE ON Account
+  FOR EACH ROW
+  EXECUTE PROCEDURE checkAccountDataConsistency_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{checkAccountDataConsistency}}]
+  CREATE OR REPLACE FUNCTION employeeBirthdateConsistency_func()
+  RETURNS TRIGGER AS $$
+  DECLARE
+    acc_age integer;
+  BEGIN
+
+    acc_age = (SELECT EXTRACT(YEAR FROM age(NEW.birthdate)));
+
+    IF EXISTS (
+        SELECT 1 
+        FROM driver
+        WHERE email = NEW.email
+        UNION 
+        SELECT 1
+        FROM operator
+        WHERE email = NEW.email
+    ) AND acc_age<18 THEN
+      perform raise_custom_error('E0001');
+    END IF;
+
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}

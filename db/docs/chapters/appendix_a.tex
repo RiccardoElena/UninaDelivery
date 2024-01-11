@@ -123,15 +123,26 @@ Sono riportati di seguito i codici d'errore personalizzati utilizzati nel proget
   {\footnotesize
     Si è tentato di eliminare un \textbf{Operator} che ha \textbf{Shipment} attive.} \\
 
-  \textbf{E0020} &
-  {\footnotesize
-    \textit{Driver cannot work in a different city than his own} } &
-  {\footnotesize
-    Si è tentato di assegnare un \textbf{Driver} a un \textbf{Deposit} che non è nella sua \textbf{City}.} \\
-
-  \textbf{E0021} &
-  {\footnotesize
-    \textit{Are you trying to store negative volume of goods?} } &
-  {\footnotesize
-    Si è tentato di aggiornare il campo \textbf{OccupiedSpace} di un \textbf{Deposit} al di sotto del totale dello spazio occupato dai prodotti che contiene.} \\
 }
+
+\customTable{cYY}[Custom Error Codes Part 3]{\textbfB{Codice d'Errore} & \textbfB{Messaggio d'Errore} & \textbfB{Descrizione}}{
+
+\textbf{E0020} &
+{\footnotesize
+  \textit{Driver cannot work in a different city than his own} } &
+{\footnotesize
+  Si è tentato di assegnare un \textbf{Driver} a un \textbf{Deposit} che non è nella sua \textbf{City}.} \\
+
+\textbf{E0021} &
+{\footnotesize
+  \textit{Are you trying to store negative volume of goods?} } &
+{\footnotesize
+  Si è tentato di aggiornare il campo \textbf{OccupiedSpace} di un \textbf{Deposit} al di sotto del totale dello spazio occupato dai prodotti che contiene.} \\
+
+\textbf{E0022} &
+  \textit{Order Emission date must be before shipping date} & 
+{\footnotesize
+  Si è tentato di inserire o modificare un \textbf{Order} o una \textbf{Shipment} collegati ponendo la data di emissione successiva a quella di spedizione.} \\
+
+}
+
