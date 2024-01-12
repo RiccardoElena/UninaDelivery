@@ -32,7 +32,7 @@ public class OrderDAOPostgre implements OrderDAO {
    * @param rs ResultSet to populate the order from
    * @return order populated from the ResultSet
    */
-  private Order populateOrderFromResultSet(final ResultSet rs) 
+  private Order populateOrderFromResultSet(final ResultSet rs)
       throws SQLException {
     Order order = null;
     try {
@@ -53,7 +53,7 @@ public class OrderDAOPostgre implements OrderDAO {
     } catch (SQLException e) {
       e.printStackTrace();
     }
-        
+
     return order;
   }
 
@@ -366,13 +366,13 @@ public class OrderDAOPostgre implements OrderDAO {
   /**
    * RETRIEVE orders from the DB made by a client between two dates.
 
-   * @param email email to search for
+   * @param client user to search for
    * @param start start date
    * @param end end date
    * @return list of the orders matching the search criteria
    */
   @Override
-  public List<Order> getOrdersByEmailAndDate(final String email,
+  public List<Order> getOrdersByAccountAndDate(final Account client,
                                               final LocalDate start,
                                               final LocalDate end)
       throws SQLException {
@@ -385,7 +385,7 @@ public class OrderDAOPostgre implements OrderDAO {
       psSelect = con.prepareStatement(
                               baseQuery + "WHERE email = ? "
                             + "AND emissiondate BETWEEN ? AND ?");
-      psSelect.setString(nextField++, email);
+      psSelect.setString(nextField++, client.getEmail());
       psSelect.setDate(nextField++, java.sql.Date.valueOf(start));
       psSelect.setDate(nextField++, java.sql.Date.valueOf(end));
       rs = psSelect.executeQuery();
