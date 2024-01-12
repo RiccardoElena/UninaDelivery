@@ -121,7 +121,7 @@ public interface OrderDAO {
    * @throws SQLException possible DB related errors
    */
 
-  List<Order> getOrdersByAccountAndDate(Account client, 
+  List<Order> getOrdersByAccountAndDate(Account client,
                                       LocalDate dateStart,
                                       LocalDate dateEnd)
       throws SQLException;
