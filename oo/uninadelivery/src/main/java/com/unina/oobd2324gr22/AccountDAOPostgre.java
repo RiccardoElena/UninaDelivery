@@ -1,4 +1,4 @@
-package com.unina._2324oobd._22;
+package com.unina.oobd2324gr22;
 
 public class AccountDAOPostgre implements AccountDAO {
 
@@ -12,6 +12,7 @@ public class AccountDAOPostgre implements AccountDAO {
     * @param email email
     * @return ciao
     */
+    @Override
     public Account getAccountByEmail(final String email) {
       return null;
     }

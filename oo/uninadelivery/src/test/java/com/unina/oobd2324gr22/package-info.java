@@ -4,4 +4,4 @@
  * It provides functionalities for testing the delivery management and package
  * tracking.
  */
-package com.unina._2324oobd._22;
+package com.unina.oobd2324gr22;

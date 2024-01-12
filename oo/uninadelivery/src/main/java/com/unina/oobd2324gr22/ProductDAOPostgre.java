@@ -1,4 +1,4 @@
-package com.unina._2324oobd._22;
+package com.unina.oobd2324gr22;
 
 public class ProductDAOPostgre implements ProductDAO {
 
@@ -13,6 +13,7 @@ public class ProductDAOPostgre implements ProductDAO {
     * @param supplier supplier
     * @return ciao
     */
+    @Override
     public Product getProductByNameAndSupplier(final String name,
                                                 final String supplier) {
       return null;

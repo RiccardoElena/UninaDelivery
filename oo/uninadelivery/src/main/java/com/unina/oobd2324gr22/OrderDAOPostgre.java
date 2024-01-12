@@ -1,4 +1,4 @@
-package com.unina._2324oobd._22;
+package com.unina.oobd2324gr22;
 
 import java.sql.SQLException;
 import java.sql.Statement;
