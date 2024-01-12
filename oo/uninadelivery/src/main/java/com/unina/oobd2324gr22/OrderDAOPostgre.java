@@ -13,7 +13,8 @@ import java.sql.PreparedStatement;
 
 public class OrderDAOPostgre implements OrderDAO {
 
-/**
+  /**
+   * Method to insert an order into the DB.
    * @param order Order to insert into the DB
    * @return the number of rows affected by the insert
    */
@@ -50,7 +51,53 @@ public class OrderDAOPostgre implements OrderDAO {
   }
 
   /**
-   * @param id id
+   * Method to get all the orders.
+   * @return lista di ordini
+   */
+  @Override
+  public List<Order> getOrders() throws SQLException {
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
+    List<Order> orders = new LinkedList<Order>();
+    Statement st = null;
+    ResultSet rs = null;
+    try {
+
+      st = con.createStatement();
+      rs = st.executeQuery("SELECT * FROM \"Orders\"");
+
+      while (rs.next()) {
+
+        orders.add(new Order(
+                          rs.getInt("id"),
+                          rs.getDate("emissiondate").toLocalDate(),
+                          rs.getBoolean("isexpress"),
+                          rs.getInt("extrawarranty"),
+                          new AccountDAOPostgre().getAccountByEmail(
+                            rs.getString("email")
+                          ),
+                          rs.getInt("quantity"),
+                          new ProductDAOPostgre().getProductByNameAndSupplier(
+                            rs.getString("name"),
+                            rs.getString("supplier")
+                          )
+                      )
+                  );
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw e;
+    } finally {
+      rs.close();
+      st.close();
+      con.close();
+    }
+
+    return orders;
+  }
+
+  /**
+   * Method to get an order by its id.
+   * @param id id of the order to get
    * @return order of the id passed
    */
   @Override
@@ -92,6 +139,7 @@ public class OrderDAOPostgre implements OrderDAO {
   }
 
   /**
+   * Method to get all the unfinished orders.
    * @return list of unfinished orders
    */
   @Override
@@ -137,51 +185,10 @@ public class OrderDAOPostgre implements OrderDAO {
     return orders;
   }
 
-  /**
-   * @return lista di ordini
-   */
-  @Override
-  public List<Order> getOrders() throws SQLException {
-    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
-    List<Order> orders = new LinkedList<Order>();
-    Statement st = null;
-    ResultSet rs = null;
-    try {
 
-      st = con.createStatement();
-      rs = st.executeQuery("SELECT * FROM \"Orders\"");
-
-      while (rs.next()) {
-
-        orders.add(new Order(
-                          rs.getInt("id"),
-                          rs.getDate("emissiondate").toLocalDate(),
-                          rs.getBoolean("isexpress"),
-                          rs.getInt("extrawarranty"),
-                          new AccountDAOPostgre().getAccountByEmail(
-                            rs.getString("email")
-                          ),
-                          rs.getInt("quantity"),
-                          new ProductDAOPostgre().getProductByNameAndSupplier(
-                            rs.getString("name"),
-                            rs.getString("supplier")
-                          )
-                      )
-                  );
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      rs.close();
-      st.close();
-      con.close();
-    }
-
-    return orders;
-  }
 
   /**
+   * Method to get the order with the largest quantity of products.
    * @return order with biggest quantity of products
    */
   @Override
@@ -227,6 +234,7 @@ public class OrderDAOPostgre implements OrderDAO {
   }
 
   /**
+   * Method to get the order with the smallest quantity of products.
    * @return order with smallest quantity of products
    */
   @Override
@@ -272,6 +280,7 @@ public class OrderDAOPostgre implements OrderDAO {
   }
 
   /**
+   * Method to get the orders by email.
    * @param email email of the account to search for
    * @return list of orders matching the search criteria
    */
@@ -316,9 +325,10 @@ public class OrderDAOPostgre implements OrderDAO {
   }
 
   /**
-   * @param start data inizio
-   * @param end data fine
-   * @return ciao
+   * Method to get the orders by range date.
+   * @param start start date
+   * @param end end date
+   * @return list of orders matching the search criteria
    */
   @Override
   public List<Order> getOrdersByDate(final LocalDate start, final LocalDate end)
@@ -362,9 +372,10 @@ public class OrderDAOPostgre implements OrderDAO {
     return orders;
   }
 
-/**
+  /**
+   * Method to get the orders by start date.
    * @param start data inizio
-   * @return ciao
+   * @return list of orders matching the search criteria
    */
   @Override
   public List<Order> getOrdersByDate(final LocalDate start)
@@ -408,6 +419,7 @@ public class OrderDAOPostgre implements OrderDAO {
   }
 
   /**
+   * Method to get the orders by email and range date.
    * @param email email to search for
    * @param start start date
    * @param end end date
@@ -460,10 +472,11 @@ public class OrderDAOPostgre implements OrderDAO {
   }
 
   /**
+   * Method to get a list of the number of the orders for each day
+   * of the month given.
    * @param month month to search for
    * @param year year to search for
    * @return list of the number of the orders for each day of the month
-   * @throws SQLException
    */
   @Override
   public List<Integer> getOrdersPerDay(final int month, final int year)
@@ -497,7 +510,9 @@ public class OrderDAOPostgre implements OrderDAO {
   }
 
   /**
+   * Method to update an order given its id.
    * @param order order to Update
+   * @return number of rows affected by the update
    */
   @Override
   public int updateOrderById(final Order order)
@@ -533,7 +548,9 @@ public class OrderDAOPostgre implements OrderDAO {
   }
 
   /**
+   * Method to delete an order given its id.
    * @param id orderID to delete
+   * @return number of rows affected by the delete
    */
   @Override
   public int deleteOrderById(final int id)

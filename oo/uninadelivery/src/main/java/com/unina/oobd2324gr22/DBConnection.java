@@ -10,39 +10,37 @@ import java.sql.SQLException;
 import java.util.Objects;
 
 public final class DBConnection {
+
     /**
-     * Default constructor.
+     * Istance private and static of the class DBConnection.
      */
     private static DBConnection dbConn = null;
     /**
-     * Default constructor.
+     * Istance private and static of the connection to the DB.
      */
     private static Connection conn = null;
 
     /**
-     * Default constructor.
+     * Private constructor.
      */
     private DBConnection() { }
 
     /**
-     * Default constructor.
-     * @return ciao
+     * Public method to get the instance of the class DBConnection.
+     * @return instance of the class DBConnection
      */
     public static DBConnection getDBConnection() {
-        // se la classe connessione è nulla, la crea
+        // if the connection doesn't exist or is closed
         if (dbConn == null) {
             dbConn = new DBConnection();
         }
-        // e la restituisce
         return dbConn;
     }
 
-    // metodo pubblico per ottenere la connessione,
-    // in questo caso passo anche il nome dello schema a cui connettermi
     /**
-     * Default constructor.
-     * @param schemaName ciao
-     * @return ciao
+     * Public method to get the connection to DB given the schema name.
+     * @param schemaName name of the schema to connect to
+     * @return connection to the DB
      */
     public static Connection getConnectionBySchema(final String schemaName) {
         String pwd = null;
@@ -51,21 +49,16 @@ public final class DBConnection {
             throw new RuntimeException("Schema name is empty");
         }
         try {
-        // se la connessione non esiste oppure è stata chiusa
             if (conn == null || conn.isClosed()) {
-                //legge la pwd dal file
                 b = new BufferedReader(new FileReader(new File(
                     "../../../../../resources/pwdfile.txt")));
                 pwd = b.readLine();
-                // registra il driver
                 Class.forName("org.postgresql.Driver");
-                // chiama il DriverManager e chiedi la connessione
                 String sUrl = "jdbc:postgresql://localhost:5432/"
                             + "uninadelivery?currentSchema="
                             + schemaName;
                 System.out.println("surl" + sUrl);
                 conn = DriverManager.getConnection(sUrl, "riccardoelena", pwd);
-
             }
         } catch
         (SQLException | ClassNotFoundException | IOException throwables) {
