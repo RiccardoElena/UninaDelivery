@@ -685,9 +685,9 @@ Conclusi tutti controlli, se nessuna eccezione è stata sollevata, è necessario
 
 \subsection{\textbf{correctOccupiedSpace}}
 
-Vediamo ora i trigger che implementano i vincoli \textbf{correctOccupiedSpaceForShipment} e \textbf{correctOccupiedSpaceForDeposit}, che si occupano di verificare che i campi \textbf{OccupiedSpace} rispettivamente di \textbf{Covers} e \textbf{Deposit} abbiano un valore maggiore o ugale alla somma dei prodotti contenuti.
+Vediamo ora i trigger che implementano i vincoli \textbf{correctOccupiedSpaceForShipment} e \textbf{correctOccupiedSpaceForDeposit}, che si occupano di verificare che i campi \textbf{OccupiedSpace} rispettivamente di \textbf{Covers} e \textbf{Deposit} abbiano un valore maggiore o uguale alla somma dei prodotti contenuti.
 
-Per questi due trigger, nonostante abbiano funzioni essenzialmente identiche, si è scelto di implementare due diverse \textit{trigger function}, poiché individuati inizialmente come due vincoli distinti.
+Per questi due trigger, nonostante abbiano funzioni essenzialmente identiche, si è scelto d'implementare due diverse \textit{trigger function}, poiché individuati inizialmente come due vincoli distinti.
 
 \begin{lstlisting}[caption={Trigger per i vincoli \textbf{correctOccupiedSpaceForShipment} e \textbf{correctOccupiedSpaceForDeposit}}]
   CREATE OR REPLACE TRIGGER correctOccupiedSpaceForShipment_in
@@ -1550,7 +1550,7 @@ Questo trigger si occupa di aggiornare, se possibile, a seguito di un aggiorname
 
 Per fare ciò la \textit{trigger function} utilizza una tecnica analoga a quella vista in \textbf{orderQuantityUpdate}, con l'unica differenza effettiva rappresentata dalle modalità di raccolta dei dati.
 
-In questo casi infatti sarà necessario di ben due cili \lstinline{FOR} per caso per aggiornare prima i \textbf{Deposit} e poi le \textbf{Covers}.
+In questo casi infatti sarà necessario di ben due cicli \lstinline{FOR} per caso per aggiornare prima i \textbf{Deposit} e poi le \textbf{Covers}.
 
 \begin{lstlisting}[caption={Trigger per implementare \textbf{updateProductSize}}]
   CREATE OR REPLACE TRIGGER updateProductSize
@@ -1730,7 +1730,7 @@ La \textbf{Shipment} in questione sarà necessariamente quella giusta poiché, p
 
 \subsection{\textbf{checkAccountDataConsistency}}
 
-Questa funzione si occupa di controllare, in seguito ad un aggiornamento su \textbf{Account}, che la nuova età non sia inferiore a 18 anni se l'\textbf{Account} è un \textbf{Driver} o un \textbf{Operator}.
+Questa funzione si occupa di controllare, in seguito a un aggiornamento su \textbf{Account}, che la nuova età non sia inferiore a 18 anni se l'\textbf{Account} è un \textbf{Driver} o un \textbf{Operator}.
 
 Per fare ciò la funzione si limita a controllare se l'\textbf{Account} in questione è un \textbf{Driver} o un \textbf{Operator} e in tal caso controlla che la nuova età sia maggiore di 18 anni.
 
