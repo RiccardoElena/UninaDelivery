@@ -7,8 +7,9 @@
 ---
 name: Lint Code Base
 
-env: 
+env:
   VALIDATE_LATEX: false
+  VALIDATE_JSCPD: false
 
 on:
   push:

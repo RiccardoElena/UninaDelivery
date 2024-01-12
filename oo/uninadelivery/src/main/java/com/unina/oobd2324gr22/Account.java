@@ -2,6 +2,9 @@ package com.unina.oobd2324gr22;
 
 import java.time.LocalDate;
 
+/**
+ * This class represents an account.
+ */
 public class Account {
 
   /**
@@ -41,28 +44,31 @@ public class Account {
 
   /**
    * Default constructor.
+
    * @param accName ciao
    * @param accSurname ciao
    * @param accEmail ciao
-   * @param accBDate ciao
+   * @param accBdate ciao
    * @param accPropic ciao
    * @param accPassword ciao
    * @param accAddress ciao
    */
   public Account(final String accName, final String accSurname,
-                  final String accEmail, final LocalDate accBDate,
+                  final String accEmail, final LocalDate accBdate,
                   final String accPropic, final String accPassword,
                   final Address accAddress) {
     this.name = accName;
     this.surname = accSurname;
     this.email = accEmail;
-    this.birthdate = accBDate;
+    this.birthdate = accBdate;
     this.propic = accPropic;
     this.password = accPassword;
     this.address = accAddress;
-}
+  }
 
   /**
+   * Name getter.
+
    * @return ciao
    */
   public String getName() {
@@ -70,6 +76,8 @@ public class Account {
   }
 
   /**
+   * Name setter.
+
    * @param accName Nome account
    */
   public void setName(final String accName) {
@@ -77,12 +85,17 @@ public class Account {
   }
 
   /**
+   * Surname getter.
+
    * @return cognome account
    */
   public String getSurname() {
     return surname;
   }
+
   /**
+   * Surname Setter.
+
    * @param accSurname cognome account
    */
   public void setSurname(final String accSurname) {
@@ -90,6 +103,8 @@ public class Account {
   }
 
   /**
+   * Email getter.
+
    * @return email account
    */
   public String getEmail() {

@@ -6,23 +6,23 @@ package com.unina.oobd2324gr22;
  */
 public final class App {
 
-    // Constructors
+  // Constructors
 
-    /**
-     * Default constructor.
-     */
-    private App() {
-        throw new UnsupportedOperationException(
-      "This is a utility class and cannot be instantiated");
-    }
+  /**
+   * Default constructor.
+   */
+  private App() {
+    throw new UnsupportedOperationException(
+    "This is a utility class and cannot be instantiated");
+  }
 
-    // Methods
+  // Methods
 
-    /**
-     * Main method.
-     * @param args Command line arguments.
-     */
-    public static void main(final String[] args) {
-        System.out.println("Hello World!");
-    }
+  /**
+   * Main method.
+   * @param args Command line arguments.
+   */
+  public static void main(final String[] args) {
+    System.out.println("Hello World!");
+  }
 }

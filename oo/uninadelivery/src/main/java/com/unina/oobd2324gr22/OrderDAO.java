@@ -67,7 +67,7 @@ public interface OrderDAO {
    * @return list of orders matching the search criteria
    * @throws SQLException
    */
-  List<Order> getOrdersByEmail(String email) throws SQLException;
+  List<Order> getOrdersByAccount(Account client) throws SQLException;
 
   /**
    * Method to get the orders by range date.
