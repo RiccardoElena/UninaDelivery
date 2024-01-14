@@ -26,16 +26,6 @@ CREATE SCHEMA uninadelivery;
 ALTER SCHEMA uninadelivery OWNER TO zgenny;
 
 --
--- Name: alphanumericstring; Type: DOMAIN; Schema: uninadelivery; Owner: zgenny
---
-
-CREATE DOMAIN uninadelivery.alphanumericstring AS text
-	CONSTRAINT alphanumericstring_check CHECK ((VALUE ~ '^\w+$'::text));
-
-
-ALTER DOMAIN uninadelivery.alphanumericstring OWNER TO zgenny;
-
---
 -- Name: alphanumstring; Type: DOMAIN; Schema: uninadelivery; Owner: zgenny
 --
 
@@ -354,29 +344,6 @@ $$;
 ALTER FUNCTION uninadelivery.completedorder_func() OWNER TO zgenny;
 
 --
--- Name: correctcoversdate_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
---
-
-CREATE FUNCTION uninadelivery.correctcoversdate_func() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF EXISTS (
-      select 1 
-      FROM Shipment
-      WHERE transportid = NEW.transportid
-        AND NEW.date = shippingdate
-  ) THEN
-    perform raise_custom_error('E0023');
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION uninadelivery.correctcoversdate_func() OWNER TO riccardoelena;
-
---
 -- Name: correctoccupiedspacefordeposit_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
 --
 
@@ -390,7 +357,6 @@ BEGIN
     INTO SumOfProduct
     FROM product natural join stores
     WHERE depositID = NEW.depositID;
-
   IF SumOfProduct > NEW.OccupiedSpace THEN
     perform raise_custom_error('E0021');
   END IF;
@@ -595,8 +561,26 @@ CREATE FUNCTION uninadelivery.coversoccupiedspaceupdate_func() RETURNS trigger
   DECLARE
     Sdate Shipment.shippingdate%TYPE;
     Tid Transport.transportID%TYPE;
-    Qty real;
+    Qty numeric(100,3);
   BEGIN
+    -- check if it's an update/insert
+    IF NEW IS NOT NULL THEN
+
+      -- retrieve data to identify the covers row
+      SELECT shippingdate, transportID
+        INTO Sdate, Tid
+        FROM shipment
+        WHERE shipmentID = NEW.shipmentID;
+      -- retrieve the quantity of the order
+      SELECT quantity * PackageSizeLiters
+        INTO Qty
+        FROM "Order" JOIN PRODUCT USING (name, supplier)
+        WHERE orderID = NEW.orderID;
+
+      UPDATE covers
+        SET occupiedspace = occupiedspace + Qty
+        WHERE date = Sdate AND transportID = Tid;
+    END IF;
     -- check if it's an update/delete
     IF OLD IS NOT NULL THEN
 
@@ -619,26 +603,7 @@ CREATE FUNCTION uninadelivery.coversoccupiedspaceupdate_func() RETURNS trigger
         END IF;
     END IF;
 
-    -- check if it's an update/insert
-    IF NEW IS NOT NULL THEN
-
-      -- retrieve data to identify the covers row
-      SELECT shippingdate, transportID
-        INTO Sdate, Tid
-        FROM shipment
-        WHERE shipmentID = NEW.shipmentID;
-      -- retrieve the quantity of the order
-      SELECT quantity * PackageSizeLiters
-        INTO Qty
-        FROM "Order" JOIN PRODUCT USING (name, supplier)
-        WHERE orderID = NEW.orderID;
-
-      UPDATE covers
-        SET occupiedspace = occupiedspace + Qty
-        WHERE date = Sdate AND transportID = Tid;
-    END IF;
     RETURN NEW;
-
   END;
   $$;
 
@@ -701,38 +666,42 @@ ALTER FUNCTION uninadelivery.deletestoredproducts_func() OWNER TO zgenny;
 CREATE FUNCTION uninadelivery.depositoccupiedspaceupdate_func() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-DECLARE
-  Psize Product.PackageSizeLiters%TYPE;
-BEGIN
+  DECLARE
+    Psize Product.PackageSizeLiters %TYPE;
+  BEGIN
+  -- check if it's an update/insert
+    IF NEW IS NOT NULL THEN
+    -- retrieve the package size of the product
+      SELECT PackageSizeLiters
+        INTO Psize
+        FROM Product
+        WHERE name = NEW.name AND supplier = NEW.supplier;
 
-  -- check if it's an update/delete 
-  IF OLD IS NOT NULL THEN
-  -- retrieve the package size of the product
-  SELECT PackageSizeLiters
-    INTO Psize
-    FROM Product
-    WHERE name = OLD.name AND supplier = OLD.supplier;
+      UPDATE deposit
+      SET occupiedspace = occupiedspace + ((NEW.quantity) * Psize)
+      WHERE depositID = NEW.depositID;
+    END IF;
+
+    -- check if it's an update/delete 
+    IF OLD IS NOT NULL THEN
+    -- retrieve the package size of the product
+    SELECT PackageSizeLiters
+      INTO Psize
+      FROM Product
+      WHERE name = OLD.name AND supplier = OLD.supplier;
+
     UPDATE deposit
       SET occupiedspace = occupiedspace - (OLD.quantity * Psize)
       WHERE depositID = OLD.depositID;
+    END IF;
+
     IF TG_OP = 'DELETE' THEN
       RETURN OLD;
     END IF;
-  END IF;
-  -- check if it's an update/insert
-  IF NEW IS NOT NULL THEN
-    -- retrieve the package size of the product
-  SELECT PackageSizeLiters
-    INTO Psize
-    FROM Product
-    WHERE name = NEW.name AND supplier = NEW.supplier;
-    UPDATE deposit
-      SET occupiedspace = occupiedspace + (NEW.quantity * Psize)
-      WHERE depositID = NEW.depositID;
-  END IF;
-  RETURN NEW;
-END;
-$$;
+
+    RETURN NEW;
+  END;
+  $$;
 
 
 ALTER FUNCTION uninadelivery.depositoccupiedspaceupdate_func() OWNER TO zgenny;
@@ -1232,6 +1201,31 @@ $$;
 ALTER FUNCTION uninadelivery.isshipmentdirectedincorrectareadeposit_func() OWNER TO zgenny;
 
 --
+-- Name: istransportadapttoshipment_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.istransportadapttoshipment_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF NEW.directedto IS NULL THEN
+    IF EXISTS (
+      SELECT 1
+        FROM Transport
+        WHERE Transportid = NEW.Transportid
+          AND TransportType <> 'WheeledSmall'
+    ) THEN
+      perform raise_custom_error('E0024');
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.istransportadapttoshipment_func() OWNER TO riccardoelena;
+
+--
 -- Name: notexeedtransportcapacity_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
 --
 
@@ -1422,23 +1416,24 @@ BEGIN
                   transportid = OLD.TransportID;
   END IF;
 
-  FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
-      -- for each order ...
-      SELECT quantity , name , supplier 
-        INTO QTY , PName , Psupp
-        FROM "Order" NATURAL JOIN PRODUCT
-        WHERE OrderID = shipped_order.OrderID;
+  IF(OLD.ShippedFrom <> NEW.ShippedFrom) THEN
+    FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
+        -- for each order ...
+        SELECT quantity , name , supplier 
+          INTO QTY , PName , Psupp
+          FROM "Order" NATURAL JOIN PRODUCT
+          WHERE OrderID = shipped_order.OrderID;
 
-      -- restore the products in the old deposit
-      UPDATE stores
-        SET quantity = quantity + QTY
-        WHERE depositid = OLD.ShippedFrom AND name = PName AND supplier = Psupp;
-      -- remove the products from the new deposit
-      UPDATE stores
-        SET quantity = quantity - QTY
-        WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = Psupp;
-  END LOOP;
-
+        -- restore the products in the old deposit
+        UPDATE stores
+          SET quantity = quantity + QTY
+          WHERE depositid = OLD.ShippedFrom AND name = PName AND supplier = Psupp;
+        -- remove the products from the new deposit
+        UPDATE stores
+          SET quantity = quantity - QTY
+          WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = Psupp;
+    END LOOP;
+  END IF;
   IF TG_OP = 'DELETE' THEN
     RETURN OLD;
   END IF;
@@ -1484,6 +1479,30 @@ CREATE FUNCTION uninadelivery.updateproductsize_func() RETURNS trigger
 DECLARE
   record RECORD;
 BEGIN
+    -- check if it's an update/insert
+    IF NOT (NEW IS NULL) THEN
+      -- update the occupied space of the deposit
+      FOR record IN (
+        SELECT quantity, depositID
+          FROM stores NATURAL JOIN deposit
+          WHERE name = NEW.name AND supplier = NEW.supplier
+      ) LOOP
+        UPDATE deposit
+          SET occupiedspace = occupiedspace + (NEW.PackageSizeLiters * record.quantity)
+          WHERE depositID = record.depositID;
+      END LOOP;
+      -- update the occupied space of the covers
+      FOR record IN (
+        SELECT quantity, date, covers.transportID
+          FROM "Order" NATURAL JOIN ships NATURAL JOIN shipment JOIN covers
+          ON date=shippingdate AND shipment.transportID = covers.transportID
+          WHERE name = NEW.name AND supplier = NEW.supplier
+      ) LOOP
+        UPDATE covers
+          SET occupiedspace = occupiedspace + (NEW.PackageSizeLiters * record.quantity)
+          WHERE transportID = record.transportID AND date = record.date;
+      END LOOP;
+    END IF;
     -- check if it's an update/delete
     IF NOT (OLD IS NULL) THEN
 
@@ -1493,7 +1512,7 @@ BEGIN
           FROM stores NATURAL JOIN deposit
           WHERE name = OLD.name AND supplier = OLD.supplier
       ) LOOP
-  
+
         UPDATE deposit
           SET occupiedspace = occupiedspace - (OLD.PackageSizeLiters * record.quantity)
           WHERE depositID = record.depositID;
@@ -1516,31 +1535,6 @@ BEGIN
       END IF;
 
     END IF;
-    -- check if it's an update/insert
-    IF NOT (NEW IS NULL) THEN
-      -- update the occupied space of the deposit
-      FOR record IN (
-        SELECT quantity, depositID
-          FROM stores NATURAL JOIN deposit
-          WHERE name = NEW.name AND supplier = NEW.supplier
-      ) LOOP
-  
-        UPDATE deposit
-          SET occupiedspace = occupiedspace + (NEW.PackageSizeLiters * record.quantity)
-          WHERE depositID = record.depositID;
-      END LOOP;
-      -- update the occupied space of the covers
-      FOR record IN (
-        SELECT quantity, date, covers.transportID
-          FROM "Order" NATURAL JOIN ships NATURAL JOIN shipment JOIN covers
-          ON date=shippingdate AND shipment.transportID = covers.transportID
-          WHERE name = NEW.name AND supplier = NEW.supplier
-      ) LOOP
-        UPDATE covers
-          SET occupiedspace = occupiedspace + (NEW.PackageSizeLiters * record.quantity)
-          WHERE transportID = record.transportID AND date = record.date;
-      END LOOP;
-    END IF;
     -- returning the correct record
     RETURN NEW;
 END;
@@ -1548,6 +1542,30 @@ $$;
 
 
 ALTER FUNCTION uninadelivery.updateproductsize_func() OWNER TO riccardoelena;
+
+--
+-- Name: updatetransportdataconsistency_func(); Type: FUNCTION; Schema: uninadelivery; Owner: riccardoelena
+--
+
+CREATE FUNCTION uninadelivery.updatetransportdataconsistency_func() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF NEW.TransportType <> 'WheeledSmall' THEN
+    IF EXISTS (
+      SELECT 1
+        FROM Shipment
+        WHERE Transportid = NEW.Transportid
+          AND directedto IS NULL) THEN
+      perform raise_custom_error('E0024');
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION uninadelivery.updatetransportdataconsistency_func() OWNER TO riccardoelena;
 
 --
 -- Name: validemployeebirthdate_func(); Type: FUNCTION; Schema: uninadelivery; Owner: zgenny
@@ -1668,8 +1686,8 @@ CREATE TABLE uninadelivery.covers (
     zipcode uninadelivery.numericstring NOT NULL,
     country uninadelivery.letterstring NOT NULL,
     date date,
-    occupiedspace real DEFAULT 0 NOT NULL,
-    CONSTRAINT formatcoversoccupiedspace CHECK ((occupiedspace >= (0)::double precision))
+    occupiedspace numeric(100,3) DEFAULT 0 NOT NULL,
+    CONSTRAINT formatcoversoccupiedspace CHECK (((occupiedspace)::double precision >= (0)::double precision))
 );
 
 
@@ -1693,16 +1711,16 @@ ALTER TABLE uninadelivery.custom_error_messages OWNER TO zgenny;
 
 CREATE TABLE uninadelivery.deposit (
     depositid integer NOT NULL,
-    occupiedspace real DEFAULT 0 NOT NULL,
-    maxcapacity real NOT NULL,
+    occupiedspace numeric(100,3) DEFAULT 0 NOT NULL,
+    maxcapacity numeric(100,3) NOT NULL,
     deposittype uninadelivery.deposittype NOT NULL,
     addressno uninadelivery.alphanumstring NOT NULL,
     street uninadelivery.alphanumstring NOT NULL,
     zipcode uninadelivery.numericstring NOT NULL,
     country uninadelivery.letterstring NOT NULL,
     CONSTRAINT checkdepositfullness CHECK ((occupiedspace <= maxcapacity)),
-    CONSTRAINT foramtdepositmaxcapacity CHECK ((maxcapacity > (0)::double precision)),
-    CONSTRAINT foramtdepositoccupiedspace CHECK ((occupiedspace >= (0)::double precision)),
+    CONSTRAINT foramtdepositmaxcapacity CHECK (((maxcapacity)::double precision > (0)::double precision)),
+    CONSTRAINT foramtdepositoccupiedspace CHECK (((occupiedspace)::double precision >= (0)::double precision)),
     CONSTRAINT formatdepositaddressno CHECK (((addressno)::text ~ '^[1-9]\d*[a-z]?(?:BIS)?$'::text))
 );
 
@@ -1779,13 +1797,13 @@ CREATE TABLE uninadelivery.product (
     name text NOT NULL,
     supplier text DEFAULT 'UninaDelivery'::text NOT NULL,
     description text NOT NULL,
-    packagesizeliters real NOT NULL,
+    packagesizeliters numeric(100,3) NOT NULL,
     isfragile boolean,
     price numeric(100,2) NOT NULL,
     CONSTRAINT checkproductdescriptionontopic CHECK (((description ~~* (('%'::text || name) || '%'::text)) AND (description ~~* (('%'::text || supplier) || '%'::text)))),
     CONSTRAINT formatproductdescription CHECK ((description ~ '^[a-zA-ZÀ-ÿ0-9]+[\ a-zA-ZÀ-ÿ0-9!@#$%^&*()_+{}\[\]:;<>,.?''~\\\/-]*$'::text)),
     CONSTRAINT formatproductname CHECK ((description ~ '^[a-zA-ZÀ-ÿ0-9]+[\ a-zA-ZÀ-ÿ0-9!@#$%^&*()_+{}\[\]:;<>,.?''~\\\/-]*$'::text)),
-    CONSTRAINT formatproductpackagesizeliters CHECK ((packagesizeliters > (0)::double precision)),
+    CONSTRAINT formatproductpackagesizeliters CHECK (((packagesizeliters)::double precision > (0)::double precision)),
     CONSTRAINT formatproductprice CHECK ((price > (0)::numeric)),
     CONSTRAINT formatproductsupplier CHECK ((description ~ '^[a-zA-ZÀ-ÿ0-9]+[\ a-zA-ZÀ-ÿ0-9!@#$%^&*()_+{}\[\]:;<>,.?''~\\\/-]*$'::text))
 );
@@ -1848,11 +1866,11 @@ ALTER TABLE uninadelivery.stores OWNER TO zgenny;
 
 CREATE TABLE uninadelivery.transport (
     transportid integer NOT NULL,
-    maxcapacity real NOT NULL,
+    maxcapacity numeric(100,3) NOT NULL,
     isavailable boolean DEFAULT true,
     transporttype uninadelivery.transporttype NOT NULL,
     depositid integer NOT NULL,
-    CONSTRAINT formattransportmaxcapacity CHECK ((maxcapacity > (0)::double precision))
+    CONSTRAINT formattransportmaxcapacity CHECK (((maxcapacity)::double precision > (0)::double precision))
 );
 
 
@@ -1915,7 +1933,6 @@ ALTER TABLE ONLY uninadelivery.transport ALTER COLUMN transportid SET DEFAULT ne
 COPY uninadelivery."Order" (orderid, emissiondate, isexpress, extrawarranty, iscompleted, email, quantity, name, supplier) FROM stdin;
 5	2024-01-03	\N	0	\N	relena@gmail.com	1	Penna	Bic
 6	2024-01-03	\N	0	\N	relena@gmail.com	100	Penna	Bic
-1	2023-12-31	\N	0	\N	lucabest@gmail.com	3	Penna	Bic
 52	2024-01-07	\N	0	\N	fiorosa@gmail.com	10000	Gomma	Bic
 2	2023-12-31	\N	0	\N	lucabest@gmail.com	2	Gomma	Bic
 41	2024-01-04	t	0	\N	lucabest@gmail.com	2	Smartphone	Samsung
@@ -1929,6 +1946,7 @@ COPY uninadelivery."Order" (orderid, emissiondate, isexpress, extrawarranty, isc
 42	2023-02-05	\N	1	t	relena@gmail.com	1	Maglione	Gucci
 48	2020-04-11	\N	2	t	mthembu@example.com	2	Forno a Microonde	Panasonic
 53	2024-01-09	\N	0	\N	test@gmail.com	1	Scarpe da Ginnastica	Nike
+1	2023-12-31	\N	0	\N	lucabest@gmail.com	3	Penna	Bic
 \.
 
 
@@ -2055,10 +2073,10 @@ COPY uninadelivery.area (zipcode, city, state, country, worldzone) FROM stdin;
 --
 
 COPY uninadelivery.covers (transportid, zipcode, country, date, occupiedspace) FROM stdin;
-18	12345	Corea del Sud	2024-01-20	0.8
-19	67890	Cina	2024-01-21	0.8
-20	67890	Cina	2024-01-22	0.8
-1	00123	Italia	2024-02-04	4.7999997
+18	12345	Corea del Sud	2024-01-20	0.800
+19	67890	Cina	2024-01-21	0.800
+20	67890	Cina	2024-01-22	0.800
+1	00123	Italia	2024-02-04	3.300
 \.
 
 
@@ -2090,6 +2108,7 @@ E0012	Cannot modify an order that is already arrived to client
 E0021	Are you trying to store negative volume of goods?
 E0022	Order Emission date must be before shipping date
 E0023	This covers does not match any shipment
+E0024	Transport is not adapt to shipment
 \.
 
 
@@ -2098,49 +2117,49 @@ E0023	This covers does not match any shipment
 --
 
 COPY uninadelivery.deposit (depositid, occupiedspace, maxcapacity, deposittype, addressno, street, zipcode, country) FROM stdin;
-150	25	10000	City	999	Plum Boulevard	67890	Regno Unito
-151	25	10500	City	888	Pear Street	54321	Francia
-152	25	11000	City	777	Mango Drive	98765	Giappone
-153	25	11500	City	666	Avocado Lane	12345	Germania
-154	25	12000	City	555	Papaya Road	67890	Russia
-155	25	12500	City	444	Kiwi Court	54321	Egitto
-156	25	13000	City	333	Pineapple Avenue	98765	India
-157	25	13500	City	222	Watermelon Boulevard	12345	Sudafrica
-158	25	14000	City	111	Blueberry Drive	67890	Kenya
-159	25	14500	City	999	Raspberry Street	54321	Brasile
-162	25	16000	City	666	Grapefruit Court	67890	Cina
-164	25	17500	City	333	Pomegranate Drive	12345	Emirati Arabi Uniti
-165	25	18000	City	222	Mango Boulevard	67890	Singapore
-18	25	100	City	123	Main Street	54321	Stati Uniti
-19	25	200	State	456	Oak Avenue	22222	Italia
-21	25	400	Central	987	Elm Street	11111	Giappone
-166	25	18500	City	111	Dragonfruit Avenue	54321	India
-167	25	19000	City	999	Passionfruit Street	98765	Sudafrica
-177	25	1000	Central	12BIS	Pele Street	54321	Brasile
-179	25	1000	Central	41BIS	Fiscal Paradise Square	12345	Emirati Arabi Uniti
-180	25	1000	Central	4nBIS	Orus Boulevard	54321	Egitto
-182	25	1000	Central	789	Main Street	67890	Kenya
-185	25	1000	Central	789	Main Street	54321	Stati Uniti
-186	25	1000	Central	789	Koala Street	98765	Australia
-4	92.5	15000	State	6	Viale Delle Rose	25121	Italia
-5	72.8	25000	Country	22	Corso Stretto	50123	Italia
-148	65	9000	City	222	Coconut Court	54321	Canada
-149	91	9500	City	111	Peach Avenue	98765	Australia
-147	51	8500	City	333	Lime Road	67890	Stati Uniti
-163	30	17000	City	444	Honeydew Boulevard	98765	Grecia
-20	32.5	300	Country	789	Maple Road	99999	Regno Unito
-178	56.800003	1000	Central	28	Lotus Street	67890	Singapore
-160	50	15000	City	888	Strawberry Lane	98765	Messico
-2	115.8	80000	Central	7BIS	Corso Umberto I	20145	Italia
-187	55	1000	Central	456	Ghandi Road	98765	India
-188	0	15000	Central	256	Koala Avenue	67890	Nuova Zelanda
-189	0	13000	Country	55BIS	Alexanderplatz	12345	Germania
-161	128.8	15500	City	777	Blackberry Road	12345	Corea del Sud
-190	0	50000	Central	889	Kpop Road	12345	Corea del Sud
-191	0	50000	Central	454	Strawberry Court	67890	Cina
-192	0	10000	Country	1	Tiananmen Square	69403	Cina
-1	1024.2001	10000	City	1	Via Roma	00123	Italia
-3	100	12000	City	23	Via Roma	00123	Italia
+150	25.000	10000.000	City	999	Plum Boulevard	67890	Regno Unito
+151	25.000	10500.000	City	888	Pear Street	54321	Francia
+152	25.000	11000.000	City	777	Mango Drive	98765	Giappone
+153	25.000	11500.000	City	666	Avocado Lane	12345	Germania
+154	25.000	12000.000	City	555	Papaya Road	67890	Russia
+155	25.000	12500.000	City	444	Kiwi Court	54321	Egitto
+156	25.000	13000.000	City	333	Pineapple Avenue	98765	India
+157	25.000	13500.000	City	222	Watermelon Boulevard	12345	Sudafrica
+158	25.000	14000.000	City	111	Blueberry Drive	67890	Kenya
+159	25.000	14500.000	City	999	Raspberry Street	54321	Brasile
+162	25.000	16000.000	City	666	Grapefruit Court	67890	Cina
+164	25.000	17500.000	City	333	Pomegranate Drive	12345	Emirati Arabi Uniti
+165	25.000	18000.000	City	222	Mango Boulevard	67890	Singapore
+18	25.000	100.000	City	123	Main Street	54321	Stati Uniti
+19	25.000	200.000	State	456	Oak Avenue	22222	Italia
+21	25.000	400.000	Central	987	Elm Street	11111	Giappone
+166	25.000	18500.000	City	111	Dragonfruit Avenue	54321	India
+167	25.000	19000.000	City	999	Passionfruit Street	98765	Sudafrica
+177	25.000	1000.000	Central	12BIS	Pele Street	54321	Brasile
+179	25.000	1000.000	Central	41BIS	Fiscal Paradise Square	12345	Emirati Arabi Uniti
+180	25.000	1000.000	Central	4nBIS	Orus Boulevard	54321	Egitto
+182	25.000	1000.000	Central	789	Main Street	67890	Kenya
+185	25.000	1000.000	Central	789	Main Street	54321	Stati Uniti
+186	25.000	1000.000	Central	789	Koala Street	98765	Australia
+4	92.500	15000.000	State	6	Viale Delle Rose	25121	Italia
+5	72.800	25000.000	Country	22	Corso Stretto	50123	Italia
+148	65.000	9000.000	City	222	Coconut Court	54321	Canada
+149	91.000	9500.000	City	111	Peach Avenue	98765	Australia
+147	51.000	8500.000	City	333	Lime Road	67890	Stati Uniti
+163	30.000	17000.000	City	444	Honeydew Boulevard	98765	Grecia
+20	32.500	300.000	Country	789	Maple Road	99999	Regno Unito
+178	56.800	1000.000	Central	28	Lotus Street	67890	Singapore
+160	50.000	15000.000	City	888	Strawberry Lane	98765	Messico
+2	115.800	80000.000	Central	7BIS	Corso Umberto I	20145	Italia
+187	55.000	1000.000	Central	456	Ghandi Road	98765	India
+188	0.000	15000.000	Central	256	Koala Avenue	67890	Nuova Zelanda
+189	0.000	13000.000	Country	55BIS	Alexanderplatz	12345	Germania
+161	128.800	15500.000	City	777	Blackberry Road	12345	Corea del Sud
+190	0.000	50000.000	Central	889	Kpop Road	12345	Corea del Sud
+191	0.000	50000.000	Central	454	Strawberry Court	67890	Cina
+192	0.000	10000.000	Country	1	Tiananmen Square	69403	Cina
+1	535.100	10000.000	City	1	Via Roma	00123	Italia
+3	25.400	12000.000	City	23	Via Roma	00123	Italia
 \.
 
 
@@ -2186,18 +2205,18 @@ witherheart63@gmail.com	R.Elena1@uninadelivery.operator.com
 --
 
 COPY uninadelivery.product (category, name, supplier, description, packagesizeliters, isfragile, price) FROM stdin;
-Cancelleria	Penna	Bic	La famosa Penna nera della Bic che migliorera la tua Cancelleria a casa.	0.5	\N	1.00
-Elettronica	Smartphone	Samsung	Smartphone Samsung avanzato con fotocamera di qualità	0.5	f	699.99
-Abbigliamento	Maglione	Gucci	Maglione di lusso in lana merino del brand Gucci	4	f	499.99
-Casa e Giardino	Tavolo da Pranzo	IKEA	Tavolo da pranzo moderno per la sala da pranzo prodotto da IKEA	1.2	f	299.99
-Elettronica	Laptop	Dell	Potente laptop Dell per le esigenze professionali	4	f	1099.99
-Cucina	Frigorifero	Whirlpool	Frigorifero Whirlpool con tecnologia di raffreddamento avanzata	2	f	899.99
-Abbigliamento	Scarpe da Ginnastica	Nike	Scarpe da ginnastica sportive Nike con suola ammortizzante	0.8	f	129.99
-Elettronica	Smart TV	Sony	Smart TV Sony con schermo 4K e funzionalità smart integrate	10	f	799.99
-Cucina	Forno a Microonde	Panasonic	Forno a microonde Panasonic con diverse modalità di cottura	0.5	f	149.99
-Gioielli	Collana di Perle	Tiffany & Co.	Elegante collana di perle di acqua dolce di Tiffany & Co.	2.5	f	599.99
-Casa e Giardino	Aspirapolvere Robot	iRobot	Aspirapolvere robot iRobot con navigazione intelligente	5.3	f	349.99
-Cancelleria	Gomma	Bic	La famosa gomma nera della bic che migliorera la tua cancelleria a casa.	0.8	\N	1.00
+Cancelleria	Penna	Bic	La famosa Penna nera della Bic che migliorera la tua Cancelleria a casa.	0.500	\N	1.00
+Elettronica	Smartphone	Samsung	Smartphone Samsung avanzato con fotocamera di qualità	0.500	f	699.99
+Abbigliamento	Maglione	Gucci	Maglione di lusso in lana merino del brand Gucci	4.000	f	499.99
+Casa e Giardino	Tavolo da Pranzo	IKEA	Tavolo da pranzo moderno per la sala da pranzo prodotto da IKEA	1.200	f	299.99
+Elettronica	Laptop	Dell	Potente laptop Dell per le esigenze professionali	4.000	f	1099.99
+Cucina	Frigorifero	Whirlpool	Frigorifero Whirlpool con tecnologia di raffreddamento avanzata	2.000	f	899.99
+Abbigliamento	Scarpe da Ginnastica	Nike	Scarpe da ginnastica sportive Nike con suola ammortizzante	0.800	f	129.99
+Elettronica	Smart TV	Sony	Smart TV Sony con schermo 4K e funzionalità smart integrate	10.000	f	799.99
+Cucina	Forno a Microonde	Panasonic	Forno a microonde Panasonic con diverse modalità di cottura	0.500	f	149.99
+Gioielli	Collana di Perle	Tiffany & Co.	Elegante collana di perle di acqua dolce di Tiffany & Co.	2.500	f	599.99
+Casa e Giardino	Aspirapolvere Robot	iRobot	Aspirapolvere robot iRobot con navigazione intelligente	5.300	f	349.99
+Cancelleria	Gomma	Bic	La famosa gomma nera della bic che migliorera la tua cancelleria a casa.	0.800	\N	1.00
 \.
 
 
@@ -2206,11 +2225,11 @@ Cancelleria	Gomma	Bic	La famosa gomma nera della bic che migliorera la tua cance
 --
 
 COPY uninadelivery.shipment (shipmentid, shippingdate, hasarrived, shippedfrom, directedto, businessmail, transportid) FROM stdin;
-7	2024-02-04	\N	1	\N	R.Elena@uninadelivery.operator.com	1
 14	2024-02-05	\N	1	\N	R.Patel@uninadelivery.operator.com	1
 15	2024-01-20	\N	161	190	T.Yamamoto@uninadelivery.operator.com	18
 16	2024-01-21	\N	190	191	T.Yamamoto@uninadelivery.operator.com	19
 17	2024-01-22	\N	191	\N	T.Yamamoto@uninadelivery.operator.com	20
+7	2024-02-04	\N	1	\N	R.Elena@uninadelivery.operator.com	1
 \.
 
 
@@ -2222,7 +2241,6 @@ COPY uninadelivery.ships (shipmentid, orderid) FROM stdin;
 7	2
 7	5
 7	41
-7	1
 15	53
 16	53
 17	53
@@ -2235,7 +2253,6 @@ COPY uninadelivery.ships (shipmentid, orderid) FROM stdin;
 
 COPY uninadelivery.stores (name, supplier, depositid, quantity) FROM stdin;
 Gomma	Bic	3	18
-Gomma	Bic	1	16
 Maglione	Gucci	2	10
 Tavolo da Pranzo	IKEA	3	5
 Laptop	Dell	4	15
@@ -2252,12 +2269,10 @@ Smart TV	Sony	161	7
 Forno a Microonde	Panasonic	163	10
 Collana di Perle	Tiffany & Co.	20	3
 Aspirapolvere Robot	iRobot	178	6
-Smartphone	Samsung	1	16
 Smart TV	Sony	187	2
 Smart TV	Sony	2	5
 Scarpe da Ginnastica	Nike	2	1
 Scarpe da Ginnastica	Nike	1	11
-Penna	Bic	1	1021
 Penna	Bic	150	50
 Penna	Bic	151	50
 Penna	Bic	152	50
@@ -2295,6 +2310,9 @@ Penna	Bic	178	50
 Penna	Bic	160	100
 Penna	Bic	161	100
 Scarpe da Ginnastica	Nike	161	11
+Gomma	Bic	1	16
+Smartphone	Samsung	1	16
+Penna	Bic	1	1011
 \.
 
 
@@ -2303,23 +2321,23 @@ Scarpe da Ginnastica	Nike	161	11
 --
 
 COPY uninadelivery.transport (transportid, maxcapacity, isavailable, transporttype, depositid) FROM stdin;
-1	100	t	WheeledSmall	1
-5	600	t	WheeledSmall	147
-6	700	t	WheeledLarge	19
-7	800	t	Rails	20
-8	900	t	Water	178
-9	1000	t	Air	21
-10	100	t	WheeledSmall	187
-11	200	t	WheeledLarge	19
-12	300	t	Rails	177
-13	400	t	Water	21
-14	500	t	Air	178
-15	100	t	WheeledSmall	3
-16	1000	t	Air	187
-17	1000	t	Water	2
-18	400	\N	WheeledSmall	161
-19	3400	\N	Air	190
-20	1200	t	WheeledSmall	191
+1	100.000	t	WheeledSmall	1
+5	600.000	t	WheeledSmall	147
+6	700.000	t	WheeledLarge	19
+7	800.000	t	Rails	20
+8	900.000	t	Water	178
+9	1000.000	t	Air	21
+10	100.000	t	WheeledSmall	187
+11	200.000	t	WheeledLarge	19
+12	300.000	t	Rails	177
+13	400.000	t	Water	21
+14	500.000	t	Air	178
+15	100.000	t	WheeledSmall	3
+16	1000.000	t	Air	187
+17	1000.000	t	Water	2
+18	400.000	\N	WheeledSmall	161
+19	3400.000	\N	Air	190
+20	1200.000	t	WheeledSmall	191
 \.
 
 
@@ -2532,31 +2550,17 @@ CREATE TRIGGER completedorder AFTER INSERT OR UPDATE ON uninadelivery.shipment F
 
 
 --
--- Name: covers correctcoversdate; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
---
-
-CREATE TRIGGER correctcoversdate BEFORE INSERT OR UPDATE ON uninadelivery.covers FOR EACH ROW EXECUTE FUNCTION uninadelivery.correctcoversdate_func();
-
-
---
 -- Name: covers correctoccupiedspaceforcovers_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER correctoccupiedspaceforcovers_in BEFORE INSERT ON uninadelivery.covers FOR EACH ROW EXECUTE FUNCTION uninadelivery.correctoccupiedspaceforshipment_func();
-
-
---
--- Name: covers correctoccupiedspaceforcovers_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
---
-
-CREATE TRIGGER correctoccupiedspaceforcovers_up BEFORE UPDATE ON uninadelivery.covers FOR EACH ROW EXECUTE FUNCTION uninadelivery.correctoccupiedspaceforshipment_func();
+CREATE TRIGGER correctoccupiedspaceforcovers_in AFTER INSERT ON uninadelivery.covers FOR EACH ROW EXECUTE FUNCTION uninadelivery.correctoccupiedspaceforshipment_func();
 
 
 --
 -- Name: deposit correctoccupiedspacefordeposit_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER correctoccupiedspacefordeposit_in BEFORE INSERT ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.correctoccupiedspacefordeposit_func();
+CREATE TRIGGER correctoccupiedspacefordeposit_in AFTER UPDATE ON uninadelivery.deposit FOR EACH ROW WHEN ((new.occupiedspace <> old.occupiedspace)) EXECUTE FUNCTION uninadelivery.correctoccupiedspacefordeposit_func();
 
 
 --
@@ -2564,6 +2568,13 @@ CREATE TRIGGER correctoccupiedspacefordeposit_in BEFORE INSERT ON uninadelivery.
 --
 
 CREATE TRIGGER correctoccupiedspacefordeposit_up BEFORE UPDATE ON uninadelivery.deposit FOR EACH ROW EXECUTE FUNCTION uninadelivery.correctoccupiedspacefordeposit_func();
+
+
+--
+-- Name: covers correctoccupiedspaceforshipment_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER correctoccupiedspaceforshipment_in AFTER UPDATE ON uninadelivery.covers FOR EACH ROW WHEN ((new.occupiedspace <> old.occupiedspace)) EXECUTE FUNCTION uninadelivery.correctoccupiedspaceforshipment_func();
 
 
 --
@@ -2784,6 +2795,13 @@ CREATE TRIGGER isshipmentdirectedincorrectareadeposit_in BEFORE INSERT ON uninad
 
 
 --
+-- Name: shipment istransportadapttoshipment; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER istransportadapttoshipment BEFORE INSERT OR UPDATE ON uninadelivery.shipment FOR EACH ROW EXECUTE FUNCTION uninadelivery.istransportadapttoshipment_func();
+
+
+--
 -- Name: driver onlyonejobperaccountdriver_in; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
@@ -2826,6 +2844,13 @@ CREATE TRIGGER shipmentdataconsisency_up BEFORE UPDATE ON uninadelivery.shipment
 
 
 --
+-- Name: stores updatedepositoccupiedspace; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER updatedepositoccupiedspace AFTER UPDATE ON uninadelivery.stores FOR EACH ROW WHEN ((old.quantity > new.quantity)) EXECUTE FUNCTION uninadelivery.depositoccupiedspaceupdate_func();
+
+
+--
 -- Name: stores updatedepositoccupiedspacedl; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
@@ -2843,21 +2868,35 @@ CREATE TRIGGER updatedepositoccupiedspacein BEFORE INSERT ON uninadelivery.store
 -- Name: stores updatedepositoccupiedspaceup; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER updatedepositoccupiedspaceup BEFORE UPDATE ON uninadelivery.stores FOR EACH ROW EXECUTE FUNCTION uninadelivery.depositoccupiedspaceupdate_func();
+CREATE TRIGGER updatedepositoccupiedspaceup BEFORE UPDATE ON uninadelivery.stores FOR EACH ROW WHEN ((old.quantity < new.quantity)) EXECUTE FUNCTION uninadelivery.depositoccupiedspaceupdate_func();
 
 
 --
 -- Name: Order updateorderquantity; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER updateorderquantity BEFORE UPDATE ON uninadelivery."Order" FOR EACH ROW EXECUTE FUNCTION uninadelivery.orderquantityupdate_func();
+CREATE TRIGGER updateorderquantity AFTER UPDATE ON uninadelivery."Order" FOR EACH ROW EXECUTE FUNCTION uninadelivery.orderquantityupdate_func();
 
 
 --
--- Name: product updateproductsize; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+-- Name: product updateproductsize_new_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER updateproductsize AFTER DELETE OR UPDATE ON uninadelivery.product FOR EACH ROW EXECUTE FUNCTION uninadelivery.updateproductsize_func();
+CREATE TRIGGER updateproductsize_new_up BEFORE UPDATE ON uninadelivery.product FOR EACH ROW WHEN ((old.packagesizeliters < new.packagesizeliters)) EXECUTE FUNCTION uninadelivery.updateproductsize_func();
+
+
+--
+-- Name: product updateproductsize_up; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER updateproductsize_up AFTER UPDATE ON uninadelivery.product FOR EACH ROW WHEN ((old.packagesizeliters > new.packagesizeliters)) EXECUTE FUNCTION uninadelivery.updateproductsize_func();
+
+
+--
+-- Name: transport updatetransportdataconsistency; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
+--
+
+CREATE TRIGGER updatetransportdataconsistency BEFORE UPDATE ON uninadelivery.transport FOR EACH ROW EXECUTE FUNCTION uninadelivery.updatetransportdataconsistency_func();
 
 
 --
