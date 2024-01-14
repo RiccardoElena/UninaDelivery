@@ -4,7 +4,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.unina.2324oobd.22</groupId>
+  <groupId>com.unina.2324oobdgr22</groupId>
   <artifactId>uninadelivery</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
@@ -25,6 +25,13 @@
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.6.0</version>
+    </dependency>
+
   </dependencies>
 
   
@@ -52,6 +59,14 @@
         </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
+          <configuration>
+            <archive>
+            <manifest>
+            <addClasspath>true</addClasspath>
+            <mainClass>com.unina.oobd2324gr22.App</mainClass>
+            </manifest>
+            </archive>
+          </configuration>
           <version>3.0.2</version>
         </plugin>
         <plugin>
@@ -74,25 +89,23 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <executions>
-            <execution>
-              <phase>package</phase>
-              <goals>
-                  <goal>single</goal>
-              </goals>
-              <configuration>
-                  <archive>
+          <configuration>
+              <archive>
                   <manifest>
-                      <mainClass>
-                          com.baeldung.executable.ExecutableMavenJar
-                      </mainClass>
+                      <mainClass>com.unina.oobd2324gr22.App</mainClass>
                   </manifest>
-                  </archive>
-                  <descriptorRefs>
-                      <descriptorRef>jar-with-dependencies</descriptorRef>
-                  </descriptorRefs>
-              </configuration>
-            </execution>
+              </archive>
+              <descriptorRefs>
+                  <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
+          </configuration>
+          <executions>
+              <execution>
+                  <phase>package</phase>
+                  <goals>
+                      <goal>single</goal>
+                  </goals>
+              </execution>
           </executions>
         </plugin>
       </plugins>

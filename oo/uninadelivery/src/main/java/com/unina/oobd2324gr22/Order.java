@@ -54,6 +54,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @param orderid ciao
    * @param emissiondate ciao
    * @param isexpress ciao
@@ -83,6 +84,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @return ciao
    */
   public int getOrderId() {
@@ -91,6 +93,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @return ciao
    */
   public LocalDate getEmissionDate() {
@@ -99,6 +102,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @return ciao
    */
   public boolean getIsExpress() {
@@ -107,6 +111,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @return ciao
    */
   public int getExtraWarranty() {
@@ -115,6 +120,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @return ciao
    */
   public String getAccountEmail() {
@@ -123,6 +129,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @return ciao
    */
   public int getQuantity() {
@@ -131,6 +138,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @return ciao
    */
   public String getProductName() {
@@ -139,6 +147,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @return ciao
    */
   public String getProductSupplier() {
@@ -147,6 +156,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @return ciao
    */
   public LocalDate getExpectedDeliveryDate() {
@@ -155,6 +165,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @param orderid ciao
    */
   public void setOrderId(final int orderid) {
@@ -163,6 +174,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @param emissiondate ciao
    */
   public void setEmissionDate(final LocalDate emissiondate) {
@@ -171,6 +183,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @param isexpress ciao
    */
   public void setIsExpress(final boolean isexpress) {
@@ -179,6 +192,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @param extrawarranty ciao
    */
   public void setExtraWarranty(final int extrawarranty) {
@@ -187,6 +201,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @param client ciao
    */
   public void setAccount(final Account client) {
@@ -195,6 +210,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @param qty ciao
    */
   public void setQuantity(final int qty) {
@@ -203,6 +219,7 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @param pct ciao
    */
   public void setProduct(final Product pct) {
@@ -211,9 +228,22 @@ public class Order {
 
   /**
    * Default constructor.
+
    * @param expecteddeliverydate ciao
    */
   public void setExpectedDeliveryDate(final LocalDate expecteddeliverydate) {
     this.expectedDeliveryDate = expecteddeliverydate;
+  }
+
+  /**
+   * toString method.
+   */
+  @Override
+  public String toString() {
+    return "Order [id=" + id + ", emissionDate=" + emissionDate
+              + ", isExpress=" + isExpress  + ", extraWarranty="
+              + extraWarranty + ", account=" + account + ", quantity="
+              + quantity + ", product=" + product + ", expectedDeliveryDate="
+              + expectedDeliveryDate + "]";
   }
 }

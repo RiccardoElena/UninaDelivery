@@ -1,12 +1,16 @@
 package com.unina.oobd2324gr22;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+// import java.io.File;
+import java.io.FileNotFoundException;
+// import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+// import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -61,8 +65,12 @@ public final class DBConnection {
     }
     try {
       if (conn == null || conn.isClosed()) {
-        b = new BufferedReader(new FileReader(new File(
-            "../../../../../resources/pwdfile.txt")));
+        InputStream is = DBConnection.class
+                            .getResourceAsStream("/pwddb.txt");
+        if (is == null) {
+            throw new FileNotFoundException("File pwddb.txt non trovato");
+        }
+        b = new BufferedReader(new InputStreamReader(is));
         pwd = b.readLine();
         Class.forName("org.postgresql.Driver");
         String url = "jdbc:postgresql://localhost:5432/"
@@ -73,6 +81,7 @@ public final class DBConnection {
       }
     } catch
     (SQLException | ClassNotFoundException | IOException throwables) {
+      System.out.println("Error in getConnectionBySchema");
       throwables.printStackTrace();
     }
 

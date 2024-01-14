@@ -50,20 +50,26 @@ public interface OrderDAO {
   /**
    * Method to get the order with the largest quantity of products.
 
+    * @param month month to search for
+    * @param year year to search for
    * @return order with largerest quantity of products
    * @throws SQLException possible DB related errors
    */
 
-  Order getOrderWithLargestQuantity() throws SQLException;
+  Order getOrderWithLargestQuantity(int month, int year)
+      throws SQLException;
 
   /**
    * Method to get the order with the smallest quantity of products.
 
+   * @param month month to search for
+   * @param year year to search for
    * @return order with smallest quantity of products
    * @throws SQLException possible DB related errors
    */
 
-  Order getOrderWithSmallestQuantity() throws SQLException;
+  Order getOrderWithSmallestQuantity(int month, int year)
+      throws SQLException;
 
   /**
    * Method to get a list of the number of the orders for each day

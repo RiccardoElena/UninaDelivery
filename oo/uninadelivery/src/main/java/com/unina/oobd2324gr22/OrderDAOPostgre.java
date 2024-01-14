@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class OrderDAOPostgre implements OrderDAO {
   /**
    * Base query for retrieving orders.
    */
-  private String baseQuery = "SELECT * FROM \"Orders\" ";
+  private String baseQuery = "SELECT * FROM \"Order\" ";
 
   /**
    * Internal method to populate an order from a ResultSet.
@@ -71,7 +72,7 @@ public class OrderDAOPostgre implements OrderDAO {
     try {
       int nextField = 1;
       PreparedStatement psInsert = con.prepareStatement(
-                              "INSERT INTO \"Orders\" "
+                              "INSERT INTO \"Order\" "
                             + "(emissiondate, isexpress, extrawarranty, email, "
                             + "quantity, name, supplier) VALUES "
                             + "(?, ?, ?, ?, ?, ?, ?)"
@@ -108,7 +109,7 @@ public class OrderDAOPostgre implements OrderDAO {
     PreparedStatement psSelect = null;
     ResultSet rs = null;
     try {
-      psSelect = con.prepareStatement(baseQuery + "WHERE id = ?");
+      psSelect = con.prepareStatement(baseQuery + "WHERE orderid = ?");
       psSelect.setInt(1, id);
       rs = psSelect.executeQuery();
       while (rs.next()) {
@@ -190,30 +191,30 @@ public class OrderDAOPostgre implements OrderDAO {
     return orders;
   }
 
-  private String createQueryForMinMax(final boolean isMin)
-      throws SQLException {
-    String st
-        = baseQuery + "WHERE quantity = (SELECT "
-        + (isMin ? "MIN" : "MAX")
-        + "(quantity) FROM \"Orders\") LIMIT 1";
-    return st;
-  }
-
   /**
    * RETRIVE the order with the largest quantity of products.
 
+   * @param month month to search for
+   * @param year year to search for
    * @return order with biggest quantity of products
    */
   @Override
-  public Order getOrderWithLargestQuantity() throws SQLException {
+  public Order getOrderWithLargestQuantity(final int month, final int year)
+      throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     Order order = null;
-    Statement st = null;
+    PreparedStatement st = null;
     ResultSet rs = null;
     try {
 
-      st = con.createStatement();
-      rs = st.executeQuery(createQueryForMinMax(false));
+      st = con.prepareStatement("SELECT MAX(quantity) "
+                                + "FROM \"Order\" WHERE "
+                                + "EXTRACT(MONTH FROM emissiondate) = ? AND "
+                                + "EXTRACT(YEAR FROM emissiondate) = ? "
+                                + "LIMIT 1");
+      st.setInt(1, month);
+      st.setInt(2, year);
+      rs = st.executeQuery();
 
       while (rs.next()) {
 
@@ -237,15 +238,22 @@ public class OrderDAOPostgre implements OrderDAO {
    * @return order with smallest quantity of products
    */
   @Override
-  public Order getOrderWithSmallestQuantity() throws SQLException {
+  public Order getOrderWithSmallestQuantity(final int month, final int year)
+      throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     Order order = null;
-    Statement st = null;
+    PreparedStatement st = null;
     ResultSet rs = null;
     try {
 
-      st = con.createStatement();
-      rs = st.executeQuery(createQueryForMinMax(true));
+      st = con.prepareStatement("SELECT MIN(quantity) "
+                                + "FROM \"Order\" WHERE "
+                                + "EXTRACT(MONTH FROM emissiondate) = ? AND "
+                                + "EXTRACT(YEAR FROM emissiondate) = ? "
+                                + "LIMIT 1");
+      st.setInt(1, month);
+      st.setInt(2, year);
+      rs = st.executeQuery();
 
       while (rs.next()) {
 
@@ -405,6 +413,10 @@ public class OrderDAOPostgre implements OrderDAO {
 
   /**
    * RETRIEVE the number of orders for each day of the month.
+   *
+   * The function initialize an ArrayList with the number of days of the
+   * month selected as 0. Then for every days that has orders it updates
+   * the value of the ArrayList at the index of the day with the number
 
    * @param month month to search for
    * @param year year to search for
@@ -414,14 +426,20 @@ public class OrderDAOPostgre implements OrderDAO {
   @Override
   public List<Integer> getOrdersPerDay(final int month, final int year)
       throws SQLException {
+
     con = DBConnection.getConnectionBySchema("uninadelivery");
-    List<Integer> orders = new ArrayList<Integer>();
+    int dayInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
+
+    List<Integer> orders = new ArrayList<Integer>(
+                                Collections.nCopies(dayInMonth, 0));
+
     PreparedStatement psSelect = null;
     ResultSet rs = null;
     int nextField = 1;
     try {
       psSelect = con.prepareStatement(
-                              "SELECT COUNT(*) FROM \"Orders\" WHERE "
+                              "SELECT EXTRACT(DAY FROM emissiondate), "
+                            + "COUNT(*) FROM \"Order\" WHERE "
                             + "EXTRACT(MONTH FROM emissiondate) = ? AND "
                             + "EXTRACT(YEAR FROM emissiondate) = ? "
                             + "GROUP BY EXTRACT(DAY FROM emissiondate)");
@@ -429,7 +447,8 @@ public class OrderDAOPostgre implements OrderDAO {
       psSelect.setInt(nextField++, year);
       rs = psSelect.executeQuery();
       while (rs.next()) {
-        orders.add(rs.getInt(1));
+        orders.set(rs.getInt(1) - 1,
+                    rs.getInt(2));
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -456,7 +475,7 @@ public class OrderDAOPostgre implements OrderDAO {
     try {
       int nextField = 1;
       PreparedStatement psUpdate = con.prepareStatement(
-                              "UPDATE \"Orders\" SET "
+                              "UPDATE \"Order\" SET "
                             + "emissiondate = ?, isexpress = ?, "
                             + "extrawarranty = ?, email = ?, quantity = ?, "
                             + "name = ?, supplier = ? WHERE orderid = ?"
@@ -494,7 +513,7 @@ public class OrderDAOPostgre implements OrderDAO {
     int rowAffected;
     try {
       PreparedStatement psDelete = con.prepareStatement(
-                              "DELETE FROM \"Orders\" WHERE id = ?");
+                              "DELETE FROM \"Order\" WHERE orderid = ?");
       psDelete.setInt(1, id);
       rowAffected = psDelete.executeUpdate();
       psDelete.close();
