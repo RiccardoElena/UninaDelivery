@@ -563,7 +563,7 @@ Anche in questo caso tutti i dati necessari alla procedura sono recuperabili dal
 
 Questa funzione si occupa esclusivamente di fare un \lstinline{UPDATE} nella tabella \textbf{Covers} gestendo in maniera specifica per le spedizioni eventuali conflitti di unicità.
 
-\begin{lstlisting}[caption={Funzione \textbf{updateCoversForShipment}}]
+\begin{lstlisting}[caption={Funzione \textbf{updateCoversForShipment}}, label={updateCoversForShipment}]
   CREATE OR REPLACE FUNCTION updateCoversForShipment(
     odate Covers.Date %TYPE , 
     otransportid Transport.TransportID %TYPE , 
@@ -691,13 +691,14 @@ Per questi due trigger, nonostante abbiano funzioni essenzialmente identiche, si
 
 \begin{lstlisting}[caption={Trigger per i vincoli \textbf{correctOccupiedSpaceForShipment} e \textbf{correctOccupiedSpaceForDeposit}}]
   CREATE OR REPLACE TRIGGER correctOccupiedSpaceForShipment_in
-  BEFORE INSERT ON Covers
+  AFTER INSERT OR UPDATE ON Covers
   FOR EACH ROW
-  EXECUTE PROCEDURE correctOccupiedSpaceForDeposit_func();
+  EXECUTE PROCEDURE correctOccupiedSpaceForShipment_func();
 
   CREATE OR REPLACE TRIGGER correctOccupiedSpaceForDeposit_in
-  BEFORE INSERT ON Deposit
+  after UPDATE ON Deposit
   FOR EACH ROW
+  WHEN (NEW.OccupiedSpace <> OLD.OccupiedSpace)
   EXECUTE PROCEDURE correctOccupiedSpaceForDeposit_func();
 \end{lstlisting}
 
@@ -721,6 +722,8 @@ Per questi due trigger, nonostante abbiano funzioni essenzialmente identiche, si
       WHERE shipmentID = ShipID;
     -- checking if the occupied space is enough, otherwise raise error
     IF SumOfProduct > NEW.OccupiedSpace THEN
+      UPDATE covers set OccupiedSpace = OLD.OccupiedSpace
+        WHERE TransportID = NEW.TransportID AND Date = NEW.Date;
       perform raise_custom_error('E0014');
     END IF;
     RETURN NEW;
@@ -734,7 +737,7 @@ Per questi due trigger, nonostante abbiano funzioni essenzialmente identiche, si
   AS $$
   DECLARE
     SumOfProduct product.PackageSizeLiters%TYPE;
-  BEGIN
+    BEGIN
     -- calculating total occupied space by the product
     SELECT sum(PackageSizeLiters*quantity)
       INTO SumOfProduct
@@ -742,6 +745,9 @@ Per questi due trigger, nonostante abbiano funzioni essenzialmente identiche, si
       WHERE depositID = NEW.depositID;
     -- checking if the occupied space is enough, otherwise raise error
     IF SumOfProduct > NEW.OccupiedSpace THEN
+    raise notice '% % %', NEW.depositID, SumOfProduct, NEW.OccupiedSpace;
+      UPDATE deposit set OccupiedSpace = OLD.OccupiedSpace
+        WHERE depositID = NEW.depositID;
       perform raise_custom_error('E0021');
     END IF;
     RETURN NEW;
@@ -1119,6 +1125,65 @@ Per fare ciò la \textit{trigger function} si limita a chiamare la funzione \int
   $$ LANGUAGE plpgsql;
 \end{lstlisting}
 
+\subsection{\textbf{isTransportAdaptedToShipment}}
+
+Questo vincolo si assicura che, all'inserimento di una riga in \textbf{Shipment}, il \textbf{Transport} assegnato sia adatto alla tipologia di \textbf{Shipment} in questione.
+
+In particolare la \textit{trigger function} si occuperà di verificare che, nel caso di spedizione verso clienti, ovvero \textbf{DirectedTo} sia \lstinline{NULL}, il \textbf{Transport} sia di tipo \lstinline{'WheeledSmall}.
+
+\begin{lstlisting}[caption={Trigger per il vincolo \textbf{isTransportAdaptedToShipment}}]
+  CREATE OR REPLACE TRIGGER isTransportAdaptedToShipment_in
+  BEFORE INSERT ON Shipment
+  FOR EACH ROW
+  EXECUTE PROCEDURE isTransportAdaptedToShipment_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{isTransportAdaptedToShipment}}]
+  CREATE OR REPLACE FUNCTION isTransportAdaptToShipment_func()
+  RETURNS TRIGGER AS $$
+  BEGIN
+    IF NEW.directedto IS NULL THEN
+      IF EXISTS (
+        SELECT 1
+          FROM Transport
+          WHERE Transportid = NEW.Transportid
+            AND TransportType <> 'WheeledSmall'
+      ) THEN
+        perform raise_custom_error('E0024');
+      END IF;
+    END IF;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+Per questo vincolo è in oltre necessario assicurarsi che il tipo di \textbf{Transport} non venga cambiato dopo l'assegnazione. Per fare ciò è necessario un ulteriore trigger che si attivi all'aggiornamento di \textbf{Transport} e faccia un controllo analogo a quello visto per \textbf{isTransportAdaptedToShipment}.
+
+\begin{lstlisting}[caption={Trigger per il vincolo \textbf{isTransportAdaptedToShipment}}]
+  CREATE OR REPLACE TRIGGER updateTransportDataConsistency
+  BEFORE UPDATE ON Transport
+  FOR EACH ROW 
+  EXECUTE PROCEDURE updateTransportDataConsistency_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{updateTransportDataConsistency\_func}}]
+  CREATE OR REPLACE FUNCTION updateTransportDataConsistency_func()
+  RETURNS TRIGGER AS $$
+  BEGIN
+    IF NEW.TransportType <> 'WheeledSmall' THEN
+      IF EXISTS (
+        SELECT 1
+          FROM Shipment
+          WHERE Transportid = NEW.Transportid
+            AND directedto IS NULL) THEN
+        perform raise_custom_error('E0024');
+      END IF;
+    END IF;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
 \subsection{\textbf{checkTransportCapacity}}
 
 Questo vincolo si occupa di controllare che la quantità di prodotti trasportati da un \textbf{Transport} non superi la sua capacità massima. 
@@ -1418,31 +1483,31 @@ La logica della funzione è identica a quella di \textbf{CoversOccupiedSpaceUpda
   DECLARE
     Psize Product.PackageSizeLiters %TYPE;
   BEGIN
-    -- check if it's an update/delete 
-    IF OLD IS NOT NULL THEN
-    -- retrieve the package size of the product
-    SELECT PackageSizeLiters
-      INTO Psize
-      FROM Product
-      WHERE name = OLD.name AND supplier = OLD.supplier;
-      UPDATE deposit
-        SET occupiedspace = occupiedspace - (OLD.quantity * Psize)
-        WHERE depositID = OLD.depositID;
-      IF TG_OP = 'DELETE' THEN
-        RETURN OLD;
-      END IF;
+  -- check if it's an update/insert
+  IF NEW IS NOT NULL THEN
+  -- retrieve the package size of the product
+  SELECT PackageSizeLiters
+  INTO Psize
+  FROM Product
+  WHERE name = NEW.name AND supplier = NEW.supplier;
+  UPDATE deposit
+  SET occupiedspace = occupiedspace + (NEW.quantity * Psize)
+  WHERE depositID = NEW.depositID;
+  END IF;
+  -- check if it's an update/delete 
+  IF OLD IS NOT NULL THEN
+  -- retrieve the package size of the product
+  SELECT PackageSizeLiters
+    INTO Psize
+    FROM Product
+    WHERE name = OLD.name AND supplier = OLD.supplier;
+    UPDATE deposit
+      SET occupiedspace = occupiedspace - (OLD.quantity * Psize)
+      WHERE depositID = OLD.depositID;
+    IF TG_OP = 'DELETE' THEN
+      RETURN OLD;
     END IF;
-    -- check if it's an update/insert
-    IF NEW IS NOT NULL THEN
-      -- retrieve the package size of the product
-    SELECT PackageSizeLiters
-      INTO Psize
-      FROM Product
-      WHERE name = NEW.name AND supplier = NEW.supplier;
-      UPDATE deposit
-        SET occupiedspace = occupiedspace + (NEW.quantity * Psize)
-        WHERE depositID = NEW.depositID;
-    END IF;
+  END IF;
     RETURN NEW;
   END;
   $$ LANGUAGE plpgsql;
@@ -1632,6 +1697,18 @@ Per fare ciò è sufficiente controllare che la data di emissione di un \textbf{
 
 È inoltre importante assicurarsi anche che non vengano effettuati aggiornamenti o inserimenti su \textbf{Covers} che facciano collidere le date di spedizione e di emissione.
 
+Per fare ciò però è necessario far scattare il trigger \lstinline{AFTER UPDATE} su \textbf{Covers}, in quanto è necessario che i dati di \textbf{Shipment} siano già stati aggiornati.
+
+In particolare il trigger \lstinline{AFTER UPDATE} su \textbf{Covers} si occuperà di controllare se esiste una \textbf{Shipment} che corrisponda per data e \textbf{Transport} alla \textbf{Covers} aggiornata.
+
+In caso di risposta negativa, la \textbf{Covers} verrà ripristinata al valore precedente. Qual'ora esista invece una \textbf{Shipment} che corrisponda per data e \textbf{Transport} alla \textbf{Covers} aggiornata, sarà necessario controllare anche che i campi \textbf{ZipCode} e \textbf{Country} siano coerenti con la \textbf{Shipment}.
+
+Per fare ciò possiamo sfruttare il fatto che, per la tabella \textbf{Shipment}, sono già stati predisposti dei meccanismi di controllo che aggiornano la tabella \textbf{Covers} in caso di necessità, come ad esempio la funzione \intlink{updateCoversForShipment}{updateCoversForShipment}.
+
+Per fare ciò è sufficiente fare un \lstinline{UPDATE} su \textbf{Shipment} che non modifichi nessun campo, in modo da far scattare il trigger \lstinline{BEFORE UPDATE} su \textbf{Shipment} che si occuperà di aggiornare \textbf{Covers} se necessario.
+
+Per evitare però un ciclo infinito, prevenuto di base dal \textbf{DBMS}, è necessario specificare che il trigger \lstinline{AFTER UPDATE} su \textbf{Covers} si attivi solo se c'è stata effettivamente una modifica, ovvero se c'è almeno un campo diverso, in modo da bloccare il ciclo di aggiornamenti in caso di \lstinline{UPDATE} su \textbf{Covers} che non modifichi nessun campo.
+
 Per questo è sufficiente controllare all'inserimento o aggiornamento di \textbf{Covers} che esista almeno una \textbf{Shipment} in quella data con quel \textbf{Transport}.
 
 La \textbf{Shipment} in questione sarà necessariamente quella giusta poiché, pur cambiando la data di una \textbf{Covers} inserendone una di una \textbf{Shipment} già esistente ma che non la riguarda, l'operazione sarà bloccata dal vincolo di unicità su \textbf{Covers}.
@@ -1650,8 +1727,20 @@ La \textbf{Shipment} in questione sarà necessariamente quella giusta poiché, p
   FOR EACH ROW EXECUTE PROCEDURE correctShipsEmissionDate_func();
 
   CREATE OR REPLACE TRIGGER correctCoversDate
-  BEFORE INSERT OR UPDATE ON Covers
-  FOR EACH ROW EXECUTE PROCEDURE correctCoversDate_func();
+  BEFORE INSERT ON Covers
+  FOR EACH ROW 
+  EXECUTE PROCEDURE correctCoversDate_func();
+
+  CREATE OR REPLACE TRIGGER updateCoversDataConsistency
+  AFTER UPDATE ON covers
+  FOR EACH ROW 
+  WHEN (
+    OLD.Transportid <> NEW.Transportid OR
+    OLD.Date <> NEW.Date OR
+    OLD.ZipCode <> NEW.ZipCode OR
+    OLD.Country <> NEW.Country
+  )
+  EXECUTE PROCEDURE updateCoversDataConsistency_func();
 \end{lstlisting}
 
 \begin{lstlisting}[caption={Funzione \textbf{correctOrderEmissionDate}}]

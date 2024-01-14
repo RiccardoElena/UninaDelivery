@@ -62,8 +62,8 @@ Nello schema concettuale non sono presenti attributi \textbf{Multipli} o \textbf
 Nello schema concettuale sono presenti essenzialmente quattro attributi \textbf{Derivati}:
 
 \begin{itemize}
-  \item L'attributo \textbf{Price} dell'entità \textbf{Shipment}, il quale però non ha necessità di essere conservato, non essendo un attributo di frequente richiesta per il sistema richiesto, e che quindi può essere eventualmente calcolato \textit{on-the-fly} in fase d'interrogazione del database basandosi sugli indirizzi di partenza e arrivo della spedizione e sulle eventuali modalità extra di consegna specificate in \textbf{Order}, come \textit{ExtraWarranty} e \textit{IsExpress}.
-  \item L'attributo \textbf{IsCompleted} dell'entità \textbf{Order}, che è stato conservato in quanto è un attributo che può essere richiesto frequentemente dal sistema, e richiede un interrogazione con risultato potenzialmente molto grande per essere valorizzato.
+  \item L'attributo \textbf{Price} dell'entità \textbf{Shipment}, il quale però non ha necessità di essere conservato, non essendo un attributo di frequente richiesta per il sistema, e che quindi può essere eventualmente calcolato \textit{on-the-fly} in fase d'interrogazione del database basandosi sugli indirizzi di partenza e arrivo della spedizione e sulle eventuali modalità extra di consegna specificate in \textbf{Order}, come \textit{ExtraWarranty} e \textit{IsExpress}.
+  \item L'attributo \textbf{IsCompleted} dell'entità \textbf{Order}, è stato conservato in quanto è un attributo che può essere richiesto frequentemente dal sistema, e richiede un interrogazione con risultato potenzialmente molto grande per essere valorizzato.
   \item L'attributo \textbf{OccupiedSpace} sia dell'entità \textbf{Deposit} che della classe d'associazione di \textbf{Covers}, infine, è stato anch'esso conservato, in quanto è un attributo che può essere richiesto frequentemente dal sistema, e richiede un interrogazione con risultato potenzialmente molto grande per essere valorizzata. 
 \end{itemize}
 
@@ -90,7 +90,7 @@ In ultima analisi, la classe \textbf{Shipment} è coinvolta in due associazioni 
 
 \subsection{Identificazione delle Chiavi primarie}\label{individuazioneDelleChiaviPrimarie}
 
-Aldilà delle chiavi primarie già presenti nello schema concettuale esplicitate nel \textbf{diagramma ER} e dell'attributo \textbf{TransportID} introdotto \intlink{Redundancy analysis}{precedentemente}, si è deciso di aggiungere chiavi surrogate per le entità \textbf{Order}, \textbf{Shipment} e \textbf{Deposit}, poiché migrando le chiavi di altre entità si sarebbero ottenute chiavi composte troppo lunghe e complesse.
+Aldilà delle chiavi primarie già presenti nello schema concettuale esplicitate nel \textbf{diagramma EER} e dell'attributo \textbf{TransportID} introdotto \intlink{Redundancy analysis}{precedentemente}, si è deciso di aggiungere chiavi surrogate per le entità \textbf{Order}, \textbf{Shipment} e \textbf{Deposit}, poiché migrando le chiavi di altre entità si sarebbero ottenute chiavi composte troppo lunghe e complesse.
 
 Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la chiave primaria di \textbf{Area} essendo una composizione e di conseguenza già concettualmente una \textit{parte} dell'entità \textbf{Address}. 
 
@@ -260,7 +260,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   } &
   --- &
   {\footnotesize
-  \textbf{Address \([1]\)} (\textit{is site of}): L'indirizzo di un dato deposito;
+  \textbf{Address \([0..1]\)} (\textit{is site of}): L'indirizzo di un dato deposito;
 
   \textbf{Deposit \([1]\)} (\textit{sited on}): Il deposito che si trova in un dato indirizzo;
   
@@ -272,7 +272,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   } &
   --- &
   {\footnotesize
-  \textbf{Area \([*]\)} (\textit{is location}): Le Area che contengono un dato indirizzo;
+  \textbf{Area \([1]\)} (\textit{is location}): L'Area che contiene un dato indirizzo;
 
   \textbf{Address \([*]\)} (\textit{located}): Gli indirizzi che appartengono a una data zona;
   }\\
@@ -308,13 +308,13 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
 
   \textbf{ShippedFrom} &
   {\footnotesize
-  Esprime la relazione tra \textbf{Shipment} e \textbf{Deposit} \textit{mittente}. Una \textbf{Shipment} può avere un solo mittente, mentre un \textbf{Deposit} può essere mittente di più \textbf{Shipment}.
+  Esprime la relazione tra \textbf{Shipment} e \textbf{Deposit} \textit{mittente}. Una \textbf{Shipment} ha un solo mittente, mentre un \textbf{Deposit} è mittente di più \textbf{Shipment}.
   } &
   --- &
   {\footnotesize
   \textbf{Shipment \([*]\)} (\textit{shipped}): Le spedizioni che partono da un dato deposito; 
 
-  \textbf{Deposit \([1]\)} (\textit{seder}): Il deposito mittente di una data spedizione; 
+  \textbf{Deposit \([1]\)} (\textit{sender}): Il deposito mittente di una data spedizione; 
   }\\
 
   \textbf{DirectedTo} &
@@ -329,7 +329,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   }\\
   \textbf{Ships} &
   {\footnotesize
-  Esprime la relazione tra \textbf{Shipment} e \textbf{Order}. Una \textbf{Shipment} può contenere più \textbf{Order}, e un \textbf{Order} può essere contenuto in più \textbf{Shipment}.
+  Esprime la relazione tra \textbf{Shipment} e \textbf{Order}. Una \textbf{Shipment} contiene più \textbf{Order}, e un \textbf{Order} è contenuto in più \textbf{Shipment}.
   } &
   --- &
   {\footnotesize
@@ -357,7 +357,7 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   {\footnotesize
   \textbf{Shipment \([*]\)} (\textit{transported by}): Le spedizioni trasportate da un dato mezzo di trasporto;; 
 
-  \textbf{Transport \([1]\)} (\textit{transports}): Il mezzo di trasporto che trasporta una data spedizione; 
+  \textbf{Transport \([1]\)} (\textit{transports}): Il mezzo di trasporto per una data spedizione; 
   }\\
   
 }
@@ -729,5 +729,10 @@ Per l'entità \textbf{Address} invece, è risultato più appropriato migrare la 
   \textbf{checkTransportFullness} & Interrelazionale & 
   {\footnotesize
   Nella classe d'associazione \textbf{Cover} il campo \textbf{OccupiedSpace} può avere valori solo minori o uguali al campo \textbf{MaxCapacity} della classe \textbf{Transport}
+  }\\
+
+  \textbf{isTransportAdaptedToShipment} & Interrelazionale &
+  {\footnotesize
+  Il \textbf{Transport} associato a una \textbf{Shipment} deve essere di tipo \textbf{WheeledSmall} se la \textbf{Shipment} è diretta a un \textbf{Account}.
   }\\
 }

@@ -13,14 +13,14 @@ Per pulizia del codice si è preferito lavorare su uno \textbf{schema} creato ap
 Vista la vasta gamma di vincoli di dominio simili su vari campi, si è deciso di definire dei domini personalizzati per facilitare la creazione delle tabelle.
 
 \begin{lstlisting}
-  CREATE DOMAIN letterString AS text CHECK (VALUE ~ '^[a-zA-Z]+$');
+  CREATE DOMAIN letterString AS text CHECK (VALUE ~ '^[A-Za-zÀ-ÿ]+[A-Za-zÀ-ÿ\s\.]*$');
   
-  CREATE DOMAIN numericString AS text CHECK (VALUE ~ '^[0-9]+$');
+  CREATE DOMAIN numericString AS text CHECK (VALUE ~ '^\d*$');
   
-  CREATE DOMAIN alphanumericString AS text CHECK (VALUE ~ '^\w+[\w\s.]$');
+  CREATE DOMAIN alphanumericString AS text CHECK (VALUE ~ '^[\wÀ-ÿ]+[\s\wÀ-ÿ\.]*$');
   
   CREATE DOMAIN emailString AS text CHECK (
-    VALUE ~ '^\w+[\w.]*\w@[a-zA-Z.]+\.[a-zA-Z]{2,}$'
+    VALUE ~ '^[a-zA-Z0-9]+[a-zA-Z0-9.]*[a-zA-Z0-9]+@[a-zA-Z.]+\.[a-zA-Z]{2,}$'
   );
 \end{lstlisting}
 
