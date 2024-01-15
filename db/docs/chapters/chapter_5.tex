@@ -465,7 +465,8 @@ Ciò è fatto tramite l'utilizzo della funzione \textbf{isSameCity} vista in \in
 
 I dati relativi all'\textbf{Area} di destinazione verranno infine restituiti dalla procedura tramite \lstinline{OUT} per permettere alla funzione di aggiornare i dati di \textbf{Covers}.
 
-Per quanto riguarda l'eventualità di chiamata della funzione a seguito di una \lstinline{DELETE}, essendo \lstinline{NEW = NULL} la procedura restituirà sempre \lstinline{coversNeedsUpdate = FALSE}, rientrando nel caso corretto.
+Per quanto riguarda l'eventualità di chiamata della funzione a seguito di una \lstinline{DELETE}, essendo \\
+\lstinline{NEW = NULL} la procedura restituirà sempre {\FiraCode\fontsize{10pt}{11pt}\selectfont coversNeedsUpdate}\lstinline{ = FALSE}, rientrando nel caso corretto.
 \newpage
 \begin{lstlisting}[caption={Procedure \textbf{checkCorrectArea}}]
   CREATE OR REPLACE PROCEDURE checkCorrectArea( New IN Shipment, Zcode OUT area.zipcode  %TYPE , Cy OUT area.country  %TYPE , coverNeedsUpdate OUT BOOLEAN)
@@ -587,6 +588,9 @@ Questa funzione si occupa esclusivamente di fare un \lstinline{UPDATE} nella tab
   END
   $$ LANGUAGE plpgsql;
 \end{lstlisting}
+
+\newpage
+
 \subsubsection{Aggiornamenti conclusivi}
 
 Conclusi tutti controlli, se nessuna eccezione è stata sollevata, è necessario aggiornare le tabelle \textbf{Covers} e \textbf{Stores}.
@@ -603,22 +607,53 @@ Conclusi tutti controlli, se nessuna eccezione è stata sollevata, è necessario
                   transportid = OLD.TransportID;
   END IF;
 
-  FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
-      -- for each order ...
-      SELECT quantity , name , supplier 
-        INTO QTY , PName , PSupply
-        FROM "Order" NATURAL JOIN PRODUCT
-        WHERE OrderID = shipped_order.OrderID;
+  IF(OLD.ShippedFrom <> NEW.ShippedFrom) THEN
+    FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
+        -- for each order ...
+        SELECT quantity , name , supplier 
+          INTO QTY , PName , PSupply
+          FROM "Order" NATURAL JOIN PRODUCT
+          WHERE OrderID = shipped_order.OrderID;
 
-      -- restore the products in the old deposit
-      UPDATE stores
-        SET quantity = quantity + QTY
-        WHERE depositid = OLD.ShippedFrom AND name = PName AND supplier = PSupply;
-      -- remove the products from the new deposit
-      UPDATE stores
-        SET quantity = quantity - QTY
-        WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = PSupply;
-  END LOOP;
+        -- restore the products in the old deposit
+        UPDATE stores
+          SET quantity = quantity + QTY
+          WHERE depositid = OLD.ShippedFrom AND name = PName AND supplier = PSupply;
+        -- remove the products from the new deposit
+        UPDATE stores
+          SET quantity = quantity - QTY
+          WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = PSupply;
+    END LOOP;
+  END IF;
+  --check for update in directedTo
+    IF OLD.DirectedTo IS NOT NULL THEN
+      -- if the shipment was directed to a deposit, i have to update the deposits
+      FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=OLD.ShipmentID) LOOP
+          -- for each order ...
+        SELECT quantity , name , supplier 
+          INTO QTY , PName , Psupp
+          FROM "Order" NATURAL JOIN PRODUCT
+          WHERE OrderID = shipped_order.OrderID;
+        -- remove products from old destination
+        UPDATE stores
+            SET quantity = quantity - QTY
+            WHERE depositid = OLD.DirectedTo AND name = PName AND supplier = Psupp;
+      END LOOP;
+    END IF;
+    IF NEW.DirectedTo IS NOT NULL THEN
+      FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
+          -- for each order ...
+        SELECT quantity , name , supplier 
+          INTO QTY , PName , Psupp
+          FROM "Order" NATURAL JOIN PRODUCT
+          WHERE OrderID = shipped_order.OrderID;
+        -- add products to new destination
+        INSERT INTO stores (depositid, name, supplier, quantity)
+            VALUES (NEW.DirectedTo, PName, Psupp, QTY)
+            ON CONFLICT (depositid, name, supplier) DO UPDATE
+            SET quantity = stores.quantity + EXCLUDED.quantity;
+      END LOOP;
+    END IF;
 \end{lstlisting}
 
 \begin{lstlisting}[caption={Trigger per \textbf{UPDATE/DELETE ON Shipment}}]
@@ -637,48 +672,92 @@ Conclusi tutti controlli, se nessuna eccezione è stata sollevata, è necessario
   CREATE OR REPLACE FUNCTION shipmentDataConsistency_func() RETURNS trigger
   AS $$
   DECLARE
-    QTY stores.quantity %TYPE;
-    PName product.name %TYPE;
-    Psupp product.supplier %TYPE;
-    ZCode area.zipcode %TYPE;
-    Cy area.country %TYPE;
+    QTY stores.quantity%TYPE;
+    PName product.name%TYPE;
+    Psupp product.supplier%TYPE;
+    ZCode area.zipcode%TYPE;
+    Cy area.country%TYPE;
     coverNeedsUpdate BOOLEAN = TRUE;
     shipped_order Ships%ROWTYPE;
   BEGIN
+    -- if the shipment has already arrived, cannot be modified
     IF OLD.HasArrived = TRUE THEN
-      PERFORM raise_custom_error('E0017');
+      perform raise_custom_error('E0017');
     END IF;
-    IF TG_OP = 'DELETE' THEN
-      RETURN OLD;
-    END IF;
-    CALL checkCorrectArea(NEW, OLD, ZCode, Cy, coverNeedsUpdate);
-    IF NEW.ShippedFrom <> OLD.ShippedFrom THEN
-      CALL checkValidOrder(NEW);
-    END IF;
-    IF coverNeedsUpdate THEN
 
-      PERFORM updateCoversForShipment( OLD.ShippingDate, OLD.TransportID, ZCode, Cy, NEW.ShippingDate, NEW.TransportID);
+    -- check for correct area
+
+    call checkCorrectArea(NEW, ZCode, Cy, coverNeedsUpdate);
+    
+    -- if the starting deposit has changed, i have to check if the new deposit has enough products to satisfy the orders
+    IF NEW.ShippedFrom <> OLD.ShippedFrom THEN
+      call checkValidOrder(NEW);
+    END IF;
+
+    -- if everything is ok, function can procede to the updates
+    IF coverNeedsUpdate THEN
+      -- try to update the covers table, if fails, raise error
+      -- In case shipment is directed to clients ZCode and Cy are the one from clients, otherwise they are the one from directedTo deposit
+      perform updateCoversForShipment( OLD.ShippingDate, OLD.TransportID, ZCode, Cy, NEW.ShippingDate, NEW.TransportID);
     ELSE 
       DELETE FROM covers 
-              WHERE shippingdate = OLD.ShippingDate AND 
+              WHERE date = OLD.ShippingDate AND 
                     transportid = OLD.TransportID;
     END IF;
-    FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
+
+    IF(OLD.ShippedFrom <> NEW.ShippedFrom) THEN
+      FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=OLD.ShipmentID) LOOP
+          -- for each order ...
+          SELECT quantity , name , supplier 
+            INTO QTY , PName , Psupp
+            FROM "Order" NATURAL JOIN PRODUCT
+            WHERE OrderID = shipped_order.OrderID;
+
+          -- restore the products in the old deposit
+          INSERT INTO stores (depositid, name, supplier, quantity)
+            VALUES (OLD.ShippedFrom, PName, Psupp, QTY)
+            ON CONFLICT (depositid, name, supplier) DO UPDATE
+            SET quantity = stores.quantity + EXCLUDED.quantity;
+          -- remove the products from the new deposit
+          UPDATE stores
+            SET quantity = quantity - QTY
+            WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = Psupp;
+      END LOOP;
+    END IF;
+    --check for update in directedTo
+    IF OLD.DirectedTo IS NOT NULL THEN
+      -- if the shipment was directed to a deposit, i have to update the deposits
+      FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=OLD.ShipmentID) LOOP
+          -- for each order ...
         SELECT quantity , name , supplier 
           INTO QTY , PName , Psupp
           FROM "Order" NATURAL JOIN PRODUCT
           WHERE OrderID = shipped_order.OrderID;
+        -- remove products from old destination
         UPDATE stores
-          SET quantity = quantity + QTY
-          WHERE depositid = OLD.ShippedFrom AND name = PName AND supplier = Psupp;
-        UPDATE stores
-          SET quantity = quantity - QTY
-          WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = Psupp;
-    END LOOP;
+            SET quantity = quantity - QTY
+            WHERE depositid = OLD.DirectedTo AND name = PName AND supplier = Psupp;
+      END LOOP;
+    END IF;
+    IF NEW.DirectedTo IS NOT NULL THEN
+      FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
+          -- for each order ...
+        SELECT quantity , name , supplier 
+          INTO QTY , PName , Psupp
+          FROM "Order" NATURAL JOIN PRODUCT
+          WHERE OrderID = shipped_order.OrderID;
+        -- add products to new destination
+        INSERT INTO stores (depositid, name, supplier, quantity)
+            VALUES (NEW.DirectedTo, PName, Psupp, QTY)
+            ON CONFLICT (depositid, name, supplier) DO UPDATE
+            SET quantity = stores.quantity + EXCLUDED.quantity;
+      END LOOP;
+    END IF;
     IF TG_OP = 'DELETE' THEN
       RETURN OLD;
     END IF;
     RETURN NEW;
+    
   END;
   $$ LANGUAGE plpgsql;
 \end{lstlisting}
@@ -690,15 +769,14 @@ Vediamo ora i trigger che implementano i vincoli \textbf{correctOccupiedSpaceFor
 Per questi due trigger, nonostante abbiano funzioni essenzialmente identiche, si è scelto d'implementare due diverse \textit{trigger function}, poiché individuati inizialmente come due vincoli distinti.
 
 \begin{lstlisting}[caption={Trigger per i vincoli \textbf{correctOccupiedSpaceForShipment} e \textbf{correctOccupiedSpaceForDeposit}}]
-  CREATE OR REPLACE TRIGGER correctOccupiedSpaceForShipment_in
-  AFTER INSERT OR UPDATE ON Covers
+  CREATE OR REPLACE TRIGGER correctOccupiedSpaceForCovers_in
+  AFTER INSERT ON Covers
   FOR EACH ROW
   EXECUTE PROCEDURE correctOccupiedSpaceForShipment_func();
 
   CREATE OR REPLACE TRIGGER correctOccupiedSpaceForDeposit_in
-  after UPDATE ON Deposit
+  AFTER INSERT ON Deposit
   FOR EACH ROW
-  WHEN (NEW.OccupiedSpace <> OLD.OccupiedSpace)
   EXECUTE PROCEDURE correctOccupiedSpaceForDeposit_func();
 \end{lstlisting}
 
@@ -722,32 +800,26 @@ Per questi due trigger, nonostante abbiano funzioni essenzialmente identiche, si
       WHERE shipmentID = ShipID;
     -- checking if the occupied space is enough, otherwise raise error
     IF SumOfProduct > NEW.OccupiedSpace THEN
-      UPDATE covers set OccupiedSpace = OLD.OccupiedSpace
-        WHERE TransportID = NEW.TransportID AND Date = NEW.Date;
       perform raise_custom_error('E0014');
     END IF;
     RETURN NEW;
   END;
-  $$ LANGUAGE plpgsql;
 \end{lstlisting}
 
-\begin{lstlisting}[caption={Funzione per il vincolo \textbf{correctOccupiedSpaceForDeposit}}]
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{correctOccupiedSpaceForDeposit}}, label={correctOccupiedSpaceForDeposit_func}]
   CREATE OR REPLACE FUNCTION correctOccupiedSpaceForDeposit_func()
   RETURNS trigger
   AS $$
   DECLARE
     SumOfProduct product.PackageSizeLiters%TYPE;
-    BEGIN
-    -- calculating total occupied space by the product
+  BEGIN
+    -- calculating total occupied space
     SELECT sum(PackageSizeLiters*quantity)
       INTO SumOfProduct
       FROM product natural join stores
       WHERE depositID = NEW.depositID;
     -- checking if the occupied space is enough, otherwise raise error
     IF SumOfProduct > NEW.OccupiedSpace THEN
-    raise notice '% % %', NEW.depositID, SumOfProduct, NEW.OccupiedSpace;
-      UPDATE deposit set OccupiedSpace = OLD.OccupiedSpace
-        WHERE depositID = NEW.depositID;
       perform raise_custom_error('E0021');
     END IF;
     RETURN NEW;
@@ -1414,13 +1486,31 @@ In entrambi i casi, la funzione recuperi dati necessari per identificare la cove
   RETURNS TRIGGER
   AS $$
   DECLARE
-    Sdate Shipment.shippingdate %TYPE;
-    Tid Transport.transportID %TYPE;
-    Qty real;
+    Sdate Shipment.shippingdate%TYPE;
+    Tid Transport.transportID%TYPE;
+    Qty numeric(100,3);
   BEGIN
+    -- check if it's an update/insert
+    IF NEW IS NOT NULL THEN
 
+      -- retrieve data to identify the covers row
+      SELECT shippingdate, transportID
+        INTO Sdate, Tid
+        FROM shipment
+        WHERE shipmentID = NEW.shipmentID;
+      -- retrieve the quantity of the order
+      SELECT quantity * PackageSizeLiters
+        INTO Qty
+        FROM "Order" JOIN PRODUCT USING (name, supplier)
+        WHERE orderID = NEW.orderID;
+
+      UPDATE covers
+        SET occupiedspace = occupiedspace + Qty
+        WHERE date = Sdate AND transportID = Tid;
+    END IF;
     -- check if it's an update/delete
     IF OLD IS NOT NULL THEN
+
       -- retrieve data to identify the covers row
       SELECT shippingdate, transportID
         INTO Sdate, Tid
@@ -1440,24 +1530,6 @@ In entrambi i casi, la funzione recuperi dati necessari per identificare la cove
         END IF;
     END IF;
 
-    -- check if it's an update/insert
-    IF NEW IS NOT NULL THEN
-      -- retrieve data to identify the covers row
-      SELECT shippingdate, transportID
-        INTO Sdate, Tid
-        FROM shipment
-        WHERE shipmentID = NEW.shipmentID;
-      -- retrieve the quantity of the order
-      SELECT quantity * PackageSizeLiters
-        INTO Qty
-        FROM "Order" JOIN PRODUCT USING (name, supplier)
-        WHERE orderID = NEW.orderID;
-
-      UPDATE covers
-        SET occupiedspace = occupiedspace + Qty
-        WHERE date = Sdate AND transportID = Tid;
-    END IF;
-
     RETURN NEW;
   END;
   $$ LANGUAGE plpgsql;
@@ -1469,9 +1541,32 @@ Similmente al trigger precedente, questa funzione si occupa di aggiornare il cam
 
 La logica della funzione è identica a quella di \textbf{CoversOccupiedSpaceUpdate}, con la differenza che in questo caso la quantità da aggiungere o rimuovere è recuperata direttamente dalla riga di \textbf{Stores}.
 
+In questo particolare caso però è necessario, per evitare conflitti col vincolo \intlink{correctOccupiedSpaceForDeposit}{correctOccupiedSpaceForDeposit} definire due comportamenti distinti per \lstinline{UPDATE}, in base l'aggiornamento sia una diminuzione o un aumento.
+
+Il vincolo citato infatti si occupa di controllare che la quantità di prodotto presente in un \textbf{Deposit} non sia mai meno del valore conservato in \textbf{OccupiedSpace} e per fare ciò confronta il valore di \textbf{OccupiedSpace} con la somma delle quantità di prodotto presenti in \textbf{Stores}.
+
+Quindi, sarà necessario far attivare il trigger nel momento in cui la quantità di prodotto conservato è minima, ovvero \lstinline{BEFORE} se si tratta di un aumento e \lstinline{AFTER} se si tratta di una diminuzione.
+
 \begin{lstlisting}[caption={Trigger per implementare \textbf{depositOccupiedSpaceUpdate}}]
-  CREATE OR REPLACE TRIGGER depositOccupiedSpaceUpdate
-  AFTER INSERT OR UPDATE OR DELETE ON Stores
+  CREATE OR REPLACE TRIGGER updateDepositOccupiedSpacein
+  BEFORE INSERT ON Stores
+  FOR EACH ROW
+  EXECUTE PROCEDURE depositOccupiedSpaceUpdate_func();
+
+  CREATE OR REPLACE TRIGGER updateDepositOccupiedSpace
+  AFTER UPDATE ON Stores
+  FOR EACH ROW
+  WHEN (NEW.quantity < OLD.quantity)
+  EXECUTE PROCEDURE depositOccupiedSpaceUpdate_func();
+
+  CREATE OR REPLACE TRIGGER updateDepositOccupiedSpaceUp
+  BEFORE UPDATE ON Stores
+  FOR EACH ROW
+  WHEN (NEW.quantity > OLD.quantity)
+  EXECUTE PROCEDURE depositOccupiedSpaceUpdate_func();
+
+  CREATE OR REPLACE TRIGGER deleteDepositOccupiedSpaceDl
+  BEFORE DELETE ON Stores
   FOR EACH ROW
   EXECUTE PROCEDURE depositOccupiedSpaceUpdate_func();
 \end{lstlisting}
@@ -1485,22 +1580,22 @@ La logica della funzione è identica a quella di \textbf{CoversOccupiedSpaceUpda
   BEGIN
   -- check if it's an update/insert
   IF NEW IS NOT NULL THEN
-  -- retrieve the package size of the product
-  SELECT PackageSizeLiters
-  INTO Psize
-  FROM Product
-  WHERE name = NEW.name AND supplier = NEW.supplier;
-  UPDATE deposit
-  SET occupiedspace = occupiedspace + (NEW.quantity * Psize)
-  WHERE depositID = NEW.depositID;
+    -- retrieve the package size of the product
+    SELECT PackageSizeLiters
+      INTO Psize
+      FROM Product
+      WHERE name = NEW.name AND supplier = NEW.supplier;
+    UPDATE deposit
+      SET occupiedspace = occupiedspace + (NEW.quantity * Psize)
+      WHERE depositID = NEW.depositID;
   END IF;
   -- check if it's an update/delete 
   IF OLD IS NOT NULL THEN
   -- retrieve the package size of the product
-  SELECT PackageSizeLiters
-    INTO Psize
-    FROM Product
-    WHERE name = OLD.name AND supplier = OLD.supplier;
+    SELECT PackageSizeLiters
+      INTO Psize
+      FROM Product
+      WHERE name = OLD.name AND supplier = OLD.supplier;
     UPDATE deposit
       SET occupiedspace = occupiedspace - (OLD.quantity * Psize)
       WHERE depositID = OLD.depositID;
@@ -1630,34 +1725,6 @@ In questo casi infatti sarà necessario di ben due cicli \lstinline{FOR} per cas
   DECLARE
     record RECORD;
   BEGIN
-      -- check if it's an update/delete
-      IF NOT (OLD IS NULL) THEN
-        -- update the occupied space of the deposit
-        FOR record IN (
-          SELECT quantity, depositID
-            FROM stores NATURAL JOIN deposit
-            WHERE name = OLD.name AND supplier = OLD.supplier
-        ) LOOP
-          UPDATE deposit
-            SET occupiedspace = occupiedspace - (OLD.PackageSizeLiters * record.quantity)
-            WHERE depositID = record.depositID;
-        END LOOP;
-        -- update the occupied space of the covers
-        FOR record IN (
-          SELECT quantity, date, covers.transportID
-            FROM "Order" NATURAL JOIN ships NATURAL JOIN shipment JOIN covers
-            ON date=shippingdate AND shipment.transportID = covers.transportID
-            WHERE name = OLD.name AND supplier = OLD.supplier
-        ) LOOP
-          UPDATE covers
-            SET occupiedspace = occupiedspace - (OLD.PackageSizeLiters * record.quantity)
-            WHERE transportID = record.transportID AND date = record.date;
-        END LOOP;
-        -- returning the correct record
-        IF TG_OP = 'DELETE' THEN
-          RETURN OLD;
-        END IF;
-      END IF;
       -- check if it's an update/insert
       IF NOT (NEW IS NULL) THEN
         -- update the occupied space of the deposit
@@ -1666,7 +1733,6 @@ In questo casi infatti sarà necessario di ben due cicli \lstinline{FOR} per cas
             FROM stores NATURAL JOIN deposit
             WHERE name = NEW.name AND supplier = NEW.supplier
         ) LOOP
-    
           UPDATE deposit
             SET occupiedspace = occupiedspace + (NEW.PackageSizeLiters * record.quantity)
             WHERE depositID = record.depositID;
@@ -1682,6 +1748,38 @@ In questo casi infatti sarà necessario di ben due cicli \lstinline{FOR} per cas
             SET occupiedspace = occupiedspace + (NEW.PackageSizeLiters * record.quantity)
             WHERE transportID = record.transportID AND date = record.date;
         END LOOP;
+      END IF;
+      -- check if it's an update/delete
+      IF NOT (OLD IS NULL) THEN
+
+        -- update the occupied space of the deposit
+        FOR record IN (
+          SELECT quantity, depositID
+            FROM stores NATURAL JOIN deposit
+            WHERE name = OLD.name AND supplier = OLD.supplier
+        ) LOOP
+
+          UPDATE deposit
+            SET occupiedspace = occupiedspace - (OLD.PackageSizeLiters * record.quantity)
+            WHERE depositID = record.depositID;
+        END LOOP;
+        -- update the occupied space of the covers
+        FOR record IN (
+          SELECT quantity, date, covers.transportID
+            FROM "Order" NATURAL JOIN ships NATURAL JOIN shipment JOIN covers
+            ON date=shippingdate AND shipment.transportID = covers.transportID
+            WHERE name = OLD.name AND supplier = OLD.supplier
+        ) LOOP
+    
+          UPDATE covers
+            SET occupiedspace = occupiedspace - (OLD.PackageSizeLiters * record.quantity)
+            WHERE transportID = record.transportID AND date = record.date;
+        END LOOP;
+        -- returning the correct record
+        IF TG_OP = 'DELETE' THEN
+          RETURN OLD;
+        END IF;
+
       END IF;
       -- returning the correct record
       RETURN NEW;
@@ -1694,24 +1792,6 @@ In questo casi infatti sarà necessario di ben due cicli \lstinline{FOR} per cas
 Vediamo ora l'insieme di funzioni che si occupano controllare la coerenza delle date inserite o aggiornate in \textbf{Shipment} e \textbf{Order}
 
 Per fare ciò è sufficiente controllare che la data di emissione di un \textbf{Order} sia antecedente a tutte le date di spedizione in cui quell'\textbf{Order} è coinvolto, controllando eventuali aggiornamenti o inserimenti su \textbf{Order}, \textbf{Shipment} e \textbf{Ships}.
-
-È inoltre importante assicurarsi anche che non vengano effettuati aggiornamenti o inserimenti su \textbf{Covers} che facciano collidere le date di spedizione e di emissione.
-
-Per fare ciò però è necessario far scattare il trigger \lstinline{AFTER UPDATE} su \textbf{Covers}, in quanto è necessario che i dati di \textbf{Shipment} siano già stati aggiornati.
-
-In particolare il trigger \lstinline{AFTER UPDATE} su \textbf{Covers} si occuperà di controllare se esiste una \textbf{Shipment} che corrisponda per data e \textbf{Transport} alla \textbf{Covers} aggiornata.
-
-In caso di risposta negativa, la \textbf{Covers} verrà ripristinata al valore precedente. Qual'ora esista invece una \textbf{Shipment} che corrisponda per data e \textbf{Transport} alla \textbf{Covers} aggiornata, sarà necessario controllare anche che i campi \textbf{ZipCode} e \textbf{Country} siano coerenti con la \textbf{Shipment}.
-
-Per fare ciò possiamo sfruttare il fatto che, per la tabella \textbf{Shipment}, sono già stati predisposti dei meccanismi di controllo che aggiornano la tabella \textbf{Covers} in caso di necessità, come ad esempio la funzione \intlink{updateCoversForShipment}{updateCoversForShipment}.
-
-Per fare ciò è sufficiente fare un \lstinline{UPDATE} su \textbf{Shipment} che non modifichi nessun campo, in modo da far scattare il trigger \lstinline{BEFORE UPDATE} su \textbf{Shipment} che si occuperà di aggiornare \textbf{Covers} se necessario.
-
-Per evitare però un ciclo infinito, prevenuto di base dal \textbf{DBMS}, è necessario specificare che il trigger \lstinline{AFTER UPDATE} su \textbf{Covers} si attivi solo se c'è stata effettivamente una modifica, ovvero se c'è almeno un campo diverso, in modo da bloccare il ciclo di aggiornamenti in caso di \lstinline{UPDATE} su \textbf{Covers} che non modifichi nessun campo.
-
-Per questo è sufficiente controllare all'inserimento o aggiornamento di \textbf{Covers} che esista almeno una \textbf{Shipment} in quella data con quel \textbf{Transport}.
-
-La \textbf{Shipment} in questione sarà necessariamente quella giusta poiché, pur cambiando la data di una \textbf{Covers} inserendone una di una \textbf{Shipment} già esistente ma che non la riguarda, l'operazione sarà bloccata dal vincolo di unicità su \textbf{Covers}.
 
 \begin{lstlisting}[caption={Trigger per implementare \textbf{updateDates}}]
   CREATE OR REPLACE TRIGGER correctOrderEmissionDate
@@ -1731,16 +1811,6 @@ La \textbf{Shipment} in questione sarà necessariamente quella giusta poiché, p
   FOR EACH ROW 
   EXECUTE PROCEDURE correctCoversDate_func();
 
-  CREATE OR REPLACE TRIGGER updateCoversDataConsistency
-  AFTER UPDATE ON covers
-  FOR EACH ROW 
-  WHEN (
-    OLD.Transportid <> NEW.Transportid OR
-    OLD.Date <> NEW.Date OR
-    OLD.ZipCode <> NEW.ZipCode OR
-    OLD.Country <> NEW.Country
-  )
-  EXECUTE PROCEDURE updateCoversDataConsistency_func();
 \end{lstlisting}
 
 \begin{lstlisting}[caption={Funzione \textbf{correctOrderEmissionDate}}]
@@ -1794,23 +1864,6 @@ La \textbf{Shipment} in questione sarà necessariamente quella giusta poiché, p
           AND emissiondate > shippingdate
     ) THEN
       perform raise_custom_error('E0022');
-    END IF;
-    RETURN NEW;
-  END;
-  $$ LANGUAGE plpgsql;
-\end{lstlisting}
-
-\begin{lstlisting}[caption={Funzione \textbf{correctCoversDate}}]
-  CREATE OR REPLACE FUNCTION correctCoversDate_func()
-  RETURNS TRIGGER AS $$
-  BEGIN
-    IF EXISTS (
-        select 1 
-        FROM Shipment
-        WHERE transportid = NEW.transportid
-          AND NEW.date = shippingdate
-    ) THEN
-      perform raise_custom_error('E0023');
     END IF;
     RETURN NEW;
   END;

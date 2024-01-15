@@ -12,13 +12,16 @@ Per pulizia del codice si è preferito lavorare su uno \textbf{schema} creato ap
 
 Vista la vasta gamma di vincoli di dominio simili su vari campi, si è deciso di definire dei domini personalizzati per facilitare la creazione delle tabelle.
 
-\begin{lstlisting}
-  CREATE DOMAIN letterString AS text CHECK (VALUE ~ '^[A-Za-zÀ-ÿ]+[A-Za-zÀ-ÿ\s\.]*$');
-  
-  CREATE DOMAIN numericString AS text CHECK (VALUE ~ '^\d*$');
-  
-  CREATE DOMAIN alphanumericString AS text CHECK (VALUE ~ '^[\wÀ-ÿ]+[\s\wÀ-ÿ\.]*$');
-  
+\begin{lstlisting}[caption={Creazione Domini personalizzati}]
+  CREATE DOMAIN letterString AS text CHECK (
+    VALUE ~ '^[A-Za-zÀ-ÿ]+[A-Za-zÀ-ÿ\s\.]*$'
+  );
+  CREATE DOMAIN numericString AS text CHECK (
+    VALUE ~ '^\d*$'
+  );
+  CREATE DOMAIN alphanumericString AS text CHECK (
+    VALUE ~ '^[\wÀ-ÿ]+[\s\wÀ-ÿ\.]*$'
+  );
   CREATE DOMAIN emailString AS text CHECK (
     VALUE ~ '^[a-zA-Z0-9]+[a-zA-Z0-9.]*[a-zA-Z0-9]+@[a-zA-Z.]+\.[a-zA-Z]{2,}$'
   );
@@ -26,20 +29,18 @@ Vista la vasta gamma di vincoli di dominio simili su vari campi, si è deciso di
 
 Inoltre per i campi che nel diagramma ristrutturato sono stati definiti come \textbf{enumerazioni}, si è deciso di utilizzare dei tipi enumerati personalizzati.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Creazione Tipi Enumerati}]
   CREATE TYPE WorldZone AS ENUM (
     'NA', 'EUW', 'EUNE', 'LATAM', 'MIDEAST', 'CKJ', 'SEA', 'IND', 'RUS', 'STAN', 
     'OC', 'AFN', 'AFC', 'AFS'
   );
-
   CREATE TYPE DepositType AS ENUM (
     'City', 'State', 'Country', 'Central'
   );
-
   CREATE TYPE TransportType AS ENUM (
     'WheeledSmall', 'WheeledLarge', 'Rails', 'Water', 'Air'
   );
-  
+
   CREATE TYPE DrivingLicenceType AS ENUM ('BE', 'CE');
 \end{lstlisting}
 
@@ -133,8 +134,8 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Deposit}}]
   CREATE TABLE Deposit (
     DepositID SERIAL NOT NULL ,
-    OccupiedSpace real NOT NULL DEFAULT 0,
-    MaxCapacity real NOT NULL ,
+    OccupiedSpace numeric( 100 , 3 ) NOT NULL DEFAULT 0,
+    MaxCapacity numeric( 100 , 3 ) NOT NULL ,
     DepositType DepositType NOT NULL ,
     AddressNo alphNumString NOT NULL ,
     Street alphNumString NOT NULL ,
@@ -164,7 +165,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
     ZipCode numericString NOT NULL ,
     Country letterString NOT NULL ,
     Date date NOT NULL ,
-    OccupiedSpace real NOT NULL DEFAULT 0
+    OccupiedSpace numeric( 100 , 3 ) NOT NULL DEFAULT 0
   );
   ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE CASCADE ON UPDATE CASCADE;
   ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Area FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -182,7 +183,7 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
     Name text NOT NULL ,
     Supplier text NOT NULL ,
     Description text NOT NULL ,
-    PackageSizeLiters real NOT NULL ,
+    PackageSizeLiters numeric( 100 , 3 ) NOT NULL ,
     IsFragile boolean ,
     Price numeric ( 100 , 2 ) NOT NULL
   );
@@ -212,8 +213,8 @@ Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-up
 \begin{lstlisting}[caption={Creazione della tabella \textbf{Transport}}]
   CREATE TABLE Transport (
     TransportID Serial NOT NULL ,
-    OccupiedSpace real NOT NULL DEFAULT 0,
-    MaxCapacity real NOT NULL ,
+    OccupiedSpace numeric( 100 , 3 ) NOT NULL DEFAULT 0,
+    MaxCapacity numeric( 100 , 3 ) NOT NULL ,
     IsAvailable boolean DEFAULT true, 
     TransportType TransportType NOT NULL ,
     DepositID integer NOT NULL

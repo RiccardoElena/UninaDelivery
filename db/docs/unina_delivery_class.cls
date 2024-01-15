@@ -180,6 +180,8 @@
                 Contextuals=Alternate
         ]
 
+\newcommand{\textfira}[1]{{\Firacode #1}}
+
 % Custom theme for code listings
 \renewcommand{\lstlistingname}{Codice}
 \renewcommand\lstlistlistingname{Frammenti di Codice}
