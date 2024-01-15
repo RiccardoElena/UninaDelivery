@@ -365,31 +365,28 @@ Per fare ciò, la \textit{trigger function} si avvale di una funzione ausiliaria
       IF NOT EXISTS (
         SELECT 1
           FROM stores
-          WHERE depositid = DIDstart AND 
-                name = PName AND 
-                supplier = PSupply AND 
-                quantity >= QTY
+          WHERE depositid = DIDstart AND name = PName AND supplier = PSupply AND quantity >= QTY
       ) THEN
         -- all the products must be in the same deposit
         perform raise_custom_error('E0013');
       END IF;
-    ELSE
-      -- retrieve maximum quantity of the product in the starting deposit
-      SELECT quantity
+    ELSE -- otherwise
+        -- retrieve maximum quantity of the product in the starting deposit
+      SELECT stores.quantity
         INTO Qty2
         FROM stores
         WHERE depositid = DIDstart AND name = PName AND supplier = PSupply;
       -- if there is no product exception 'E0013' is raised otherwise
       -- transfer the maximum quantity possible to the new deposit
       INSERT INTO stores (name, supplier, depositid, quantity)
-        VALUES (PName, PSupply, DIDend, LEAST(QTY, QTY2)) -- if the product already exists in the deposit, update the quantity
+        VALUES (PName, PSupply, DIDend, LEAST(QTY, QTY2))
       ON CONFLICT (name, supplier, depositid) DO UPDATE
-        SET quantity = stores.quantity + LEAST(QTY, QTY2);
-    END IF;
+        SET quantity = stores.quantity + EXCLUDED.quantity;
     -- if nothing went wrong, decrement the quantity in the starting deposit
     UPDATE stores
       SET quantity = GREATEST(quantity - QTY, 0)
       WHERE depositid = DIDstart AND name = PName AND supplier = PSupply;
+    END IF;
   EXCEPTION
     WHEN no_data_found THEN
       perform raise_custom_error('E0013');
@@ -725,33 +722,35 @@ Conclusi tutti controlli, se nessuna eccezione è stata sollevata, è necessario
       END LOOP;
     END IF;
     --check for update in directedTo
-    IF OLD.DirectedTo IS NOT NULL THEN
-      -- if the shipment was directed to a deposit, i have to update the deposits
-      FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=OLD.ShipmentID) LOOP
-          -- for each order ...
-        SELECT quantity , name , supplier 
-          INTO QTY , PName , Psupp
-          FROM "Order" NATURAL JOIN PRODUCT
-          WHERE OrderID = shipped_order.OrderID;
-        -- remove products from old destination
-        UPDATE stores
-            SET quantity = quantity - QTY
-            WHERE depositid = OLD.DirectedTo AND name = PName AND supplier = Psupp;
-      END LOOP;
-    END IF;
-    IF NEW.DirectedTo IS NOT NULL THEN
-      FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
-          -- for each order ...
-        SELECT quantity , name , supplier 
-          INTO QTY , PName , Psupp
-          FROM "Order" NATURAL JOIN PRODUCT
-          WHERE OrderID = shipped_order.OrderID;
-        -- add products to new destination
-        INSERT INTO stores (depositid, name, supplier, quantity)
-            VALUES (NEW.DirectedTo, PName, Psupp, QTY)
-            ON CONFLICT (depositid, name, supplier) DO UPDATE
-            SET quantity = stores.quantity + EXCLUDED.quantity;
-      END LOOP;
+    IF COALESCE(OLD.DirectedTo,0) <> COALESCE(NEW.DirectedTo,0) THEN
+      IF OLD.DirectedTo IS NOT NULL THEN
+        -- if the shipment was directed to a deposit, i have to update the deposits
+        FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=OLD.ShipmentID) LOOP
+            -- for each order ...
+          SELECT quantity , name , supplier 
+            INTO QTY , PName , Psupp
+            FROM "Order" NATURAL JOIN PRODUCT
+            WHERE OrderID = shipped_order.OrderID;
+          -- remove products from old destination
+          UPDATE stores
+              SET quantity = quantity - QTY
+              WHERE depositid = OLD.DirectedTo AND name = PName AND supplier = Psupp;
+        END LOOP;
+      END IF;
+      IF NEW.DirectedTo IS NOT NULL THEN
+        FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
+            -- for each order ...
+          SELECT quantity , name , supplier 
+            INTO QTY , PName , Psupp
+            FROM "Order" NATURAL JOIN PRODUCT
+            WHERE OrderID = shipped_order.OrderID;
+          -- add products to new destination
+          INSERT INTO stores (depositid, name, supplier, quantity)
+              VALUES (NEW.DirectedTo, PName, Psupp, QTY)
+              ON CONFLICT (depositid, name, supplier) DO UPDATE
+              SET quantity = stores.quantity + EXCLUDED.quantity;
+        END LOOP;
+      END IF;
     END IF;
     IF TG_OP = 'DELETE' THEN
       RETURN OLD;
@@ -1566,7 +1565,7 @@ Quindi, sarà necessario far attivare il trigger nel momento in cui la quantità
   EXECUTE PROCEDURE depositOccupiedSpaceUpdate_func();
 
   CREATE OR REPLACE TRIGGER deleteDepositOccupiedSpaceDl
-  BEFORE DELETE ON Stores
+  AFTER DELETE ON Stores
   FOR EACH ROW
   EXECUTE PROCEDURE depositOccupiedSpaceUpdate_func();
 \end{lstlisting}
@@ -1640,7 +1639,7 @@ Per fare ciò la \textit{trigger function} si limita a controllare dopo inserime
 
 Questo trigger si occupa di aggiornare, se possibile, a seguito di un aggiornamento della quantità di prodotto di un \textbf{Order}, lo spazio occupato nella \textbf{Covers} e nei \textbf{Deposit} che lo riguardano.
 
-Per fare ciò la \textit{trigger function} si avvale della funzione \intlink{checkdeposithasenoughproducts}{checkDepositHasEnoughProducts} chiamata per ogni \textbf{Shipment} riguardante l'\textbf{Order} in questione che non sia finita. Essendo che la funzione \textbf{checkDepositHasEnoughProducts} si occupa di aggiornare i \textbf{Deposit}, viene chiamata dalla funzione in ordine crescente sulle date di spedizione, in modo da aggiornare prima i \textbf{Deposit} coinvolti nelle spedizioni più vecchie.
+Per fare ciò la \textit{trigger function} ripristina in tutti i \textbf{Deposit} i valori precedenti all'update per poi avvalersi della funzione \intlink{checkdeposithasenoughproducts}{checkDepositHasEnoughProducts} chiamata per ogni \textbf{Shipment} riguardante l'\textbf{Order} in questione che non sia finita. Essendo che la funzione \textbf{checkDepositHasEnoughProducts} si occupa di aggiornare i \textbf{Deposit}, viene chiamata dalla funzione in ordine crescente sulle date di spedizione, in modo da aggiornare prima i \textbf{Deposit} coinvolti nelle spedizioni più vecchie.
 
 Successivamente con un meccanismo simile, la funzione aggiorna tutte le \textbf{Covers} riguardanti l'\textbf{Order} in questione e \textbf{Shipment} non ancora consegnate.
 
@@ -1663,7 +1662,7 @@ Successivamente con un meccanismo simile, la funzione aggiorna tutte le \textbf{
   BEGIN
     -- if the oreder is already arrived to client can't be modified
     IF OLD.iscompleted = true THEN
-      perform raise_custom_error('E0020');
+      perform raise_custom_error('E0012');
     END IF;
     -- retriving the old and new package size
     SELECT PackageSizeLiters
@@ -1674,7 +1673,8 @@ Successivamente con un meccanismo simile, la funzione aggiorna tutte le \textbf{
       INTO NPsize
       FROM Product
       WHERE name = NEW.name AND supplier = NEW.supplier;
-      -- foreach unfinished shipment that ships the order, from the oldest
+
+      -- for each unfinished shipment that ships the order, starting from the oldest
       FOR o_shipment IN (
         SELECT shipment.*
           FROM ships NATURAL JOIN shipment
@@ -1682,10 +1682,28 @@ Successivamente con un meccanismo simile, la funzione aggiorna tutte le \textbf{
           ORDER BY shippingdate ASC
       )
       LOOP
+        IF o_shipment.directedto IS NOT NULL THEN
+          INSERT INTO stores (name, supplier, depositid, quantity)
+            VALUES (OLD.name, OLD.supplier, o_shipment.shippedfrom, OLD.quantity)
+          ON CONFLICT (name, supplier, depositid) DO UPDATE
+            SET quantity = stores.quantity + EXCLUDED.quantity;
+          UPDATE stores
+            SET quantity = quantity - OLD.quantity
+            WHERE depositid = o_shipment.directedto AND name = OLD.name AND supplier = OLD.supplier;
+        END IF;
+        INSERT INTO stores (name, supplier, depositid, quantity)
+          VALUES (OLD.name, OLD.supplier, o_shipment.shippedfrom, NEW.quantity)
+        ON CONFLICT (name, supplier, depositid) DO UPDATE
+          SET quantity = stores.quantity + EXCLUDED.quantity;
+
+        UPDATE stores
+          SET quantity = quantity - OLD.quantity
+          WHERE depositid = o_shipment.shippedfrom AND name = OLD.name AND supplier = OLD.supplier;
+
       -- check if the deposit can handle the new quantity
-        PERFORM checkdeposithasenoughproducts(o_shipment.directedto, 
-                o_shipment.shippedfrom, NEW.name, NEW.supplier, NEW.quantity);
+        PERFORM checkdeposithasenoughproducts(o_shipment.directedto, o_shipment.shippedfrom, NEW.name, NEW.supplier, NEW.quantity);
       END LOOP;
+
     -- try to update all the covers that ships the order and are not arrived
     FOR cover IN (
       SELECT covers.* 
@@ -1695,8 +1713,7 @@ Successivamente con un meccanismo simile, la funzione aggiorna tutte le \textbf{
             (hasarrived = false OR hasarrived IS NULL)
     ) LOOP
       UPDATE covers
-        SET occupiedspace = occupiedspace + (NEW.quantity * NPsize) - 
-                                            (OLD.quantity * OPsize)
+        SET occupiedspace = occupiedspace + (NEW.quantity * NPsize) - (OLD.quantity * OPsize)
         WHERE date = cover.date AND transportid = cover.transportid;
     END LOOP;
     RETURN NEW;
@@ -1905,6 +1922,52 @@ Per fare ciò la funzione si limita a controllare se l'\textbf{Account} in quest
     END IF;
 
     RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{deletedShipment}}
+
+Questa funzione si occupa di reinserire nei \textbf{Deposit} di partenza di una \textbf{Shipment} tra deposit che viene eliminata i prodotti che erano stati spostati in tale \textbf{Shipment}.
+
+Per fare ciò la funzione si limita ad aggiornare il campo \textbf{Quantity} della tabella \textbf{Stores} del deposito di partenza, aggiungendo la quantità di prodotto spostata.
+
+\begin{lstlisting}[caption={Trigger per implementare \textbf{deletedShipment}}]
+  CREATE OR REPLACE TRIGGER deletedShipment
+  AFTER DELETE ON Shipment
+  FOR EACH ROW
+  EXECUTE PROCEDURE deletedShipment_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{deletedShipment}}]
+  CREATE OR REPLACE FUNCTION deletedShipment_func()
+  RETURNS TRIGGER AS $$
+  DECLARE
+    QTY integer;
+    PName varchar(50);
+    Psupp varchar(50);
+    shipped_order Ships%ROWTYPE;
+  BEGIN
+    IF OLD.directedTo IS NOT NULL  THEN
+      FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=OLD.ShipmentID) LOOP
+          -- for each order ...
+          SELECT quantity , name , supplier 
+            INTO QTY , PName , Psupp
+            FROM "Order" NATURAL JOIN PRODUCT
+            WHERE OrderID = shipped_order.OrderID;
+
+          -- restore the products in the old deposit
+          INSERT INTO stores (depositid, name, supplier, quantity)
+            VALUES (OLD.ShippedFrom, PName, Psupp, QTY)
+            ON CONFLICT (depositid, name, supplier) DO UPDATE
+            SET quantity = stores.quantity + EXCLUDED.quantity;
+
+          UPDATE stores SET quantity = quantity - QTY
+            WHERE depositid = OLD.directedTo AND name = PName AND supplier = Psupp;
+      END LOOP;
+    END IF;
+
+    RETURN OLD;
   END;
   $$ LANGUAGE plpgsql;
 \end{lstlisting}

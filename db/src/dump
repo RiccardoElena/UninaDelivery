@@ -271,11 +271,11 @@ CREATE FUNCTION uninadelivery.checkdeposithasenoughproducts(didend integer, dids
         VALUES (PName, PSupply, DIDend, LEAST(QTY, QTY2))
       ON CONFLICT (name, supplier, depositid) DO UPDATE
         SET quantity = stores.quantity + EXCLUDED.quantity;
-    END IF;
     -- if nothing went wrong, decrement the quantity in the starting deposit
     UPDATE stores
-      SET quantity = GREATEST(stores.quantity - QTY, 0)
+      SET quantity = GREATEST(quantity - QTY, 0)
       WHERE depositid = DIDstart AND name = PName AND supplier = PSupply;
+    END IF;
   EXCEPTION
     WHEN no_data_found THEN
       perform raise_custom_error('E0013');
@@ -351,19 +351,21 @@ ALTER FUNCTION uninadelivery.completedorder_func() OWNER TO zgenny;
 CREATE FUNCTION uninadelivery.correctoccupiedspacefordeposit_func() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-DECLARE
-  SumOfProduct product.PackageSizeLiters%TYPE;
-BEGIN
-  SELECT sum(PackageSizeLiters*stores.quantity)
-    INTO SumOfProduct
-    FROM product natural join stores
-    WHERE depositID = NEW.depositID;
-  IF SumOfProduct > NEW.OccupiedSpace THEN
-    perform raise_custom_error('E0021');
-  END IF;
-  RETURN NEW;
-END;
-$$;
+  DECLARE
+    SumOfProduct product.PackageSizeLiters%TYPE;
+  BEGIN
+    -- calculating total occupied space
+    SELECT sum(PackageSizeLiters*quantity)
+      INTO SumOfProduct
+      FROM product natural join stores
+      WHERE depositID = NEW.depositID;
+    -- checking if the occupied space is enough, otherwise raise error
+    IF SumOfProduct > NEW.OccupiedSpace THEN
+      perform raise_custom_error('E0021');
+    END IF;
+    RETURN NEW;
+  END;
+  $$;
 
 
 ALTER FUNCTION uninadelivery.correctoccupiedspacefordeposit_func() OWNER TO riccardoelena;
@@ -658,14 +660,12 @@ DECLARE
 BEGIN
   IF OLD.directedTo IS NOT NULL  THEN
     FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=OLD.ShipmentID) LOOP
-    raise notice 'Shipped order';
         -- for each order ...
         SELECT quantity , name , supplier 
           INTO QTY , PName , Psupp
           FROM "Order" NATURAL JOIN PRODUCT
           WHERE OrderID = shipped_order.OrderID;
 
-        raise notice 'dT: %', OLD.directedTo;
         -- restore the products in the old deposit
         INSERT INTO stores (depositid, name, supplier, quantity)
           VALUES (OLD.ShippedFrom, PName, Psupp, QTY)
@@ -718,7 +718,6 @@ CREATE FUNCTION uninadelivery.depositoccupiedspaceupdate_func() RETURNS trigger
         INTO Psize
         FROM Product
         WHERE name = NEW.name AND supplier = NEW.supplier;
-
       UPDATE deposit
       SET occupiedspace = occupiedspace + ((NEW.quantity) * Psize)
       WHERE depositID = NEW.depositID;
@@ -731,7 +730,6 @@ CREATE FUNCTION uninadelivery.depositoccupiedspaceupdate_func() RETURNS trigger
       INTO Psize
       FROM Product
       WHERE name = OLD.name AND supplier = OLD.supplier;
-
     UPDATE deposit
       SET occupiedspace = occupiedspace - (OLD.quantity * Psize)
       WHERE depositID = OLD.depositID;
@@ -1365,6 +1363,24 @@ CREATE FUNCTION uninadelivery.orderquantityupdate_func() RETURNS trigger
           ORDER BY shippingdate ASC
       )
       LOOP
+        IF o_shipment.directedto IS NOT NULL THEN
+          INSERT INTO stores (name, supplier, depositid, quantity)
+            VALUES (OLD.name, OLD.supplier, o_shipment.shippedfrom, OLD.quantity)
+          ON CONFLICT (name, supplier, depositid) DO UPDATE
+            SET quantity = stores.quantity + EXCLUDED.quantity;
+          UPDATE stores
+            SET quantity = quantity - OLD.quantity
+            WHERE depositid = o_shipment.directedto AND name = OLD.name AND supplier = OLD.supplier;
+        END IF;
+        INSERT INTO stores (name, supplier, depositid, quantity)
+          VALUES (OLD.name, OLD.supplier, o_shipment.shippedfrom, NEW.quantity)
+        ON CONFLICT (name, supplier, depositid) DO UPDATE
+          SET quantity = stores.quantity + EXCLUDED.quantity;
+
+        UPDATE stores
+          SET quantity = quantity - OLD.quantity
+          WHERE depositid = o_shipment.shippedfrom AND name = OLD.name AND supplier = OLD.supplier;
+
       -- check if the deposit can handle the new quantity
         PERFORM checkdeposithasenoughproducts(o_shipment.directedto, o_shipment.shippedfrom, NEW.name, NEW.supplier, NEW.quantity);
       END LOOP;
@@ -1424,95 +1440,97 @@ ALTER FUNCTION uninadelivery.raise_custom_error(p_error_code text) OWNER TO zgen
 CREATE FUNCTION uninadelivery.shipmentdataconsistency_func() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-DECLARE
-  QTY stores.quantity%TYPE;
-  PName product.name%TYPE;
-  Psupp product.supplier%TYPE;
-  ZCode area.zipcode%TYPE;
-  Cy area.country%TYPE;
-  coverNeedsUpdate BOOLEAN = TRUE;
-  shipped_order Ships%ROWTYPE;
-BEGIN
-  -- if the shipment has already arrived, cannot be modified
-  IF OLD.HasArrived = TRUE THEN
-    perform raise_custom_error('E0017');
-  END IF;
+  DECLARE
+    QTY stores.quantity%TYPE;
+    PName product.name%TYPE;
+    Psupp product.supplier%TYPE;
+    ZCode area.zipcode%TYPE;
+    Cy area.country%TYPE;
+    coverNeedsUpdate BOOLEAN = TRUE;
+    shipped_order Ships%ROWTYPE;
+  BEGIN
+    -- if the shipment has already arrived, cannot be modified
+    IF OLD.HasArrived = TRUE THEN
+      perform raise_custom_error('E0017');
+    END IF;
 
-  -- check for correct area
+    -- check for correct area
 
-  call checkCorrectArea(NEW, ZCode, Cy, coverNeedsUpdate);
-  
-  -- if the starting deposit has changed, i have to check if the new deposit has enough products to satisfy the orders
-  IF NEW.ShippedFrom <> OLD.ShippedFrom THEN
-    call checkValidOrder(NEW);
-  END IF;
+    call checkCorrectArea(NEW, ZCode, Cy, coverNeedsUpdate);
+    
+    -- if the starting deposit has changed, i have to check if the new deposit has enough products to satisfy the orders
+    IF NEW.ShippedFrom <> OLD.ShippedFrom THEN
+      call checkValidOrder(NEW);
+    END IF;
 
-  -- if everything is ok, function can procede to the updates
-  IF coverNeedsUpdate THEN
-    -- try to update the covers table, if fails, raise error
-    -- In case shipment is directed to clients ZCode and Cy are the one from clients, otherwise they are the one from directedTo deposit
-    perform updateCoversForShipment( OLD.ShippingDate, OLD.TransportID, ZCode, Cy, NEW.ShippingDate, NEW.TransportID);
-  ELSE 
-    DELETE FROM covers 
-            WHERE date = OLD.ShippingDate AND 
-                  transportid = OLD.TransportID;
-  END IF;
+    -- if everything is ok, function can procede to the updates
+    IF coverNeedsUpdate THEN
+      -- try to update the covers table, if fails, raise error
+      -- In case shipment is directed to clients ZCode and Cy are the one from clients, otherwise they are the one from directedTo deposit
+      perform updateCoversForShipment( OLD.ShippingDate, OLD.TransportID, ZCode, Cy, NEW.ShippingDate, NEW.TransportID);
+    ELSE 
+      DELETE FROM covers 
+              WHERE date = OLD.ShippingDate AND 
+                    transportid = OLD.TransportID;
+    END IF;
 
-  IF(OLD.ShippedFrom <> NEW.ShippedFrom) THEN
-    FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=OLD.ShipmentID) LOOP
-        -- for each order ...
-        SELECT quantity , name , supplier 
-          INTO QTY , PName , Psupp
-          FROM "Order" NATURAL JOIN PRODUCT
-          WHERE OrderID = shipped_order.OrderID;
+    IF(OLD.ShippedFrom <> NEW.ShippedFrom) THEN
+      FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=OLD.ShipmentID) LOOP
+          -- for each order ...
+          SELECT quantity , name , supplier 
+            INTO QTY , PName , Psupp
+            FROM "Order" NATURAL JOIN PRODUCT
+            WHERE OrderID = shipped_order.OrderID;
 
-        -- restore the products in the old deposit
-        INSERT INTO stores (depositid, name, supplier, quantity)
-          VALUES (OLD.ShippedFrom, PName, Psupp, QTY)
-          ON CONFLICT (depositid, name, supplier) DO UPDATE
-          SET quantity = stores.quantity + EXCLUDED.quantity;
-        -- remove the products from the new deposit
-        UPDATE stores
-          SET quantity = quantity - QTY
-          WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = Psupp;
-    END LOOP;
-  END IF;
-  --check for update in directedTo
-  IF OLD.DirectedTo IS NOT NULL THEN
-    -- if the shipment was directed to a deposit, i have to update the deposits
-    FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=OLD.ShipmentID) LOOP
-        -- for each order ...
-      SELECT quantity , name , supplier 
-        INTO QTY , PName , Psupp
-        FROM "Order" NATURAL JOIN PRODUCT
-        WHERE OrderID = shipped_order.OrderID;
-      -- remove products from old destination
-      UPDATE stores
-          SET quantity = quantity - QTY
-          WHERE depositid = OLD.DirectedTo AND name = PName AND supplier = Psupp;
-    END LOOP;
-  END IF;
-  IF NEW.DirectedTo IS NOT NULL THEN
-    FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
-        -- for each order ...
-      SELECT quantity , name , supplier 
-        INTO QTY , PName , Psupp
-        FROM "Order" NATURAL JOIN PRODUCT
-        WHERE OrderID = shipped_order.OrderID;
-      -- add products to new destination
-      INSERT INTO stores (depositid, name, supplier, quantity)
-          VALUES (NEW.DirectedTo, PName, Psupp, QTY)
-          ON CONFLICT (depositid, name, supplier) DO UPDATE
-          SET quantity = stores.quantity + EXCLUDED.quantity;
-    END LOOP;
-  END IF;
-  IF TG_OP = 'DELETE' THEN
-    RETURN OLD;
-  END IF;
-  RETURN NEW;
-  
-END;
-$$;
+          -- restore the products in the old deposit
+          INSERT INTO stores (depositid, name, supplier, quantity)
+            VALUES (OLD.ShippedFrom, PName, Psupp, QTY)
+            ON CONFLICT (depositid, name, supplier) DO UPDATE
+            SET quantity = stores.quantity + EXCLUDED.quantity;
+          -- remove the products from the new deposit
+          UPDATE stores
+            SET quantity = quantity - QTY
+            WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = Psupp;
+      END LOOP;
+    END IF;
+    --check for update in directedTo
+    IF COALESCE(OLD.DirectedTo,0) <> COALESCE(NEW.DirectedTo,0) THEN
+      IF OLD.DirectedTo IS NOT NULL THEN
+        -- if the shipment was directed to a deposit, i have to update the deposits
+        FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=OLD.ShipmentID) LOOP
+            -- for each order ...
+          SELECT quantity , name , supplier 
+            INTO QTY , PName , Psupp
+            FROM "Order" NATURAL JOIN PRODUCT
+            WHERE OrderID = shipped_order.OrderID;
+          -- remove products from old destination
+          UPDATE stores
+              SET quantity = quantity - QTY
+              WHERE depositid = OLD.DirectedTo AND name = PName AND supplier = Psupp;
+        END LOOP;
+      END IF;
+      IF NEW.DirectedTo IS NOT NULL THEN
+        FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
+            -- for each order ...
+          SELECT quantity , name , supplier 
+            INTO QTY , PName , Psupp
+            FROM "Order" NATURAL JOIN PRODUCT
+            WHERE OrderID = shipped_order.OrderID;
+          -- add products to new destination
+          INSERT INTO stores (depositid, name, supplier, quantity)
+              VALUES (NEW.DirectedTo, PName, Psupp, QTY)
+              ON CONFLICT (depositid, name, supplier) DO UPDATE
+              SET quantity = stores.quantity + EXCLUDED.quantity;
+        END LOOP;
+      END IF;
+    END IF;
+    IF TG_OP = 'DELETE' THEN
+      RETURN OLD;
+    END IF;
+    RETURN NEW;
+    
+  END;
+  $$;
 
 
 ALTER FUNCTION uninadelivery.shipmentdataconsistency_func() OWNER TO zgenny;
@@ -2008,17 +2026,17 @@ COPY uninadelivery."Order" (orderid, emissiondate, isexpress, extrawarranty, isc
 52	2024-01-07	\N	0	\N	fiorosa@gmail.com	10000	Gomma	Bic
 2	2023-12-31	\N	0	\N	lucabest@gmail.com	2	Gomma	Bic
 41	2024-01-04	t	0	\N	lucabest@gmail.com	2	Smartphone	Samsung
-44	2024-01-02	\N	1	t	jane.smith@example.com	1	Laptop	Dell
-46	2024-01-03	\N	1	t	ivanov@example.com	1	Scarpe da Ginnastica	Nike
-50	2024-01-01	\N	1	t	lucabest@gmail.com	1	Aspirapolvere Robot	iRobot
-43	2022-05-06	t	0	t	john.doe@example.com	3	Tavolo da Pranzo	IKEA
-45	2020-12-08	t	0	t	mike.johnson@example.com	2	Frigorifero	Whirlpool
-47	2019-06-10	t	0	t	patel@example.com	1	Smart TV	Sony
-49	2023-09-12	t	0	t	yamamoto@example.com	1	Collana di Perle	Tiffany & Co.
-42	2023-02-05	\N	1	t	relena@gmail.com	1	Maglione	Gucci
-48	2020-04-11	\N	2	t	mthembu@example.com	2	Forno a Microonde	Panasonic
-53	2024-01-09	\N	0	\N	test@gmail.com	1	Scarpe da Ginnastica	Nike
+44	2024-01-02	\N	1	\N	jane.smith@example.com	1	Laptop	Dell
+46	2024-01-03	\N	1	\N	ivanov@example.com	1	Scarpe da Ginnastica	Nike
+50	2024-01-01	\N	1	\N	lucabest@gmail.com	1	Aspirapolvere Robot	iRobot
+43	2022-05-06	t	0	\N	john.doe@example.com	3	Tavolo da Pranzo	IKEA
+45	2020-12-08	t	0	\N	mike.johnson@example.com	2	Frigorifero	Whirlpool
+47	2019-06-10	t	0	\N	patel@example.com	1	Smart TV	Sony
+49	2023-09-12	t	0	\N	yamamoto@example.com	1	Collana di Perle	Tiffany & Co.
+42	2023-02-05	\N	1	\N	relena@gmail.com	1	Maglione	Gucci
+48	2020-04-11	\N	2	\N	mthembu@example.com	2	Forno a Microonde	Panasonic
 1	2023-12-31	\N	0	\N	lucabest@gmail.com	3	Penna	Bic
+53	2024-01-09	\N	0	\N	test@gmail.com	1	Scarpe da Ginnastica	Nike
 \.
 
 
@@ -2145,10 +2163,10 @@ COPY uninadelivery.area (zipcode, city, state, country, worldzone) FROM stdin;
 --
 
 COPY uninadelivery.covers (transportid, zipcode, country, date, occupiedspace) FROM stdin;
+1	00123	Italia	2024-02-04	4.800
 20	67890	Cina	2024-01-22	0.800
-1	00123	Italia	2024-02-04	3.300
-18	12345	Corea del Sud	2024-01-20	0.800
 19	67890	Cina	2024-01-21	0.800
+18	12345	Corea del Sud	2024-01-20	0.800
 \.
 
 
@@ -2227,12 +2245,12 @@ COPY uninadelivery.deposit (depositid, occupiedspace, maxcapacity, deposittype, 
 188	0.000	15000.000	Central	256	Koala Avenue	67890	Nuova Zelanda
 189	0.000	13000.000	Country	55BIS	Alexanderplatz	12345	Germania
 192	0.000	10000.000	Country	1	Tiananmen Square	69403	Cina
-190	0.000	50000.000	Central	889	Kpop Road	12345	Corea del Sud
 3	547.700	12000.000	City	23	Via Roma	00123	Italia
+191	0.000	50000.000	Central	454	Strawberry Court	67890	Cina
 193	0.000	50000.000	Central	889BIS	Kpop Road	12345	Corea del Sud
+190	0.000	50000.000	Central	889	Kpop Road	12345	Corea del Sud
+1	1603.800	10000.000	City	1	Via Roma	00123	Italia
 161	128.800	15500.000	City	777	Blackberry Road	12345	Corea del Sud
-191	0.800	50000.000	Central	454	Strawberry Court	67890	Cina
-1	1605.300	10000.000	City	1	Via Roma	00123	Italia
 \.
 
 
@@ -2311,10 +2329,10 @@ Cancelleria	Gomma	UninaDelivery	La meno famosa gomma nera di UninaDelivery che m
 
 COPY uninadelivery.shipment (shipmentid, shippingdate, hasarrived, shippedfrom, directedto, businessmail, transportid) FROM stdin;
 14	2024-02-05	\N	1	\N	R.Patel@uninadelivery.operator.com	1
-16	2024-01-21	\N	190	191	T.Yamamoto@uninadelivery.operator.com	19
-17	2024-01-22	\N	191	\N	T.Yamamoto@uninadelivery.operator.com	20
 7	2024-02-04	\N	1	\N	R.Elena@uninadelivery.operator.com	1
-15	2024-01-20	\N	161	190	T.Yamamoto@uninadelivery.operator.com	18
+17	2024-01-22	\N	191	\N	T.Yamamoto@uninadelivery.operator.com	20
+16	2024-01-21	t	190	191	T.Yamamoto@uninadelivery.operator.com	19
+15	2024-01-20	t	161	190	T.Yamamoto@uninadelivery.operator.com	18
 \.
 
 
@@ -2329,6 +2347,7 @@ COPY uninadelivery.ships (shipmentid, orderid) FROM stdin;
 17	53
 15	53
 16	53
+7	1
 \.
 
 
@@ -2396,16 +2415,15 @@ Penna	Bic	160	100
 Penna	Bic	161	100
 Gomma	Bic	1	16
 Smartphone	Samsung	1	16
-Penna	Bic	1	1011
 Scarpe da Ginnastica	Nike	3	11
 Smartphone	Samsung	3	16
 Penna	Bic	3	1011
 Scarpe da Ginnastica	Nike	161	10
-Scarpe da Ginnastica	Nike	191	1
 Scarpe da Ginnastica	UninaDelivery	1	22
 Gomma	UninaDelivery	1	32
 Smartphone	UninaDelivery	1	32
 Penna	UninaDelivery	1	2022
+Penna	Bic	1	1008
 \.
 
 
@@ -2962,7 +2980,7 @@ CREATE TRIGGER updatedepositoccupiedspaceb BEFORE UPDATE ON uninadelivery.stores
 -- Name: stores updatedepositoccupiedspacedl; Type: TRIGGER; Schema: uninadelivery; Owner: zgenny
 --
 
-CREATE TRIGGER updatedepositoccupiedspacedl BEFORE DELETE ON uninadelivery.stores FOR EACH ROW EXECUTE FUNCTION uninadelivery.depositoccupiedspaceupdate_func();
+CREATE TRIGGER updatedepositoccupiedspacedl AFTER DELETE ON uninadelivery.stores FOR EACH ROW EXECUTE FUNCTION uninadelivery.depositoccupiedspaceupdate_func();
 
 
 --
