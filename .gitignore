@@ -1,1 +1,21 @@
-**/.vscode/*.json
+/.vscode/settings.json
+### Doc related
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.blx
+*.log
+*.toc
+*.out
+*.psd
+*.pdf
+*.lol
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+### Build related
+*.class
+**/target/
+
+!**/sources/*.pdf

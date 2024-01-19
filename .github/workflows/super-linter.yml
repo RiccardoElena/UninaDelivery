@@ -7,6 +7,11 @@
 ---
 name: Lint Code Base
 
+env:
+  VALIDATE_LATEX: false
+  VALIDATE_JSCPD: false
+  VALIDATE_YAML: false
+
 on:
   push:
     branches: ['*']

@@ -1,0 +1,303 @@
+\chapter{Implementazione delle Tabelle}
+
+In conclusione si riportano le istruzioni per l'implementazione fisica del database.
+
+Come DBMS provider si è scelto di utilizzare PostgreSQL, per la sua facilità di utilizzo e la sua affidabilità.
+
+Il database è hostato localmente per rendere più agevole la connessione.
+
+Per pulizia del codice si è preferito lavorare su uno \textbf{schema} creato appositamente per il progetto, chiamato \textbf{UninaDelivery}.
+
+\section{Definizione dei Domini Personalizzati}
+
+Vista la vasta gamma di vincoli di dominio simili su vari campi, si è deciso di definire dei domini personalizzati per facilitare la creazione delle tabelle.
+
+\begin{lstlisting}[caption={Creazione Domini personalizzati}]
+  CREATE DOMAIN letterString AS text CHECK (
+    VALUE ~ '^[A-Za-zÀ-ÿ]+[A-Za-zÀ-ÿ\s\.]*$'
+  );
+  CREATE DOMAIN numericString AS text CHECK (
+    VALUE ~ '^\d*$'
+  );
+  CREATE DOMAIN alphanumericString AS text CHECK (
+    VALUE ~ '^[\wÀ-ÿ]+[\s\wÀ-ÿ\.]*$'
+  );
+  CREATE DOMAIN emailString AS text CHECK (
+    VALUE ~ '^[a-zA-Z0-9]+[a-zA-Z0-9.]*[a-zA-Z0-9]+@[a-zA-Z.]+\.[a-zA-Z]{2,}$'
+  );
+\end{lstlisting}
+
+Inoltre per i campi che nel diagramma ristrutturato sono stati definiti come \textbf{enumerazioni}, si è deciso di utilizzare dei tipi enumerati personalizzati.
+
+\begin{lstlisting}[caption={Creazione Tipi Enumerati}]
+  CREATE TYPE WorldZone AS ENUM (
+    'NA', 'EUW', 'EUNE', 'LATAM', 'MIDEAST', 'CKJ', 'SEA', 'IND', 'RUS', 'STAN', 
+    'OC', 'AFN', 'AFC', 'AFS'
+  );
+  CREATE TYPE DepositType AS ENUM (
+    'City', 'State', 'Country', 'Central'
+  );
+  CREATE TYPE TransportType AS ENUM (
+    'WheeledSmall', 'WheeledLarge', 'Rails', 'Water', 'Air'
+  );
+
+  CREATE TYPE DrivingLicenceType AS ENUM ('BE', 'CE');
+\end{lstlisting}
+
+\section{Creazione delle Tabelle}
+
+Vediamo ora la creazione delle tabelle, con annessi vincoli di dominio e di n-upla, oltre che le chiavi primarie e le chiavi esterne.
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Area}}]
+  CREATE TABLE Area (
+    ZipCode numericString NOT NULL ,
+    City letterString NOT NULL ,
+    State letterString NOT NULL ,
+    Country letterString NOT NULL ,
+    WorldZone WorldZone NOT NULL
+  );
+  ALTER TABLE Area ADD CONSTRAINT Area_pk PRIMARY KEY (ZipCode, Country);
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Account}}]
+  CREATE TABLE Account (
+    Name letterString NOT NULL ,
+    Surname letterString NOT NULL ,
+    Email emailString NOT NULL ,
+    Birthdate date NOT NULL ,
+    ProPic text ,
+    Password text NOT NULL ,
+    AddressNo alphNumString NOT NULL ,
+    Street alphNumString NOT NULL ,
+    ZipCode numericString NOT NULL ,
+    Country letterString NOT NULL
+  );
+  ALTER TABLE account ADD CONSTRAINT Account_pk PRIMARY KEY (Email);
+  ALTER TABLE account ADD CONSTRAINT validAccountBirthdate CHECK (
+    EXTRACT( YEAR FROM age(Birthdate)) >= 16 
+  );
+  ALTER TABLE account ADD CONSTRAINT formatAccountPassword CHECK(
+    Password ~ '^[A-Fa-f0-9]{64}$'
+  );
+  ALTER TABLE account ADD CONSTRAINT formatAccountProPic CHECK (
+    ProPic ~ '^\/9j\/4AAQSkZJRg[-A-Za-z0-9+\/]*={0,2}$'
+  );
+  ALTER TABLE Account ADD CONSTRAINT formatAccountAddressNo CHECK (
+    AddressNo ~ '^[1-9]\d*[a-z]?(?:BIS)?$'
+  );
+  ALTER TABLE Account ADD CONSTRAINT account_fk FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
+\end{lstlisting}
+  
+
+\newpage
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Order}}]
+  CREATE TABLE "Order"(
+    OrderID SERIAL NOT NULL , 
+    EmissionDate Date NOT NULL DEFAULT current_date,
+    IsExpress boolean ,
+    ExtraWarranty smallint NOT NULL DEFAULT 0,
+    IsCompleted boolean ,
+    Email emailString NOT NULL ,
+    Quantity integer NOT NULL ,
+    Name text NOT NULL ,
+    Supplier text NOT NULL
+  );
+  ALTER TABLE "Order" ADD CONSTRAINT Order_pk PRIMARY KEY (OrderID);
+  ALTER TABLE "Order" ADD CONSTRAINT formatOrderExtraWarranty CHECK (
+    ExtraWarranty >=0
+  );
+  ALTER TABLE "Order" ADD CONSTRAINT Order_fk_Product FOREIGN KEY (Name, Supplier) REFERENCES Product(Name, Supplier) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE "Order" ADD CONSTRAINT Order_fk FOREIGN KEY (Email) REFERENCES Account(Email) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE "Order" ADD CONSTRAINT formatOrderEmissionDate CHECK (
+    EmissionDate <= current_date
+  );
+  ALTER TABLE "Order" ADD CONSTRAINT formatOrderQuantity CHECK (
+    Quantity > 0
+  );
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Stores}}]
+  CREATE TABLE Stores(
+    Name text NOT NULL ,
+    Supplier text NOT NULL ,
+    DepositID integer NOT NULL ,
+    Quantity integer NOT NULL
+  );
+  ALTER TABLE Stores ADD CONSTRAINT noDuplicateProductInDeposit UNIQUE (Name, Supplier, DepositID);
+  ALTER TABLE Stores ADD CONSTRAINT Stores_fk_Product FOREIGN KEY (Name, Supplier) REFERENCES Product(Name, Supplier) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Stores ADD CONSTRAINT Stores_fk_Deposit FOREIGN KEY (DepositID) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Stores ADD CONSTRAINT formatStoresQuantity CHECK(Quantity > 0);
+\end{lstlisting}
+
+\newpage
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Deposit}}]
+  CREATE TABLE Deposit (
+    DepositID SERIAL NOT NULL ,
+    OccupiedSpace numeric( 100 , 3 ) NOT NULL DEFAULT 0,
+    MaxCapacity numeric( 100 , 3 ) NOT NULL ,
+    DepositType DepositType NOT NULL ,
+    AddressNo alphNumString NOT NULL ,
+    Street alphNumString NOT NULL ,
+    ZipCode numericString NOT NULL ,
+    Country letterString NOT NULL
+  );
+  ALTER TABLE Deposit ADD CONSTRAINT Deposit_pk PRIMARY KEY ( DepositID);
+  ALTER TABLE Deposit ADD CONSTRAINT foramtDepositOccupiedSpace CHECK(
+    OccupiedSpace >= 0
+  );
+  ALTER TABLE Deposit ADD CONSTRAINT foramtDepositMaxCapacity CHECK(
+    MaxCapacity > 0
+  );
+  ALTER TABLE Deposit ADD CONSTRAINT checkDepositFullness CHECK (
+    OccupiedSpace <= MaxCapacity
+  );
+  ALTER TABLE Deposit ADD CONSTRAINT formatDepositAddressNo CHECK (
+    AddressNo ~ '^[1-9]\d*[a-z]?(?:BIS)?$'
+  );
+  ALTER TABLE Deposit ADD CONSTRAINT Deposit_fk FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE deposit ADD CONSTRAINT onlyOneDepositPerAddress UNIQUE(AddressNo, Street, ZipCode, Country);
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Covers}}]
+  CREATE TABLE Covers (
+    TransportID integer NOT NULL ,
+    ZipCode numericString NOT NULL ,
+    Country letterString NOT NULL ,
+    Date date NOT NULL ,
+    OccupiedSpace numeric( 100 , 3 ) NOT NULL DEFAULT 0
+  );
+  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Covers ADD CONSTRAINT Covers_fk_Area FOREIGN KEY (ZipCode, Country) REFERENCES Area(ZipCode, Country) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Covers ADD CONSTRAINT onlyOneAreaPerDay UNIQUE (TransportID, Date);
+  ALTER TABLE Covers ADD CONSTRAINT formatCoversOccupiedSpace CHECK (
+    OccupiedSpace >=0
+  );
+\end{lstlisting}
+
+\newpage
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Product}}]
+  CREATE TABLE Product (
+    Category letterString NOT NULL ,
+    Name text NOT NULL ,
+    Supplier text NOT NULL ,
+    Description text NOT NULL ,
+    PackageSizeLiters numeric( 100 , 3 ) NOT NULL ,
+    IsFragile boolean ,
+    Price numeric ( 100 , 2 ) NOT NULL
+  );
+  ALTER TABLE Product ADD CONSTRAINT Product_pk PRIMARY KEY (Name,Supplier);
+  ALTER TABLE Product ADD CONSTRAINT formatProductName CHECK(
+    Name ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?''~\\\/-]*$'
+  );
+  ALTER TABLE Product ADD CONSTRAINT formatProductDescription CHECK(
+    Description ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?''~\\\/-]*$'
+  );
+  ALTER TABLE Product ADD CONSTRAINT formatProductSupplier CHECK(
+    Supplier ~ '^[a-zA-Z0-9]+[\ a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?''~\\\/-]*$'
+  );
+  ALTER TABLE Product ADD CONSTRAINT formatProductPackageSizeLiters CHECK(
+    PackageSizeLiters > 0
+  );
+  ALTER TABLE Product ADD CONSTRAINT formatProductPrice CHECK(
+    Price > 0
+  );
+  ALTER TABLE Product ADD CONSTRAINT checkProductDescriptionOnTopic CHECK(
+    (Description ILIKE ('% ' || Name || '%')) AND 
+    (Description ILIKE ('% ' || Supplier || '%'))
+  )
+\end{lstlisting}
+
+\newpage
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Transport}}]
+  CREATE TABLE Transport (
+    TransportID Serial NOT NULL ,
+    OccupiedSpace numeric( 100 , 3 ) NOT NULL DEFAULT 0,
+    MaxCapacity numeric( 100 , 3 ) NOT NULL ,
+    IsAvailable boolean DEFAULT true, 
+    TransportType TransportType NOT NULL ,
+    DepositID integer NOT NULL
+  );
+  ALTER TABLE Transport ADD CONSTRAINT Transport_pk PRIMARY KEY(TransportID);
+  ALTER TABLE Transport ADD CONSTRAINT Transport_fk FOREIGN KEY(DepositID) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE; 
+  ALTER TABLE Transport ADD CONSTRAINT formatTransportMaxCapacity CHECK (
+    MaxCapacity >0
+  );
+  ALTER TABLE Transport ADD CONSTRAINT checkTransportFullness CHECK(
+    OccupiedSpace <= MaxCapacity
+  );
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Operator}}]
+  CREATE TABLE Operator (
+  Email emailString NOT NULL ,
+  BusinessMail emailString NOT NULL DEFAULT 'tobechanged@example.com'
+);
+ALTER TABLE Operator ADD CONSTRAINT Operator_pk PRIMARY KEY (BusinessMail);
+ALTER TABLE Operator ADD CONSTRAINT Operator_fk FOREIGN KEY (Email) REFERENCES Account(Email) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE ONLY Operator ADD CONSTRAINT unique_Account_Operator UNIQUE (Email)
+\end{lstlisting}
+
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Ships}}]
+  CREATE TABLE Ships ( 
+    ShipmentID integer NOT NULL ,
+    OrderID integer NOT NULL
+  );
+  ALTER TABLE Ships ADD CONSTRAINT noDuplicateOrderInShipment UNIQUE (ShipmentID, OrderID);
+  ALTER TABLE Ships ADD CONSTRAINT Ships_fk_Shipment FOREIGN KEY (ShipmentID) REFERENCES Shipment(ShipmentID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Ships ADD CONSTRAINT Ships_fk_Order FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID) ON DELETE CASCADE ON UPDATE CASCADE;
+\end{lstlisting}
+
+\newpage
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Shipment}}]
+  CREATE TABLE Shipment (
+    ShipmentID Serial NOT NULL ,
+    ShippingDate date NOT NULL ,
+    HasArrived boolean ,
+    ShippedFrom integer NOT NULL ,
+    DirectedTo integer ,
+    BusinessMail emailString NOT NULL ,
+    TransportID integer NOT NULL
+  );
+  ALTER TABLE Shipment ADD CONSTRAINT Shipment_pk PRIMARY KEY (ShipmentID);
+  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_startDeposit FOREIGN KEY (ShippedFrom) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_arrivalDeposit FOREIGN KEY (DirectedTo) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE shipment ADD CONSTRAINT onlyOneTravelPerDay UNIQUE ( ShippingDate, TransportID ) ;
+  ALTER TABLE Shipment ADD CONSTRAINT checkDifferentStartEndDeposits CHECK (
+    ShippedFrom <> DirectedTo
+  );
+  ALTER TABLE Shipment ADD CONSTRAINT validShipmentDate CHECK (
+    ShippingDate >= current_date
+  );
+  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE RESTRICT ON UPDATE CASCADE;
+  ALTER TABLE Shipment ADD CONSTRAINT Shipment_fk_operator FOREIGN KEY (BusinessMail) REFERENCES Operator(Businessmail) ON DELETE CASCADE ON UPDATE CASCADE;
+\end{lstlisting} 
+ 
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Driver}}]
+  CREATE TABLE Driver (
+    BusinessMail emailString NOT NULL DEFAULT 'tobechanged@example.com',
+    DrivingLicenceType DrivingLicenceType NOT NULL ,
+    Email emailString NOT NULL , 
+    DepositID integer NOT NULL 
+  );
+  ALTER TABLE Driver ADD CONSTRAINT Driver_pk PRIMARY KEY (BusinessMail);
+  ALTER TABLE Driver ADD CONSTRAINT Driver_fk_Account FOREIGN KEY (Email) REFERENCES Account(Email) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Driver ADD CONSTRAINT Driver_fk_Deposit FOREIGN KEY (DepositID) REFERENCES Deposit(DepositID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE ONLY Driver ADD CONSTRAINT unique_Account_Driver UNIQUE (Email)
+\end{lstlisting}
+
+\newpage
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{Drives}}]
+  CREATE TABLE Drives(
+    TransportID integer NOT NULL ,
+    BusinessMail emailString NOT NULL ,
+    Date date NOT NULL
+  );
+  ALTER TABLE Drives ADD CONSTRAINT Drives_fk_Driver FOREIGN KEY (BusinessMail) REFERENCES Driver(BusinessMail) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Drives ADD CONSTRAINT Drives_fk_Transport FOREIGN KEY (TransportID) REFERENCES Transport(TransportID) ON DELETE CASCADE ON UPDATE CASCADE;
+  ALTER TABLE Drives ADD CONSTRAINT onlyOneTravelPerDayTransport UNIQUE (TransportID, Date);
+  ALTER TABLE Drives ADD CONSTRAINT onlyOneTravelPerDayDriver UNIQUE (BusinessMail, Date);
+\end{lstlisting}

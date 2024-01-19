@@ -1,0 +1,1973 @@
+\chapter{Implementazione Triggers e Funzioni}
+
+Sono riportati i trigger e le funzioni creati per la gestione dei vincoli individuati durante \intlink{ConstraintDictionary}{la ristrutturazione del database} e, più in generale, per la gestione del database.
+
+Nonostante siano stati definiti trigger sia per \lstinline{INSERT} che per \lstinline{UPDATE}, quest'ultimi verranno spesso omessi nella documentazione. Tali casi sono quelli in cui il trigger per \lstinline{UPDATE} esegue la stessa funzione di quello per \lstinline{INSERT}, rendendolo di fatto identico.
+
+Si è deciso per tali trigger di evitare di definirli direttamente \lstinline{ON INSERT OR UPDATE} e tenerli separati poterli attivare e disattivare singolarmente.
+
+\section{Exception Handling}
+
+Per una gestione più pulita degli errori si è deciso di creare una funzione che lanciasse tutte le eccezioni personalizzate, ricavandole da un'apposita tabella \textbf{custom\_error\_messages}.
+Questa tabella si occupa di tener traccia dei codici di errore e dei messaggi di errore associati.
+
+\begin{lstlisting}[caption={Creazione della tabella \textbf{custom\_error\_messages}}]
+  CREATE TABLE custom_error_messages (
+    error_code integer NOT NULL PRIMARY KEY,
+    error_message text NOT NULL
+  );
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Creazione della funzione per gestire le eccezioni}]
+  CREATE OR REPLACE FUNCTION raise_custom_error(p_error_code text)
+  RETURNS VOID AS $$
+  DECLARE
+    v_error_message TEXT;
+  BEGIN
+    -- Find error message in the custom_error_messages table 
+    SELECT error_message INTO v_error_message
+    FROM custom_error_messages
+    WHERE error_code = p_error_code;
+  
+    -- Raise exception with the retrieved error message
+    RAISE EXCEPTION USING 
+              ERRCODE = p_error_code, 
+              MESSAGE = v_error_message;
+    
+    -- If the error code given does not exist in the table, raise an exception to notify the user
+    EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+        RAISE EXCEPTION 'Error % not found', p_error_code;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+
+
+\section{Gestione dei Vincoli}
+
+\subsection{\textbf{isAddressForSomethingSpecific}}
+
+Per gestire questo vincolo sono necessari due trigger, uno per la tabella \textbf{Account} e uno per la tabella \textbf{Deposit}.
+
+Nonostante ciò, la funzione che dovranno eseguire è praticamente analoga, fatto salvo per dei dettagli inerenti alla tabella su cui si sta lavorando.
+
+Si avrà infatti in entrambi i casi che la funzione dovrà controllare nella tabella tra le due in cui non è chiamato se esistono righe con lo stesso \textit{AddressNo}, \textit{Street}, \textit{ZipCode} e \textit{Country}.
+
+Dovrà inoltre tenere di conto del tipo di deposito. Infatti se si sta lavorando su \textbf{Account} si dovranno escludere dalla ricerca i \textbf{Deposit} di tipo \textit{City}, mentre se si sta lavorando su \textbf{Deposit} si dovrà controllare che il tipo di deposito inserito non sia \textit{City}.
+
+Si può dunque utilizzare \textbf{SQL Dinamico} per generalizzare la funzione e utilizzarla in entrambi i trigger.
+
+Le \textit{trigger function} però non possono accettare argomenti in ingresso. Per ovviare a ciò si è utilizzata la variabile \lstinline{TG_TABLE_NAME}, messa a disposizione da PostgreSQL che contiene il nome della tabella su cui è stato innescato il trigger.
+
+Sfruttando questa informazione è possibile creare la query dinamica in base alla tabella su cui si sta lavorando, e farla eseguire dalla funzione.
+
+Vediamo innanzitutto i trigger per questo vincolo.
+
+\begin{lstlisting}[caption={Creazione dei trigger per il vincolo \textbf{isAddressForSomethingSpecific}}]
+  CREATE OR REPLACE TRIGGER isAddressForSomethingSpecificAccount_in
+  BEFORE INSERT ON Account
+  FOR EACH ROW
+  EXECUTE PROCEDURE isAddressForSomethingSpecific_func();
+
+  CREATE OR REPLACE TRIGGER isAddressForSomethingSpecificDeposit_in
+  BEFORE INSERT ON Deposit
+  FOR EACH ROW
+  EXECUTE PROCEDURE isAddressForSomethingSpecific_func();
+\end{lstlisting}
+
+\newpage
+\begin{lstlisting}[caption={Creazione della funzione \textbf{isAddressForSomethingSpecific\_func}}, label={isAddressForSomethingSpecific}]
+  CREATE OR REPLACE FUNCTION isAddressForSomethingSpecific_func()
+  RETURNS TRIGGER
+  AS 
+  $$
+  DECLARE 
+    flag integer;
+    queryp1 text = 'SELECT COUNT(*) 
+                  FROM ';
+    queryp2 text = ' 
+                  WHERE (AddressNo = $1 AND 
+                        Street = $2 AND 
+                        ZipCode = $3 AND  
+                        Country = $4';
+    tableName text;
+  BEGIN
+    -- Checking if the trigger table is Account or Deposit and chosing where to search
+    IF TG_TABLE_NAME::text = 'account' THEN
+      tableName = 'Deposit';
+    ELSIF TG_TABLE_NAME::text = 'deposit' THEN
+      tableName = 'Account';
+    END IF; 
+
+    -- Excluding City Deposits from the search if the trigger table is Account
+    IF tableName = 'Deposit' THEN
+      queryp2 = queryp2 || ' AND DepositType <> ''City'' ';
+    ELSIF tableName = 'Account' THEN
+    -- If the inserted deposit is a City Deposit, there's no need to search
+      IF NEW.DepositType = 'City' THEN
+        RETURN NEW;
+      END IF;
+    ELSE 
+      -- If the trigger table is neither Account nor Deposit, raise an exception
+      PERFORM raise_custom_error('E0003');
+    END IF;
+        
+    -- Completing the query
+    queryp1 = queryp1 || tableName || queryp2 || ')';
+    -- Executing the query
+    EXECUTE queryp1 into flag USING NEW.AddressNo, NEW.Street, NEW.ZipCode, NEW.Country;
+    -- If already exists someone at that address, raise an exception
+    IF flag > 0 THEN
+      PERFORM raise_custom_error('E0002');
+    END IF;
+
+    RETURN NEW;
+    END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\newpage
+
+\subsection{\textbf{isShipmentDirectedInCorrectArea}}
+
+Il vincolo è diviso in due casi, uno per le spedizioni dirette ai clienti e uno per le spedizioni dirette ai depositi.
+
+In entrambi i casi però è necessario controllare che il trasporto associato alla spedizione abbia in programma per la data di spedizione la copertura della zona di destinazione.
+
+In particolare il trasporto è adatto se non ha ancora zone programmate per quel giorno, oppure se ha come zona programmata proprio quella di destinazione.
+
+In tal senso è possibile implementare questo vincolo utilizzando un corretto \textit{Exception Handling}.
+
+Una volta recuperati i dati necessari a determinare la zona da coprire infatti possiamo dividere il problema in tre casi:
+
+\begin{enumerate}
+  \item Il trasporto non ha zone programmate per quel giorno: la spedizione è valida e va inserita la copertura per la zona della spedizione in \textbf{Covers}.
+  \item Il trasporto ha come zona programmata proprio quella della spedizione: la spedizione è valida e non va inserita nessuna copertura.
+  \item Il trasporto ha zone programmate per quel giorno ma non quella della spedizione: la spedizione non è valida e va lanciata un'eccezione.
+\end{enumerate}
+
+Possiamo notare ora che, fatta eccezione per il caso \(2\) risolvibile con un banale \lstinline{IF EXISTS}, gli altri due casi possono essere accorpati.
+
+Infatti grazie al vincolo di unicità \textbf{onlyOneAreaPerDay} possiamo non preoccuparci di controllare se il trasporto è già impegnato in altra zona nella data di spedizione prima d'inserire, poiché se ne occuperà \textbf{onlyOneAreaPerDay} lanciando un eccezione.
+
+Trattando dunque separatamente il caso \(2\), che fortunatamente è il più banale non dovendo fare nulla, possiamo accorpare i casi \(1\) e \(3\).
+
+Per fare ciò andiamo a definire una funzione che si occupi d'inserire la copertura per la zona di destinazione della spedizione, e che lanci un'eccezione se il trasporto è già impegnato in altra zona nella data di spedizione.
+
+\newpage
+
+\begin{lstlisting}[caption={funzione per inserimento in \textbf{Covers}}]
+  CREATE OR REPLACE FUNCTION createCoversForShipment(Zc Covers.ZipCode  %TYPE , Cy Covers.Country  %TYPE , Tid Covers.transportId  %TYPE , D Covers.Date %TYPE)
+  RETURNS VOID AS $$
+  BEGIN
+    -- Excluding Case 2 where nothig has to be done
+    IF NOT EXISTS (
+        SELECT 1
+        FROM Covers
+        WHERE ZipCode = ZC
+          AND Country = Cy
+          AND transportid = Tid
+          AND Date = D
+      ) THEN
+        -- Trying to insert the new cover
+        INSERT INTO Covers
+          VALUES (Tid, Zc, Cy, D);
+    END IF;
+    -- If It's Case 1 the function will end here
+  EXCEPTION
+    WHEN unique_violation THEN 
+      -- Otherwise if it's Case 3 an exception will be raised
+      PERFORM raise_custom_error('E0006');
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+È necessario adesso individuare il modo di raccogliere i dati necessari alla funzione nei due casi descritti sopra.
+
+Nel caso in cui la spedizione sia diretta verso un deposito, i dati relativi alla zona da coprire sono accessibili direttamente con l'utilizzo della chiave esterna, mentre i dati relativi a data e trasporto sono presenti nella riga da inserire.
+
+Per quanto riguarda spedizioni dirette ai clienti invece, i dati relativi alla zona da coprire vanno recuperati nella tabella \textbf{Account}, passando per la tabella \textbf{Order} tramite la tabella \textbf{Ships}.
+
+Avendo però \textbf{Ships} delle chiavi esterne verso \textbf{Order} e \textbf{Shipment}, non è possibile far attivare il trigger con un inserimento su \textbf{Shipment}, poiché questo stesso trigger dovrebbe andare a cercare i dati in \textbf{Ships} che non è ancora stata popolata.
+
+Di conseguenza è necessario che il trigger si attivi su \textbf{Ships}, recuperando eventualmente i dati da \textbf{Shipment}.
+
+Contestualmente alla funzione che implementa il vincolo \textbf{isShipmentDirectedInCorrectArea} è possibile implementare anche il vincolo \textbf{isCityDepositShippingToClient}
+poiché l'evento d'innesco è lo stesso, nonché i dati necessari alla sua implementazione.
+
+Vediamo dunque innanzitutto la funzione che implementa il vincolo \textbf{isCityDepositShippingToClient}, per poi passare all'implementazione dei trigger e delle trigger function.
+Questa funzione, una volta recuperati i dati relativi al deposito di partenza, andrà a chiamare un ulteriore funzione che controllerà se le due \textbf{Area} fornite sono nella stessa città.
+
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{isCityDepositShippingToClient}}]
+  CREATE OR REPLACE FUNCTION isCityDepositShippingToClient(Zc Covers.ZipCode  %TYPE , Cy Covers.Country  %TYPE , Did Covers.transportId %TYPE)
+  RETURNS VOID AS $$
+    DECLARE 
+      d_zipcode Area.ZipCode %TYPE;
+      d_country Area.Country %TYPE;
+    BEGIN
+      -- retriving deposit location data
+      SELECT ZipCode, Country 
+        INTO d_zipcode, d_country
+        FROM deposit
+        WHERE depositid = Did;
+      -- checking if cities matches
+      IF NOT isSameCity(Zc, Cy, d_zipcode, d_country) THEN
+        PERFORM raise_custom_error('E0008');
+      END IF;
+    END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+Per quanto riguarda l'implementazione di \textbf{isSameCity}, si occupa di confrontare due \textbf{Area} e restituire \lstinline{TRUE} se appartengono alla stessa città, \lstinline{FALSE} altrimenti.
+
+\begin{lstlisting}[caption={Funzione \textbf{isSameCity}}, label={isSameCity}]
+  CREATE OR REPLACE FUNCTION isSameCity(Zc1 area.zipcode  %TYPE , Cy1 area.country  %TYPE , Zc2 area.zipcode  %TYPE , Cy2 area.country %TYPE)
+  RETURNS BOOLEAN AS $$
+  DECLARE
+    C1 area.city %TYPE;
+    C2 area.city %TYPE;
+    S1 area.state %TYPE;
+    S2 area.state %TYPE;
+    W1 area.worldzone %TYPE;
+    W2 area.worldzone %TYPE;
+  BEGIN
+    -- being the couple (zipcode, country) unique, enough to identify a city
+    SELECT city, state, worldzone
+      INTO C1, S1, Wz1
+      FROM area
+      WHERE zipcode = ZCode1 AND country = Cy1;
+    SELECT city, state, worldzone
+      INTO C2, S2, Wz2
+      FROM area
+      WHERE zipcode = ZCode2 AND country = Cy2;
+
+    IF C1 = C2 AND S1 = S2 AND Wz1 = Wz2 THEN
+      RETURN TRUE;
+    ELSE
+      RETURN FALSE;
+    END IF;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+Come detto in precedenza i trigger per questo vincolo si attiveranno uno su \textbf{Ships} e un altro su \textbf{Shipment}.
+
+\begin{lstlisting}[caption={Trigger per il vincolo \textbf{isShipmentDirectedInCorrectArea}}]
+  CREATE OR REPLACE TRIGGER isShipmentDirectedInCorrectAreaAccount_in
+  BEFORE INSERT ON Ships
+  FOR EACH ROW 
+  EXECUTE PROCEDURE isShipmentDirectedInCorrectAreaAccount_func();
+  
+  CREATE OR REPLACE TRIGGER isShipmentDirectedInCorrectAreaDeposit_in
+  BEFORE INSERT ON Shipment 
+  FOR EACH ROW 
+  EXECUTE PROCEDURE isShipmentDirectedInCorrectAreaDeposit_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per le spedizioni verso clienti}]
+  CREATE OR REPLACE FUNCTION isShipmentDirectedInCorrectAreaAccount_func() 
+  RETURNS TRIGGER AS $$
+  DECLARE 
+    ZCode Account.ZipCode %TYPE;
+    Cy Account.Country %TYPE;
+    Tid Shipment.transportId %TYPE;
+    SDate Shipment.ShippingDate %TYPE;
+    Sdeposit Shipment.ShippedFrom %TYPE;
+  BEGIN 
+    -- Assuring it's the correct case
+    IF EXISTS (
+      SELECT 1
+      FROM Shipment
+      WHERE ShipmentID=NEW.ShipmentID AND DirectedTo IS NOT NULL
+    ) THEN
+      RETURN NEW;
+    END IF;
+  
+    -- Retrieving the data needed
+    SELECT ZipCode, Country 
+      INTO ZCode, Cy
+      FROM "Order" NATURAL JOIN Account
+      WHERE OrderId = NEW.OrderID;
+    SELECT transportId, ShippingDate, ShippedFrom
+      INTO Tid, Sdate, Sdeposit
+      FROM shipment
+      WHERE shipmentid = NEW.shipmentid;
+        
+    -- calling the function to check isCityDepositShippingToClient constraint
+    PERFORM isCityDepositShippingToClient(ZCode, Cy, Sdeposit);
+
+    -- calling the function to insert the cover
+    PERFORM createCoversForShipment(ZCode, Cy, Tid, D);
+
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\newpage
+\begin{lstlisting}[caption={Funzione per le spedizioni verso depositi}]
+  CREATE OR REPLACE FUNCTION isShipmentDirectedInCorrectAreaDeposit_func() 
+  RETURNS TRIGGER AS $$
+  DECLARE 
+    ZCode Deposit.ZipCode %TYPE;
+    Cy Deposit.Country %TYPE;
+  BEGIN 
+    -- Assuring it's the correct case
+    IF NEW.DirectedTo IS NULL THEN 
+      RETURN NEW;
+    END IF;
+
+    -- Retrieving the data needed
+    SELECT ZipCode, Country 
+    INTO ZCode, Cy
+    FROM deposit
+    WHERE depositid = NEW.DirectedTo;
+
+    -- Calling the function to insert the cover
+    PERFORM createCoversForShipment(ZCode, Cy, NEW.transportId, NEW.ShippingDate);
+    RETURN NEW;
+
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+
+\subsection{\textbf{isShipmentContainingValidOrders}}
+
+Il vincolo si assicura che non venga spedito un prodotto da un deposito nel quale quest ultimo non sia presente.
+
+Nel caso in cui la spedizione sia diretta verso un cliente, il trigger si assicura che il deposito di partenza abbia abbastanza prodotti per soddisfare la spedizione.
+
+Se invece la spedizione è diretta verso un deposito, il trigger preleva la quantità massima di prodotto presente nel deposito di partenza fino a soddisfare la spedizione, e la trasferisce nel deposito di destinazione.
+
+Successivamente se tutto è andato bene, decrementa la quantità del prodotto nel deposito.
+
+Per fare ciò, la \textit{trigger function} si avvale di una funzione ausiliaria \textbf{checkDepositHasEnoughProducts} che si occupa di valutare se il deposito ha abbastanza prodotti per soddisfare la spedizione.
+
+\newpage
+
+\begin{lstlisting}[caption={Funzione ausiliaria \textbf{checkDepositHasEnoughProducts}}, label={checkdeposithasenoughproducts}]
+  CREATE OR REPLACE FUNCTION checkDepositHasEnoughProducts(
+    DIDend Shipment.DirectedTo %TYPE , 
+    DIDstart Shipment.ShippedFrom %TYPE , 
+    PName product.name %TYPE , 
+    PSupply product.supplier %TYPE , 
+    QTY "Order".Quantity %TYPE
+  )
+  RETURNS VOID 
+  AS $$
+  DECLARE
+    QTY2 stores.quantity %TYPE;
+  BEGIN
+    -- if shipment is towards a client then
+    IF DIDend IS NULL THEN
+      IF NOT EXISTS (
+        SELECT 1
+          FROM stores
+          WHERE depositid = DIDstart AND name = PName AND supplier = PSupply AND quantity >= QTY
+      ) THEN
+        -- all the products must be in the same deposit
+        perform raise_custom_error('E0013');
+      END IF;
+    ELSE -- otherwise
+        -- retrieve maximum quantity of the product in the starting deposit
+      SELECT stores.quantity
+        INTO Qty2
+        FROM stores
+        WHERE depositid = DIDstart AND name = PName AND supplier = PSupply;
+      -- if there is no product exception 'E0013' is raised otherwise
+      -- transfer the maximum quantity possible to the new deposit
+      INSERT INTO stores (name, supplier, depositid, quantity)
+        VALUES (PName, PSupply, DIDend, LEAST(QTY, QTY2))
+      ON CONFLICT (name, supplier, depositid) DO UPDATE
+        SET quantity = stores.quantity + EXCLUDED.quantity;
+    -- if nothing went wrong, decrement the quantity in the starting deposit
+    UPDATE stores
+      SET quantity = GREATEST(quantity - QTY, 0)
+      WHERE depositid = DIDstart AND name = PName AND supplier = PSupply;
+    END IF;
+  EXCEPTION
+    WHEN no_data_found THEN
+      perform raise_custom_error('E0013');
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[caption={Creazione trigger \textbf{isShipmentContainingValidOrders}}]
+  CREATE OR REPLACE TRIGGER isShipmentContainingValidOrders_in
+  BEFORE INSERT ON ships
+  FOR EACH ROW
+  EXECUTE PROCEDURE isShipmentContainingValidOrders_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Creazione funzione \textbf{isShipmentContainingValidOrders\_func}}]
+  CREATE OR REPLACE FUNCTION isShipmentContainingValidOrders_func()
+  RETURNS TRIGGER AS $$
+  DECLARE
+    QTY stores.quantity%TYPE;
+    QTY2 stores.quantity%TYPE;
+    PName product.name%TYPE;
+    PSupply product.supplier%TYPE;
+    DIDstart deposit.depositid%TYPE;
+    DIDend deposit.depositid%TYPE;
+  BEGIN
+    -- retriving data needed
+    SELECT quantity , product.name , product.supplier 
+      INTO QTY , PName , PSupply
+      FROM "Order" JOIN PRODUCT
+      ON "Order".name = PRODUCT.name AND "Order".supplier = PRODUCT.supplier
+      WHERE OrderID = NEW.OrderID;
+    SELECT shippedfrom, directedto
+      INTO DIDstart, DIDend
+      FROM shipment
+      WHERE shipmentID = NEW.shipmentID;
+    -- check if the deposit has enough products
+    PERFORM checkdeposithasenoughproducts(DIDend, DIDstart, PName, PSupply, QTY);
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{Triggers per \textbf{\textit{UPDATE/DELETE ON Shipment}}}
+
+Gli ultimi due trigger visti sono entrambi vincoli che, completamente o in parte, sono relativi alla tabella \textbf{Shipment} ma che si attivano sulla tabella \textbf{Ships}.
+
+In questi due casi specifici inoltre, la specifica \lstinline{ON UPDATE CASCADE} e \lstinline{ON DELETE CASCADE} della \lstinline{FOREIGN KEY} non è sufficiente a garantire la consistenza dei dati in caso di aggiornamento della tabella \textbf{Shipment}, facendo i trigger affidamento a campi diversi da \textbf{ShipmentID}.
+
+Infatti nel caso si andasse a modificare una \textbf{Shipment} si potrebbero alterare dati utili alla funzione \textbf{isShipmentDirectedInCorrectAreaAccount\_func}, che non verrebbe richiamata, o ancora peggio si potrebbe passare da un caso all'altro. 
+
+Di conseguenza, per l'\lstinline{UPDATE OR DELETE ON} \textbf{Shipment} è necessario definire una funzione ad hoc che si occupi di controllare i vincoli precedenti sia per quanto riguarda \textbf{Shipment} che per quanto riguarda \textbf{Ships}.
+
+Essendo la logica di aggiornamento identica a quella di cancellazione, salvo per il record da restituire alla fine, è possibile utilizzare un unica funzione per gestire entrambi questi casi.
+
+Per disambiguare i due potenziali record da restituire, è stata utilizzata la variabile speciale \lstinline{TG_OP} messa a disposizione da PostgreSQL che contiene la tipologia di operazione che ha innescato il trigger.
+
+In particolare questa funzione, dopo aver controllata che la spedizione non sia ancora arrivata, andrà a chiamare due \textbf{procedure} che si occuperanno di verificare i vincoli visti in precedenza, fornendo alla funzione i dati necessari alla modifica di altre tabelle se non ci sono stati errori.
+\subsubsection{Procedura \textbf{checkCorrectArea}}
+
+Questa procedura si occupa di verificare che l'\textbf{Area} in cui la \textbf{Shipment} è diretta sia ancora coerente coi dati inseriti.
+
+Per fare ciò la funzione si avvale di un altra funzione analoga a \textbf{createCoversForShipment} ma che si occupa dell'update, ovvero \textbf{updateCoversForShipment}.
+
+I parametri necessari a questa procedura sono tutti recuperabili grazie all'utilizzo del record \textbf{NEW}, tranne che per quelli relativi ad \textbf{Area}, che dipendono dal caso in cui ci troviamo.
+
+Nel caso la spedizione sia diretta verso un \textbf{Deposit}, sarà sufficiente recuperare i dati relativi all'\textbf{Area} del deposito \textbf{DirectedTo}.
+
+Altrimenti, sarà necessario innanzitutto controllare se sono stati già inseriti ordini per quella spedizione. In caso negativo l'unica cosa da fare sarà eliminare eventuali coperture precedenti non più valide.
+Se invece esistono già degli ordini relativi a quella spedizione, bisognerà innanzitutto controllare che tutti gli ordini siano diretti verso clienti nella stessa area, potendo i mezzi di trasporto coprirne una sola per spedizione.
+
+A quel punto sarà necessario controllare che il deposito di partenza si trovi nella stessa città di destinazione della spedizione, e in caso negativo lanciare l'eccezione utilizzata in \textbf{isCityDepositShippingToClient}.
+Ciò è fatto tramite l'utilizzo della funzione \textbf{isSameCity} vista in \intlink{isSameCity}{precedenza}.
+
+I dati relativi all'\textbf{Area} di destinazione verranno infine restituiti dalla procedura tramite \lstinline{OUT} per permettere alla funzione di aggiornare i dati di \textbf{Covers}.
+
+Per quanto riguarda l'eventualità di chiamata della funzione a seguito di una \lstinline{DELETE}, essendo \\
+\lstinline{NEW = NULL} la procedura restituirà sempre {\FiraCode\fontsize{10pt}{11pt}\selectfont coversNeedsUpdate}\lstinline{ = FALSE}, rientrando nel caso corretto.
+\newpage
+\begin{lstlisting}[caption={Procedure \textbf{checkCorrectArea}}]
+  CREATE OR REPLACE PROCEDURE checkCorrectArea( New IN Shipment, Zcode OUT area.zipcode  %TYPE , Cy OUT area.country  %TYPE , coverNeedsUpdate OUT BOOLEAN)
+  AS $$
+  DECLARE
+    Zcode2 area.zipcode %TYPE;
+    Cy2 area.country %TYPE;
+  BEGIN 
+    IF NEW.DirectedTo IS NOT NULL THEN
+      SELECT ZipCode, Country 
+        INTO ZCode, Cy
+        FROM Deposit
+        WHERE DepositID = NEW.DirectedTo;
+    ELSE
+    -- for shipments to clients, all orders must be directed to the same area
+    -- at first I check if there are at least one order for that shipment
+      IF NOT EXISTS (
+        SELECT 1
+          FROM Ships 
+          WHERE ShipmentID = NEW.ShipmentID
+      ) THEN
+        -- if not, I don't have to update the covers table
+        coverNeedsUpdate = FALSE;
+      ELSE
+        -- When it's assured that at least one order exists I can pick one random order and check if all the others are directed to the same area
+        SELECT ZipCode, Country 
+          INTO ZCode, Cy
+          FROM Ships NATURAL JOIN "Order" NATURAL JOIN Account
+          WHERE ShipmentID = NEW.ShipmentID
+          LIMIT 1;
+        IF EXISTS (
+          SELECT 1
+            FROM Ships NATURAL JOIN "Order" NATURAL JOIN Account
+            WHERE ShipmentID = NEW.ShipmentID AND
+                  (ZipCode <> ZCode OR Country <> Cy)
+        ) THEN
+          PERFORM raise_custom_error('E0016');
+        END IF;
+        -- now, I have to check if the new deposit is in the same city
+        SELECT ZipCode, Country 
+          INTO ZCode2, Cy2
+          FROM deposit
+          WHERE DepositID = NEW.ShippedFrom;
+        IF NOT isSameCity(ZCode, Cy, ZCode2, Cy2) THEN
+          PERFORM raise_custom_error('E0008');
+        END IF;
+      END IF;
+    END IF;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsubsection{Verifica ValidOrders}
+
+La seconda procedura si occupa di controllare che la spedizione contenga ancora ordini validi, ovvero che il \textit{nuovo \textbf{ShippedFrom}} contenga tutti i prodotti in quantità sufficiente per essere spediti.
+
+Per fare ciò è sufficiente controllare che per ogni prodotto presente nella spedizione, il deposito di partenza abbia una quantità sufficiente a soddisfare quella richiesta, in caso contrario si dovrà sollevare un eccezione.
+
+Anche in questo caso tutti i dati necessari alla procedura sono recuperabili dal record \textbf{NEW}, non dovendo restituire nulla in questo caso alla funzione, dovendo in ogni caso reiterare tra i prodotti per aggiornare \textbf{Stores}.
+
+\begin{lstlisting}[caption={Procedure \textbf{checkValidOrder}}]
+  CREATE OR REPLACE PROCEDURE checkValidOrder( New IN Shipment)
+  AS $$
+    DECLARE
+      QTY stores.quantity %TYPE;
+      PName product.name %TYPE;
+      PSupply product.supplier %TYPE;
+      shipped_order Ships%ROWTYPE;
+    BEGIN
+      FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
+  
+          -- for each order ...
+          SELECT quantity , name , supplier 
+            INTO QTY , PName , PSupply
+            FROM "Order" NATURAL JOIN PRODUCT
+            WHERE OrderID = shipped_order.OrderID;
+  
+          -- the new deposit has to have enough products to satisfy the order?
+          IF NOT EXISTS (
+            SELECT 1
+              FROM stores
+              WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = PSupply AND quantity >= QTY
+          ) THEN
+            -- if not, raise error
+            PERFORM raise_custom_error('E0015');
+          END IF;
+        END LOOP;
+    END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\newpage
+
+\subsubsection{Funzione \textbf{updateCoversForShipment}}
+
+Questa funzione si occupa esclusivamente di fare un \lstinline{UPDATE} nella tabella \textbf{Covers} gestendo in maniera specifica per le spedizioni eventuali conflitti di unicità.
+
+\begin{lstlisting}[caption={Funzione \textbf{updateCoversForShipment}}, label={updateCoversForShipment}]
+  CREATE OR REPLACE FUNCTION updateCoversForShipment(
+    odate Covers.Date %TYPE , 
+    otransportid Transport.TransportID %TYPE , 
+    nzc Area.ZipCode %TYPE , 
+    ncy Area.Country %TYPE , 
+    ndate Covers.Date %TYPE , 
+    ntransportid Transport.TransportID %TYPE)
+  RETURNS VOID 
+  AS $$
+  BEGIN
+    UPDATE Covers 
+      SET Date = NDate,
+          TransportID = NTransportID,
+          ZipCode = NZc,
+          Country = NCy
+      WHERE Date = ODate AND 
+            TransportID = OTransportID;
+  EXCEPTION
+    WHEN unique_violation THEN 
+      perform raise_custom_error('E0006');
+  END
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\newpage
+
+\subsubsection{Aggiornamenti conclusivi}
+
+Conclusi tutti controlli, se nessuna eccezione è stata sollevata, è necessario aggiornare le tabelle \textbf{Covers} e \textbf{Stores}.
+
+\begin{lstlisting}[caption={Sezione di aggiornamento finale}]
+  -- if everything is ok, function can procede to the updates
+  IF coverNeedsUpdate THEN
+    -- try to update the covers table, if fails, raise error
+    -- In case shipment is directed to clients ZCode and Cy are the one from clients, otherwise they are the one from directedTo deposit
+    PERFORM updateCoversForShipment( OLD.ShippingDate, OLD.TransportID, ZCode, Cy, NEW.ShippingDate, NEW.TransportID);
+  ELSE 
+    DELETE FROM covers 
+            WHERE shippingdate = OLD.ShippingDate AND 
+                  transportid = OLD.TransportID;
+  END IF;
+
+  IF(OLD.ShippedFrom <> NEW.ShippedFrom) THEN
+    FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
+        -- for each order ...
+        SELECT quantity , name , supplier 
+          INTO QTY , PName , PSupply
+          FROM "Order" NATURAL JOIN PRODUCT
+          WHERE OrderID = shipped_order.OrderID;
+
+        -- restore the products in the old deposit
+        UPDATE stores
+          SET quantity = quantity + QTY
+          WHERE depositid = OLD.ShippedFrom AND name = PName AND supplier = PSupply;
+        -- remove the products from the new deposit
+        UPDATE stores
+          SET quantity = quantity - QTY
+          WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = PSupply;
+    END LOOP;
+  END IF;
+  --check for update in directedTo
+    IF OLD.DirectedTo IS NOT NULL THEN
+      -- if the shipment was directed to a deposit, i have to update the deposits
+      FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=OLD.ShipmentID) LOOP
+          -- for each order ...
+        SELECT quantity , name , supplier 
+          INTO QTY , PName , Psupp
+          FROM "Order" NATURAL JOIN PRODUCT
+          WHERE OrderID = shipped_order.OrderID;
+        -- remove products from old destination
+        UPDATE stores
+            SET quantity = quantity - QTY
+            WHERE depositid = OLD.DirectedTo AND name = PName AND supplier = Psupp;
+      END LOOP;
+    END IF;
+    IF NEW.DirectedTo IS NOT NULL THEN
+      FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
+          -- for each order ...
+        SELECT quantity , name , supplier 
+          INTO QTY , PName , Psupp
+          FROM "Order" NATURAL JOIN PRODUCT
+          WHERE OrderID = shipped_order.OrderID;
+        -- add products to new destination
+        INSERT INTO stores (depositid, name, supplier, quantity)
+            VALUES (NEW.DirectedTo, PName, Psupp, QTY)
+            ON CONFLICT (depositid, name, supplier) DO UPDATE
+            SET quantity = stores.quantity + EXCLUDED.quantity;
+      END LOOP;
+    END IF;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Trigger per \textbf{UPDATE/DELETE ON Shipment}}]
+  CREATE OR REPLACE TRIGGER shipmentDataConsisency_up
+  BEFORE UPDATE ON Shipment
+  FOR EACH ROW
+  EXECUTE PROCEDURE shipmentDataConsistency_func();
+
+  CREATE OR REPLACE TRIGGER shipmentDataConsisency_dl
+  BEFORE DELETE ON Shipment
+  FOR EACH ROW
+  EXECUTE PROCEDURE shipmentDataConsistency_func();
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[caption={Funzione completa}]
+  CREATE OR REPLACE FUNCTION shipmentDataConsistency_func() RETURNS trigger
+  AS $$
+  DECLARE
+    QTY stores.quantity%TYPE;
+    PName product.name%TYPE;
+    Psupp product.supplier%TYPE;
+    ZCode area.zipcode%TYPE;
+    Cy area.country%TYPE;
+    coverNeedsUpdate BOOLEAN = TRUE;
+    shipped_order Ships%ROWTYPE;
+  BEGIN
+    -- if the shipment has already arrived, cannot be modified
+    IF OLD.HasArrived = TRUE THEN
+      perform raise_custom_error('E0017');
+    END IF;
+
+    -- check for correct area
+
+    call checkCorrectArea(NEW, ZCode, Cy, coverNeedsUpdate);
+    
+    -- if the starting deposit has changed, i have to check if the new deposit has enough products to satisfy the orders
+    IF NEW.ShippedFrom <> OLD.ShippedFrom THEN
+      call checkValidOrder(NEW);
+    END IF;
+
+    -- if everything is ok, function can procede to the updates
+    IF coverNeedsUpdate THEN
+      -- try to update the covers table, if fails, raise error
+      -- In case shipment is directed to clients ZCode and Cy are the one from clients, otherwise they are the one from directedTo deposit
+      perform updateCoversForShipment( OLD.ShippingDate, OLD.TransportID, ZCode, Cy, NEW.ShippingDate, NEW.TransportID);
+    ELSE 
+      DELETE FROM covers 
+              WHERE date = OLD.ShippingDate AND 
+                    transportid = OLD.TransportID;
+    END IF;
+
+    IF(OLD.ShippedFrom <> NEW.ShippedFrom) THEN
+      FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=OLD.ShipmentID) LOOP
+          -- for each order ...
+          SELECT quantity , name , supplier 
+            INTO QTY , PName , Psupp
+            FROM "Order" NATURAL JOIN PRODUCT
+            WHERE OrderID = shipped_order.OrderID;
+
+          -- restore the products in the old deposit
+          INSERT INTO stores (depositid, name, supplier, quantity)
+            VALUES (OLD.ShippedFrom, PName, Psupp, QTY)
+            ON CONFLICT (depositid, name, supplier) DO UPDATE
+            SET quantity = stores.quantity + EXCLUDED.quantity;
+          -- remove the products from the new deposit
+          UPDATE stores
+            SET quantity = quantity - QTY
+            WHERE depositid = NEW.ShippedFrom AND name = PName AND supplier = Psupp;
+      END LOOP;
+    END IF;
+    --check for update in directedTo
+    IF COALESCE(OLD.DirectedTo,0) <> COALESCE(NEW.DirectedTo,0) THEN
+      IF OLD.DirectedTo IS NOT NULL THEN
+        -- if the shipment was directed to a deposit, i have to update the deposits
+        FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=OLD.ShipmentID) LOOP
+            -- for each order ...
+          SELECT quantity , name , supplier 
+            INTO QTY , PName , Psupp
+            FROM "Order" NATURAL JOIN PRODUCT
+            WHERE OrderID = shipped_order.OrderID;
+          -- remove products from old destination
+          UPDATE stores
+              SET quantity = quantity - QTY
+              WHERE depositid = OLD.DirectedTo AND name = PName AND supplier = Psupp;
+        END LOOP;
+      END IF;
+      IF NEW.DirectedTo IS NOT NULL THEN
+        FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=NEW.ShipmentID) LOOP
+            -- for each order ...
+          SELECT quantity , name , supplier 
+            INTO QTY , PName , Psupp
+            FROM "Order" NATURAL JOIN PRODUCT
+            WHERE OrderID = shipped_order.OrderID;
+          -- add products to new destination
+          INSERT INTO stores (depositid, name, supplier, quantity)
+              VALUES (NEW.DirectedTo, PName, Psupp, QTY)
+              ON CONFLICT (depositid, name, supplier) DO UPDATE
+              SET quantity = stores.quantity + EXCLUDED.quantity;
+        END LOOP;
+      END IF;
+    END IF;
+    IF TG_OP = 'DELETE' THEN
+      RETURN OLD;
+    END IF;
+    RETURN NEW;
+    
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{correctOccupiedSpace}}
+
+Vediamo ora i trigger che implementano i vincoli \textbf{correctOccupiedSpaceForShipment} e \textbf{correctOccupiedSpaceForDeposit}, che si occupano di verificare che i campi \textbf{OccupiedSpace} rispettivamente di \textbf{Covers} e \textbf{Deposit} abbiano un valore maggiore o uguale alla somma dei prodotti contenuti.
+
+Per questi due trigger, nonostante abbiano funzioni essenzialmente identiche, si è scelto d'implementare due diverse \textit{trigger function}, poiché individuati inizialmente come due vincoli distinti.
+
+\begin{lstlisting}[caption={Trigger per i vincoli \textbf{correctOccupiedSpaceForShipment} e \textbf{correctOccupiedSpaceForDeposit}}]
+  CREATE OR REPLACE TRIGGER correctOccupiedSpaceForCovers_in
+  AFTER INSERT ON Covers
+  FOR EACH ROW
+  EXECUTE PROCEDURE correctOccupiedSpaceForShipment_func();
+
+  CREATE OR REPLACE TRIGGER correctOccupiedSpaceForDeposit_in
+  AFTER INSERT ON Deposit
+  FOR EACH ROW
+  EXECUTE PROCEDURE correctOccupiedSpaceForDeposit_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{correctOccupiedSpaceForShipment}}]
+  CREATE OR REPLACE FUNCTION correctOccupiedSpaceForShipment_func() 
+  RETURNS trigger
+  AS $$
+  DECLARE
+    ShipID shipment.ShipmentID%TYPE;
+    SumOfProduct product.PackageSizeLiters%TYPE;
+  BEGIN
+    -- retrieving shipment reference to calculate total occupied space
+    SELECT ShipmentID
+      INTO ShipID
+      FROM shipment
+      WHERE TransportID = NEW.TransportID AND ShippingDate = NEW.Date;
+    -- calculating total occupied space by the product
+    SELECT sum(PackageSizeLiters*quantity)
+      INTO SumOfProduct
+      FROM product NATURAL JOIN "Order" NATURAL JOIN Ships
+      WHERE shipmentID = ShipID;
+    -- checking if the occupied space is enough, otherwise raise error
+    IF SumOfProduct > NEW.OccupiedSpace THEN
+      perform raise_custom_error('E0014');
+    END IF;
+    RETURN NEW;
+  END;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{correctOccupiedSpaceForDeposit}}, label={correctOccupiedSpaceForDeposit_func}]
+  CREATE OR REPLACE FUNCTION correctOccupiedSpaceForDeposit_func()
+  RETURNS trigger
+  AS $$
+  DECLARE
+    SumOfProduct product.PackageSizeLiters%TYPE;
+  BEGIN
+    -- calculating total occupied space
+    SELECT sum(PackageSizeLiters*quantity)
+      INTO SumOfProduct
+      FROM product natural join stores
+      WHERE depositID = NEW.depositID;
+    -- checking if the occupied space is enough, otherwise raise error
+    IF SumOfProduct > NEW.OccupiedSpace THEN
+      perform raise_custom_error('E0021');
+    END IF;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{correctTransportAssignment}}
+
+Questo vincolo molto semplice si assicura che, all'assegnazione di un \textbf{Transport} a un \textbf{Deposit}, contestuale all'inserimento del \textbf{Transport} stesso, il \textbf{Deposit} sia della tipologia giusta per possedere quel tipo di \textbf{Transport}.
+
+In particolare la \textit{trigger function} si occupa di sollevare un eccezione in tutti i casi in cui l'assegnamento non sia corretto, ovvero se:
+\begin{itemize}
+  \item Il \textbf{Transport} è \textit{WheeledLarge} e il \textbf{Deposit} è di tipo \textit{City}.
+  \item Il \textbf{Transport} è \textit{Rails} e il \textbf{Deposit} è di tipo \textit{City} o \textit{State}.
+  \item Il \textbf{Transport} è \textit{Air} o \textit{Water} e il \textbf{Deposit} non è di tipo \textit{Central}.
+\end{itemize}
+
+\begin{lstlisting}[caption={Trigger per il vincolo \textbf{correctTransportAssignment}}]
+  CREATE OR REPLACE TRIGGER correctTransportAssignment_in
+  BEFORE INSERT ON Transport
+  FOR EACH ROW
+  EXECUTE PROCEDURE correctTransportAssignment_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{correctTransportAssignment}}]
+  CREATE OR REPLACE FUNCTION correcttransportassignment_func() 
+  RETURNS trigger
+  AS $$
+  DECLARE
+    Dtype Deposit.DepositType %TYPE;
+  BEGIN
+
+  -- retrieve the depositType of the deposit the transport is assigned to
+  SELECT DepositType
+  INTO Dtype
+  FROM Deposit
+  WHERE depositid = NEW.depositid;
+
+  -- checking the error combinations
+  IF NEW.TransportType = 'WheeledLarge' AND Dtype = 'City' THEN
+    PERFORM raise_custom_error('E0010');
+  END IF;
+  IF NEW.TransportType = 'Rails' AND (Dtype = 'City' OR Dtype = 'State') THEN
+    PERFORM raise_custom_error('E0010');
+  END IF;
+  IF (NEW.TransportType = 'Air' OR NEW.TransportType = 'Water') AND Dtype <> 'Central' THEN
+    PERFORM raise_custom_error('E0010');
+  END IF;
+
+  RETURN NEW;
+
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{correctTransportForDrivingLicence}}
+
+Questo vincolo si assicura che, all'assegnazione di un \textbf{Transport} a un \textbf{Driver}, contestuale a un inserimento nella tabella \textbf{Drives}, il \textbf{Driver} sia in possesso della patente necessaria per guidare quel tipo di \textbf{Transport}.
+In particolare la \textit{trigger function} non solleva un eccezione solo se:
+ Il \textbf{Transport} è \textit{WheeledSmall}, poiché tutte le patenti del sistema permettono di guidare questo tipo di trasporto, o il \textbf{Transport} è \textit{WheeledLarge} e il \textbf{Driver} ha la patente \textit{CE}.
+
+Tutti gli altri tipi di veicolo non sono guidati da diretti dipendenti dell'azienda, ma da autisti esterni, che non sono presenti nel database, come specificato nel capitolo~\ref{DomainAssumptions} in \intlink{transporterManagement}{gestione dei trasportatori}.
+
+\begin{lstlisting}[caption={Trigger per il vincolo \textbf{correctTransportForDrivingLicence}}]
+  CREATE OR REPLACE TRIGGER correctTransportForDrivingLicence_in
+  BEFORE INSERT ON Drives
+  FOR EACH ROW
+  EXECUTE PROCEDURE correctTransportForDrivingLicence_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{correctTransportForDrivingLicence}}]
+  CREATE OR REPLACE FUNCTION correcttransportfordrivinglicence_func() 
+  RETURNS trigger
+  AS $$
+  DECLARE
+    drivinglicence Driver.drivinglicencetype %TYPE;
+    Ttype Transport.transporttype %TYPE;
+  BEGIN
+
+    -- retriving data needed
+    -- retrieving the driving licence of the driver
+    SELECT drivinglicencetype
+    INTO drivinglicence
+    FROM driver
+    WHERE BusinessMail = NEW.BusinessMail;
+
+    -- retrieving the transport type of the transport
+    SELECT transporttype
+    INTO Ttype
+    FROM transport
+    WHERE transportid = NEW.transportid;
+
+    -- checking the correct cases
+    IF Ttype = 'WheeledSmall' THEN
+      RETURN NEW;
+    END IF;
+    IF Ttype = 'WheeledLarge' AND drivinglicence = 'CE' THEN
+      RETURN NEW;
+    END IF;
+
+    -- if it's none of the correct cases, raise error
+    PERFORM raise_custom_error('E0009');
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+
+\subsection{\textbf{isAssignedToValidTransport}}
+
+Vediamo dunque i trigger che implementano i vincoli relativi all'assegnazione dei \textbf{Transport}, ovvero \textbf{isDriverAssignedToValidTransport} e \textbf{isShipmentAssignedToValidTransport}.
+
+Questi vincoli si assicura che, all'assegnamento di un \textbf{Transport} a un \textbf{Driver} o a una \textbf{Shipment}, contestuale all'inserimento di una riga in \textbf{Drives} o all'inserimento della \textbf{Shipment} stessa,  il \textbf{Driver} lavori per il \textbf{Deposit} a cui appartiene il \textbf{Transport} e la \textbf{Shipment} parta dal \textbf{Deposit} a cui appartiene \textbf{Transport}.
+
+Le \textit{trigger function} si occuperanno, in maniera analoga l'una all'altra, di sollevare un eccezione se, una volta recuperati gli identificativi dei \textbf{Deposit} relativi alle tabelle in causa, questi non coincidono.
+
+\begin{lstlisting}[caption={Trigger per i vincoli \textbf{isAssignedToValidTransport}}]
+  CREATE OR REPLACE TRIGGER isDriverAssignedToValidTransport_in
+  BEFORE INSERT ON Drives
+  FOR EACH ROW
+  EXECUTE PROCEDURE isDriverAssignedToValidTransport_func();
+
+  CREATE OR REPLACE TRIGGER isShipmentAssignedToValidTransport_in
+  BEFORE INSERT ON Shipment
+  FOR EACH ROW
+  EXECUTE PROCEDURE isShipmentAssignedToValidTransport_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{isDriverAssignedToValidTransport}}]
+  CREATE OR REPLACE FUNCTION isdriverassignedtovalidtransport_func() 
+  RETURNS trigger
+  AS $$
+  DECLARE
+    d_deposit Driver.DepositID %TYPE;
+    t_deposit Transport.DepositID %TYPE;
+  BEGIN
+
+    -- retriving data needed
+    SELECT DepositID
+      INTO d_deposit
+      FROM Driver
+      WHERE BusinessMail = NEW.BusinessMail;
+
+    SELECT DepositID
+      INTO t_deposit
+      FROM Transport
+      WHERE TransportID = NEW.Transportid;
+
+    -- if deposits don't match, raise error
+    IF d_deposit <> t_deposit THEN
+      PERFORM raise_custom_error('E0004');
+    END IF;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{isShipmentAssignedToValidTransport}}]
+  CREATE OR REPLACE FUNCTION isshipmentassignedtovalidtransport_func() 
+  RETURNS trigger
+  AS $$
+  DECLARE
+    t_deposit Transport.DepositID %TYPE;
+  BEGIN
+    -- retriving data needed
+    SELECT DepositID
+    INTO t_deposit
+    FROM Transport
+    WHERE TransportID = NEW.TransportID;
+
+    -- if deposits don't match, raise error
+    IF t_deposit <> NEW.ShippedFrom THEN
+      PERFORM raise_custom_error('E0005');
+    END IF;
+
+    RETURN NEW;
+
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{isDriverWorkingInCorrectCity}}
+
+Questo vincolo si assicura che, all'assegnazione di un \textbf{Driver} a un \textbf{Deposit}, contestuale all'inserimento di una riga in \textbf{Driver}, il \textbf{Driver} lavori per un \textbf{Deposit} corretto, ovvero che un \textbf{Deposit} sia nella stessa \textit{City} del \textbf{Driver}.
+
+In particolare la \textit{trigger function} si occuperà di sollevare un eccezione se, una volta recuperati i dati necessari alla verifica, la funzione \intlink{isSameCity}{isSameCity} restituisce \lstinline{FALSE}.
+
+\begin{lstlisting}[caption={Trigger per il vincolo \textbf{isDriverWorkingInCorrectCity}}]
+  CREATE OR REPLACE TRIGGER isDriverWorkingInCorrectCity_in
+  BEFORE INSERT ON Driver
+  FOR EACH ROW
+  EXECUTE PROCEDURE isDriverWorkingInCorrectCity_func();
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{isDriverWorkingInCorrectCity}}]
+  CREATE OR REPLACE FUNCTION isDriverWorkingInCorrectCity_func()
+  RETURNS TRIGGER AS $$
+  DECLARE
+    d_zp deposit.zipcode%TYPE;
+    d_cy deposit.country%TYPE;
+    a_zp account.zipcode%TYPE;
+    a_cy account.country%TYPE;
+  BEGIN
+    -- retrieving data needed
+    SELECT zipcode, country INTO d_zp, d_cy
+    FROM deposit
+    WHERE depositid = NEW.depositid;
+
+    SELECT zipcode, country INTO a_zp, a_cy
+    FROM account
+    WHERE email = NEW.email;
+    -- checking if the driver is working in the correct city
+    IF NOT isSameCity(d_zp, d_cy, a_zp, a_cy) THEN
+      perform raise_custom_error('E0020');
+    END IF;
+    
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{formatEmployeeBusinessmail}}
+
+Vediamo ora i due trigger per controllare la formattazione corretta della \textbf{BusinessMail} per \textbf{Operator} e \textbf{Driver}.
+
+Per quanto sarebbe stato possibile ridursi a un unica funzione utilizzando SQL Dinamico, si è preferito tenere due funzioni separate essendo stati in primo luogo i vincoli associati a questi trigger individuati separatamente.
+Per entrambi però si seguirà la stessa strategia implementativa, ovvero essendo il formato della \textbf{BusinessMail} interamente calcolabile, viene generata una \textbf{BusinessMail} e inserita al posto di quella fornita all'inserimento. 
+Viene in oltre notificato dal sistema se la sostituzione era necessaria e nel caso qual è la nuova \textbf{BusinessMail}.
+
+\begin{lstlisting}[caption={Trigger per i vincoli \textbf{formatDriverBusinessmail} e \textbf{formatOperatorBusinessmail}}]
+  CREATE OR REPLACE TRIGGER formatDriverBusinessmail_in
+  BEFORE INSERT ON Driver
+  FOR EACH ROW
+  EXECUTE PROCEDURE formatDriverBusinessmail_func();
+
+  CREATE OR REPLACE TRIGGER formatOperatorBusinessmail_in
+  BEFORE INSERT ON Operator
+  FOR EACH ROW
+  EXECUTE PROCEDURE formatOperatorBusinessmail_func();
+\end{lstlisting}
+
+\newpage
+
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{formatDriverBusinessmail}}]
+  CREATE OR REPLACE FUNCTION formatDriverBusinessMail_func()
+  RETURNS TRIGGER
+  AS $$
+  DECLARE
+    name_initial text;
+    acc_surname text;
+    omoniums_num integer;
+    new_mail text;
+  BEGIN
+
+    -- retriving account data
+    SELECT Name, surname
+    INTO name_initial, acc_surname
+    FROM Account
+    WHERE email=new.email;
+
+    -- extracting the initial of the name
+    name_initial = SUBSTR(name_initial, 1,1);
+
+    -- generating first part of the new businessmail
+    new_mail = name_initial || '.' || acc_surname;
+
+    -- looking for omoniums
+    SELECT COUNT(*)
+    INTO omoniums_num
+    FROM Driver
+    WHERE businessmail LIKE (new_mail || '%') AND businessmail <> new.businessmail;
+
+    -- adding omoniums number if needed
+    IF omoniums_num > 0 THEN
+      new_mail = new_mail || omoniums_num::text;
+    END IF;
+
+    -- completing businessmail with domain if needed
+    new_mail = new_mail || '@uninadelivery.driver.com';
+
+    -- if the inserted mail was not correct, notify the user
+    IF NEW.businessmail <> new_mail THEN
+      RAISE NOTICE 'Non standard businessmail inserted. Substituting it with %', new_mail;
+    END IF;
+
+    -- inserting the new businessmail
+    NEW.businessmail = new_mail;
+
+    RETURN NEW;
+
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{formatOperatorBusinessmail}}]
+  CREATE OR REPLACE FUNCTION formatOperatorBusinessMail_func()
+  RETURNS TRIGGER
+  AS $$
+  DECLARE
+    name_initial text;
+    acc_surname text;
+    omoniums_num integer;
+    new_mail text;
+  BEGIN
+
+    -- retriving account data
+    SELECT Name, surname
+    INTO name_initial, acc_surname
+    FROM Account
+    WHERE email=new.email;
+
+    -- extracting the initial of the name
+    name_initial = SUBSTR(name_initial, 1,1);
+
+    -- generating first part of the new businessmail
+    new_mail = name_initial || '.' || acc_surname;
+
+    -- looking for omoniums
+    SELECT COUNT(*)
+    INTO omoniums_num
+    FROM Operator
+    WHERE businessmail LIKE (new_mail || '%') AND businessmail <> new.businessmail;
+
+    -- adding omoniums number if needed
+    IF omoniums_num > 0 THEN
+      new_mail = new_mail || omoniums_num::text;
+    END IF;
+
+    -- completing businessmail with domain if needed
+    new_mail = new_mail || '@uninadelivery.operator.com';
+
+    -- if the inserted mail was not correct, notify the user
+    IF NEW.businessmail <> new_mail THEN
+      RAISE NOTICE 'Non standard businessmail inserted. Substituting it with %', new_mail;
+    END IF;
+
+    -- inserting the new businessmail
+    NEW.businessmail = new_mail;
+
+    RETURN NEW;
+
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{isAccountReachable}}
+
+Questo vincolo si assicura che, all'inserimento di un \textbf{Account}, questo si trovi in una \textit{City} raggiungibile dal servizio, ovvero che sia presente almeno un \textbf{Deposit} nella stessa \textit{City}.
+
+Per fare ciò la \textit{trigger function} si limita a chiamare la funzione \intlink{isSameCity}{isSameCity} con i dati dell'\textbf{Account} inserito e di tutti i \textbf{Deposit}. Se nessuna di queste chiamate restituisce \lstinline{TRUE}, allora l'\textbf{Account} non è raggiungibile e viene sollevata un'eccezione.
+
+\begin{lstlisting}[caption={Trigger per il vincolo \textbf{isAccountReachable}}]
+  CREATE OR REPLACE TRIGGER isAccountReachable_in
+  BEFORE INSERT ON Account
+  FOR EACH ROW
+  EXECUTE PROCEDURE isAccountReachable_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{isAccountReachable}}]
+  CREATE OR REPLACE FUNCTION isAccountReachable_func()
+  RETURNS TRIGGER
+  AS $$
+  BEGIN
+
+    IF NOT EXISTS (
+      SELECT 1
+      FROM Deposit
+      WHERE isSameCity(NEW.ZipCode, NEW.Country, ZipCode, Country)
+    ) THEN
+      PERFORM raise_custom_error('E0007');
+    END IF;
+    RETURN NEW;
+
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{isTransportAdaptedToShipment}}
+
+Questo vincolo si assicura che, all'inserimento di una riga in \textbf{Shipment}, il \textbf{Transport} assegnato sia adatto alla tipologia di \textbf{Shipment} in questione.
+
+In particolare la \textit{trigger function} si occuperà di verificare che, nel caso di spedizione verso clienti, ovvero \textbf{DirectedTo} sia \lstinline{NULL}, il \textbf{Transport} sia di tipo \lstinline{'WheeledSmall}.
+
+\begin{lstlisting}[caption={Trigger per il vincolo \textbf{isTransportAdaptedToShipment}}]
+  CREATE OR REPLACE TRIGGER isTransportAdaptedToShipment_in
+  BEFORE INSERT ON Shipment
+  FOR EACH ROW
+  EXECUTE PROCEDURE isTransportAdaptedToShipment_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{isTransportAdaptedToShipment}}]
+  CREATE OR REPLACE FUNCTION isTransportAdaptToShipment_func()
+  RETURNS TRIGGER AS $$
+  BEGIN
+    IF NEW.directedto IS NULL THEN
+      IF EXISTS (
+        SELECT 1
+          FROM Transport
+          WHERE Transportid = NEW.Transportid
+            AND TransportType <> 'WheeledSmall'
+      ) THEN
+        perform raise_custom_error('E0024');
+      END IF;
+    END IF;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+Per questo vincolo è in oltre necessario assicurarsi che il tipo di \textbf{Transport} non venga cambiato dopo l'assegnazione. Per fare ciò è necessario un ulteriore trigger che si attivi all'aggiornamento di \textbf{Transport} e faccia un controllo analogo a quello visto per \textbf{isTransportAdaptedToShipment}.
+
+\begin{lstlisting}[caption={Trigger per il vincolo \textbf{isTransportAdaptedToShipment}}]
+  CREATE OR REPLACE TRIGGER updateTransportDataConsistency
+  BEFORE UPDATE ON Transport
+  FOR EACH ROW 
+  EXECUTE PROCEDURE updateTransportDataConsistency_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{updateTransportDataConsistency\_func}}]
+  CREATE OR REPLACE FUNCTION updateTransportDataConsistency_func()
+  RETURNS TRIGGER AS $$
+  BEGIN
+    IF NEW.TransportType <> 'WheeledSmall' THEN
+      IF EXISTS (
+        SELECT 1
+          FROM Shipment
+          WHERE Transportid = NEW.Transportid
+            AND directedto IS NULL) THEN
+        perform raise_custom_error('E0024');
+      END IF;
+    END IF;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{checkTransportCapacity}}
+
+Questo vincolo si occupa di controllare che la quantità di prodotti trasportati da un \textbf{Transport} non superi la sua capacità massima. 
+
+Ciò può accadere in due casi:
+\begin{itemize}
+  \item All'inserimento o aggiornamento di una riga in \textbf{Covers}, dove viene conservato per una specifica data e un specifico \textbf{Transport} il numero di prodotti trasportati.
+  \item All'aggiornamento della capacità massima stessa in \textbf{Transport}.
+\end{itemize}
+
+Possiamo però definire una \textit{trigger function} unica per entrambi i casi, in quanto il controllo da effettuare è identico.
+
+Facendo infatti una \lstinline{NATURAL JOIN} tra le tabelle \textbf{Covers} e \textbf{Transport} e selezionando solo le righe relative al \textbf{Transport} in questione, presente sia in \textbf{Covers} che in \textbf{Transport}, basterà controllare che non esistono righe in cui 
+\begin{lstlisting}
+  Covers.OccupiedSpace > Transport.MaxCapacity
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Trigger per il vincolo \textbf{checkTransportCapacity}}]
+  CREATE OR REPLACE TRIGGER checkTransportCapacity
+  BEFORE INSERT OR UPDATE ON Covers
+  FOR EACH ROW
+  EXECUTE PROCEDURE notExeedTransportCapacity_func();
+
+  CREATE OR REPLACE TRIGGER checkTransportCapacity
+  BEFORE UPDATE ON Transport
+  FOR EACH ROW
+  EXECUTE PROCEDURE notExeedTransportCapacity_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{checkTransportCapacity}}]
+  CREATE OR REPLACE FUNCTION notExeedTransportCapacity_func()
+  RETURNS TRIGGER
+  AS $$
+  BEGIN
+     
+    IF EXISTS (
+      -- this select works for both cases, using from NEW only the common field
+      SELECT 1
+      FROM Covers NATURAL JOIN Transport
+      WHERE TransportID = NEW.TransportID AND
+            OccupiedSpace > MaxCapacity
+    ) THEN
+      PERFORM raise_custom_error('E0018');
+    END IF;
+    RETURN NEW;
+
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\newpage
+
+\subsection{\textbf{onlyOneJobPerAccount}}
+
+Questo vincolo si assicura che uno stesso \textbf{Account} sia impiegato al più in un ruolo, ovvero che non sia presente un \textbf{Account} che sia sia \textbf{Driver} che \textbf{Operator}.
+
+Per fare ciò è necessario che il trigger si attivi sia sulla tabella \textbf{Driver} che su \textbf{Operator}, con una logica però pressoché identica. La \textit{trigger function} dovrà infatti guardare se esiste, nell'altra tabella rispetto a quella che ha fatto scattare il trigger, una riga con la stessa \textbf{Email}.
+È possibile dunque utilizzare SQL Dinamico similmente a quanto visto per \intlink{isAddressForSomethingSpecific}{isAddressForSomethingSpecific}.
+
+\begin{lstlisting}[caption={Trigger per il vincolo \textbf{onlyOneJobPerAccount}}]
+  CREATE OR REPLACE TRIGGER onlyOneJobPerAccountDriver_in
+  BEFORE INSERT ON Driver
+  FOR EACH ROW
+  EXECUTE PROCEDURE onlyOneJobPerAccount_func();
+
+  CREATE OR REPLACE TRIGGER onlyOneJobPerAccountOperator_in
+  BEFORE INSERT ON Operator
+  FOR EACH ROW
+  EXECUTE PROCEDURE onlyOneJobPerAccount_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{onlyOneJobPerAccount}}]
+  CREATE OR REPLACE FUNCTION onlyOneJobPerAccount_func()
+  RETURNS TRIGGER
+  AS $$
+  DECLARE
+    flag integer;
+    tableName text;
+  BEGIN
+    -- retrieving other table name, if TG_TABLE_NAME is not an expected table raise an exception
+    IF TG_TABLE_NAME = 'driver' THEN
+      tableName = 'operator';
+    ELSIF TG_TABLE_NAME = 'operator' THEN
+      tableName = 'driver';
+    ELSE 
+      PERFORM raise_custom_error('E0012');
+    END IF;
+
+    -- counting rows with the same email
+    EXECUTE format('SELECT count(*) FROM %I WHERE Email=$1', tableName) 
+    INTO flag USING NEW.Email;
+
+    -- if there is at least one row, raise error
+    IF flag > 0 THEN
+      PERFORM raise_custom_error('E0011');
+    END IF;
+
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{validEmployeeBirthdate}}
+
+Questo vincolo si assicura che la data di nascita di un \textbf{Driver} o di un \textbf{Operator} sia superiore ai 18 anni.
+
+Per fare ciò la \textit{trigger function} si limita a controllare che gli anni di età dell'\textbf{Account} siano maggiori di 18.
+
+\begin{lstlisting}[caption={Trigger per il vincolo \textbf{validEmployeeBirthdate}}]
+  CREATE OR REPLACE TRIGGER validEmployeeBirthdateDriver_in
+  BEFORE INSERT ON Driver
+  FOR EACH ROW
+  EXECUTE PROCEDURE validEmployeeBirthdate_func();
+
+  CREATE OR REPLACE TRIGGER validEmployeeBirthdateOperator_in
+  BEFORE INSERT ON Operator
+  FOR EACH ROW
+  EXECUTE PROCEDURE validEmployeeBirthdate_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione per il vincolo \textbf{validEmployeeBirthdate}}]
+  CREATE OR REPLACE FUNCTION validemployeebirthdate_func()
+  RETURNS TRIGGER
+  AS $$
+  DECLARE
+    employee_age integer;
+  BEGIN
+    -- retrieving employee age
+    SELECT EXTRACT( YEAR FROM age(Birthdate))
+      INTO employee_age
+      FROM account
+      WHERE Email = NEW.Email;
+
+    -- if employee is not 18 or older, raise error
+    IF employee_age < 18 THEN
+      PERFORM raise_custom_error('E0001');
+    END IF;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\section{Gestione del Database}
+
+In ultimo sono riportate le funzioni utilizzate per la gestione del database, ovvero le funzioni che permettono di aggiornare i dati in maniera consistente e automatizzata.
+
+\subsection{\textbf{blockOperatorDeletion}}
+
+Questa funzione si occupa di bloccare l'eliminazione di un \textbf{Operator} se ci sono ancora \textbf{Shipment} da consegnare da lui create.
+
+Per fare ciò la funzione si limita a controllare se esistono \textbf{Shipment} con \textbf{Operator} uguale a quello che si sta cercando di eliminare che non siano ancora arrivate e in tale caso lancia un eccezione.
+
+\begin{lstlisting}[caption={Trigger per implementare \textbf{blockOperatorDeletion}}]
+  CREATE OR REPLACE TRIGGER blockOperatorDeletion
+  BEFORE DELETE ON Operator
+  FOR EACH ROW
+  EXECUTE PROCEDURE blockOperatorDeletion_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{blockOperatorDeletion}}]
+  CREATE OR REPLACE FUNCTION blockOperatorDeletion_func()
+  RETURNS TRIGGER
+  AS $$
+  BEGIN
+    IF EXISTS (
+      SELECT 1
+      FROM Shipment
+      WHERE BusinessMail = OLD.BusinessMail AND
+            HasArrived <> TRUE
+    ) THEN
+      PERFORM raise_custom_error('E0019');
+    END IF;
+    RETURN OLD;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{completedOrder}}
+
+Questa funzione si occupa di aggiornare lo stato di un \textbf{Order}, impostando il campo \textbf{isCompleted} a \textit{TRUE} se il prodotto è stato consegnato al cliente, ovvero se esiste una \textbf{Shipment} con \textbf{HasArrived} impostato a \textit{TRUE} che spedisce tale \textbf{Order}.
+
+Per fare ciò è chiaramente più efficace innescare il trigger all'aggiornamento di \textbf{Shipment} piuttosto che di \textbf{Order}, in modo da intercettare l'aggiornamento di \textbf{HasArrived} su una spedizione diretta a clienti.
+
+\begin{lstlisting}[caption={Trigger per implementare \textbf{completedOrder}}]
+  CREATE OR REPLACE TRIGGER completedOrder
+  AFTER UPDATE ON Shipment
+  FOR EACH ROW
+  WHEN (NEW.directedto IS NULL AND NEW.hasarrived = TRUE)
+  EXECUTE PROCEDURE completedOrder_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{completedOrder}}]
+  CREATE OR REPLACE FUNCTION completedOrder_func()
+  RETURNS TRIGGER
+  AS $$
+  BEGIN
+    UPDATE "Order" 
+      SET iscompleted = TRUE 
+      WHERE OrderID IN (
+        SELECT OrderID 
+          FROM ships 
+          WHERE shipmentID = NEW.shipmentID
+      );
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{CoversOccupiedSpaceUpdate}}
+
+Questa funzione si occupa di aggiornare il campo \textbf{OccupiedSpace} di \textbf{Covers} ogni volta che venga inserita, aggiornata o eliminata una riga in \textbf{Ships} relativa alla spedizione che riguarda quella \textbf{Covers}.
+
+La funzione è divisa in due parti, una prima che gestisca l'eliminazione della vecchia quantità in caso ci si trovi in un aggiornamento o eliminazione, e una seconda che gestisce l'inserimento della nuova quantità nel caso ci si trovi in un inserimento o un aggiornamento.
+
+In entrambi i casi, la funzione recuperi dati necessari per identificare la covers e la quantità da aggiungere o rimuovere, e aggiorna il campo \textbf{OccupiedSpace} di \textbf{Covers}.
+
+\begin{lstlisting}[caption={Trigger per implementare \textbf{CoversOccupiedSpaceUpdate}}]
+  CREATE OR REPLACE TRIGGER CoversOccupiedSpaceUpdate
+  AFTER INSERT OR UPDATE OR DELETE ON Ships
+  FOR EACH ROW
+  EXECUTE PROCEDURE CoversOccupiedSpaceUpdate_func();
+\end{lstlisting}
+
+\newpage
+
+\begin{lstlisting}[caption={Funzione \textbf{CoversOccupiedSpaceUpdate}}]
+  CREATE OR REPLACE FUNCTION CoversOccupiedSpaceUpdate_func()
+  RETURNS TRIGGER
+  AS $$
+  DECLARE
+    Sdate Shipment.shippingdate%TYPE;
+    Tid Transport.transportID%TYPE;
+    Qty numeric(100,3);
+  BEGIN
+    -- check if it's an update/insert
+    IF NEW IS NOT NULL THEN
+
+      -- retrieve data to identify the covers row
+      SELECT shippingdate, transportID
+        INTO Sdate, Tid
+        FROM shipment
+        WHERE shipmentID = NEW.shipmentID;
+      -- retrieve the quantity of the order
+      SELECT quantity * PackageSizeLiters
+        INTO Qty
+        FROM "Order" JOIN PRODUCT USING (name, supplier)
+        WHERE orderID = NEW.orderID;
+
+      UPDATE covers
+        SET occupiedspace = occupiedspace + Qty
+        WHERE date = Sdate AND transportID = Tid;
+    END IF;
+    -- check if it's an update/delete
+    IF OLD IS NOT NULL THEN
+
+      -- retrieve data to identify the covers row
+      SELECT shippingdate, transportID
+        INTO Sdate, Tid
+        FROM shipment
+        WHERE shipmentID = OLD.shipmentID;
+      -- retrieve the quantity of the order
+      SELECT quantity * PackageSizeLiters
+        INTO Qty
+        FROM "Order" JOIN PRODUCT USING (name, supplier)
+        WHERE orderID = OLD.orderID;
+
+      UPDATE covers
+        SET occupiedspace = occupiedspace - Qty
+        WHERE date = Sdate AND transportID = Tid;
+        IF TG_OP = 'DELETE' THEN
+          RETURN OLD;
+        END IF;
+    END IF;
+
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{depositOccupiedSpaceUpdate}}
+
+Similmente al trigger precedente, questa funzione si occupa di aggiornare il campo \textbf{OccupiedSpace} di \textbf{Deposit} ogni volta che venga inserita, aggiornata o eliminata una riga in \textbf{Stores} relativa al deposito che riguarda quell \textbf{Deposit}.
+
+La logica della funzione è identica a quella di \textbf{CoversOccupiedSpaceUpdate}, con la differenza che in questo caso la quantità da aggiungere o rimuovere è recuperata direttamente dalla riga di \textbf{Stores}.
+
+In questo particolare caso però è necessario, per evitare conflitti col vincolo \intlink{correctOccupiedSpaceForDeposit}{correctOccupiedSpaceForDeposit} definire due comportamenti distinti per \lstinline{UPDATE}, in base l'aggiornamento sia una diminuzione o un aumento.
+
+Il vincolo citato infatti si occupa di controllare che la quantità di prodotto presente in un \textbf{Deposit} non sia mai meno del valore conservato in \textbf{OccupiedSpace} e per fare ciò confronta il valore di \textbf{OccupiedSpace} con la somma delle quantità di prodotto presenti in \textbf{Stores}.
+
+Quindi, sarà necessario far attivare il trigger nel momento in cui la quantità di prodotto conservato è minima, ovvero \lstinline{BEFORE} se si tratta di un aumento e \lstinline{AFTER} se si tratta di una diminuzione.
+
+\begin{lstlisting}[caption={Trigger per implementare \textbf{depositOccupiedSpaceUpdate}}]
+  CREATE OR REPLACE TRIGGER updateDepositOccupiedSpacein
+  BEFORE INSERT ON Stores
+  FOR EACH ROW
+  EXECUTE PROCEDURE depositOccupiedSpaceUpdate_func();
+
+  CREATE OR REPLACE TRIGGER updateDepositOccupiedSpace
+  AFTER UPDATE ON Stores
+  FOR EACH ROW
+  WHEN (NEW.quantity < OLD.quantity)
+  EXECUTE PROCEDURE depositOccupiedSpaceUpdate_func();
+
+  CREATE OR REPLACE TRIGGER updateDepositOccupiedSpaceUp
+  BEFORE UPDATE ON Stores
+  FOR EACH ROW
+  WHEN (NEW.quantity > OLD.quantity)
+  EXECUTE PROCEDURE depositOccupiedSpaceUpdate_func();
+
+  CREATE OR REPLACE TRIGGER deleteDepositOccupiedSpaceDl
+  AFTER DELETE ON Stores
+  FOR EACH ROW
+  EXECUTE PROCEDURE depositOccupiedSpaceUpdate_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{depositOccupiedSpaceUpdate}}]
+  CREATE OR REPLACE FUNCTION depositOccupiedSpaceUpdate_func()
+  RETURNS TRIGGER
+  AS $$
+  DECLARE
+    Psize Product.PackageSizeLiters %TYPE;
+  BEGIN
+  -- check if it's an update/insert
+  IF NEW IS NOT NULL THEN
+    -- retrieve the package size of the product
+    SELECT PackageSizeLiters
+      INTO Psize
+      FROM Product
+      WHERE name = NEW.name AND supplier = NEW.supplier;
+    UPDATE deposit
+      SET occupiedspace = occupiedspace + (NEW.quantity * Psize)
+      WHERE depositID = NEW.depositID;
+  END IF;
+  -- check if it's an update/delete 
+  IF OLD IS NOT NULL THEN
+  -- retrieve the package size of the product
+    SELECT PackageSizeLiters
+      INTO Psize
+      FROM Product
+      WHERE name = OLD.name AND supplier = OLD.supplier;
+    UPDATE deposit
+      SET occupiedspace = occupiedspace - (OLD.quantity * Psize)
+      WHERE depositID = OLD.depositID;
+    IF TG_OP = 'DELETE' THEN
+      RETURN OLD;
+    END IF;
+  END IF;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{deleteStoredProducts}}
+
+Questo trigger si occupa di rimuovere i prodotti da un \textbf{Deposit} ogni volta che la \textbf{Quantity} scende a \lstinline{0}.
+
+Per fare ciò la \textit{trigger function} si limita a controllare dopo inserimenti o aggiornamenti in \textbf{Stores} se \textbf{Quantity} è \lstinline{0}, e in tal caso elimina la riga.
+
+\begin{lstlisting}[caption={Trigger per implementare \textbf{deleteStoredProducts}}]
+  CREATE OR REPLACE TRIGGER deleteStoredProducts
+  AFTER INSERT OR UPDATE ON Stores
+  FOR EACH ROW
+  WHEN (NEW.quantity = 0)
+  EXECUTE PROCEDURE deleteStoredProducts_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{deleteStoredProducts}}]
+  CREATE OR REPLACE FUNCTION deleteStoredProducts_func()
+  RETURNS TRIGGER
+  AS $$
+  BEGIN
+    DELETE FROM stores
+      WHERE depositid = NEW.depositid AND
+            name = NEW.name AND
+            supplier = NEW.supplier;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{orderQuantityUpdate}}
+
+Questo trigger si occupa di aggiornare, se possibile, a seguito di un aggiornamento della quantità di prodotto di un \textbf{Order}, lo spazio occupato nella \textbf{Covers} e nei \textbf{Deposit} che lo riguardano.
+
+Per fare ciò la \textit{trigger function} ripristina in tutti i \textbf{Deposit} i valori precedenti all'update per poi avvalersi della funzione \intlink{checkdeposithasenoughproducts}{checkDepositHasEnoughProducts} chiamata per ogni \textbf{Shipment} riguardante l'\textbf{Order} in questione che non sia finita. Essendo che la funzione \textbf{checkDepositHasEnoughProducts} si occupa di aggiornare i \textbf{Deposit}, viene chiamata dalla funzione in ordine crescente sulle date di spedizione, in modo da aggiornare prima i \textbf{Deposit} coinvolti nelle spedizioni più vecchie.
+
+Successivamente con un meccanismo simile, la funzione aggiorna tutte le \textbf{Covers} riguardanti l'\textbf{Order} in questione e \textbf{Shipment} non ancora consegnate.
+
+\begin{lstlisting}[caption={Trigger per implementare \textbf{orderQuantityUpdate}}]
+  CREATE OR REPLACE TRIGGER orderQuantityUpdate
+  AFTER UPDATE ON "Order"
+  FOR EACH ROW
+  EXECUTE PROCEDURE orderQuantityUpdate_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{orderQuantityUpdate}}]
+  CREATE OR REPLACE FUNCTION orderQuantityUpdate_func()
+  RETURNS TRIGGER
+  AS $$
+  DECLARE
+    OPsize Product.PackageSizeLiters%TYPE;
+    NPsize Product.PackageSizeLiters%TYPE;
+    cover Covers%ROWTYPE;
+    o_shipment Shipment%ROWTYPE;
+  BEGIN
+    -- if the oreder is already arrived to client can't be modified
+    IF OLD.iscompleted = true THEN
+      perform raise_custom_error('E0012');
+    END IF;
+    -- retriving the old and new package size
+    SELECT PackageSizeLiters
+      INTO OPsize
+      FROM Product
+      WHERE name = OLD.name AND supplier = OLD.supplier;
+    SELECT PackageSizeLiters
+      INTO NPsize
+      FROM Product
+      WHERE name = NEW.name AND supplier = NEW.supplier;
+
+      -- for each unfinished shipment that ships the order, starting from the oldest
+      FOR o_shipment IN (
+        SELECT shipment.*
+          FROM ships NATURAL JOIN shipment
+          WHERE orderid = NEW.orderid AND (hasarrived = false OR hasarrived IS NULL)
+          ORDER BY shippingdate ASC
+      )
+      LOOP
+        IF o_shipment.directedto IS NOT NULL THEN
+          INSERT INTO stores (name, supplier, depositid, quantity)
+            VALUES (OLD.name, OLD.supplier, o_shipment.shippedfrom, OLD.quantity)
+          ON CONFLICT (name, supplier, depositid) DO UPDATE
+            SET quantity = stores.quantity + EXCLUDED.quantity;
+          UPDATE stores
+            SET quantity = quantity - OLD.quantity
+            WHERE depositid = o_shipment.directedto AND name = OLD.name AND supplier = OLD.supplier;
+        END IF;
+        INSERT INTO stores (name, supplier, depositid, quantity)
+          VALUES (OLD.name, OLD.supplier, o_shipment.shippedfrom, NEW.quantity)
+        ON CONFLICT (name, supplier, depositid) DO UPDATE
+          SET quantity = stores.quantity + EXCLUDED.quantity;
+
+        UPDATE stores
+          SET quantity = quantity - OLD.quantity
+          WHERE depositid = o_shipment.shippedfrom AND name = OLD.name AND supplier = OLD.supplier;
+
+      -- check if the deposit can handle the new quantity
+        PERFORM checkdeposithasenoughproducts(o_shipment.directedto, o_shipment.shippedfrom, NEW.name, NEW.supplier, NEW.quantity);
+      END LOOP;
+
+    -- try to update all the covers that ships the order and are not arrived
+    FOR cover IN (
+      SELECT covers.* 
+        FROM (ships NATURAL JOIN shipment) JOIN covers
+        ON (shippingdate = date AND shipment.transportid = shipment.transportid)
+        WHERE orderid = NEW.orderid AND 
+            (hasarrived = false OR hasarrived IS NULL)
+    ) LOOP
+      UPDATE covers
+        SET occupiedspace = occupiedspace + (NEW.quantity * NPsize) - (OLD.quantity * OPsize)
+        WHERE date = cover.date AND transportid = cover.transportid;
+    END LOOP;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{updateProductSize}}
+
+Questo trigger si occupa di aggiornare, se possibile, a seguito di un aggiornamento della dimensione di un prodotto, lo spazio occupato nella \textbf{Covers} e nei \textbf{Deposit} che lo riguardano.
+
+Per fare ciò la \textit{trigger function} utilizza una tecnica analoga a quella vista in \textbf{orderQuantityUpdate}, con l'unica differenza effettiva rappresentata dalle modalità di raccolta dei dati.
+
+In questo casi infatti sarà necessario di ben due cicli \lstinline{FOR} per caso per aggiornare prima i \textbf{Deposit} e poi le \textbf{Covers}.
+
+\begin{lstlisting}[caption={Trigger per implementare \textbf{updateProductSize}}]
+  CREATE OR REPLACE TRIGGER updateProductSize
+  AFTER UPDATE OR DELETE ON Product
+  FOR EACH ROW
+  EXECUTE PROCEDURE updateProductSize_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{updateProductSize}}]
+  CREATE OR REPLACE FUNCTION updateProductSize_func()
+  RETURNS TRIGGER AS $$
+  DECLARE
+    record RECORD;
+  BEGIN
+      -- check if it's an update/insert
+      IF NOT (NEW IS NULL) THEN
+        -- update the occupied space of the deposit
+        FOR record IN (
+          SELECT quantity, depositID
+            FROM stores NATURAL JOIN deposit
+            WHERE name = NEW.name AND supplier = NEW.supplier
+        ) LOOP
+          UPDATE deposit
+            SET occupiedspace = occupiedspace + (NEW.PackageSizeLiters * record.quantity)
+            WHERE depositID = record.depositID;
+        END LOOP;
+        -- update the occupied space of the covers
+        FOR record IN (
+          SELECT quantity, date, covers.transportID
+            FROM "Order" NATURAL JOIN ships NATURAL JOIN shipment JOIN covers
+            ON date=shippingdate AND shipment.transportID = covers.transportID
+            WHERE name = NEW.name AND supplier = NEW.supplier
+        ) LOOP
+          UPDATE covers
+            SET occupiedspace = occupiedspace + (NEW.PackageSizeLiters * record.quantity)
+            WHERE transportID = record.transportID AND date = record.date;
+        END LOOP;
+      END IF;
+      -- check if it's an update/delete
+      IF NOT (OLD IS NULL) THEN
+
+        -- update the occupied space of the deposit
+        FOR record IN (
+          SELECT quantity, depositID
+            FROM stores NATURAL JOIN deposit
+            WHERE name = OLD.name AND supplier = OLD.supplier
+        ) LOOP
+
+          UPDATE deposit
+            SET occupiedspace = occupiedspace - (OLD.PackageSizeLiters * record.quantity)
+            WHERE depositID = record.depositID;
+        END LOOP;
+        -- update the occupied space of the covers
+        FOR record IN (
+          SELECT quantity, date, covers.transportID
+            FROM "Order" NATURAL JOIN ships NATURAL JOIN shipment JOIN covers
+            ON date=shippingdate AND shipment.transportID = covers.transportID
+            WHERE name = OLD.name AND supplier = OLD.supplier
+        ) LOOP
+    
+          UPDATE covers
+            SET occupiedspace = occupiedspace - (OLD.PackageSizeLiters * record.quantity)
+            WHERE transportID = record.transportID AND date = record.date;
+        END LOOP;
+        -- returning the correct record
+        IF TG_OP = 'DELETE' THEN
+          RETURN OLD;
+        END IF;
+
+      END IF;
+      -- returning the correct record
+      RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{updateDates}}
+
+Vediamo ora l'insieme di funzioni che si occupano controllare la coerenza delle date inserite o aggiornate in \textbf{Shipment} e \textbf{Order}
+
+Per fare ciò è sufficiente controllare che la data di emissione di un \textbf{Order} sia antecedente a tutte le date di spedizione in cui quell'\textbf{Order} è coinvolto, controllando eventuali aggiornamenti o inserimenti su \textbf{Order}, \textbf{Shipment} e \textbf{Ships}.
+
+\begin{lstlisting}[caption={Trigger per implementare \textbf{updateDates}}]
+  CREATE OR REPLACE TRIGGER correctOrderEmissionDate
+  BEFORE INSERT OR UPDATE ON "Order"
+  FOR EACH ROW EXECUTE PROCEDURE correctOrderEmissionDate_func();
+
+  CREATE OR REPLACE TRIGGER correctShippingDate
+  BEFORE INSERT OR UPDATE ON shipment
+  FOR EACH ROW EXECUTE PROCEDURE correctShippingDate_func();
+
+  CREATE OR REPLACE TRIGGER correctShipsEmissionDate
+  BEFORE INSERT OR UPDATE ON Ships
+  FOR EACH ROW EXECUTE PROCEDURE correctShipsEmissionDate_func();
+
+  CREATE OR REPLACE TRIGGER correctCoversDate
+  BEFORE INSERT ON Covers
+  FOR EACH ROW 
+  EXECUTE PROCEDURE correctCoversDate_func();
+
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{correctOrderEmissionDate}}]
+  CREATE OR REPLACE FUNCTION correctOrderEmissionDate_func()
+  RETURNS TRIGGER AS $$
+  BEGIN
+    IF EXISTS (
+        select 1 
+        FROM Ships NATURAL JOIN shipment
+        WHERE orderid = NEW.orderid
+          AND shippingdate < NEW.emissiondate
+    ) THEN 
+      perform raise_custom_error('E0022');
+    END IF;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{correctShippingDate}}]
+  CREATE OR REPLACE FUNCTION correctShippingDate_func()
+  RETURNS TRIGGER AS $$
+  BEGIN
+    IF EXISTS (
+        select 1 
+        FROM Ships NATURAL JOIN "Order"
+        WHERE shipmentid = NEW.shipmentid
+          AND NEW.shippingdate < emissiondate
+    ) THEN
+      perform raise_custom_error('E0022');
+    END IF;
+    UPDATE covers 
+          SET date=NEW.shippingdate, 
+              transportid=NEW.transportid 
+        WHERE date=OLD.shippingdate 
+          AND transportid=OLD.transportid;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{correctShipsEmissionDate}}]
+  CREATE OR REPLACE FUNCTION correctShipsEmissionDate_func()
+  RETURNS TRIGGER AS $$
+  BEGIN
+    IF EXISTS (
+        select 1 
+        FROM "Order" NATURAL JOIN Ships NATURAL JOIN shipment
+        WHERE shipmentid = NEW.shipmentid 
+          AND orderid = NEW.orderid
+          AND emissiondate > shippingdate
+    ) THEN
+      perform raise_custom_error('E0022');
+    END IF;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{checkAccountDataConsistency}}
+
+Questa funzione si occupa di controllare, in seguito a un aggiornamento su \textbf{Account}, che la nuova età non sia inferiore a 18 anni se l'\textbf{Account} è un \textbf{Driver} o un \textbf{Operator}.
+
+Per fare ciò la funzione si limita a controllare se l'\textbf{Account} in questione è un \textbf{Driver} o un \textbf{Operator} e in tal caso controlla che la nuova età sia maggiore di 18 anni.
+
+\begin{lstlisting}[caption={Trigger per implementare \textbf{checkAccountDataConsistency}}]
+  CREATE OR REPLACE TRIGGER checkAccountDataConsistency
+  BEFORE UPDATE ON Account
+  FOR EACH ROW
+  EXECUTE PROCEDURE checkAccountDataConsistency_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{checkAccountDataConsistency}}]
+  CREATE OR REPLACE FUNCTION employeeBirthdateConsistency_func()
+  RETURNS TRIGGER AS $$
+  DECLARE
+    acc_age integer;
+  BEGIN
+
+    acc_age = (SELECT EXTRACT(YEAR FROM age(NEW.birthdate)));
+
+    IF EXISTS (
+        SELECT 1 
+        FROM driver
+        WHERE email = NEW.email
+        UNION 
+        SELECT 1
+        FROM operator
+        WHERE email = NEW.email
+    ) AND acc_age<18 THEN
+      perform raise_custom_error('E0001');
+    END IF;
+
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+\subsection{\textbf{deletedShipment}}
+
+Questa funzione si occupa di reinserire nei \textbf{Deposit} di partenza di una \textbf{Shipment} tra deposit che viene eliminata i prodotti che erano stati spostati in tale \textbf{Shipment}.
+
+Per fare ciò la funzione si limita ad aggiornare il campo \textbf{Quantity} della tabella \textbf{Stores} del deposito di partenza, aggiungendo la quantità di prodotto spostata.
+
+\begin{lstlisting}[caption={Trigger per implementare \textbf{deletedShipment}}]
+  CREATE OR REPLACE TRIGGER deletedShipment
+  AFTER DELETE ON Shipment
+  FOR EACH ROW
+  EXECUTE PROCEDURE deletedShipment_func();
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funzione \textbf{deletedShipment}}]
+  CREATE OR REPLACE FUNCTION deletedShipment_func()
+  RETURNS TRIGGER AS $$
+  DECLARE
+    QTY integer;
+    PName varchar(50);
+    Psupp varchar(50);
+    shipped_order Ships%ROWTYPE;
+  BEGIN
+    IF OLD.directedTo IS NOT NULL  THEN
+      FOR shipped_order IN (SELECT * FROM Ships WHERE ShipmentID=OLD.ShipmentID) LOOP
+          -- for each order ...
+          SELECT quantity , name , supplier 
+            INTO QTY , PName , Psupp
+            FROM "Order" NATURAL JOIN PRODUCT
+            WHERE OrderID = shipped_order.OrderID;
+
+          -- restore the products in the old deposit
+          INSERT INTO stores (depositid, name, supplier, quantity)
+            VALUES (OLD.ShippedFrom, PName, Psupp, QTY)
+            ON CONFLICT (depositid, name, supplier) DO UPDATE
+            SET quantity = stores.quantity + EXCLUDED.quantity;
+
+          UPDATE stores SET quantity = quantity - QTY
+            WHERE depositid = OLD.directedTo AND name = PName AND supplier = Psupp;
+      END LOOP;
+    END IF;
+
+    RETURN OLD;
+  END;
+  $$ LANGUAGE plpgsql;
+\end{lstlisting}
