@@ -5,55 +5,55 @@ import java.time.LocalDate;
 public class Order {
 
   /**
-   * Default constructor.
+   * Id of the order.
    */
   private int id;
 
   /**
-   * Default constructor.
+   * Emission date of the order.
    */
   private LocalDate emissionDate;
 
   /**
-   * Default constructor.
+   * Express delivery of the order.
    */
   private boolean isExpress;
 
   /**
-   * Default constructor.
+   * Extra warranty of the order.
    */
   private int extraWarranty;
 
   /**
-   * Default constructor.
+   * Client of the order.
    */
   private Account account;
 
   /**
-   * Default constructor.
+   * Quantity of the order.
    */
   private int quantity;
   /**
-   * Default constructor.
+   * Product of the order.
    */
   private Product product;
 
   /**
-   * Default constructor.
+   * Expected delivery date of the order.
    */
   private LocalDate expectedDeliveryDate;
 
   /**
-   * Default constructor.
+   * Express delivery days.
    */
   private static final int EXPRESSDELIVERY  = 3;
   /**
-   * Default constructor.
+   * Standard delivery days.
    */
   private static final int STANDARDDELIVERY = 7;
 
   /**
-   * Default constructor.
+   * Constructor with parameters.
 
    * @param orderid ciao
    * @param emissiondate ciao
@@ -83,153 +83,153 @@ public class Order {
   }
 
   /**
-   * Default constructor.
-
-   * @return ciao
+   * Getter of the order id.
+   *
+   * @return order id
    */
   public int getOrderId() {
     return id;
   }
 
   /**
-   * Default constructor.
-
-   * @return ciao
+   * Getter of the emission date.
+   *
+   * @return emission date
    */
   public LocalDate getEmissionDate() {
     return emissionDate;
   }
 
   /**
-   * Default constructor.
-
-   * @return ciao
+   * Getter of the express delivery.
+   *
+   * @return express delivery
    */
   public boolean getIsExpress() {
     return isExpress;
   }
 
   /**
-   * Default constructor.
-
-   * @return ciao
+   * Getter of the extra warranty.
+   *
+   * @return time of extra warranty
    */
   public int getExtraWarranty() {
     return extraWarranty;
   }
 
   /**
-   * Default constructor.
-
-   * @return ciao
+   * Getter of the client email.
+   *
+   * @return client email
    */
   public String getAccountEmail() {
     return account.getEmail();
   }
 
   /**
-   * Default constructor.
-
-   * @return ciao
+   * Getter of the quantity.
+   *
+   * @return quantity
    */
   public int getQuantity() {
     return quantity;
   }
 
   /**
-   * Default constructor.
-
-   * @return ciao
+   * Getter of the name of the product.
+   *
+   * @return name of the product
    */
   public String getProductName() {
     return product.getName();
   }
 
   /**
-   * Default constructor.
-
-   * @return ciao
+   * Getter of the supplier of the product.
+   *
+   * @return supplier of the product
    */
   public String getProductSupplier() {
     return product.getSupplier();
   }
 
   /**
-   * Default constructor.
-
-   * @return ciao
+   * Getter of the Expected Delivery Date.
+   *
+   * @return expected delivery date
    */
   public LocalDate getExpectedDeliveryDate() {
     return expectedDeliveryDate;
   }
 
   /**
-   * Default constructor.
+   * Setter of the order id.
 
-   * @param orderid ciao
+   * @param orderid order id
    */
   public void setOrderId(final int orderid) {
     this.id = orderid;
   }
 
   /**
-   * Default constructor.
+   * Setter of the emission date.
 
-   * @param emissiondate ciao
+   * @param emissiondate emission date
    */
   public void setEmissionDate(final LocalDate emissiondate) {
     this.emissionDate = emissiondate;
   }
 
   /**
-   * Default constructor.
+   * Setter of the express delivery.
 
-   * @param isexpress ciao
+   * @param isexpress express delivery
    */
   public void setIsExpress(final boolean isexpress) {
     this.isExpress = isexpress;
   }
 
   /**
-   * Default constructor.
+   * Setter of the extra warranty.
 
-   * @param extrawarranty ciao
+   * @param extrawarranty extra warranty
    */
   public void setExtraWarranty(final int extrawarranty) {
     this.extraWarranty = extrawarranty;
   }
 
   /**
-   * Default constructor.
+   * Setter of the client.
 
-   * @param client ciao
+   * @param client client
    */
   public void setAccount(final Account client) {
     this.account = client;
   }
 
   /**
-   * Default constructor.
+   * Setter of the quantity.
 
-   * @param qty ciao
+   * @param qty quantity
    */
   public void setQuantity(final int qty) {
     this.quantity = qty;
   }
 
   /**
-   * Default constructor.
+   * Setter of the product.
 
-   * @param pct ciao
+   * @param pct product
    */
   public void setProduct(final Product pct) {
     this.product = pct;
   }
 
   /**
-   * Default constructor.
+   * Setter of the expected delivery date.
 
-   * @param expecteddeliverydate ciao
+   * @param expecteddeliverydate expected delivery date
    */
   public void setExpectedDeliveryDate(final LocalDate expecteddeliverydate) {
     this.expectedDeliveryDate = expecteddeliverydate;

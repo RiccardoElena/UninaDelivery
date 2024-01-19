@@ -157,4 +157,21 @@ public class Product {
     this.price = pPrice;
   }
 
+  /**
+   * Method to get the string representation of the product.
+   *
+   * @return string
+   */
+  @Override
+  public String toString() {
+    return "Product ["
+            + "category='" + category + '\''
+            + ", name='" + name + '\''
+            + ", supplier='" + supplier + '\''
+            + ", description='" + description + '\''
+            + ", packageSizeLiters=" + packageSizeLiters
+            + ", isFragile=" + isFragile
+            + ", price=" + price
+            + ']';
+  }
 }
