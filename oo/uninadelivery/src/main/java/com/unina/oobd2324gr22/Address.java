@@ -2,6 +2,8 @@ package com.unina.oobd2324gr22;
 
 public class Address extends Area {
 
+  // Attributes
+
   /**
     * Address number of the address.
     */
@@ -11,6 +13,8 @@ public class Address extends Area {
     * Name of the street of the address.
     */
   private String street;
+
+  // Constructors
 
   /**
     * Constructor with parameters.
@@ -30,6 +34,8 @@ public class Address extends Area {
     this.addressNumber = number;
     this.street = streetName;
   }
+
+  // Getters and Setters
 
   /**
    * Getter of the address number.

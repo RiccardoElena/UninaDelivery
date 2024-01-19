@@ -4,6 +4,11 @@ import java.time.LocalDate;
 
 /**
  * This class represents an account.
+ * <ul>
+ * <li> Each account is a Customer.
+ * <li> It can be extended to Operator and Driver to represent
+ * specific types of accounts.
+ * </ul>
  */
 public class Account {
 
