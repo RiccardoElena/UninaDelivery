@@ -174,4 +174,20 @@ public class Account {
     this.address = accAddress;
   }
 
+  /**
+   * To string method.
+   */
+  @Override
+  public String toString() {
+    return "Account{"
+          + "\nname = '" + this.name + "',"
+          + "\nsurname = '" + this.surname + "',"
+          + "\nemail = '" + this.email + "',"
+          + "\nbirthdate = '" + this.birthdate + "',"
+          + "\npropic = '" + this.propic + "',"
+          + "\npassword = '" + this.password + "',"
+          + "\naddress = " + this.address.toString().replace("\n", "\n\t")
+          + "\n}";
+  }
+
 }

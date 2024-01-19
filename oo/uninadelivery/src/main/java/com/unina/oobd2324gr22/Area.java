@@ -148,11 +148,10 @@ public class Area {
   @Override
   public String toString() {
     return "Area{"
-            + "zipCode='" + this.zipCode + '\''
-            + ", city='" + this.city + '\''
-            + ", state='" + this.state + '\''
-            + ", country='" + this.country + '\''
-            + ", worldZone='" + this.worldZone + '\''
+            + "\nzipCode = '" + this.zipCode + "',"
+            + "\ncity = '" + this.city + "',"
+            + "\nstate = '" + this.state + "',"
+            + "\ncountry = '" + this.country + "',"
             + '}';
   }
 

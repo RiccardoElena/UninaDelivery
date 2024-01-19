@@ -75,13 +75,13 @@ public class Address extends Area {
   @Override
   public String toString() {
     return "Address ["
-            + "addressNumber=" + this.addressNumber
-            + ", street='" + this.street + '\''
-            + ", zipCode='" + this.getZipCode() + '\''
-            + ", city='" + this.getCity() + '\''
-            + ", state='" + this.getState() + '\''
-            + ", country='" + this.getCountry() + '\''
-            + ", worldZone='" + this.getWorldZone() + '\''
+            + "\naddressNumber = " + this.addressNumber + ','
+            + "\nstreet = '" + this.street + "',"
+            + "\nzipCode = '" + this.getZipCode() + "',"
+            + "\ncity = '" + this.getCity() + "',"
+            + "\nstate = '" + this.getState() + "',"
+            + "\ncountry = '" + this.getCountry() + "',"
+            + "\nworldZone = '" + this.getWorldZone() + "'"
             + '}';
   }
 

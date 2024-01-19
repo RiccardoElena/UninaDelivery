@@ -240,10 +240,17 @@ public class Order {
    */
   @Override
   public String toString() {
-    return "Order [id=" + id + ", emissionDate=" + emissionDate
-              + ", isExpress=" + isExpress  + ", extraWarranty="
-              + extraWarranty + ", account=" + account + ", quantity="
-              + quantity + ", product=" + product + ", expectedDeliveryDate="
-              + expectedDeliveryDate + "]";
+    return "Order{"
+              + "\nid ='" + this.id + "',"
+              + "\nemissionDate = '" + this.emissionDate + "',"
+              + "\nisExpress = " + this.isExpress + ","
+              + "\nextraWarranty = " + this.extraWarranty + ","
+              + "\naccount = " + this.account.toString()
+                                          .replace("\n", "\n\t") + "',"
+              + "\nquantity = " + this.quantity + ","
+              + "\nproduct = " + this.product.toString()
+                                          .replace("\n", "\n\t") + "',"
+              + "\nexpectedDeliveryDate = '" + this.expectedDeliveryDate + "'"
+              + "\n}";
   }
 }

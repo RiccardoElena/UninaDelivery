@@ -164,14 +164,14 @@ public class Product {
    */
   @Override
   public String toString() {
-    return "Product ["
-            + "category='" + category + '\''
-            + ", name='" + name + '\''
-            + ", supplier='" + supplier + '\''
-            + ", description='" + description + '\''
-            + ", packageSizeLiters=" + packageSizeLiters
-            + ", isFragile=" + isFragile
-            + ", price=" + price
-            + ']';
+    return "Product {"
+        + "\ncategory = '" + this.category + "',"
+        + "\nname = '" + this.name + "',"
+        + "\nsupplier = '" + this.supplier + "',"
+        + "\ndescription = '" + this.description + "',"
+        + "\npackageSizeLiters = " + this.packageSizeLiters + ","
+        + "\nisFragile = " + this.isFragile + ","
+        + "\nprice = " + this.price
+        + "\n}";
   }
 }
