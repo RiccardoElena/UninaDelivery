@@ -1,4 +1,4 @@
-package com.unina.oobd2324gr22;
+package com.unina.oobd2324gr22.entity.DTO;
 
 public class Address extends Area {
 
@@ -74,7 +74,7 @@ public class Address extends Area {
   }
 
   /**
-   * Method to get the string representation of the address.
+   * Get the string representation of the address.
    *
    * @return string representation of the address
    */

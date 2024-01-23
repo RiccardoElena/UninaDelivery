@@ -1,4 +1,4 @@
-package com.unina.oobd2324gr22;
+package com.unina.oobd2324gr22.entity.DTO;
 
 public class Product {
 
@@ -158,7 +158,7 @@ public class Product {
   }
 
   /**
-   * Method to get the string representation of the product.
+   * Get the string representation of the product.
    *
    * @return string
    */

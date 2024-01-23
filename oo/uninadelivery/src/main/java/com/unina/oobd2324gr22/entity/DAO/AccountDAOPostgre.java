@@ -1,7 +1,8 @@
-package com.unina.oobd2324gr22;
+package com.unina.oobd2324gr22.entity.DAO;
 
 import java.sql.SQLException;
 import java.util.List;
+import com.unina.oobd2324gr22.entity.DTO.Account;
 
 // TODO @zGenny @RiccardoElena nly signature has been written, no implementation
 

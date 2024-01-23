@@ -1,8 +1,10 @@
-package com.unina.oobd2324gr22;
+package com.unina.oobd2324gr22.entity.DAO;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import com.unina.oobd2324gr22.entity.DTO.Account;
+import com.unina.oobd2324gr22.entity.DTO.Order;
 
 /**
  * This interface represents the Data Access Object for the Order class.
@@ -10,7 +12,7 @@ import java.util.List;
 public interface OrderDAO {
 
   /**
-   * Method to insert an order into the DB.
+   * Insert an order into the DB from the database.
 
    * @param order Order to insert into the DB
    * @return the number of rows affected by the insert
@@ -20,7 +22,7 @@ public interface OrderDAO {
   int insertOrder(Order order) throws SQLException;
 
   /**
-   * Method to get all the orders.
+   * Retrive all the orders from the database.
 
    * @return lista di ordini
    * @throws SQLException possible DB related errors
@@ -29,7 +31,7 @@ public interface OrderDAO {
   List<Order> getOrders() throws SQLException;
 
   /**
-   * Method to get an order by its id.
+   * Retrive an order by its id from the database.
 
    * @param id id of the order to get
    * @return order of the id passed
@@ -39,7 +41,7 @@ public interface OrderDAO {
   Order getOrderById(int id) throws SQLException;
 
   /**
-   * Method to get all the unfinished orders.
+   * Retrive all the unfinished orders from the database.
 
    * @return list of unfinished orders
    * @throws SQLException possible DB related errors
@@ -48,7 +50,7 @@ public interface OrderDAO {
   List<Order> getUnfinishedOrders() throws SQLException;
 
   /**
-   * Method to get the order with the largest quantity of products.
+   * Retrive the order with the largest quantity of products from the database.
 
     * @param month month to search for
     * @param year year to search for
@@ -60,7 +62,7 @@ public interface OrderDAO {
       throws SQLException;
 
   /**
-   * Method to get the order with the smallest quantity of products.
+   * Retrive the order with the smallest quantity of products from the database.
 
    * @param month month to search for
    * @param year year to search for
@@ -72,7 +74,7 @@ public interface OrderDAO {
       throws SQLException;
 
   /**
-   * Method to get a list of the number of the orders for each day
+   * Retrive a list of the number of the orders for each day from the database
    * of the month given.
 
    * @param month month to search for
@@ -85,7 +87,7 @@ public interface OrderDAO {
 
 
   /**
-   * Method to get the orders for a specific client.
+   * Retrive the orders for a specific client from the database.
 
    * @param client account to search for
    * @return list of orders matching the search criteria
@@ -95,7 +97,7 @@ public interface OrderDAO {
   List<Order> getOrdersByAccount(Account client) throws SQLException;
 
   /**
-   * Method to get the orders by range date.
+   * Retrive the orders by range date from the database.
 
    * @param dateStart start date
    * @param dateEnd end date
@@ -107,7 +109,7 @@ public interface OrderDAO {
       throws SQLException;
 
   /**
-   * Method to get the orders by start date.
+   * Retrive the orders by start date from the database.
 
    * @param dateStart data inizio
    * @return list of orders matching the search criteria
@@ -118,7 +120,8 @@ public interface OrderDAO {
       throws SQLException;
 
   /**
-   * Method to get the orders in a range of date for a specific user.
+   * Retrive the orders in a range of date for a specific
+   * user from the database.
 
    * @param client client to search for
    * @param dateStart start date
@@ -133,7 +136,7 @@ public interface OrderDAO {
       throws SQLException;
 
   /**
-   * Method to update an order given its id.
+   * Update an order given its id from the database.
 
    * @param order order to Update
    * @return number of rows affected by the update
@@ -142,7 +145,7 @@ public interface OrderDAO {
   int updateOrderById(Order order) throws SQLException;
 
   /**
-   * Method to delete an order given its id.
+   * Delete an order given its id from the database.
 
    * @param id orderID to delete
    * @return number of rows affected by the delete

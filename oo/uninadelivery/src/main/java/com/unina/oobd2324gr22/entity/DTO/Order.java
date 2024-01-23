@@ -1,4 +1,4 @@
-package com.unina.oobd2324gr22;
+package com.unina.oobd2324gr22.entity.DTO;
 
 import java.time.LocalDate;
 
@@ -163,14 +163,14 @@ public class Order {
     return expectedDeliveryDate;
   }
 
-  /**
-   * Setter of the order id.
+  // /**
+  //  * Setter of the order id.
 
-   * @param orderid order id
-   */
-  public void setOrderId(final int orderid) {
-    this.id = orderid;
-  }
+  //  * @param orderid order id
+  //  */
+  // public void setOrderId(final int orderid) {
+  //   this.id = orderid;
+  // }
 
   /**
    * Setter of the emission date.

@@ -1,4 +1,4 @@
-package com.unina.oobd2324gr22;
+package com.unina.oobd2324gr22.entity.DTO;
 
 import java.time.LocalDate;
 
@@ -23,6 +23,7 @@ public final class Driver extends Account {
    */
 
   private Deposit workplace;
+
 
   // Constructors - Builder pattern
 

@@ -1,4 +1,4 @@
-package com.unina.oobd2324gr22;
+package com.unina.oobd2324gr22.entity.DTO;
 
 public class Area {
 
@@ -141,7 +141,7 @@ public class Area {
   }
 
   /**
-   * Method to get the string representation of the area.
+   * Get the string representation of the area.
    *
    * @return string representation of the area
    */

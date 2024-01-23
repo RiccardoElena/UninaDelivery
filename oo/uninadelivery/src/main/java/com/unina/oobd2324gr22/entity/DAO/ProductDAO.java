@@ -1,6 +1,7 @@
-package com.unina.oobd2324gr22;
+package com.unina.oobd2324gr22.entity.DAO;
 
 import java.sql.SQLException;
+import com.unina.oobd2324gr22.entity.DTO.Product;
 
 public interface ProductDAO {
 

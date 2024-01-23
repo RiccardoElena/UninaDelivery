@@ -1,4 +1,6 @@
-package com.unina.oobd2324gr22;
+package com.unina.oobd2324gr22.entity.DAO;
+
+import com.unina.oobd2324gr22.entity.DTO.Product;
 
 public class ProductDAOPostgre implements ProductDAO {
 

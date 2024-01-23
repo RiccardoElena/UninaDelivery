@@ -1,4 +1,4 @@
-package com.unina.oobd2324gr22;
+package com.unina.oobd2324gr22.utils;
 
 import java.io.BufferedReader;
 // import java.io.File;

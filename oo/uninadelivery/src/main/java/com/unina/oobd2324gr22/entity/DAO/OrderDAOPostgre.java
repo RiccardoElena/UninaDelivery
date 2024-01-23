@@ -1,4 +1,4 @@
-package com.unina.oobd2324gr22;
+package com.unina.oobd2324gr22.entity.DAO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import com.unina.oobd2324gr22.entity.DTO.Account;
+import com.unina.oobd2324gr22.entity.DTO.Order;
+import com.unina.oobd2324gr22.utils.DBConnection;
 
 
 /**
