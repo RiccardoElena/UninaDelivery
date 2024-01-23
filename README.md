@@ -72,16 +72,17 @@ Da definire in seguito ad assegnazione traccia.
 
 ### Struttura del repository
 
+- `db/`: cartella relativa al progetto di Basi di Dati.
+  - `db/docs`: documentazione del progetto di Basi di Dati.
+    - `Documentazione-BasiDiDati-GroupID.pdf`: documentazione del progetto di Basi di Dati, con annesso progetto *LaTeX* per la generazione del PDF.
+  - `db/src/`: codice sorgente del progetto di Basi di Dati.
+    - `dump`: dump del database.
+    - `README.md`: README del progetto di Basi di Dati.
 - `oo/`: cartella relativa al progetto di Object Orientation.
   - `oo/docs`: documentazione del progetto di Object Orientation.
     - `Documentazione-ObjectOrientation-GroupID.pdf`: documentazione del progetto di Object Orientation.
-  - `oo/src/`: codice sorgente del progetto di Object Orientation.
+  - `oo/uninadelivery/`: codice sorgente del progetto di Object Orientation.
     - `oo/pom.xml`: file di configurazione Maven.
-- `db/`: cartella relativa al progetto di Basi di Dati.
-  - `db/docs`: documentazione del progetto di Basi di Dati.
-    - `Documentazione-BasiDiDati-GroupID.pdf`: documentazione del progetto di Basi di Dati.
-  - `db/src/`: codice sorgente del progetto di Basi di Dati.
-    - `README.md`: README del progetto di Basi di Dati.
 - `README.md`: README generale del progetto, questo file.
 - `sun_checks.xml`: file di configurazione Checkstyle.
 
