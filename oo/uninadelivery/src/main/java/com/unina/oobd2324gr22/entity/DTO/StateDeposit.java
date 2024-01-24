@@ -38,5 +38,23 @@ public class StateDeposit extends Deposit {
           + "\n}";
   }
 
+  /**
+   * Add a wheeled large transport to the deposit.
+
+   * @param transport the wheeled large transport to add.
+   */
+
+  public void addTransport(final WheeledLarge transport) {
+    if (transport == null) {
+      throw new IllegalArgumentException("Transport cannot be null");
+    }
+
+    if (this.getTransports().contains(transport)) {
+      return;
+    }
+
+    this.getTransports().add(transport);
+
+  }
 
 }

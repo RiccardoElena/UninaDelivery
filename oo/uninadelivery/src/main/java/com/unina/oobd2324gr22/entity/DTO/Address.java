@@ -74,6 +74,16 @@ public class Address extends Area {
   }
 
   /**
+   * Get the area the addres is in.
+
+   * @return area the address is in
+   */
+  public Area getArea() {
+    return new Area(this.getZipCode(), this.getCity(), this.getState(),
+                    this.getCountry(), this.getWorldZone());
+  }
+
+  /**
    * Get the string representation of the address.
    *
    * @return string representation of the address

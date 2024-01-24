@@ -38,4 +38,23 @@ public class CountryDeposit extends StateDeposit {
           + "\n}";
   }
 
+  /**
+   * Add a rails transport to the deposit.
+
+   * @param transport the rails transport to add.
+   */
+
+   public void addTransport(final RailsTransport transport) {
+    if (transport == null) {
+      throw new IllegalArgumentException("Transport cannot be null");
+    }
+
+    if (this.getTransports().contains(transport)) {
+      return;
+    }
+
+    this.getTransports().add(transport);
+
+  }
+
 }

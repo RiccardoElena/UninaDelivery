@@ -17,5 +17,6 @@ public class WheeledSmall extends WheeledTransport {
                   final float tOccupiedSpace, final boolean tIsAvailable,
                   final Deposit tDepositOwner) {
     super(tId, tMaxCapacity, tOccupiedSpace, tIsAvailable, tDepositOwner);
+    tDepositOwner.addTransport(this);
   }
 }

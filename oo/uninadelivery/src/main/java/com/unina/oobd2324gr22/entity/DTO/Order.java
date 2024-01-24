@@ -119,12 +119,12 @@ public class Order {
   }
 
   /**
-   * Getter of the client email.
+   * Getter of the client.
    *
-   * @return client email
+   * @return client
    */
-  public String getAccountEmail() {
-    return account.getEmail();
+  public Account getAccount() {
+    return account;
   }
 
   /**
@@ -137,21 +137,13 @@ public class Order {
   }
 
   /**
-   * Getter of the name of the product.
-   *
-   * @return name of the product
-   */
-  public String getProductName() {
-    return product.getName();
-  }
+    * Getter of the product.
 
-  /**
-   * Getter of the supplier of the product.
-   *
-   * @return supplier of the product
+   * @return product
    */
-  public String getProductSupplier() {
-    return product.getSupplier();
+
+  public Product getProduct() {
+    return product;
   }
 
   /**
@@ -216,7 +208,6 @@ public class Order {
   public void setQuantity(final int qty) {
     this.quantity = qty;
   }
-
   /**
    * Setter of the product.
 

@@ -17,6 +17,7 @@ public abstract class WheeledLarge extends WheeledTransport {
                   final float tOccupiedSpace, final boolean tIsAvailable,
                   final StateDeposit tDepositOwner) {
     super(tId, tMaxCapacity, tOccupiedSpace, tIsAvailable, tDepositOwner);
+    tDepositOwner.addTransport(this);
   }
 
 }

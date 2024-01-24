@@ -29,6 +29,13 @@ public abstract class Transport {
    */
   private Deposit depositOwner;
 
+  // Constants
+
+  /**
+   * Default max capacity of the transport.
+   */
+  private static final float DEFAULT_MAX_CAPACITY = 100000;
+
   // Constructors
 
   /**
@@ -43,9 +50,12 @@ public abstract class Transport {
   public Transport(final int tId, final float tMaxCapacity,
                   final float tOccupiedSpace, final boolean tIsAvailable,
                   final Deposit tDepositOwner) {
+    if (tDepositOwner == null) {
+      throw new IllegalArgumentException("Deposit owner cannot be null");
+    }
     this.id = tId;
-    this.maxCapacity = tMaxCapacity;
-    this.occupiedSpace = tOccupiedSpace;
+    this.maxCapacity = tMaxCapacity < 0 ? DEFAULT_MAX_CAPACITY : tMaxCapacity;
+    this.occupiedSpace = tOccupiedSpace < 0 ? 0 : tOccupiedSpace;
     this.isAvailable = tIsAvailable;
     this.depositOwner = tDepositOwner;
   }

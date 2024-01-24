@@ -17,5 +17,6 @@ public class WaterTransport extends Transport {
                   final float tOccupiedSpace, final boolean tIsAvailable,
                   final CentralDeposit tDepositOwner) {
     super(tId, tMaxCapacity, tOccupiedSpace, tIsAvailable, tDepositOwner);
+    tDepositOwner.addTransport(this);
   }
 }

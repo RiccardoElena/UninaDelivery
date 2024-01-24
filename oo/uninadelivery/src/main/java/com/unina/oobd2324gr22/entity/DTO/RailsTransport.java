@@ -17,5 +17,6 @@ public class RailsTransport extends Transport {
                   final float tOccupiedSpace, final boolean tIsAvailable,
                   final CountryDeposit tDepositOwner) {
     super(tId, tMaxCapacity, tOccupiedSpace, tIsAvailable, tDepositOwner);
+    tDepositOwner.addTransport(this);
   }
 }

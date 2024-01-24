@@ -32,10 +32,16 @@ public class Deposit {
   private Address address;
 
   /**
+   * Transports owned by the deposit.
+   */
+  private List<Transport> transports;
+
+  /**
    * Stored products of the deposit.
    */
 
   private List<StoredProduct> storedProducts;
+
 
   /**
    * Inner util class needed to store quantity along with the product.
@@ -109,6 +115,10 @@ public class Deposit {
        */
 
       public void setQuantity(final int sQuantity) {
+        if (sQuantity <= 0) {
+          storedProducts.remove(this);
+          return;
+        }
         this.quantity = sQuantity;
       }
   }
@@ -238,14 +248,40 @@ public class Deposit {
     StoredProduct sP = new StoredProduct(sProduct, sQuantity);
     if (this.storedProducts.contains(sP)) {
 
-      storedProducts.get(storedProducts.indexOf(sP))
+      this.storedProducts.get(this.storedProducts.indexOf(sP))
                       .setQuantity(
-                        storedProducts.get(
-                          storedProducts.indexOf(sP)
+                        this.storedProducts.get(
+                          this.storedProducts.indexOf(sP)
                         ).getQuantity() + sQuantity
                       );
     } else {
       this.storedProducts.add(sP);
     }
+  }
+
+  /**
+   * Getter of the transports.
+   *
+   * @return transports
+   */
+  public List<Transport> getTransports() {
+    return this.transports;
+  }
+
+  /**
+   * Add a wheeled small transport to the deposit.
+   *
+   * @param transport wheeled small transport to add
+   */
+  public void addTransport(final WheeledSmall transport) {
+    if (transport == null) {
+      throw new IllegalArgumentException("Transport cannot be null");
+    }
+
+    if (this.transports.contains(transport)) {
+      return;
+    }
+
+    this.transports.add(transport);
   }
 }

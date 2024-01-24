@@ -37,4 +37,23 @@ public class CentralDeposit extends CountryDeposit {
           + "\naddress = " + this.getAddress().toString().replace("\n", "\n\t")
           + "\n}";
   }
+
+  /**
+   * Add a transport to the deposit.
+
+   * @param transport the transport to add.
+   */
+
+   public void addTransport(final Transport transport) {
+    if (transport == null) {
+      throw new IllegalArgumentException("Transport cannot be null");
+    }
+
+    if (this.getTransports().contains(transport)) {
+      return;
+    }
+
+    this.getTransports().add(transport);
+
+  }
 }
