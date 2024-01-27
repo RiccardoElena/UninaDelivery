@@ -40,6 +40,6 @@ jobs:
         uses: super-linter/super-linter@v5.7.2 # x-release-please-version
         env:
           VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: main
+          DEFAULT_BRANCH: master
           # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
