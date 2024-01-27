@@ -84,10 +84,10 @@ public class OrderDAOPostgre implements OrderDAO {
           order.getEmissionDate()));
       psInsert.setBoolean(nextField++, (order.getIsExpress() ? true : null));
       psInsert.setInt(nextField++, order.getExtraWarranty());
-      psInsert.setString(nextField++, order.getAccountEmail());
+      psInsert.setString(nextField++, order.getAccount().getEmail());
       psInsert.setInt(nextField++, order.getQuantity());
-      psInsert.setString(nextField++, order.getProductName());
-      psInsert.setString(nextField++, order.getProductSupplier());
+      psInsert.setString(nextField++, order.getProduct().getName());
+      psInsert.setString(nextField++, order.getProduct().getSupplier());
       rowAffected = psInsert.executeUpdate();
       psInsert.close();
       con.close();
@@ -487,10 +487,10 @@ public class OrderDAOPostgre implements OrderDAO {
           order.getEmissionDate()));
       psUpdate.setBoolean(nextField++, (order.getIsExpress() ? true : null));
       psUpdate.setInt(nextField++, order.getExtraWarranty());
-      psUpdate.setString(nextField++, order.getAccountEmail());
+      psUpdate.setString(nextField++, order.getAccount().getEmail());
       psUpdate.setInt(nextField++, order.getQuantity());
-      psUpdate.setString(nextField++, order.getProductName());
-      psUpdate.setString(nextField++, order.getProductSupplier());
+      psUpdate.setString(nextField++, order.getProduct().getName());
+      psUpdate.setString(nextField++, order.getProduct().getSupplier());
       psUpdate.setInt(nextField++, order.getOrderId());
       rowAffected = psUpdate.executeUpdate();
       psUpdate.close();
