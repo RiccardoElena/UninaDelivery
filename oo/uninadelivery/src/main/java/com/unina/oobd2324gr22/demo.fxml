@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="demo.Controller">
+   <left>
+      <AnchorPane prefHeight="400.0" prefWidth="220.0" BorderPane.alignment="CENTER">
+         <children>
+            <ImageView fitHeight="185.0" fitWidth="181.0" layoutX="20.0" layoutY="-14.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@UninaDelivery_logo.png" />
+               </image>
+            </ImageView>
+            <Label layoutX="37.0" layoutY="339.0" text="All Rights Reserved © 2024." />
+            <Label layoutX="73.0" layoutY="183.0" text="UninaDelivery" />
+         </children>
+      </AnchorPane>
+   </left>
+   <right>
+      <AnchorPane prefHeight="400.0" prefWidth="380.0" BorderPane.alignment="CENTER">
+         <children>
+            <ImageView fitHeight="139.0" fitWidth="145.0" layoutX="148.0" layoutY="-4.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../../../image_processing20200512-27005-1bqdlna.png" />
+               </image>
+            </ImageView>
+            <Label layoutX="58.0" layoutY="192.0" text="Email" />
+            <Label layoutX="37.0" layoutY="230.0" text="Password" />
+            <TextField fx:id="emailTextField" layoutX="113.0" layoutY="188.0" prefHeight="25.0" prefWidth="210.0" promptText="email@uninadelivery.com" />
+            <PasswordField fx:id="passwordTextField" layoutX="113.0" layoutY="225.0" prefHeight="25.0" prefWidth="209.0" promptText="Password" />
+            <Button fx:id="esciButton" layoutX="322.0" layoutY="4.0" mnemonicParsing="false" onAction="#esciButtonAction" prefHeight="25.0" prefWidth="43.0" textFill="TRANSPARENT">
+               <graphic>
+                  <ImageView fitHeight="31.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../../7124045_logout_icon.png" />
+                     </image>
+                  </ImageView>
+               </graphic></Button>
+            <Button fx:id="loginButton" layoutX="180.0" layoutY="264.0" mnemonicParsing="false" onAction="#loginButtonAction" prefHeight="33.0" prefWidth="81.0" text="Accedi" />
+         </children>
+      </AnchorPane>
+   </right>
+   <top>
+      <Pane fx:id="topPane" prefHeight="35.0" prefWidth="600.0" BorderPane.alignment="CENTER" />
+   </top>
+</BorderPane>
