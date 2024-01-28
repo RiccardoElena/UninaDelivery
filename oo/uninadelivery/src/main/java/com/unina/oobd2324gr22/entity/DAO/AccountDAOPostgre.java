@@ -39,6 +39,17 @@ public class AccountDAOPostgre implements AccountDAO {
   }
 
   /**
+   * PostgreSQL implementation of the getAccountByEmailAndPassword method.
+   */
+  @Override
+  public Account getAccountByEmailAndPassword(final String email,
+                                              final String password)
+                                                throws SQLException {
+    throw new UnsupportedOperationException(
+      "Unimplemented method 'getAccountByEmailAndPassword'");
+  }
+
+  /**
    * PostgreSQL implementation of the getAccountByNameAndSurname method.
    */
 
@@ -80,5 +91,6 @@ public class AccountDAOPostgre implements AccountDAO {
       throws SQLException {
     return 0;
   }
+
 
 }

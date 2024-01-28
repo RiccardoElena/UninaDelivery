@@ -35,6 +35,16 @@ public interface AccountDAO {
   Account getAccountByEmail(String email) throws SQLException;
 
   /**
+   * Retrieve an account by its email and password.
+
+   * @param email email
+   * @param password password
+   * @return the account with given email and password or null if not found
+   */
+  Account getAccountByEmailAndPassword(String email, String password)
+      throws SQLException;
+
+  /**
    * Retrieve all accounts with given name and surname.
 
    * @param name name to search
@@ -42,6 +52,7 @@ public interface AccountDAO {
    * @return list of accounts with given name and surname
    * @throws SQLException possible DB related errors
    */
+
 
   List<Account> getAccountByNameAndSurname(String name, String surname)
       throws SQLException;

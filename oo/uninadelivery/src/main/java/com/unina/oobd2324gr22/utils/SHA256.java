@@ -1,32 +1,45 @@
-package demo.utils;
+package com.unina.oobd2324gr22.utils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class SHA256 {
 
-  private static byte[] getSHA(String input) throws NoSuchAlgorithmException {
+  /**
+   * Mask to get the last byte of an integer.
+   */
+  private static final int LAST_BYTE_MASK = 0xff;
+
+  private static byte[] getSHA(final String input)
+    throws NoSuchAlgorithmException {
     MessageDigest digest = MessageDigest.getInstance("SHA-256");
     return digest.digest(input.getBytes());
   }
 
-  private static String toHexString(byte[] hash) {
+  private static String toHexString(final byte[] hash) {
     StringBuilder hexString = new StringBuilder(2 * hash.length);
     for (byte b : hash) {
-      String hex = Integer.toHexString(0xff & b);
+      String hex = Integer.toHexString(LAST_BYTE_MASK & b);
       if (hex.length() == 1) {
-        hexString.append('0'); 
+        hexString.append('0');
       }
       hexString.append(hex);
     }
     return hexString.toString();
   }
 
-  public String toSHA256(String originalString) {
+  /**
+   * Returns a SHA-256 hash of the given string.
+   *
+   * @param originalString the string to hash
+   * @return the SHA-256 hash of the given string
+   */
+  public final String toSHA256(final String originalString) {
     try {
       return toHexString(getSHA(originalString));
     } catch (NoSuchAlgorithmException e) {
-      System.out.println("Errore durante la generazione dell'hash SHA-256: " + e.getMessage());
+      System.out.println(
+        "Errore durante la generazione dell'hash SHA-256: " + e.getMessage());
       return null;
     }
   }

@@ -1,4 +1,4 @@
-package demo;
+package com.unina.oobd2324gr22;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -10,13 +10,23 @@ import javafx.stage.StageStyle;
 
 public class Main extends Application {
 
+  /**
+   * Width of the window.
+   */
+  static final int WIDTH = 600;
+
+  /**
+   * Height of the window.
+   */
+  static final int HEIGHT = 400;
+
   @Override
-  public void start(Stage primaryStage) throws Exception {
+  public final void start(final Stage primaryStage) throws Exception {
     primaryStage.initStyle(StageStyle.TRANSPARENT);
     primaryStage.setTitle("Demo JavaFX");
-    
+
     Parent root = FXMLLoader.load(getClass().getResource("demo.fxml"));
-    Scene scene = new Scene(root, 600, 400);
+    Scene scene = new Scene(root, WIDTH, HEIGHT);
 
     Node topPane = root.lookup("#topPane");
 
@@ -41,7 +51,12 @@ public class Main extends Application {
   }
 
 
-  public static void main(String[] args) {
+  /**
+   * Main method. Launches the application.
+   *
+   * @param args command line arguments
+   */
+  public static void main(final String[] args) {
     launch(args);
     System.out.println("Hello World!");
   }
