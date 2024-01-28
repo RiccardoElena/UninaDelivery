@@ -11,6 +11,9 @@ env:
   VALIDATE_LATEX: false
   VALIDATE_JSCPD: false
   VALIDATE_YAML: false
+  # TODO Remove this line when understood
+  # how to check locally google-java-format
+  VALIDATE_GOOGLE_JAVA_FORMAT: false
 
 on:
   push:
