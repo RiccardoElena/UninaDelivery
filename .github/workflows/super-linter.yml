@@ -11,8 +11,8 @@ env:
   VALIDATE_LATEX: false
   VALIDATE_JSCPD: false
   VALIDATE_YAML: false
-  LINTER_RULES_PATH: 'config/checks.xml'
-  JAVA_FILE_NAME: 'config/checks.xml'
+  LINTER_RULES_PATH: config/
+  JAVA_FILE_NAME: config/checks.xml
   # TODO Remove this line when understood
   # how to check locally google-java-format
   # VALIDATE_GOOGLE_JAVA_FORMAT: false
