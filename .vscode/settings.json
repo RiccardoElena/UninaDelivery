@@ -1,5 +1,5 @@
 {
-  "java.checkstyle.configuration": "${workspaceFolder}/sun_checks.xml",
+  "java.checkstyle.configuration": "${workspaceFolder}/config/checks.xml",
   "latex-workshop.linting.chktex.enabled": true,
   "latex-workshop.linting.chktex.exec.args": [
     "-wall",
