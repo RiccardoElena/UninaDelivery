@@ -2,39 +2,25 @@ package com.unina.oobd2324gr22.entity.DTO;
 
 public class Product {
 
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   private String category;
 
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   private String name;
 
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   private String supplier;
 
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   private String description;
 
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   private double packageSizeLiters;
 
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   private boolean isFragile;
 
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   private float price;
 
   /**
@@ -46,10 +32,14 @@ public class Product {
    * @param pIsFragile isFragile
    * @param pPrice price
    */
-  public Product(final String pCategory, final String pName,
-                  final String pSupplier, final String pDescription,
-                  final double pPackageSizeLiters, final boolean pIsFragile,
-                  final float pPrice) {
+  public Product(
+      final String pCategory,
+      final String pName,
+      final String pSupplier,
+      final String pDescription,
+      final double pPackageSizeLiters,
+      final boolean pIsFragile,
+      final float pPrice) {
     this.category = pCategory;
     this.name = pName;
     this.supplier = pSupplier;
@@ -165,13 +155,26 @@ public class Product {
   @Override
   public String toString() {
     return "Product {"
-        + "\ncategory = '" + this.category + "',"
-        + "\nname = '" + this.name + "',"
-        + "\nsupplier = '" + this.supplier + "',"
-        + "\ndescription = '" + this.description + "',"
-        + "\npackageSizeLiters = " + this.packageSizeLiters + ","
-        + "\nisFragile = " + this.isFragile + ","
-        + "\nprice = " + this.price
+        + "\ncategory = '"
+        + this.category
+        + "',"
+        + "\nname = '"
+        + this.name
+        + "',"
+        + "\nsupplier = '"
+        + this.supplier
+        + "',"
+        + "\ndescription = '"
+        + this.description
+        + "',"
+        + "\npackageSizeLiters = "
+        + this.packageSizeLiters
+        + ","
+        + "\nisFragile = "
+        + this.isFragile
+        + ","
+        + "\nprice = "
+        + this.price
         + "\n}";
   }
 }

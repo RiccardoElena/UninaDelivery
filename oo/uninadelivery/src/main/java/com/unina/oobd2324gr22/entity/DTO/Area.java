@@ -2,47 +2,39 @@ package com.unina.oobd2324gr22.entity.DTO;
 
 public class Area {
 
-  /**
-    * Zip code of the area.
-    */
+  /** Zip code of the area. */
   private String zipCode;
 
-  /**
-    * City name of the area.
-    */
+  /** City name of the area. */
   private String city;
 
-  /**
-    * State name of the area.
-    */
+  /** State name of the area. */
   private String state;
 
-  /**
-    * Country name of the area.
-    */
+  /** Country name of the area. */
   private String country;
 
-  /**
-    * WorldZone of the area.
-    */
+  /** WorldZone of the area. */
   private String worldZone;
 
-  /**
-    * Default constructor.
-    */
-  public Area() { }
+  /** Default constructor. */
+  public Area() {}
 
   /**
-    * Constructor with parameters.
-
-    * @param zip zip code of the area
-    * @param cityN city name of the area
-    * @param stateN state name of the area
-    * @param countryN country name of the area
-    * @param wz world zone of the area
-    */
-  public Area(final String zip, final String cityN, final String stateN,
-              final String countryN, final String wz) {
+   * Constructor with parameters.
+   *
+   * @param zip zip code of the area
+   * @param cityN city name of the area
+   * @param stateN state name of the area
+   * @param countryN country name of the area
+   * @param wz world zone of the area
+   */
+  public Area(
+      final String zip,
+      final String cityN,
+      final String stateN,
+      final String countryN,
+      final String wz) {
     this.zipCode = zip;
     this.city = cityN;
     this.state = stateN;
@@ -148,11 +140,18 @@ public class Area {
   @Override
   public String toString() {
     return "Area{"
-            + "\nzipCode = '" + this.zipCode + "',"
-            + "\ncity = '" + this.city + "',"
-            + "\nstate = '" + this.state + "',"
-            + "\ncountry = '" + this.country + "',"
-            + '}';
+        + "\nzipCode = '"
+        + this.zipCode
+        + "',"
+        + "\ncity = '"
+        + this.city
+        + "',"
+        + "\nstate = '"
+        + this.state
+        + "',"
+        + "\ncountry = '"
+        + this.country
+        + "',"
+        + '}';
   }
-
 }

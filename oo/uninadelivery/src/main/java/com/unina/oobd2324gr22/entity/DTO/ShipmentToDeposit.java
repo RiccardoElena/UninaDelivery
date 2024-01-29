@@ -1,25 +1,19 @@
 package com.unina.oobd2324gr22.entity.DTO;
 
-import java.time.LocalDate;
 import com.unina.oobd2324gr22.entity.DTO.Deposit.StoredProduct;
+import java.time.LocalDate;
 
 public class ShipmentToDeposit extends Shipment {
 
-  /**
-   * The veichle transporting the shipment.
-   */
-
+  /** The veichle transporting the shipment. */
   private Transport transport;
 
-  /**
-   * The destination deposit.
-   */
-
+  /** The destination deposit. */
   private Deposit destinationDeposit;
 
   /**
    * The constructor of the class.
-
+   *
    * @param sId the id of the shipment.
    * @param shipDate the date the shipment should take off.
    * @param sHasArrived flag to check if the shipment is arrived.
@@ -28,17 +22,19 @@ public class ShipmentToDeposit extends Shipment {
    * @param startDeposit the destination deposit.
    * @param endDeposit the destination deposit.
    */
-
   public ShipmentToDeposit(
-      final int sId, final LocalDate shipDate,
-      final boolean sHasArrived, final Operator sOperator,
-      final Transport sTransport, final Deposit startDeposit,
+      final int sId,
+      final LocalDate shipDate,
+      final boolean sHasArrived,
+      final Operator sOperator,
+      final Transport sTransport,
+      final Deposit startDeposit,
       final Deposit endDeposit) {
 
     super(sId, shipDate, sHasArrived, sOperator, startDeposit);
     if (sTransport.getDepositOwner() != startDeposit) {
-      throw new IllegalArgumentException("The transport must be in the same"
-          + " deposit of the shipment");
+      throw new IllegalArgumentException(
+          "The transport must be in the same" + " deposit of the shipment");
     }
     this.transport = sTransport;
     this.destinationDeposit = endDeposit;
@@ -46,50 +42,42 @@ public class ShipmentToDeposit extends Shipment {
 
   /**
    * Getter for the veichle transporting the shipment.
-
+   *
    * @return the veichle transporting the shipment.
    */
-
   public Transport getTransport() {
     return transport;
   }
 
   /**
    * Setter for the veichle transporting the shipment.
-
+   *
    * @param sTransport the veichle transporting the shipment.
    */
-
   public void setTransport(final Transport sTransport) {
     this.transport = sTransport;
   }
 
   /**
    * Getter for the destination deposit.
-
+   *
    * @return the destination deposit.
    */
-
   public Deposit getDestinationDeposit() {
     return destinationDeposit;
   }
 
   /**
    * Setter for the destination deposit.
-
+   *
    * @param sDeposit the destination deposit.
    */
-
   public void setDestinationDeposit(final Deposit sDeposit) {
     this.destinationDeposit = sDeposit;
   }
 
-  /**
-   * Implementation of the addOrder method for the ShipmentToDeposit class.
-   * {@inheritDoc}
-   */
-
-   @Override
+  /** Implementation of the addOrder method for the ShipmentToDeposit class. {@inheritDoc} */
+  @Override
   public void addOrder(final Order order) {
     if (order == null) {
       throw new IllegalArgumentException("The order cannot be null");
@@ -109,16 +97,11 @@ public class ShipmentToDeposit extends Shipment {
         // remove the quantity of the product from the starting deposit
         sp.setQuantity(sp.getQuantity() - order.getQuantity());
         // add the quantity of the product to the destination deposit
-        this.getDestinationDeposit().addStoredProducts(
-            order.getProduct(), order.getQuantity());
+        this.getDestinationDeposit().addStoredProducts(order.getProduct(), order.getQuantity());
         // if the quantity of the product in the starting deposit is 0,
         // remove the product from the starting deposit
         return;
       }
     }
-
-   }
-
-
-
+  }
 }

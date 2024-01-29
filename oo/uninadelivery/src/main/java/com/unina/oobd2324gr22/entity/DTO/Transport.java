@@ -4,36 +4,24 @@ public abstract class Transport {
 
   // Attributes
 
-  /**
-   * Id of the transport.
-   */
+  /** Id of the transport. */
   private int id;
 
-  /**
-   * Max capacity of the transport.
-   */
+  /** Max capacity of the transport. */
   private float maxCapacity;
 
-  /**
-   * Occupied space of the transport.
-   */
+  /** Occupied space of the transport. */
   private float occupiedSpace;
 
-  /**
-   * Availability of the transport.
-   */
+  /** Availability of the transport. */
   private boolean isAvailable;
 
-  /**
-   * Owner of the transport.
-   */
+  /** Owner of the transport. */
   private Deposit depositOwner;
 
   // Constants
 
-  /**
-   * Default max capacity of the transport.
-   */
+  /** Default max capacity of the transport. */
   private static final float DEFAULT_MAX_CAPACITY = 100000;
 
   // Constructors
@@ -41,15 +29,18 @@ public abstract class Transport {
   /**
    * Constructor for the transport.
    *
-   * @param tId            id of the transport.
-   * @param tMaxCapacity   max capacity of the transport.
+   * @param tId id of the transport.
+   * @param tMaxCapacity max capacity of the transport.
    * @param tOccupiedSpace occupied space of the transport.
-   * @param tIsAvailable   availability of the transport.
-   * @param tDepositOwner  owner of the transport.
+   * @param tIsAvailable availability of the transport.
+   * @param tDepositOwner owner of the transport.
    */
-  public Transport(final int tId, final float tMaxCapacity,
-                  final float tOccupiedSpace, final boolean tIsAvailable,
-                  final Deposit tDepositOwner) {
+  public Transport(
+      final int tId,
+      final float tMaxCapacity,
+      final float tOccupiedSpace,
+      final boolean tIsAvailable,
+      final Deposit tDepositOwner) {
     if (tDepositOwner == null) {
       throw new IllegalArgumentException("Deposit owner cannot be null");
     }
@@ -154,4 +145,3 @@ public abstract class Transport {
     this.depositOwner = tDepositOwner;
   }
 }
-

@@ -14,8 +14,8 @@ public class CountryDeposit extends StateDeposit {
    * @param dMaxCapacity total space of the deposit
    * @param dAddress address of the deposit
    */
-  public CountryDeposit(final int dId, final float dOccupiedSpace,
-                 final float dMaxCapacity, final Address dAddress) {
+  public CountryDeposit(
+      final int dId, final float dOccupiedSpace, final float dMaxCapacity, final Address dAddress) {
     super(dId, dOccupiedSpace, dMaxCapacity, dAddress);
   }
 
@@ -31,20 +31,26 @@ public class CountryDeposit extends StateDeposit {
   @Override
   public String toString() {
     return "Account{"
-          + "\nid = '" + this.getId() + "',"
-          + "\nsurname = " + this.getOccupiedSpace() + ","
-          + "\nemail = " + this.getMaxCapacity() + ","
-          + "\naddress = " + this.getAddress().toString().replace("\n", "\n\t")
-          + "\n}";
+        + "\nid = '"
+        + this.getId()
+        + "',"
+        + "\nsurname = "
+        + this.getOccupiedSpace()
+        + ","
+        + "\nemail = "
+        + this.getMaxCapacity()
+        + ","
+        + "\naddress = "
+        + this.getAddress().toString().replace("\n", "\n\t")
+        + "\n}";
   }
 
   /**
    * Add a rails transport to the deposit.
-
+   *
    * @param transport the rails transport to add.
    */
-
-   public void addTransport(final RailsTransport transport) {
+  public void addTransport(final RailsTransport transport) {
     if (transport == null) {
       throw new IllegalArgumentException("Transport cannot be null");
     }
@@ -54,7 +60,5 @@ public class CountryDeposit extends StateDeposit {
     }
 
     this.getTransports().add(transport);
-
   }
-
 }

@@ -66,5 +66,13 @@
       "username": "riccardoelena"
     }
   ],
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "match": "\\.java$",
+        "cmd": "echo Formatting file: ${file} && google-java-format --replace \"${file}\""
+      },
+    ],
+  }
 }
 

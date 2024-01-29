@@ -4,52 +4,38 @@ import java.time.LocalDate;
 
 /**
  * This class represents an account.
+ *
  * <ul>
- * <li> Each account is a Customer.
- * <li> It can be extended to Operator and Driver to represent
- * specific types of accounts.
+ *   <li>Each account is a Customer.
+ *   <li>It can be extended to Operator and Driver to represent specific types of accounts.
  * </ul>
  */
 public class Account {
 
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   private String name;
 
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   private String surname;
 
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   private String email;
 
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   private LocalDate birthdate;
 
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   private String propic;
 
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   private String password;
 
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   private Address address;
 
   /**
    * Default constructor.
-
+   *
    * @param accName ciao
    * @param accSurname ciao
    * @param accEmail ciao
@@ -58,10 +44,14 @@ public class Account {
    * @param accPassword ciao
    * @param accAddress ciao
    */
-  public Account(final String accName, final String accSurname,
-                  final String accEmail, final LocalDate accBdate,
-                  final String accPropic, final String accPassword,
-                  final Address accAddress) {
+  public Account(
+      final String accName,
+      final String accSurname,
+      final String accEmail,
+      final LocalDate accBdate,
+      final String accPropic,
+      final String accPassword,
+      final Address accAddress) {
     this.name = accName;
     this.surname = accSurname;
     this.email = accEmail;
@@ -73,7 +63,7 @@ public class Account {
 
   /**
    * Name getter.
-
+   *
    * @return ciao
    */
   public String getName() {
@@ -82,7 +72,7 @@ public class Account {
 
   /**
    * Name setter.
-
+   *
    * @param accName Nome account
    */
   public void setName(final String accName) {
@@ -91,7 +81,7 @@ public class Account {
 
   /**
    * Surname getter.
-
+   *
    * @return cognome account
    */
   public String getSurname() {
@@ -100,7 +90,7 @@ public class Account {
 
   /**
    * Surname Setter.
-
+   *
    * @param accSurname cognome account
    */
   public void setSurname(final String accSurname) {
@@ -109,7 +99,7 @@ public class Account {
 
   /**
    * Email getter.
-
+   *
    * @return email account
    */
   public String getEmail() {
@@ -179,20 +169,30 @@ public class Account {
     this.address = accAddress;
   }
 
-  /**
-   * To string method.
-   */
+  /** To string method. */
   @Override
   public String toString() {
     return "Account{"
-          + "\nname = '" + this.name + "',"
-          + "\nsurname = '" + this.surname + "',"
-          + "\nemail = '" + this.email + "',"
-          + "\nbirthdate = '" + this.birthdate + "',"
-          + "\npropic = '" + this.propic + "',"
-          + "\npassword = '" + this.password + "',"
-          + "\naddress = " + this.address.toString().replace("\n", "\n\t")
-          + "\n}";
+        + "\nname = '"
+        + this.name
+        + "',"
+        + "\nsurname = '"
+        + this.surname
+        + "',"
+        + "\nemail = '"
+        + this.email
+        + "',"
+        + "\nbirthdate = '"
+        + this.birthdate
+        + "',"
+        + "\npropic = '"
+        + this.propic
+        + "',"
+        + "\npassword = '"
+        + this.password
+        + "',"
+        + "\naddress = "
+        + this.address.toString().replace("\n", "\n\t")
+        + "\n}";
   }
-
 }

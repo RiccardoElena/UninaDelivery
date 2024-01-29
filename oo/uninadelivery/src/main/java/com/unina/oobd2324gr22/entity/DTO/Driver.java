@@ -6,86 +6,60 @@ public final class Driver extends Account {
 
   // Attributes
 
-  /**
-   * Business mail of the driver.
-   */
-
+  /** Business mail of the driver. */
   private String businessMail;
 
-  /**
-   * Driving Licence of the driver.
-   */
-
+  /** Driving Licence of the driver. */
   private DrivingLicenceType drivingLicence;
 
-  /**
-   * Workplace of the driver.
-   */
-
+  /** Workplace of the driver. */
   private Deposit workplace;
-
 
   // Constructors - Builder pattern
 
   private Driver(final DriverBuilder builder) {
-    super(builder.builderAccName, builder.builderAccSurname,
-          builder.buildarAccEmail, builder.builderAccBdate,
-          builder.builderAccPropic, builder.builderAccPassword,
-          builder.builderAccAddress);
+    super(
+        builder.builderAccName,
+        builder.builderAccSurname,
+        builder.buildarAccEmail,
+        builder.builderAccBdate,
+        builder.builderAccPropic,
+        builder.builderAccPassword,
+        builder.builderAccAddress);
     this.businessMail = builder.builderBusinessMail;
     this.drivingLicence = builder.builderDrivingLicence;
     this.workplace = builder.builderWorkplace;
   }
 
   public static class DriverBuilder {
-    /**
-     * Name of the driver to be built.
-     */
+    /** Name of the driver to be built. */
     private String builderAccName;
 
-    /**
-     * Surname of the driver to be built.
-     */
+    /** Surname of the driver to be built. */
     private String builderAccSurname;
 
-    /**
-     * Email of the driver to be built.
-     */
+    /** Email of the driver to be built. */
     private String buildarAccEmail;
 
-    /**
-     * Birthdate of the driver to be built.
-     */
+    /** Birthdate of the driver to be built. */
     private LocalDate builderAccBdate;
 
-    /**
-     * Profile picture of the driver to be built.
-     */
+    /** Profile picture of the driver to be built. */
     private String builderAccPropic;
 
-    /**
-     * Password of the driver to be built.
-     */
+    /** Password of the driver to be built. */
     private String builderAccPassword;
 
-    /**
-     * Address of the driver to be built.
-     */
+    /** Address of the driver to be built. */
     private Address builderAccAddress;
 
-    /**
-     * Business mail of the driver to be built.
-     */
+    /** Business mail of the driver to be built. */
     private String builderBusinessMail;
 
-    /**
-     * Driving Licence of the driver to be built.
-     */
+    /** Driving Licence of the driver to be built. */
     private DrivingLicenceType builderDrivingLicence;
 
-    /**
-     * Workplace of the driver to be built.
-     */
+    /** Workplace of the driver to be built. */
     private Deposit builderWorkplace;
 
     /**
@@ -99,10 +73,14 @@ public final class Driver extends Account {
      * @param address address of the driver to be built
      * @param businessMail business mail of the driver to be built
      */
-    public DriverBuilder(final String name, final String surname,
-                         final String email, final LocalDate bdate,
-                         final String password, final Address address,
-                         final String businessMail) {
+    public DriverBuilder(
+        final String name,
+        final String surname,
+        final String email,
+        final LocalDate bdate,
+        final String password,
+        final Address address,
+        final String businessMail) {
       this.builderAccName = name;
       this.builderAccSurname = surname;
       this.buildarAccEmail = email;
@@ -129,9 +107,7 @@ public final class Driver extends Account {
      * @param drivingLicence driving licence of the driver to be built
      * @return the driver builder
      */
-
-    public DriverBuilder withDrivingLicence(
-                                      final DrivingLicenceType drivingLicence) {
+    public DriverBuilder withDrivingLicence(final DrivingLicenceType drivingLicence) {
       this.builderDrivingLicence = drivingLicence;
       return this;
     }
@@ -142,32 +118,30 @@ public final class Driver extends Account {
      * @param workplace workplace of the driver to be built
      * @return the driver builder
      */
-
     public DriverBuilder withWorkplace(final Deposit workplace) {
       this.builderWorkplace = workplace;
       return this;
     }
 
     /**
-     * Build method. It creates a new driver with given data
-     * if all the required fields are filled. To be filled manually are:
+     * Build method. It creates a new driver with given data if all the required fields are filled.
+     * To be filled manually are:
+     *
      * <ul>
-     *  <li> Driving Licence </li>
-     *  <li> Workplace </li>
+     *   <li>Driving Licence
+     *   <li>Workplace
      * </ul>
      *
      * Use the 'with' methods to fill them alogside the optional ones.
-
+     *
      * @return the driver
      */
     public Driver build() throws IllegalStateException {
-      if (this.builderDrivingLicence == null
-          || this.builderWorkplace == null) {
+      if (this.builderDrivingLicence == null || this.builderWorkplace == null) {
         throw new IllegalStateException("Missing required fields");
       }
       return new Driver(this);
     }
-
   }
 
   // Getters and Setters
@@ -177,7 +151,6 @@ public final class Driver extends Account {
    *
    * @return business mail
    */
-
   public String getBusinessMail() {
     return this.businessMail;
   }
@@ -187,7 +160,6 @@ public final class Driver extends Account {
    *
    * @param bMail business mail
    */
-
   public void setBusinessMail(final String bMail) {
     this.businessMail = bMail;
   }
@@ -197,7 +169,6 @@ public final class Driver extends Account {
    *
    * @return driving licence
    */
-
   public DrivingLicenceType getDrivingLicence() {
     return this.drivingLicence;
   }
@@ -207,7 +178,6 @@ public final class Driver extends Account {
    *
    * @param dLicence driving licence
    */
-
   public void setDrivingLicence(final DrivingLicenceType dLicence) {
     this.drivingLicence = dLicence;
   }
@@ -217,7 +187,6 @@ public final class Driver extends Account {
    *
    * @return workplace
    */
-
   public Deposit getWorkplace() {
     return this.workplace;
   }
@@ -227,7 +196,6 @@ public final class Driver extends Account {
    *
    * @param wPlace workplace
    */
-
   public void setWorkplace(final Deposit wPlace) {
     this.workplace = wPlace;
   }
@@ -237,17 +205,35 @@ public final class Driver extends Account {
   @Override
   public String toString() {
     return "Driver{"
-    + "\nname = '" + this.getName() + "',"
-    + "\nsurname = '" + this.getSurname() + "',"
-    + "\nemail = '" + this.getEmail() + "',"
-    + "\nbirthdate = '" + this.getBirthdate() + "',"
-    + "\npropic = '" + this.getPropic() + "',"
-    + "\npassword = '" + this.getPassword() + "',"
-    + "\naddress = " + this.getAddress().toString().replace("\n", "\n\t") + ","
-    + "\nbusinessMail = '" + this.getBusinessMail() + "',"
-    + "\ndrivingLicence = '" + this.getDrivingLicence() + "',"
-    + "\nworkplace = " + this.getWorkplace().toString()
-                                                .replace("\n", "\n\t")
-    + "\n}";
+        + "\nname = '"
+        + this.getName()
+        + "',"
+        + "\nsurname = '"
+        + this.getSurname()
+        + "',"
+        + "\nemail = '"
+        + this.getEmail()
+        + "',"
+        + "\nbirthdate = '"
+        + this.getBirthdate()
+        + "',"
+        + "\npropic = '"
+        + this.getPropic()
+        + "',"
+        + "\npassword = '"
+        + this.getPassword()
+        + "',"
+        + "\naddress = "
+        + this.getAddress().toString().replace("\n", "\n\t")
+        + ","
+        + "\nbusinessMail = '"
+        + this.getBusinessMail()
+        + "',"
+        + "\ndrivingLicence = '"
+        + this.getDrivingLicence()
+        + "',"
+        + "\nworkplace = "
+        + this.getWorkplace().toString().replace("\n", "\n\t")
+        + "\n}";
   }
 }

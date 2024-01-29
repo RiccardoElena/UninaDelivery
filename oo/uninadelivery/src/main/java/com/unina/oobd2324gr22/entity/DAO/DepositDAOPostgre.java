@@ -1,11 +1,11 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
-import java.sql.SQLException;
-import java.util.List;
 import com.unina.oobd2324gr22.entity.DTO.CentralDeposit;
 import com.unina.oobd2324gr22.entity.DTO.CountryDeposit;
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
 import com.unina.oobd2324gr22.entity.DTO.StateDeposit;
+import java.sql.SQLException;
+import java.util.List;
 
 public class DepositDAOPostgre implements DepositDAO {
 
@@ -14,29 +14,25 @@ public class DepositDAOPostgre implements DepositDAO {
    * {@inheritDoc}
    */
   @Override
-  public final int insertCityDeposit(final Deposit deposit)
-    throws SQLException {
-    // TODO @RiccardoElena @zGenny Auto-generated method stub
-      return 0;
-  }
-
-  @Override
-  public final int insertStateDeposit(final StateDeposit deposit)
-    throws SQLException {
-    // TODO @RiccardoElena @zGenny Auto-generated method stub
-      return 0;
-  }
-
-  @Override
-  public final int insertCountryDeposit(final CountryDeposit deposit)
-    throws SQLException {
+  public final int insertCityDeposit(final Deposit deposit) throws SQLException {
     // TODO @RiccardoElena @zGenny Auto-generated method stub
     return 0;
   }
 
   @Override
-  public final int insertCentralDeposit(final CentralDeposit deposit)
-    throws SQLException {
+  public final int insertStateDeposit(final StateDeposit deposit) throws SQLException {
+    // TODO @RiccardoElena @zGenny Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public final int insertCountryDeposit(final CountryDeposit deposit) throws SQLException {
+    // TODO @RiccardoElena @zGenny Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public final int insertCentralDeposit(final CentralDeposit deposit) throws SQLException {
     // TODO @RiccardoElena @zGenny Auto-generated method stub
     return 0;
   }
@@ -54,22 +50,19 @@ public class DepositDAOPostgre implements DepositDAO {
   }
 
   @Override
-  public final List<Deposit> getDepositsByType(final String type)
-    throws SQLException {
+  public final List<Deposit> getDepositsByType(final String type) throws SQLException {
     // TODO @RiccardoElena @zGenny Auto-generated method stub
     return null;
   }
 
   @Override
-  public final List<Deposit> getDepositsByArea(final String area)
-    throws SQLException {
+  public final List<Deposit> getDepositsByArea(final String area) throws SQLException {
     // TODO @RiccardoElena @zGenny Auto-generated method stub
     return null;
   }
 
   @Override
-  public final List<Deposit> getDepositsByAreaAndType(final String area,
-                                                      final String type)
+  public final List<Deposit> getDepositsByAreaAndType(final String area, final String type)
       throws SQLException {
     // TODO @RiccardoElena @zGenny Auto-generated method stub
     return null;
@@ -86,5 +79,4 @@ public class DepositDAOPostgre implements DepositDAO {
     // TODO @RiccardoElena @zGenny Auto-generated method stub
     return 0;
   }
-
 }

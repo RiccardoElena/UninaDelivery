@@ -1,7 +1,7 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
-import java.sql.SQLException;
 import com.unina.oobd2324gr22.entity.DTO.Product;
+import java.sql.SQLException;
 
 public interface ProductDAO {
 
@@ -10,7 +10,5 @@ public interface ProductDAO {
    * @param supplier supplier
    * @return ciao
    */
-  Product getProductByNameAndSupplier(String name, String supplier)
-  throws SQLException;
-
+  Product getProductByNameAndSupplier(String name, String supplier) throws SQLException;
 }

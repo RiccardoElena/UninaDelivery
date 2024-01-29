@@ -10,14 +10,10 @@ import javafx.stage.StageStyle;
 
 public class Main extends Application {
 
-  /**
-   * Width of the window.
-   */
+  /** Width of the window. */
   static final int WIDTH = 600;
 
-  /**
-   * Height of the window.
-   */
+  /** Height of the window. */
   static final int HEIGHT = 400;
 
   @Override
@@ -35,21 +31,22 @@ public class Main extends Application {
     final double[] yOffset = new double[1];
 
     // Evento pressione mouse sulla barra del titolo
-    topPane.setOnMousePressed(event -> {
-      xOffset[0] = event.getSceneX();
-      yOffset[0] = event.getSceneY();
-    });
+    topPane.setOnMousePressed(
+        event -> {
+          xOffset[0] = event.getSceneX();
+          yOffset[0] = event.getSceneY();
+        });
 
     // Evento trascinamento mouse sulla barra del titolo
-    topPane.setOnMouseDragged(event -> {
-      primaryStage.setX(event.getScreenX() - xOffset[0]);
-      primaryStage.setY(event.getScreenY() - yOffset[0]);
-    });
+    topPane.setOnMouseDragged(
+        event -> {
+          primaryStage.setX(event.getScreenX() - xOffset[0]);
+          primaryStage.setY(event.getScreenY() - yOffset[0]);
+        });
 
     primaryStage.setScene(scene);
     primaryStage.show();
   }
-
 
   /**
    * Main method. Launches the application.

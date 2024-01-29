@@ -4,57 +4,39 @@ import java.time.LocalDate;
 
 public class Order {
 
-  /**
-   * Id of the order.
-   */
+  /** Id of the order. */
   private int id;
 
-  /**
-   * Emission date of the order.
-   */
+  /** Emission date of the order. */
   private LocalDate emissionDate;
 
-  /**
-   * Express delivery of the order.
-   */
+  /** Express delivery of the order. */
   private boolean isExpress;
 
-  /**
-   * Extra warranty of the order.
-   */
+  /** Extra warranty of the order. */
   private int extraWarranty;
 
-  /**
-   * Client of the order.
-   */
+  /** Client of the order. */
   private Account account;
 
-  /**
-   * Quantity of the order.
-   */
+  /** Quantity of the order. */
   private int quantity;
-  /**
-   * Product of the order.
-   */
+
+  /** Product of the order. */
   private Product product;
 
-  /**
-   * Expected delivery date of the order.
-   */
+  /** Expected delivery date of the order. */
   private LocalDate expectedDeliveryDate;
 
-  /**
-   * Express delivery days.
-   */
-  private static final int EXPRESSDELIVERY  = 3;
-  /**
-   * Standard delivery days.
-   */
+  /** Express delivery days. */
+  private static final int EXPRESSDELIVERY = 3;
+
+  /** Standard delivery days. */
   private static final int STANDARDDELIVERY = 7;
 
   /**
    * Constructor with parameters.
-
+   *
    * @param orderid ciao
    * @param emissiondate ciao
    * @param isexpress ciao
@@ -63,18 +45,18 @@ public class Order {
    * @param qty ciao
    * @param pct ciao
    */
-  public Order(final int orderid, final LocalDate emissiondate,
-              final boolean isexpress, final int extrawarranty,
-              final Account client, final int qty,
-              final Product pct) {
+  public Order(
+      final int orderid,
+      final LocalDate emissiondate,
+      final boolean isexpress,
+      final int extrawarranty,
+      final Account client,
+      final int qty,
+      final Product pct) {
     this.id = orderid;
     this.emissionDate = emissiondate;
-    this.expectedDeliveryDate = emissiondate
-                                  .plusDays(
-                                    isexpress
-                                    ? EXPRESSDELIVERY
-                                    : STANDARDDELIVERY
-                                  );
+    this.expectedDeliveryDate =
+        emissiondate.plusDays(isexpress ? EXPRESSDELIVERY : STANDARDDELIVERY);
     this.isExpress = isexpress;
     this.extraWarranty = extrawarranty;
     this.account = client;
@@ -137,11 +119,10 @@ public class Order {
   }
 
   /**
-    * Getter of the product.
-
+   * Getter of the product.
+   *
    * @return product
    */
-
   public Product getProduct() {
     return product;
   }
@@ -166,7 +147,7 @@ public class Order {
 
   /**
    * Setter of the emission date.
-
+   *
    * @param emissiondate emission date
    */
   public void setEmissionDate(final LocalDate emissiondate) {
@@ -175,7 +156,7 @@ public class Order {
 
   /**
    * Setter of the express delivery.
-
+   *
    * @param isexpress express delivery
    */
   public void setIsExpress(final boolean isexpress) {
@@ -184,7 +165,7 @@ public class Order {
 
   /**
    * Setter of the extra warranty.
-
+   *
    * @param extrawarranty extra warranty
    */
   public void setExtraWarranty(final int extrawarranty) {
@@ -193,7 +174,7 @@ public class Order {
 
   /**
    * Setter of the client.
-
+   *
    * @param client client
    */
   public void setAccount(final Account client) {
@@ -202,15 +183,16 @@ public class Order {
 
   /**
    * Setter of the quantity.
-
+   *
    * @param qty quantity
    */
   public void setQuantity(final int qty) {
     this.quantity = qty;
   }
+
   /**
    * Setter of the product.
-
+   *
    * @param pct product
    */
   public void setProduct(final Product pct) {
@@ -219,29 +201,41 @@ public class Order {
 
   /**
    * Setter of the expected delivery date.
-
+   *
    * @param expecteddeliverydate expected delivery date
    */
   public void setExpectedDeliveryDate(final LocalDate expecteddeliverydate) {
     this.expectedDeliveryDate = expecteddeliverydate;
   }
 
-  /**
-   * toString method.
-   */
+  /** toString method. */
   @Override
   public String toString() {
     return "Order{"
-              + "\nid ='" + this.id + "',"
-              + "\nemissionDate = '" + this.emissionDate + "',"
-              + "\nisExpress = " + this.isExpress + ","
-              + "\nextraWarranty = " + this.extraWarranty + ","
-              + "\naccount = " + this.account.toString()
-                                          .replace("\n", "\n\t") + "',"
-              + "\nquantity = " + this.quantity + ","
-              + "\nproduct = " + this.product.toString()
-                                          .replace("\n", "\n\t") + "',"
-              + "\nexpectedDeliveryDate = '" + this.expectedDeliveryDate + "'"
-              + "\n}";
+        + "\nid ='"
+        + this.id
+        + "',"
+        + "\nemissionDate = '"
+        + this.emissionDate
+        + "',"
+        + "\nisExpress = "
+        + this.isExpress
+        + ","
+        + "\nextraWarranty = "
+        + this.extraWarranty
+        + ","
+        + "\naccount = "
+        + this.account.toString().replace("\n", "\n\t")
+        + "',"
+        + "\nquantity = "
+        + this.quantity
+        + ","
+        + "\nproduct = "
+        + this.product.toString().replace("\n", "\n\t")
+        + "',"
+        + "\nexpectedDeliveryDate = '"
+        + this.expectedDeliveryDate
+        + "'"
+        + "\n}";
   }
 }

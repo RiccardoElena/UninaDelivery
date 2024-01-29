@@ -5,13 +5,10 @@ import java.security.NoSuchAlgorithmException;
 
 public class SHA256 {
 
-  /**
-   * Mask to get the last byte of an integer.
-   */
+  /** Mask to get the last byte of an integer. */
   private static final int LAST_BYTE_MASK = 0xff;
 
-  private static byte[] getSHA(final String input)
-    throws NoSuchAlgorithmException {
+  private static byte[] getSHA(final String input) throws NoSuchAlgorithmException {
     MessageDigest digest = MessageDigest.getInstance("SHA-256");
     return digest.digest(input.getBytes());
   }
@@ -38,10 +35,8 @@ public class SHA256 {
     try {
       return toHexString(getSHA(originalString));
     } catch (NoSuchAlgorithmException e) {
-      System.out.println(
-        "Errore durante la generazione dell'hash SHA-256: " + e.getMessage());
+      System.out.println("Errore durante la generazione dell'hash SHA-256: " + e.getMessage());
       return null;
     }
   }
-
 }

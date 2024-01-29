@@ -13,7 +13,7 @@ env:
   VALIDATE_YAML: false
   # TODO Remove this line when understood
   # how to check locally google-java-format
-  VALIDATE_GOOGLE_JAVA_FORMAT: false
+  # VALIDATE_GOOGLE_JAVA_FORMAT: false
 
 on:
   push:

@@ -4,48 +4,39 @@ import java.time.LocalDate;
 import java.util.List;
 
 public abstract class Shipment {
-  /**
-   * The id of the shipment.
-   */
+  /** The id of the shipment. */
   private int id;
 
-  /**
-   * The date the shimpent should take off.
-   */
+  /** The date the shimpent should take off. */
   private LocalDate shippingDate;
 
-  /**
-   * Flag to check if the shipment is arrived.
-   */
+  /** Flag to check if the shipment is arrived. */
   private boolean hasArrived;
 
-  /**
-   * The operator that is managing the shipment.
-   */
+  /** The operator that is managing the shipment. */
   private Operator operator;
 
-  /**
-   * Starting deposit of the shipment.
-   */
+  /** Starting deposit of the shipment. */
   private Deposit startingDeposit;
 
-  /**
-   * The orders shipped.
-   */
+  /** The orders shipped. */
   private List<Order> orders;
 
   /**
    * The constructor of the class.
    *
-   * @param sId        the id of the shipment.
-   * @param shipDate   the date the shipment should take off.
+   * @param sId the id of the shipment.
+   * @param shipDate the date the shipment should take off.
    * @param sHasArrived flag to check if the shipment is arrived.
-   * @param sOperator  the operator that is managing the shipment.
+   * @param sOperator the operator that is managing the shipment.
    * @param sStartingDeposit the starting deposit of the shipment.
    */
-  public Shipment(final int sId, final LocalDate shipDate,
-                  final boolean sHasArrived, final Operator sOperator,
-                  final Deposit sStartingDeposit) {
+  public Shipment(
+      final int sId,
+      final LocalDate shipDate,
+      final boolean sHasArrived,
+      final Operator sOperator,
+      final Deposit sStartingDeposit) {
     this.id = sId;
     this.shippingDate = shipDate;
     this.hasArrived = sHasArrived;
@@ -145,9 +136,8 @@ public abstract class Shipment {
 
   /**
    * Add an order to the orders shipped.
-
+   *
    * @param order the order to add.
    */
   public abstract void addOrder(Order order);
 }
-

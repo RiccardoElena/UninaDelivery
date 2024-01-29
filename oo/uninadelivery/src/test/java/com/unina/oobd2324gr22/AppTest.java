@@ -4,15 +4,11 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-/**
- * Unit test for simple App.
- */
+/** Unit test for simple App. */
 public final class AppTest {
-    /**
-     * Rigorous Test :-).
-     */
-    @Test
-    public void shouldAnswerWithTrue() {
-        assertTrue(true);
-    }
+  /** Rigorous Test :-). */
+  @Test
+  public void shouldAnswerWithTrue() {
+    assertTrue(true);
+  }
 }

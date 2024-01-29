@@ -7,120 +7,90 @@ public class Deposit {
 
   // Attributes
 
-  /**
-   * Id of the deposit.
-   */
-
+  /** Id of the deposit. */
   private int id;
 
-  /**
-   * Occupied space of the deposit.
-   */
-
+  /** Occupied space of the deposit. */
   private float occupiedSpace;
 
-  /**
-   * Total space of the deposit.
-   */
-
+  /** Total space of the deposit. */
   private float maxCapacity;
 
-  /**
-   * Address of the deposit.
-   */
-
+  /** Address of the deposit. */
   private Address address;
 
-  /**
-   * Transports owned by the deposit.
-   */
+  /** Transports owned by the deposit. */
   private List<Transport> transports;
 
-  /**
-   * Stored products of the deposit.
-   */
-
+  /** Stored products of the deposit. */
   private List<StoredProduct> storedProducts;
 
-
-  /**
-   * Inner util class needed to store quantity along with the product.
-   */
+  /** Inner util class needed to store quantity along with the product. */
   // TODO we should consider to move this class in his own file in utils package
   protected final class StoredProduct {
 
-      // Attributes
+    // Attributes
 
-      /**
-       * Product stored.
-       */
+    /** Product stored. */
+    private Product product;
 
-      private Product product;
+    /** Quantity of the product stored. */
+    private int quantity;
 
-      /**
-       * Quantity of the product stored.
-       */
+    // Constructors
 
-      private int quantity;
+    /**
+     * Constructor with parameters.
+     *
+     * @param sProduct product stored
+     * @param sQuantity quantity of the product stored
+     */
+    protected StoredProduct(final Product sProduct, final int sQuantity) {
+      this.product = sProduct;
+      this.quantity = sQuantity;
+    }
 
-      // Constructors
+    // Getters and Setters
 
-      /**
-       * Constructor with parameters.
-       *
-       * @param sProduct product stored
-       * @param sQuantity quantity of the product stored
-       */
+    /**
+     * Getter of the product stored.
+     *
+     * @return product stored
+     */
+    public Product getProduct() {
+      return this.product;
+    }
 
-      protected StoredProduct(final Product sProduct, final int sQuantity) {
-        this.product = sProduct;
-        this.quantity = sQuantity;
+    /**
+     * Setter of the product stored.
+     *
+     * @param sProduct product stored
+     */
+    public void setProduct(final Product sProduct) {
+      this.product = sProduct;
+    }
+
+    /**
+     * Getter of the quantity of the product stored.
+     *
+     * @return quantity of the product stored
+     */
+    public int getQuantity() {
+      return this.quantity;
+    }
+
+    /**
+     * Setter of the quantity of the product stored.
+     *
+     * @param sQuantity quantity of the product stored
+     */
+    public void setQuantity(final int sQuantity) {
+      if (sQuantity <= 0) {
+        storedProducts.remove(this);
+        return;
       }
-
-      // Getters and Setters
-
-      /**
-       * Getter of the product stored.
-       *
-       * @return product stored
-       */
-      public Product getProduct() {
-        return this.product;
-      }
-
-      /**
-       * Setter of the product stored.
-       *
-       * @param sProduct product stored
-       */
-
-      public void setProduct(final Product sProduct) {
-        this.product = sProduct;
-      }
-
-      /**
-       * Getter of the quantity of the product stored.
-       *
-       * @return quantity of the product stored
-       */
-
-      public int getQuantity() {
-        return this.quantity;
-      }
-
-      /**
-       * Setter of the quantity of the product stored.
-       *
-       * @param sQuantity quantity of the product stored
-       */
-
-      public void setQuantity(final int sQuantity) {
-        if (sQuantity <= 0) {
-          storedProducts.remove(this);
-          return;
-        }
-        this.quantity = sQuantity;
-      }
+      this.quantity = sQuantity;
+    }
   }
 
   // Constructors
@@ -133,9 +103,8 @@ public class Deposit {
    * @param dMaxCapacity total space of the deposit
    * @param dAddress address of the deposit
    */
-
-  public Deposit(final int dId, final float dOccupiedSpace,
-                 final float dMaxCapacity, final Address dAddress) {
+  public Deposit(
+      final int dId, final float dOccupiedSpace, final float dMaxCapacity, final Address dAddress) {
     this.id = dId;
     this.occupiedSpace = dOccupiedSpace;
     this.maxCapacity = dMaxCapacity;
@@ -149,7 +118,6 @@ public class Deposit {
    *
    * @return id
    */
-
   public int getId() {
     return this.id;
   }
@@ -169,7 +137,6 @@ public class Deposit {
    *
    * @return occupied space
    */
-
   public float getOccupiedSpace() {
     return this.occupiedSpace;
   }
@@ -179,7 +146,6 @@ public class Deposit {
    *
    * @param dOccupiedSpace occupied space
    */
-
   public void setOccupiedSpace(final float dOccupiedSpace) {
     this.occupiedSpace = dOccupiedSpace;
   }
@@ -189,7 +155,6 @@ public class Deposit {
    *
    * @return total space
    */
-
   public float getMaxCapacity() {
     return this.maxCapacity;
   }
@@ -199,7 +164,6 @@ public class Deposit {
    *
    * @param dMaxCapacity total space
    */
-
   public void setMaxCapacity(final float dMaxCapacity) {
     this.maxCapacity = dMaxCapacity;
   }
@@ -209,7 +173,6 @@ public class Deposit {
    *
    * @return address
    */
-
   public Address getAddress() {
     return this.address;
   }
@@ -219,7 +182,6 @@ public class Deposit {
    *
    * @param dAddress address
    */
-
   public void setAddress(final Address dAddress) {
     this.address = dAddress;
   }
@@ -239,7 +201,6 @@ public class Deposit {
    * @param sProduct product to store
    * @param sQuantity quantity of the product to store
    */
-
   public void addStoredProducts(final Product sProduct, final int sQuantity) {
     if (sProduct == null || sQuantity <= 0) {
       return;
@@ -248,12 +209,10 @@ public class Deposit {
     StoredProduct sP = new StoredProduct(sProduct, sQuantity);
     if (this.storedProducts.contains(sP)) {
 
-      this.storedProducts.get(this.storedProducts.indexOf(sP))
-                      .setQuantity(
-                        this.storedProducts.get(
-                          this.storedProducts.indexOf(sP)
-                        ).getQuantity() + sQuantity
-                      );
+      this.storedProducts
+          .get(this.storedProducts.indexOf(sP))
+          .setQuantity(
+              this.storedProducts.get(this.storedProducts.indexOf(sP)).getQuantity() + sQuantity);
     } else {
       this.storedProducts.add(sP);
     }

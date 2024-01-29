@@ -14,8 +14,8 @@ public class CentralDeposit extends CountryDeposit {
    * @param dMaxCapacity total space of the deposit
    * @param dAddress address of the deposit
    */
-  public CentralDeposit(final int dId, final float dOccupiedSpace,
-                 final float dMaxCapacity, final Address dAddress) {
+  public CentralDeposit(
+      final int dId, final float dOccupiedSpace, final float dMaxCapacity, final Address dAddress) {
     super(dId, dOccupiedSpace, dMaxCapacity, dAddress);
   }
 
@@ -31,20 +31,26 @@ public class CentralDeposit extends CountryDeposit {
   @Override
   public String toString() {
     return "Account{"
-          + "\nid = '" + this.getId() + "',"
-          + "\nsurname = " + this.getOccupiedSpace() + ","
-          + "\nemail = " + this.getMaxCapacity() + ","
-          + "\naddress = " + this.getAddress().toString().replace("\n", "\n\t")
-          + "\n}";
+        + "\nid = '"
+        + this.getId()
+        + "',"
+        + "\nsurname = "
+        + this.getOccupiedSpace()
+        + ","
+        + "\nemail = "
+        + this.getMaxCapacity()
+        + ","
+        + "\naddress = "
+        + this.getAddress().toString().replace("\n", "\n\t")
+        + "\n}";
   }
 
   /**
    * Add a transport to the deposit.
-
+   *
    * @param transport the transport to add.
    */
-
-   public void addTransport(final Transport transport) {
+  public void addTransport(final Transport transport) {
     if (transport == null) {
       throw new IllegalArgumentException("Transport cannot be null");
     }
@@ -54,6 +60,5 @@ public class CentralDeposit extends CountryDeposit {
     }
 
     this.getTransports().add(transport);
-
   }
 }
