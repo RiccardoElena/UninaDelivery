@@ -11,6 +11,7 @@ env:
   VALIDATE_LATEX: false
   VALIDATE_JSCPD: false
   VALIDATE_YAML: false
+  JAVA_FILE_NAME: 'config/checks.xml'
   # TODO Remove this line when understood
   # how to check locally google-java-format
   # VALIDATE_GOOGLE_JAVA_FORMAT: false
@@ -43,7 +44,6 @@ jobs:
         uses: super-linter/super-linter@v5.7.2 # x-release-please-version
         env:
           VALIDATE_ALL_CODEBASE: true
-          LINTER_RULES_PATH: 'config/checks.xml'
           DEFAULT_BRANCH: master
           # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
