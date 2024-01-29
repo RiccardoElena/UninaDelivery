@@ -42,7 +42,8 @@ jobs:
       - name: Super-linter
         uses: super-linter/super-linter@v5.7.2 # x-release-please-version
         env:
-          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_ALL_CODEBASE: true
+          LINTER_RULES_PATH: 'sun_checks.xml'
           DEFAULT_BRANCH: master
           # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
