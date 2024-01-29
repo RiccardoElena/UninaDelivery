@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Pane?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="demo.Controller">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.unina.oobd2324gr22.Controller">
    <left>
       <AnchorPane prefHeight="400.0" prefWidth="220.0" BorderPane.alignment="CENTER">
          <children>
@@ -36,7 +36,7 @@
             <Label layoutX="37.0" layoutY="230.0" text="Password" />
             <TextField fx:id="emailTextField" layoutX="113.0" layoutY="188.0" prefHeight="25.0" prefWidth="210.0" promptText="email@uninadelivery.com" />
             <PasswordField fx:id="passwordTextField" layoutX="113.0" layoutY="225.0" prefHeight="25.0" prefWidth="209.0" promptText="Password" />
-            <Button fx:id="esciButton" layoutX="322.0" layoutY="4.0" mnemonicParsing="false" onAction="#esciButtonAction" prefHeight="25.0" prefWidth="43.0" textFill="TRANSPARENT">
+            <Button fx:id="exitButton" layoutX="322.0" layoutY="4.0" mnemonicParsing="false" onAction="#exitButtonAction" prefHeight="25.0" prefWidth="43.0" textFill="TRANSPARENT">
                <graphic>
                   <ImageView fitHeight="31.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
                      <image>

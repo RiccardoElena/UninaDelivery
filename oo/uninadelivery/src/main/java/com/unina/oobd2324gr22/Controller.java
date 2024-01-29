@@ -22,9 +22,8 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-// FIXME: Renamed the class and file to LoginController.
-// ? @zGenny: why this class does not extends Initializable
-// like the other controller?
+// FIXME: Rename the class and file to LoginController.
+
 public class Controller {
 
   /** AccountDAO instance to retrieve account data from DB. */
@@ -39,9 +38,14 @@ public class Controller {
   /** Button to login. */
   @FXML private Button loginButton;
 
+  // FIXME: Renamed the button to match naming convention.
+  // If given name was important for JFX implementation, fix it there.
+  /** Button to exit the application. */
+  @FXML private Button exitButton;
+
   // ? @zGenny: there's a reason for this method to be public and final?
   /**
-   * On loginButton clicl, retrieves login data and checks if they are correct. In such case, it
+   * On loginButton click, retrieves login data and checks if they are correct. In such case, it
    * loads the next page.
    *
    * @param event the event that triggered the method
@@ -119,13 +123,6 @@ public class Controller {
 
   // FIXME: Renamed the button to match naming convention.
   // If given name was important for JFX implementation, fix it there.
-
-  // ? @zGenny. This button is awfull here.
-  // Can we move it up or is it here for a reason?
-
-  /** Button to exit the application. */
-  @FXML private Button exitButton;
-
   // ? @zGenny: there's a reason for this method to be public and final?
   /**
    * On exitButton click, it shows a confirmation alert. If the user confirms, it closes the
@@ -133,11 +130,11 @@ public class Controller {
    *
    * @param event the event that triggered the method
    */
-  public final void esciButtonAction(final ActionEvent event) {
+  public final void exitButtonAction(final ActionEvent event) {
     Stage stage = (Stage) exitButton.getScene().getWindow();
     // TODO!: if we make a custom alert class, we should use it here
     Alert alert = new Alert(AlertType.CONFIRMATION);
-    alert.setTitle("Exit");
+    alert.setTitle("Esci");
     alert.setHeaderText("Stai per uscire!");
     alert.setContentText("Confermi?");
     Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
@@ -148,14 +145,16 @@ public class Controller {
     }
   }
 
-  // ? @zGenny: at the moment there's no way this method throws an exception.
-  // Is it for future implementation? In any case is better to specify
-  // the exception type.
-  private Account checkLogin(final String email, final String password) throws Exception {
+  private Account checkLogin(final String email, final String password) {
     try {
       return accountDAO.getAccountByEmailAndPassword(email, new SHA256().toSHA256(password));
     } catch (Exception e) {
-      throw new Exception("Errore durante il login: " + e.getMessage());
+      this.showAlert(
+          Alert.AlertType.ERROR,
+          "Errore",
+          "Errore Interno",
+          "Si è verificato un errrore interno, si prega di riprovare più tardi");
+      return null;
     }
   }
 }

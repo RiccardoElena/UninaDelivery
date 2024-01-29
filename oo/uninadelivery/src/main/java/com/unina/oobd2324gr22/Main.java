@@ -8,6 +8,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+// TODO @zGenny: remember to add all the static resources in the resources folder
+// OrderPage.fxml and several images are missing
 public class Main extends Application {
 
   /** Width of the window. */
@@ -18,10 +20,9 @@ public class Main extends Application {
 
   @Override
   public final void start(final Stage primaryStage) throws Exception {
-    primaryStage.initStyle(StageStyle.TRANSPARENT);
+    primaryStage.initStyle(StageStyle.UNDECORATED);
     primaryStage.setTitle("Demo JavaFX");
-
-    Parent root = FXMLLoader.load(getClass().getResource("demo.fxml"));
+    Parent root = FXMLLoader.load(Main.class.getResource("/demo.fxml"));
     Scene scene = new Scene(root, WIDTH, HEIGHT);
 
     Node topPane = root.lookup("#topPane");
@@ -54,6 +55,7 @@ public class Main extends Application {
    * @param args command line arguments
    */
   public static void main(final String[] args) {
+    System.out.println(System.getProperty("user.dir"));
     launch(args);
     System.out.println("Hello World!");
   }

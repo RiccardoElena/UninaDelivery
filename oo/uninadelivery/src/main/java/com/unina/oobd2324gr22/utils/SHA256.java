@@ -31,12 +31,11 @@ public class SHA256 {
    * @param originalString the string to hash
    * @return the SHA-256 hash of the given string
    */
-  public final String toSHA256(final String originalString) {
+  public final String toSHA256(final String originalString) throws RuntimeException {
     try {
       return toHexString(getSHA(originalString));
     } catch (NoSuchAlgorithmException e) {
-      System.out.println("Errore durante la generazione dell'hash SHA-256: " + e.getMessage());
-      return null;
+      throw new RuntimeException("Internal error", e);
     }
   }
 }

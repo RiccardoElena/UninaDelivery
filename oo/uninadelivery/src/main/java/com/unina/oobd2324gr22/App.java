@@ -32,5 +32,7 @@ public final class App {
     } catch (SQLException e) {
       e.printStackTrace();
     }
+
+    Main.main(args);
   }
 }

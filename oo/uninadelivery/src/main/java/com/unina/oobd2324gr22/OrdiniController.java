@@ -38,30 +38,8 @@ public class OrdiniController implements Initializable {
   /** Logged account. */
   private Account account;
 
-  // TODO! @zGenny: I've not clear the use of this Hbox
-  // please make a more descriptive javaDoc
-  /** HBox representing the top bar of the window. */
-  @FXML private HBox topBar;
-
-  @FXML
-  private void initialize() {
-    if (account != null) {
-      nameLabel.setText(account.getName());
-    }
-  }
-
-  // ? @zGenny there's a reason why this method is public?
-  // if not make it private and remove the javaDoc
-
-  /**
-   * Sets the label text to match the logged account name.
-   *
-   * @param client
-   */
-  public void setAccount(final Account client) {
-    this.account = client;
-    nameLabel.setText(client.getName());
-  }
+  /** Custom title bar. */
+  @FXML private HBox titleBar;
 
   // FIXME: Renamed the TableView to more descriptive name.
   // If given name was important for JFX implementation, fix it there.
@@ -69,14 +47,14 @@ public class OrdiniController implements Initializable {
   // All this parameter are a mess, isn't a better way to encapsulate them
   // in a custom table class?
 
+  /** Label containing the name of the logged account. */
+  @FXML private Label nameLabel;
+
   /** Table containing the orders. */
   @FXML private TableView<Order> ordersTable;
 
   // FIXME: Renamed the label to match naming convention.
   // If given name was important for JFX implementation, fix it there.
-
-  /** Label containing the name of the logged account. */
-  @FXML private Label nameLabel;
 
   /** Column containing the client of the order. */
   @FXML private TableColumn<Order, String> clientColumn = new TableColumn<Order, String>("Client");
@@ -107,11 +85,28 @@ public class OrdiniController implements Initializable {
   /** Button to exit the application. */
   @FXML private Button exitButton;
 
-  // ? @zGenny: can't understand the pourpose of this button
-  // this page should have a default exit button on the top right corner.
-  // Anyway this implementatos seems more accurate then the one in the
-  // LoginController, so I'll keep this one as reference in case we want to
-  // update the other controller or make a new custom allert class.
+  /** Button to resize the application. */
+  @FXML private Button resizeButton;
+
+  @FXML
+  private void initialize() {
+    if (account != null) {
+      nameLabel.setText(account.getName());
+    }
+  }
+
+  // ? @zGenny there's a reason why this method is public?
+  // if not make it private and remove the javaDoc
+  /**
+   * Sets the label text to match the logged account name.
+   *
+   * @param client
+   */
+  public void setAccount(final Account client) {
+    this.account = client;
+    nameLabel.setText(client.getName());
+  }
+
   /**
    * On exitButton click, it shows a confirmation alert. If the user confirms, it closes the
    * application.
@@ -133,6 +128,12 @@ public class OrdiniController implements Initializable {
     }
   }
 
+  // ? @zGenny: can't understand the pourpose of this button
+  // this page should have a default exit button on the top right corner.
+  // Anyway this implementatos seems more accurate then the one in the
+  // LoginController, so I'll keep this one as reference in case we want to
+  // update the other controller or make a new custom allert class.
+
   private void applyFadeTransition(
       final Stage stage,
       final double fromValue,
@@ -149,8 +150,6 @@ public class OrdiniController implements Initializable {
   /** Button to minimize the application. */
   @FXML private Button minimizeButton;
 
-  // ? @zGenny: the lambda expression is a bit confusing here.
-  // Can't understand the pourpose of the setOpacity method.
   /**
    * On minimizeButton click, it minimizes the application.
    *
@@ -170,9 +169,6 @@ public class OrdiniController implements Initializable {
         });
   }
 
-  /** Button to resize the application. */
-  @FXML private Button resizeButton;
-
   /**
    * On resizeButton click, it resizes the application.
    *
@@ -183,8 +179,6 @@ public class OrdiniController implements Initializable {
     stage.setMaximized(!stage.isMaximized());
   }
 
-  // ? @zGenny: is this implementation still needed after the design changes?
-  // Anyway remember to change all comment to english to mantain consistency
   @Override
   public final void initialize(final URL location, final ResourceBundle resources) {
 
@@ -195,16 +189,16 @@ public class OrdiniController implements Initializable {
     final double[] yOffset = new double[1];
 
     // Evento pressione mouse sulla barra del titolo
-    topBar.setOnMousePressed(
+    titleBar.setOnMousePressed(
         event -> {
           xOffset[0] = event.getSceneX();
           yOffset[0] = event.getSceneY();
         });
 
     // Evento trascinamento mouse sulla barra del titolo
-    topBar.setOnMouseDragged(
+    titleBar.setOnMouseDragged(
         event -> {
-          Stage stage = (Stage) topBar.getScene().getWindow();
+          Stage stage = (Stage) titleBar.getScene().getWindow();
           stage.setX(event.getScreenX() - xOffset[0]);
           stage.setY(event.getScreenY() - yOffset[0]);
         });
@@ -225,6 +219,7 @@ public class OrdiniController implements Initializable {
         event -> {
           minimizeButton.setStyle("-fx-background-color: #ffff00;");
         });
+
     minimizeButton.setOnMouseExited(
         event -> {
           minimizeButton.setStyle("-fx-background-color: transparent;");
@@ -234,6 +229,7 @@ public class OrdiniController implements Initializable {
         event -> {
           resizeButton.setStyle("-fx-background-color: #00ff00;");
         });
+
     resizeButton.setOnMouseExited(
         event -> {
           resizeButton.setStyle("-fx-background-color: transparent;");
@@ -372,6 +368,7 @@ public class OrdiniController implements Initializable {
     return ordersModels;
   }
 
+  // FIXME: change name to follow naming convention
   private void eseguiAzione(final Order order) {
     System.out.println("Hai cliccato su " + order.getOrderId());
   }
