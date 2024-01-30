@@ -108,9 +108,15 @@ public class OrderDAOPostgre implements OrderDAO {
       e.printStackTrace();
       throw e;
     } finally {
-      rs.close();
-      psSelect.close();
-      con.close();
+      if (rs != null) {
+        rs.close();
+      }
+      if (psSelect != null) {
+        psSelect.close();
+      }
+      if (con != null) {
+        con.close();
+      }
     }
     return order;
   }
@@ -138,9 +144,15 @@ public class OrderDAOPostgre implements OrderDAO {
       e.printStackTrace();
       throw e;
     } finally {
-      rs.close();
-      st.close();
-      con.close();
+      if (rs != null) {
+        rs.close();
+      }
+      if (st != null) {
+        st.close();
+      }
+      if (con != null) {
+        con.close();
+      }
     }
 
     return orders;
@@ -170,9 +182,15 @@ public class OrderDAOPostgre implements OrderDAO {
       e.printStackTrace();
       throw e;
     } finally {
-      rs.close();
-      st.close();
-      con.close();
+      if (rs != null) {
+        rs.close();
+      }
+      if (st != null) {
+        st.close();
+      }
+      if (con != null) {
+        con.close();
+      }
     }
 
     return orders;
@@ -192,7 +210,6 @@ public class OrderDAOPostgre implements OrderDAO {
     PreparedStatement st = null;
     ResultSet rs = null;
     try {
-
       st =
           con.prepareStatement(
               "SELECT MAX(quantity) "
@@ -212,9 +229,15 @@ public class OrderDAOPostgre implements OrderDAO {
       e.printStackTrace();
       throw e;
     } finally {
-      rs.close();
-      st.close();
-      con.close();
+      if (rs != null) {
+        rs.close();
+      }
+      if (st != null) {
+        st.close();
+      }
+      if (con != null) {
+        con.close();
+      }
     }
 
     return order;
@@ -252,9 +275,15 @@ public class OrderDAOPostgre implements OrderDAO {
       e.printStackTrace();
       throw e;
     } finally {
-      rs.close();
-      st.close();
-      con.close();
+      if (rs != null) {
+        rs.close();
+      }
+      if (st != null) {
+        st.close();
+      }
+      if (con != null) {
+        con.close();
+      }
     }
 
     return order;
@@ -283,9 +312,15 @@ public class OrderDAOPostgre implements OrderDAO {
       e.printStackTrace();
       throw e;
     } finally {
-      rs.close();
-      psSelect.close();
-      con.close();
+      if (rs != null) {
+        rs.close();
+      }
+      if (psSelect != null) {
+        psSelect.close();
+      }
+      if (con != null) {
+        con.close();
+      }
     }
     return orders;
   }
@@ -316,9 +351,15 @@ public class OrderDAOPostgre implements OrderDAO {
       e.printStackTrace();
       throw e;
     } finally {
-      rs.close();
-      psSelect.close();
-      con.close();
+      if (rs != null) {
+        rs.close();
+      }
+      if (psSelect != null) {
+        psSelect.close();
+      }
+      if (con != null) {
+        con.close();
+      }
     }
     return orders;
   }
@@ -346,9 +387,15 @@ public class OrderDAOPostgre implements OrderDAO {
       e.printStackTrace();
       throw e;
     } finally {
-      rs.close();
-      psSelect.close();
-      con.close();
+      if (rs != null) {
+        rs.close();
+      }
+      if (psSelect != null) {
+        psSelect.close();
+      }
+      if (con != null) {
+        con.close();
+      }
     }
     return orders;
   }
@@ -383,9 +430,15 @@ public class OrderDAOPostgre implements OrderDAO {
       e.printStackTrace();
       throw e;
     } finally {
-      rs.close();
-      psSelect.close();
-      con.close();
+      if (rs != null) {
+        rs.close();
+      }
+      if (psSelect != null) {
+        psSelect.close();
+      }
+      if (con != null) {
+        con.close();
+      }
     }
     return orders;
   }
@@ -430,9 +483,15 @@ public class OrderDAOPostgre implements OrderDAO {
       e.printStackTrace();
       throw e;
     } finally {
-      rs.close();
-      psSelect.close();
-      con.close();
+      if (rs != null) {
+        rs.close();
+      }
+      if (psSelect != null) {
+        psSelect.close();
+      }
+      if (con != null) {
+        con.close();
+      }
     }
     return orders;
   }

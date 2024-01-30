@@ -61,4 +61,21 @@ public class StateDeposit extends Deposit {
 
     this.getTransports().add(transport);
   }
+
+  /**
+   * Remove a wheeled large transport from the deposit.
+   *
+   * @param transport the wheeled large transport to remove.
+   */
+  public void removeTransport(final Transport transport) {
+    if (transport == null) {
+      throw new IllegalArgumentException("Transport cannot be null");
+    }
+
+    if (!this.getTransports().contains(transport)) {
+      return;
+    }
+
+    this.getTransports().remove(transport);
+  }
 }

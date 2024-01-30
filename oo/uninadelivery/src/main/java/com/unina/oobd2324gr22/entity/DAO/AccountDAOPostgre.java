@@ -1,13 +1,40 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
 import com.unina.oobd2324gr22.entity.DTO.Account;
+import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
+import com.unina.oobd2324gr22.utils.DBConnection;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
 // TODO @zGenny @RiccardoElena nly signature has been written, no implementation
 
 public class AccountDAOPostgre implements AccountDAO {
+
+  /** Connection to the database. */
+  private Connection con;
+
+  private Operator populateOperatorFromResultSet(final ResultSet rs) throws SQLException {
+    return new Operator.OperatorBuilder(
+            rs.getString("name"),
+            rs.getString("surname"),
+            rs.getString("email"),
+            rs.getDate("birthdate").toLocalDate(),
+            rs.getString("password"),
+            new Address(
+                rs.getString("zipcode"),
+                rs.getString("city"),
+                rs.getString("state"),
+                rs.getString("country"),
+                rs.getString("worldzone"),
+                rs.getInt("addressno"),
+                rs.getString("street")),
+            rs.getString("businessmail"))
+        .build();
+  }
 
   /** PostgreSQL implementation of the insertAccount method. */
   @Override
@@ -41,6 +68,43 @@ public class AccountDAOPostgre implements AccountDAO {
     return null;
   }
 
+  /** PostgreSQL implementation of the getAccountByBmail method. */
+  @Override
+  public final Operator getOperatorByBmailAndPassword(final String bmail, final String password)
+      throws SQLException {
+    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Operator op = null;
+    PreparedStatement st = null;
+    ResultSet rs = null;
+    try {
+      st =
+          con.prepareStatement(
+              "SELECT * FROM account NATURAL JOIN operator NATURAL JOIN area WHERE bmail = ? AND"
+                  + " password = ?");
+      st.setString(1, bmail);
+      st.setString(2, password);
+      rs = st.executeQuery();
+      if (rs.next()) {
+        op = populateOperatorFromResultSet(rs);
+      }
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw e;
+    } finally {
+      if (rs != null) {
+        rs.close();
+      }
+      if (st != null) {
+        st.close();
+      }
+      if (con != null) {
+        con.close();
+      }
+    }
+    return op;
+  }
+
   /** PostgreSQL implementation of the updateAccount method. */
   @Override
   public int updateAccount(final Account account) throws SQLException {
@@ -57,12 +121,5 @@ public class AccountDAOPostgre implements AccountDAO {
   @Override
   public int deleteAccount(final Account account) throws SQLException {
     return 0;
-  }
-
-  @Override
-  public final Operator getOperatorByBmailAndPassword(final String bmail, final String password)
-      throws SQLException {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getOperatorByBmailAndPassword'");
   }
 }
