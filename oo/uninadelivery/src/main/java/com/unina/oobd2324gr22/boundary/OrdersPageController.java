@@ -26,9 +26,6 @@ import javafx.util.Callback;
 
 public class OrdersPageController implements Initializable {
 
-  /** Duration of the fade out effect. */
-  private static final float FADE_OUT_DURATION = 0.1f;
-
   /** Orders selection functionality control class. */
   private OrdersControl ordersControl = new OrdersControl();
 
