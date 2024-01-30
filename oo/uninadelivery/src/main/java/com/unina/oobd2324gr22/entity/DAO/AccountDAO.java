@@ -1,6 +1,7 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
 import com.unina.oobd2324gr22.entity.DTO.Account;
+import com.unina.oobd2324gr22.entity.DTO.Operator;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -39,6 +40,15 @@ public interface AccountDAO {
    * @return the account with given email and password or null if not found
    */
   Account getAccountByEmailAndPassword(String email, String password) throws SQLException;
+
+  /**
+   * Retrieve an operator account by its businessmail and password.
+   *
+   * @param bmail email
+   * @param password password
+   * @return the account with given email and password or null if not found
+   */
+  Operator getOperatorByBmailAndPassword(String bmail, String password) throws SQLException;
 
   /**
    * Retrieve all accounts with given name and surname.

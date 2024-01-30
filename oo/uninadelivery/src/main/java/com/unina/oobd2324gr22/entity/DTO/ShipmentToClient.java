@@ -29,7 +29,30 @@ public class ShipmentToClient extends Shipment {
     super(sId, shipDate, sHasArrived, sOperator, startDeposit);
     if (sTransport.getDepositOwner() != startDeposit) {
       throw new IllegalArgumentException(
-          "The transport must be in the same" + " deposit of the shipment");
+          "The transport must be in the same deposit of the shipment");
+    } else {
+      this.transport = sTransport;
+    }
+  }
+
+  /**
+   * Constructor of the class for user input.
+   *
+   * @param shipDate the date the shipment should take off.
+   * @param sOperator the operator that is managing the shipment.
+   * @param sTransport the veichle transporting the shipment.
+   * @param startDeposit the destination deposit.
+   */
+  public ShipmentToClient(
+      final LocalDate shipDate,
+      final Operator sOperator,
+      final WheeledSmall sTransport,
+      final Deposit startDeposit) {
+
+    super(shipDate, sOperator, startDeposit);
+    if (sTransport.getDepositOwner() != startDeposit) {
+      throw new IllegalArgumentException(
+          "The transport must be in the same deposit of the shipment");
     } else {
       this.transport = sTransport;
     }

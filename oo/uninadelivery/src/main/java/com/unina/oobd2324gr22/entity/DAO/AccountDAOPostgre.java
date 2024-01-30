@@ -1,6 +1,7 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
 import com.unina.oobd2324gr22.entity.DTO.Account;
+import com.unina.oobd2324gr22.entity.DTO.Operator;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -56,5 +57,12 @@ public class AccountDAOPostgre implements AccountDAO {
   @Override
   public int deleteAccount(final Account account) throws SQLException {
     return 0;
+  }
+
+  @Override
+  public final Operator getOperatorByBmailAndPassword(final String bmail, final String password)
+      throws SQLException {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'getOperatorByBmailAndPassword'");
   }
 }

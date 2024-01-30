@@ -20,5 +20,6 @@
 
 !**/sources/*.pdf
 ## macOS app launcher
-header-template
-UninaDelivery
+/header-template
+/UninaDelivery
+!/oo/uninadelivery

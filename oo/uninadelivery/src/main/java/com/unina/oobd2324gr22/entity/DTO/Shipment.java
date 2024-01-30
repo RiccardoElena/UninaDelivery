@@ -23,7 +23,7 @@ public abstract class Shipment {
   private List<Order> orders;
 
   /**
-   * The constructor of the class.
+   * Full constructor of the class.
    *
    * @param sId the id of the shipment.
    * @param shipDate the date the shipment should take off.
@@ -42,6 +42,21 @@ public abstract class Shipment {
     this.hasArrived = sHasArrived;
     this.operator = sOperator;
     this.startingDeposit = sStartingDeposit;
+  }
+
+  /**
+   * Constructor of the class for user input.
+   *
+   * @param shipDate the date the shipment should take off.
+   * @param sOperator the operator that is managing the shipment.
+   * @param sStartingDeposit the starting deposit of the shipment.
+   */
+  public Shipment(
+      final LocalDate shipDate, final Operator sOperator, final Deposit sStartingDeposit) {
+    this.id = -1;
+    this.shippingDate = shipDate;
+    this.hasArrived = false;
+    this.operator = sOperator;
   }
 
   /**
