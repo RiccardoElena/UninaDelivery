@@ -4,6 +4,11 @@ import com.unina.oobd2324gr22.entity.DAO.AccountDAO;
 import com.unina.oobd2324gr22.entity.DAO.AccountDAOPostgre;
 import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.utils.SHA256;
+
+import io.github.palexdev.materialfx.controls.MFXButton;
+import io.github.palexdev.materialfx.controls.MFXPasswordField;
+import io.github.palexdev.materialfx.controls.MFXTextField;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -16,10 +21,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 // FIXME: Rename the class and file to LoginController.
@@ -30,18 +32,18 @@ public class Controller {
   private AccountDAO accountDAO = new AccountDAOPostgre();
 
   /** Text field to input the email for the login. */
-  @FXML private TextField emailTextField;
+  @FXML private MFXTextField emailTextField;
 
   /** Text field to input the password for the login. */
-  @FXML private PasswordField passwordTextField;
+  @FXML private MFXPasswordField passwordTextField;
 
   /** Button to login. */
-  @FXML private Button loginButton;
+  @FXML private MFXButton loginButton;
 
   // FIXME: Renamed the button to match naming convention.
   // If given name was important for JFX implementation, fix it there.
   /** Button to exit the application. */
-  @FXML private Button exitButton;
+  @FXML private MFXButton exitButton;
 
   // ? @zGenny: there's a reason for this method to be public and final?
   /**
@@ -65,11 +67,11 @@ public class Controller {
         // this.changePage(client, event);
         /* TODO!: this implementation is for test pourpose only
         Remove this block when done and uncomment the previous line */
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Ordini.fxml"));
-        Parent root;
         try {
+          FXMLLoader loader = new FXMLLoader(getClass().getResource("/Ordini.fxml"));
+          Parent root;
           root = loader.load();
-          OrdiniController controller = loader.getController();
+          OrdersController controller = loader.getController();
           LocalDate bdate =
               LocalDate.parse("1999-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
           client =
@@ -77,9 +79,12 @@ public class Controller {
                   "Gennaro", "De Gregorio", "gdg@gmail.com", bdate, "gdg.jpg", "password", null);
           controller.setAccount(client);
           Scene scene = new Scene(root);
+          scene.getStylesheets().add(Main.class.getResource("/style.css").toExternalForm());
           Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+          stage.setResizable(true);
           stage.setScene(scene);
           stage.show();
+          return;
         } catch (IOException e) {
           e.printStackTrace();
         }
@@ -110,7 +115,7 @@ public class Controller {
     FXMLLoader loader = new FXMLLoader(getClass().getResource("Ordini.fxml"));
     try {
       Parent root = loader.load();
-      OrdiniController controller = loader.getController();
+      OrdersController controller = loader.getController();
       controller.setAccount(account);
       Scene scene = new Scene(root);
       Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();

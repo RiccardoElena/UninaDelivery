@@ -1,5 +1,7 @@
 package com.unina.oobd2324gr22;
 
+import java.net.URL;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -22,8 +24,14 @@ public class Main extends Application {
   public final void start(final Stage primaryStage) throws Exception {
     primaryStage.initStyle(StageStyle.UNDECORATED);
     primaryStage.setTitle("Demo JavaFX");
-    Parent root = FXMLLoader.load(Main.class.getResource("/demo.fxml"));
+    URL fxmlUrl = Main.class.getResource("/demo.fxml");
+    System.out.println("Loading FXML from: " + fxmlUrl);
+
+    Parent root = FXMLLoader.load(fxmlUrl);
     Scene scene = new Scene(root, WIDTH, HEIGHT);
+    scene.getStylesheets().add(Main.class.getResource("/style.css").toExternalForm());
+    scene.getStylesheets().forEach(System.out::println);
+    
 
     Node topPane = root.lookup("#topPane");
 
