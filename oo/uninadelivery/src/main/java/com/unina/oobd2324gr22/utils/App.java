@@ -21,7 +21,7 @@ public class App extends Application {
   @Override
   public final void start(final Stage primaryStage) throws Exception {
     primaryStage.initStyle(StageStyle.UNDECORATED);
-    primaryStage.setTitle("Demo JavaFX");
+    primaryStage.setTitle("UninaDelivery");
 
     loginControl.setScene(primaryStage);
   }

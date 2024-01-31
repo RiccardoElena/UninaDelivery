@@ -180,6 +180,7 @@ public class OrdersPageController implements Initializable {
     emissionDateColumn.setCellValueFactory(new PropertyValueFactory<>("EmissionDate"));
     isExpressColumn.setCellValueFactory(new PropertyValueFactory<>("IsExpress"));
     extraWarrantyColumn.setCellValueFactory(new PropertyValueFactory<>("ExtraWarranty"));
+    quantityColumn.setCellValueFactory(new PropertyValueFactory<>("Quantity"));
 
     // TODO! @zGenny: we can consider to add the getAccountEmail method to the
     // Order class if this makes the code more readable

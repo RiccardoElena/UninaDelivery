@@ -25,7 +25,7 @@ public class NonLoginControl extends BaseControl {
         0.0,
         e -> {
           stage.setIconified(true);
-          stage.getScene().getRoot().setOpacity(1.0);
+          stage.setOpacity(1.0);
         });
   }
 

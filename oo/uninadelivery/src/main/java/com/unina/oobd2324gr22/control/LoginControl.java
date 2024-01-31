@@ -37,13 +37,12 @@ public class LoginControl extends BaseControl {
    * @throws Exception if the scene cannot be set
    */
   public void setScene(final Stage primaryStage) throws Exception {
-    URL fxmlUrl = LoginControl.class.getResource("/FXML/demo.fxml");
-    System.out.println("Loading FXML from: " + fxmlUrl);
+    URL fxmlUrl = LoginControl.class.getResource("/FXML/login.fxml");
 
     Parent root = FXMLLoader.load(fxmlUrl);
     Scene scene = new Scene(root, WIDTH, HEIGHT);
-    // scene.getStylesheets().add(LoginControl.class.getResource("/style.css").toExternalForm());
-    scene.getStylesheets().forEach(System.out::println);
+    scene.getStylesheets().add(LoginControl.class.getResource("/style/LoginPage.css")
+    .toExternalForm());
 
     primaryStage.setScene(scene);
     primaryStage.show();
@@ -85,9 +84,6 @@ public class LoginControl extends BaseControl {
                       null,
                       "G.DeGregorio@uninadelivery.operator.com")
                   .build();
-
-          // "Gennaro", "De Gregorio", "gdg@gmail.com", bdate, "gdg.jpg", "password", null);
-          System.err.println(stage);
           ordersControl.setScene(stage, client);
           return;
         } catch (Exception e) {

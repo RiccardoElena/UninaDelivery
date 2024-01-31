@@ -10,6 +10,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 // FIXME: In refactoring a lot of methods have been moved to LoginControl.
@@ -17,11 +22,17 @@ import javafx.stage.Stage;
 
 public class LoginPageController implements Initializable {
 
+  /** Width of the eye icons. */
+  static final int ICON_WIDTH = 30;
+
+  /** Height of the eye icons. */
+  static final int ICON_HEIGHT = 30;
+
   /** Text field to input the email for the login. */
-  @FXML private MFXTextField emailTextField;
+  @FXML private TextField emailTextField;
 
   /** Text field to input the password for the login. */
-  @FXML private MFXPasswordField passwordTextField;
+  @FXML private PasswordField passwordTextField;
 
   /** Button to login. */
   @FXML private MFXButton loginButton;
@@ -35,10 +46,18 @@ public class LoginPageController implements Initializable {
   /** Login functionality control class. */
   private LoginControl loginControl = new LoginControl();
 
+  /** Button for toggling password mask. */
+  @FXML private Button togglePswVisibilityButton;
+
+  /** Plain PasswordField to input the password for the login. */
+  @FXML private TextField plainPasswordTextField;
+
   @Override
   @FXML
   public final void initialize(final URL location, final ResourceBundle resources) {
     loginControl.setDraggable(topPane);
+    togglePswVisibilityButton.setGraphic(getIcon("/images/loginPage/ClosedEye.png"));
+    togglePswVisibilityButton.setOnAction(event -> togglePswVisibility());
   }
 
   // ? @zGenny: there's a reason for this method to be public and final?
@@ -62,8 +81,30 @@ public class LoginPageController implements Initializable {
    *
    * @param event the event that triggered the method
    */
-  public final void exitButtonAction(final ActionEvent event) {
+  @FXML final void exitButtonAction(final ActionEvent event) {
     Stage stage = (Stage) exitButton.getScene().getWindow();
     loginControl.exit(stage);
   }
+
+  private void togglePswVisibility() {
+    ImageView eyeView;
+    if (passwordTextField.isVisible()) {
+      togglePswVisibilityButton.setGraphic(getIcon("/images/loginPage/Eye.png"));
+      plainPasswordTextField.setText(passwordTextField.getText());
+      passwordTextField.setVisible(false);
+      plainPasswordTextField.setVisible(true);
+    } else {
+      togglePswVisibilityButton.setGraphic(getIcon("/images/loginPage/ClosedEye.png"));
+      passwordTextField.setText(plainPasswordTextField.getText());
+      plainPasswordTextField.setVisible(false);
+      passwordTextField.setVisible(true);
+    }
+  }
+
+  private ImageView getIcon(final String path) {
+    ImageView eyeView = new ImageView(new Image(path));
+    eyeView.setFitWidth(ICON_WIDTH);  // Set the width
+    eyeView.setFitHeight(ICON_HEIGHT);
+    return eyeView;
+}
 }
