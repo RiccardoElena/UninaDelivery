@@ -1,7 +1,6 @@
 package com.unina.oobd2324gr22.boundary;
 
 import com.unina.oobd2324gr22.control.DashboardControl;
-import com.unina.oobd2324gr22.control.OrdersControl;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 
 import io.github.palexdev.materialfx.controls.MFXButton;
@@ -19,9 +18,6 @@ public class DashboardPageController {
 
   /** Dashboard selection functionality control class. */
   private DashboardControl dashboardControl = new DashboardControl();
-
-  /** Orders selection functionality control class. */
-  private OrdersControl ordersControl;
 
   /** Logged account. */
   private Operator operator = dashboardControl.getLoggedOperator();;
