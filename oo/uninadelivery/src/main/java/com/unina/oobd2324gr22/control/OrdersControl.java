@@ -1,5 +1,6 @@
 package com.unina.oobd2324gr22.control;
 
+import com.unina.oobd2324gr22.boundary.OrdersPageController;
 import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 import com.unina.oobd2324gr22.entity.DTO.Order;
@@ -21,21 +22,24 @@ public class OrdersControl extends NonLoginControl {
   /**
    * Set Orders scene on Stage.
    *
-   * @param stage the stage to set the scene on
-   * @param op the logged in operator.
+   * @param currStage the stage to set the scene on
+   * @param op the operator logged in
    * @throws Exception if the scene cannot be set
    */
-  public void setScene(final Stage stage, final Operator op) throws Exception {
-    this.loggedOperator = op;
+  public void setScene(final Stage currStage, final Operator op) throws Exception {
+    setLoggedOperator(op);
+    setStage(currStage);
     FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Ordini.fxml"));
     Parent root = loader.load();
+    OrdersPageController pageController = loader.getController();
+    pageController.init(this);
     Scene scene = new Scene(root, WIDTH, HEIGHT);
     scene
         .getStylesheets()
         .add(LoginControl.class.getResource("/style/OrdersPage.css").toExternalForm());
 
-    stage.setScene(scene);
-    stage.show();
+    currStage.setScene(scene);
+    currStage.show();
     return;
   }
 
@@ -45,7 +49,17 @@ public class OrdersControl extends NonLoginControl {
    * @return the logged in operator
    */
   public Operator getLoggedOperator() {
+
     return loggedOperator;
+  }
+
+  /**
+   * Set Logged in operator.
+   *
+   * @param op the logged in operator
+   */
+  public void setLoggedOperator(final Operator op) {
+    this.loggedOperator = op;
   }
 
   // FIXME: to be changed to real functionality

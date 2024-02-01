@@ -2,8 +2,6 @@ package com.unina.oobd2324gr22.boundary;
 
 import com.unina.oobd2324gr22.control.LoginControl;
 import io.github.palexdev.materialfx.controls.MFXButton;
-import io.github.palexdev.materialfx.controls.MFXPasswordField;
-import io.github.palexdev.materialfx.controls.MFXTextField;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
@@ -81,13 +79,13 @@ public class LoginPageController implements Initializable {
    *
    * @param event the event that triggered the method
    */
-  @FXML final void exitButtonAction(final ActionEvent event) {
+  @FXML
+  final void exitButtonAction(final ActionEvent event) {
     Stage stage = (Stage) exitButton.getScene().getWindow();
-    loginControl.exit(stage);
+    loginControl.exit();
   }
 
   private void togglePswVisibility() {
-    ImageView eyeView;
     if (passwordTextField.isVisible()) {
       togglePswVisibilityButton.setGraphic(getIcon("/images/loginPage/Eye.png"));
       plainPasswordTextField.setText(passwordTextField.getText());
@@ -103,8 +101,8 @@ public class LoginPageController implements Initializable {
 
   private ImageView getIcon(final String path) {
     ImageView eyeView = new ImageView(new Image(path));
-    eyeView.setFitWidth(ICON_WIDTH);  // Set the width
+    eyeView.setFitWidth(ICON_WIDTH); // Set the width
     eyeView.setFitHeight(ICON_HEIGHT);
     return eyeView;
-}
+  }
 }

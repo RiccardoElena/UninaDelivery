@@ -2,6 +2,7 @@ package com.unina.oobd2324gr22.control;
 
 import com.unina.oobd2324gr22.entity.DAO.AccountDAO;
 import com.unina.oobd2324gr22.entity.DAO.AccountDAOPostgre;
+import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 import com.unina.oobd2324gr22.utils.SHA256;
 import java.net.URL;
@@ -41,8 +42,9 @@ public class LoginControl extends BaseControl {
 
     Parent root = FXMLLoader.load(fxmlUrl);
     Scene scene = new Scene(root, WIDTH, HEIGHT);
-    scene.getStylesheets().add(LoginControl.class.getResource("/style/LoginPage.css")
-    .toExternalForm());
+    scene
+        .getStylesheets()
+        .add(LoginControl.class.getResource("/style/LoginPage.css").toExternalForm());
 
     primaryStage.setScene(scene);
     primaryStage.show();
@@ -81,7 +83,7 @@ public class LoginControl extends BaseControl {
                       "gdg@gmail.com",
                       bdate,
                       password,
-                      null,
+                      new Address("80100", "Napoli", "NA", "Italia", "EUW", "12A", "Via Roma"),
                       "G.DeGregorio@uninadelivery.operator.com")
                   .build();
           ordersControl.setScene(stage, client);

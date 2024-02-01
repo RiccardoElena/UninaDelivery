@@ -14,18 +14,13 @@ public class NonLoginControl extends BaseControl {
   /** Height of the window. */
   protected static final int HEIGHT = 720;
 
-  /**
-   * Minimize the window.
-   *
-   * @param stage the stage to minimize
-   */
-  public void minimize(final Stage stage) {
+  /** Minimize the window. */
+  public void minimize() {
     fadeOutTransition(
-        stage,
         0.0,
         e -> {
-          stage.setIconified(true);
-          stage.setOpacity(1.0);
+          getStage().setIconified(true);
+          getStage().setOpacity(1.0);
         });
   }
 

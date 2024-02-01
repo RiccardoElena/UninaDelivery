@@ -1,16 +1,12 @@
 package com.unina.oobd2324gr22.boundary;
 
 import com.unina.oobd2324gr22.control.OrdersControl;
-import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Order;
-import java.net.URL;
 import java.time.LocalDate;
-import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
@@ -24,13 +20,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-public class OrdersPageController implements Initializable {
+public class OrdersPageController {
 
   /** Orders selection functionality control class. */
-  private OrdersControl ordersControl = new OrdersControl();
-
-  /** Logged account. */
-  private Account account;
+  private OrdersControl ordersControl;
 
   /** Custom title bar. */
   @FXML private AnchorPane titleBar;
@@ -86,10 +79,14 @@ public class OrdersPageController implements Initializable {
   /** BorderPane. */
   @FXML private BorderPane borderPane;
 
-  @Override
-  @FXML
-  public final void initialize(final URL location, final ResourceBundle resources) {
+  /**
+   * Initialize the page.
+   *
+   * @param control the Orders selection functionality control class
+   */
+  public final void init(final OrdersControl control) {
 
+    this.setOrdersControl(control);
     // FIXME: this is a test pourpose only, remove this when the DB connection
     this.displayLoggedAccountName();
 
@@ -111,6 +108,15 @@ public class OrdersPageController implements Initializable {
   } // ! end initialize
 
   /**
+   * Set Orders selection functionality control class.
+   *
+   * @param control the Orders selection functionality control class
+   */
+  public void setOrdersControl(final OrdersControl control) {
+    this.ordersControl = control;
+  }
+
+  /**
    * On exitButton click, it shows a confirmation alert. If the user confirms, it closes the
    * application.
    *
@@ -118,7 +124,7 @@ public class OrdersPageController implements Initializable {
    */
   public final void exitButtonAction(final ActionEvent event) {
     Stage stage = (Stage) exitButton.getScene().getWindow();
-    ordersControl.exit(stage);
+    ordersControl.exit();
   }
 
   /**
@@ -128,7 +134,7 @@ public class OrdersPageController implements Initializable {
    */
   public final void minimizeButtonAction(final ActionEvent event) {
     Stage stage = (Stage) minimizeButton.getScene().getWindow();
-    ordersControl.minimize(stage);
+    ordersControl.minimize();
   }
 
   /**
@@ -143,9 +149,8 @@ public class OrdersPageController implements Initializable {
 
   private void displayLoggedAccountName() {
     // TODO! : Test pourpose only, remove this when the DB connection is implemented
-    if (account != null) {
-      nameLabel.setText(ordersControl.getLoggedOperator().getName());
-    }
+
+    nameLabel.setText(ordersControl.getLoggedOperator().getName());
   }
 
   private void setDatePickerLowerBound() {

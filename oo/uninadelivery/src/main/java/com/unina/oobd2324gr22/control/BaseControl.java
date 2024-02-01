@@ -17,6 +17,9 @@ public abstract class BaseControl {
   /** Transition duration. */
   private static final double FADE_OUT_DURATION = 0.2;
 
+  /** Application stage. */
+  private Stage stage;
+
   /**
    * Show an alert.
    *
@@ -38,12 +41,8 @@ public abstract class BaseControl {
     return alert.showAndWait();
   }
 
-  /**
-   * Quit the appication.
-   *
-   * @param stage the stage to close
-   */
-  public void exit(final Stage stage) {
+  /** Quit the appication. */
+  public void exit() {
 
     Optional<ButtonType> result =
         showAlert(
@@ -53,19 +52,17 @@ public abstract class BaseControl {
             "Sei sicuro di voler uscire?");
     if (result.isPresent() && result.get() == ButtonType.OK) {
       // Crea un effetto di fade out
-      fadeOutTransition(stage, 0.0, e -> stage.close());
+      fadeOutTransition(0.0, e -> stage.close());
     }
   }
 
   /**
    * Fade out transition.
    *
-   * @param stage
    * @param toValue
    * @param onFinish
    */
-  protected void fadeOutTransition(
-      final Stage stage, final double toValue, final EventHandler<ActionEvent> onFinish) {
+  protected void fadeOutTransition(final double toValue, final EventHandler<ActionEvent> onFinish) {
     final Duration duration = Duration.seconds(FADE_OUT_DURATION);
     final KeyValue kv = new KeyValue(stage.opacityProperty(), toValue);
     final KeyFrame kf = new KeyFrame(duration, kv);
@@ -95,9 +92,26 @@ public abstract class BaseControl {
     // Evento trascinamento mouse sulla barra del titolo
     titleBar.setOnMouseDragged(
         event -> {
-          Stage stage = (Stage) titleBar.getScene().getWindow();
           stage.setX(event.getScreenX() - xOffset[0]);
           stage.setY(event.getScreenY() - yOffset[0]);
         });
+  }
+
+  /**
+   * Get the application stage.
+   *
+   * @return the application stage
+   */
+  public Stage getStage() {
+    return stage;
+  }
+
+  /**
+   * Set the application stage.
+   *
+   * @param currStage the application stage
+   */
+  public void setStage(final Stage currStage) {
+    this.stage = currStage;
   }
 }
