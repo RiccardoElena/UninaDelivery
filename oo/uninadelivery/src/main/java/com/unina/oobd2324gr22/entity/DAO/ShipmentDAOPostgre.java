@@ -120,27 +120,20 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
       // TODO!: @zGenny I'm super unsure about this query, please check it
       st =
           con.prepareStatement(
-              "SELECT *"
-                  + " FROM shipment S"
-                  + " WHERE (hasarrived = FALSE OR hasarrived IS NULL) AND"
-                  + " shippedfrom IN ("
-                  + " SELECT depositid"
-                  + " FROM deposit NATURAL JOIN stores"
-                  + " WHERE name=? AND supplier=? AND"
-                  + " (directedto IS NOT NULL OR"
-                  + " (quantity >= ? AND"
-                  + " isSameCity(zipcode, country, ?,?))))"
-                  + " AND EXISTS ("
-                  + " SELECT 1"
-                  + " FROM transport NATURAL JOIN covers"
-                  + " WHERE S.transportid = transportid AND S.shippingdate = date AND"
-                  + " occupiedspace + ? <= maxcapacity)"
-                  + "ORDER BY (directedto IS NULL) DESC, shippingdate ASC");
+              "SELECT * FROM shipment S WHERE (hasarrived = FALSE OR hasarrived IS NULL) AND"
+                  + " shippedfrom IN ( SELECT depositid FROM deposit NATURAL JOIN stores WHERE"
+                  + " name=? AND supplier=? AND (directedto IS NOT NULL OR (quantity >= ? AND"
+                  + " isSameCity(zipcode, country, ?,?)))) AND EXISTS ( SELECT 1 FROM transport"
+                  + " NATURAL JOIN covers WHERE S.transportid = transportid AND S.shippingdate ="
+                  + " date AND ((S.directedto IS NOT NULL AND occupiedspace + quantity * ? <="
+                  + " maxcapacity) OR(S.directedto IS NULL AND occupiedspace + ? <= maxcapacity))"
+                  + " ORDER BY (directedto IS NULL) DESC, shippingdate ASC");
       st.setString(nextField++, order.getProduct().getName());
       st.setString(nextField++, order.getProduct().getSupplier());
       st.setInt(nextField++, order.getQuantity());
       st.setString(nextField++, order.getAccount().getAddress().getZipCode());
       st.setString(nextField++, order.getAccount().getAddress().getCountry());
+      st.setDouble(nextField++, order.getProduct().getPackageSizeLiters());
       st.setDouble(nextField++, order.getProduct().getPackageSizeLiters() * order.getQuantity());
 
       rs = st.executeQuery();
