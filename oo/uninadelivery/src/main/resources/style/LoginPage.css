@@ -8,3 +8,14 @@
   -fx-background-color: #cc4400,  #282A37 ;
   -fx-text-fill:  #cc4400;
 }
+
+.button{
+  -fx-background-color:  #cc4400;
+  -fx-text-fill:  #F7DBA7;
+}
+
+.button:hover {
+  -fx-background-color:  #cc5c24;
+  -fx-text-fill:  #feeac5;
+  -fx-cursor: hand;
+}

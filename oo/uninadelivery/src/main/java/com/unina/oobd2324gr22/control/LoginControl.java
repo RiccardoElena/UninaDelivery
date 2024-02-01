@@ -29,7 +29,7 @@ public class LoginControl extends BaseControl {
   private AccountDAO accountDAO = new AccountDAOPostgre();
 
   /** Orders selection functionality control class. */
-  private OrdersControl ordersControl = new OrdersControl();
+  private DashboardControl dashboardControl = new DashboardControl();
 
   /**
    * Set Login scene on Stage.
@@ -86,7 +86,7 @@ public class LoginControl extends BaseControl {
                       new Address("80100", "Napoli", "NA", "Italia", "EUW", "12A", "Via Roma"),
                       "G.DeGregorio@uninadelivery.operator.com")
                   .build();
-          ordersControl.setScene(stage, client);
+          dashboardControl.setScene(stage, client);
           return;
         } catch (Exception e) {
           e.printStackTrace();

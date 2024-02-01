@@ -1,5 +1,7 @@
 package com.unina.oobd2324gr22.control;
 
+import com.unina.oobd2324gr22.entity.DTO.Operator;
+
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -13,6 +15,9 @@ public class NonLoginControl extends BaseControl {
 
   /** Height of the window. */
   protected static final int HEIGHT = 720;
+
+  /** Logged in operator. */
+  private Operator loggedOperator;
 
   /** Minimize the window. */
   public void minimize() {
@@ -54,5 +59,24 @@ public class NonLoginControl extends BaseControl {
             }
           }
         });
+  }
+
+    /**
+   * Get Logged in operator.
+   *
+   * @return the logged in operator
+   */
+  public Operator getLoggedOperator() {
+
+    return loggedOperator;
+  }
+
+  /**
+   * Set Logged in operator.
+   *
+   * @param op the logged in operator
+   */
+  public void setLoggedOperator(final Operator op) {
+    this.loggedOperator = op;
   }
 }
