@@ -123,7 +123,6 @@ public class OrdersPageController {
    * @param event
    */
   public final void exitButtonAction(final ActionEvent event) {
-    Stage stage = (Stage) exitButton.getScene().getWindow();
     ordersControl.exit();
   }
 
@@ -133,7 +132,6 @@ public class OrdersPageController {
    * @param event the event that triggered the method
    */
   public final void minimizeButtonAction(final ActionEvent event) {
-    Stage stage = (Stage) minimizeButton.getScene().getWindow();
     ordersControl.minimize();
   }
 

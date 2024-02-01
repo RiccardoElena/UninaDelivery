@@ -1,15 +1,14 @@
 package com.unina.oobd2324gr22.boundary;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-
 import com.unina.oobd2324gr22.control.DashboardControl;
+import com.unina.oobd2324gr22.control.OrdersControl;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 
 import io.github.palexdev.materialfx.controls.MFXButton;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
@@ -20,6 +19,9 @@ public class DashboardPageController {
 
   /** Dashboard selection functionality control class. */
   private DashboardControl dashboardControl = new DashboardControl();
+
+  /** Orders selection functionality control class. */
+  private OrdersControl ordersControl;
 
   /** Logged account. */
   private Operator operator = dashboardControl.getLoggedOperator();;
@@ -54,6 +56,12 @@ public class DashboardPageController {
   /** Button to logout the logged account. */
   @FXML private MFXButton logoutButton;
 
+  /** Button to edit the logged account. */
+  @FXML private MFXButton editAccountButton;
+
+  /** Button to go to Orders Page. */
+  @FXML private MFXButton gestisciOrdiniButton;
+
   /**
    * Initialize the page.
    *
@@ -87,6 +95,34 @@ public class DashboardPageController {
   @FXML
   void minimizeButtonAction(final ActionEvent event) {
     dashboardControl.minimize();
+  }
+
+  /** Button to go to Orders Page.
+   *
+   * @param event the event that triggered the action.
+  */
+  @FXML
+  void gestisciOrdiniButtonAction(final ActionEvent event) {
+    Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+    dashboardControl.goToGestioneOrdini(stage);
+  }
+
+  /** Button to edit the current account.
+   *
+   * @param event the event that triggered the action
+   */
+  @FXML
+  void editButtonAction(final ActionEvent event) {
+    dashboardControl.goToEdit();
+  }
+
+  /** Button to loggout from the current account.
+   *
+   * @param event the event that triggered the action
+   */
+  @FXML
+  void logoutButtonAction(final ActionEvent event) {
+    dashboardControl.logout();
   }
 
   /** Button to resize the window.

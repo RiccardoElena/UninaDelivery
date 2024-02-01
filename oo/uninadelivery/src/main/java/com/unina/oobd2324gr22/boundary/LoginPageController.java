@@ -81,7 +81,6 @@ public class LoginPageController implements Initializable {
    */
   @FXML
   final void exitButtonAction(final ActionEvent event) {
-    Stage stage = (Stage) exitButton.getScene().getWindow();
     loginControl.exit();
   }
 

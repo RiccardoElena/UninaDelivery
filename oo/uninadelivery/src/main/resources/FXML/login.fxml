@@ -53,12 +53,12 @@
                   <Image url="@../images/loginPage/lock/keyhole.png" />
                </image>
             </ImageView>
-            <TextField fx:id="emailTextField" layoutX="80.0" layoutY="164.0" prefHeight="40.0" prefWidth="252.0" promptText="n.surname@uninadelivery.operator.com" stylesheets="@../style/test.css">
+            <TextField fx:id="emailTextField" layoutX="80.0" layoutY="164.0" prefHeight="40.0" prefWidth="252.0" promptText="n.surname@uninadelivery.operator.com">
                <font>
                   <Font size="10.0" />
                </font>
             </TextField>
-            <TextField fx:id="plainPasswordTextField" layoutX="80.0" layoutY="212.0" prefHeight="40.0" prefWidth="214.0" promptText="password" stylesheets="@../style/test.css" visible="false" />
+            <TextField fx:id="plainPasswordTextField" layoutX="80.0" layoutY="212.0" prefHeight="40.0" prefWidth="214.0" promptText="password" visible="false" />
             <Button fx:id="togglePswVisibilityButton" layoutX="304.0" layoutY="224.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="23.0" style="-fx-background-color: none;">
                <graphic>
                   <ImageView fitHeight="28.0" fitWidth="34.0" pickOnBounds="true" preserveRatio="true">
@@ -87,7 +87,7 @@
                   <Image url="@../images/loginPage/Password%20Key.png" />
                </image>
             </ImageView>
-            <PasswordField fx:id="passwordTextField" layoutX="80.0" layoutY="212.0" prefHeight="40.0" prefWidth="214.0" promptText="••••••••" stylesheets="@../style/test.css">
+            <PasswordField fx:id="passwordTextField" layoutX="80.0" layoutY="212.0" prefHeight="40.0" prefWidth="214.0" promptText="••••••••">
                <font>
                   <Font size="10.0" />
                </font>
