@@ -30,7 +30,7 @@ public class AccountDAOPostgre implements AccountDAO {
                 rs.getString("state"),
                 rs.getString("country"),
                 rs.getString("worldzone"),
-                rs.getInt("addressno"),
+                rs.getString("addressno"),
                 rs.getString("street")),
             rs.getString("businessmail"))
         .build();

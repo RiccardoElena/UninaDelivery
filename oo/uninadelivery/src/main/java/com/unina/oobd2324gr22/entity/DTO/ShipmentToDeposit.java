@@ -66,6 +66,31 @@ public class ShipmentToDeposit extends Shipment {
   }
 
   /**
+   * Constructor of the class for quick lookup.
+   *
+   * @param sId the id of the shipment.
+   * @param shipDate the date the shipment should take off.
+   * @param sTransport the veichle transporting the shipment.
+   * @param startDeposit the destination deposit.
+   * @param endDeposit the destination deposit.
+   */
+  public ShipmentToDeposit(
+      final int sId,
+      final LocalDate shipDate,
+      final Transport sTransport,
+      final Deposit startDeposit,
+      final Deposit endDeposit) {
+
+    super(sId, shipDate, false, null, startDeposit);
+    if (sTransport.getDepositOwner() != startDeposit) {
+      throw new IllegalArgumentException(
+          "The transport must be in the same" + " deposit of the shipment");
+    }
+    this.transport = sTransport;
+    this.destinationDeposit = endDeposit;
+  }
+
+  /**
    * Getter for the veichle transporting the shipment.
    *
    * @return the veichle transporting the shipment.

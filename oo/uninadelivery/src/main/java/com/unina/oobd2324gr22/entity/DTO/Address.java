@@ -5,7 +5,7 @@ public class Address extends Area {
   // Attributes
 
   /** Address number of the address. */
-  private int addressNumber;
+  private String addressNumber;
 
   /** Name of the street of the address. */
   private String street;
@@ -29,7 +29,7 @@ public class Address extends Area {
       final String stateN,
       final String countryN,
       final String wz,
-      final int number,
+      final String number,
       final String streetName) {
     super(zip, cityN, stateN, countryN, wz);
     this.addressNumber = number;
@@ -43,7 +43,7 @@ public class Address extends Area {
    *
    * @return address number
    */
-  public int getAddressNumber() {
+  public String getAddressNumber() {
     return this.addressNumber;
   }
 
@@ -52,7 +52,7 @@ public class Address extends Area {
    *
    * @param number address number
    */
-  public void setAddressNumber(final int number) {
+  public void setAddressNumber(final String number) {
     this.addressNumber = number;
   }
 

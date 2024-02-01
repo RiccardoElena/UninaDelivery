@@ -1,5 +1,6 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
+import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import com.unina.oobd2324gr22.entity.DTO.ShipmentToClient;
 import com.unina.oobd2324gr22.entity.DTO.ShipmentToDeposit;
@@ -75,6 +76,15 @@ public interface ShipmentDAO {
    */
   List<ShipmentToDeposit> getUnfinishedShipmentsByDestinationDeposit(int deposit)
       throws SQLException;
+
+  /**
+   * Retrieve all the shipments a certain order can be assigned to.
+   *
+   * @param order order to get the compatible shipments
+   * @return list of compatible shipments
+   * @throws SQLException possible DB related errors
+   */
+  List<Shipment> getCompatibleShipments(Order order) throws SQLException;
 
   /**
    * Update a shipment towards clients in the database.
