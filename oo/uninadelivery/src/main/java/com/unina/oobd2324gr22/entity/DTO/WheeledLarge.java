@@ -1,6 +1,6 @@
 package com.unina.oobd2324gr22.entity.DTO;
 
-public abstract class WheeledLarge extends WheeledTransport {
+public class WheeledLarge extends WheeledTransport {
 
   // Constructors
 

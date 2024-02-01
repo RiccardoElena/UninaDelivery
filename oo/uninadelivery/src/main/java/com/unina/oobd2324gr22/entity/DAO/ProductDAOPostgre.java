@@ -12,6 +12,17 @@ public class ProductDAOPostgre implements ProductDAO {
   /** Connection to the database. */
   private Connection con;
 
+  private Product populateProductFromResultSet(final ResultSet rs) throws SQLException {
+    return new Product(
+        rs.getString("category"),
+        rs.getString("name"),
+        rs.getString("supplier"),
+        rs.getString("description"),
+        rs.getDouble("packagesizeliters"),
+        rs.getBoolean("isfragile"),
+        rs.getFloat("price"));
+  }
+
   /**
    * PostgreSQL implementation of the method getProductByNameAndSupplier.<br>
    * {@inheritDoc}
@@ -29,15 +40,7 @@ public class ProductDAOPostgre implements ProductDAO {
       psSelect.setString(2, supplier);
       rs = psSelect.executeQuery();
       while (rs.next()) {
-        product =
-            new Product(
-                rs.getString("category"),
-                rs.getString("name"),
-                rs.getString("supplier"),
-                rs.getString("description"),
-                rs.getDouble("packagesizeliters"),
-                rs.getBoolean("isfragile"),
-                rs.getFloat("price"));
+        product = populateProductFromResultSet(rs);
       }
     } catch (SQLException e) {
       e.printStackTrace();

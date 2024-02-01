@@ -35,6 +35,10 @@ public abstract class BaseControl {
       final String header,
       final String content) {
     Alert alert = new Alert(alertType);
+    alert
+        .getDialogPane()
+        .getStylesheets()
+        .add(getClass().getResource("/style/components/Alerts.css").toExternalForm());
     alert.setTitle(title);
     alert.setHeaderText(header);
     alert.setContentText(content);
@@ -52,6 +56,8 @@ public abstract class BaseControl {
             "Sei sicuro di voler uscire?");
     if (result.isPresent() && result.get() == ButtonType.OK) {
       // Crea un effetto di fade out
+      System.err.println(this.stage);
+      System.err.println("wow3 " + this.getStage());
       fadeOutTransition(0.0, e -> stage.close());
     }
   }
@@ -112,6 +118,9 @@ public abstract class BaseControl {
    * @param currStage the application stage
    */
   public void setStage(final Stage currStage) {
+    System.err.println(getStage());
     this.stage = currStage;
+    System.err.println(getStage());
+    System.err.println("wow " + this.stage);
   }
 }

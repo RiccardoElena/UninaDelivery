@@ -1,5 +1,6 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
+import com.unina.oobd2324gr22.entity.DTO.Deposit;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import com.unina.oobd2324gr22.entity.DTO.ShipmentToClient;
@@ -10,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,28 +21,29 @@ import java.util.List;
  */
 public class ShipmentDAOPostgre implements ShipmentDAO {
 
-  /** Connection to the database. */
-  private Connection con;
-
   private Shipment populateShipmentFromResultSet(final ResultSet rs) throws SQLException {
-    Shipment shipment = null;
-    if (rs.getString("directedto") == null) {
-      shipment =
-          new ShipmentToClient(
-              rs.getInt("shipmentid"),
-              rs.getDate("shippingdate").toLocalDate(),
-              (WheeledSmall) new TransportDAOPostgre().getTransportById(rs.getInt("transportid")),
-              new DepositDAOPostgre().getDepositById(rs.getInt("shippedfrom")));
+    int shipmentId = rs.getInt("shipmentid");
+    LocalDate shippingDate = rs.getDate("shippingdate").toLocalDate();
+    TransportDAO transportDAO = new TransportDAOPostgre();
+    DepositDAO depositDAO = new DepositDAOPostgre();
+    Deposit shippedFrom = depositDAO.getDepositById(rs.getInt("shippedfrom"));
+    Shipment shipment;
 
+    if (rs.getString("directedto") == null) {
+      WheeledSmall transport =
+          (WheeledSmall) transportDAO.getTransportById(rs.getInt("transportid"));
+      shipment = new ShipmentToClient(shipmentId, shippingDate, transport, shippedFrom);
     } else {
+      Deposit directedTo = depositDAO.getDepositById(rs.getInt("directedto"));
       shipment =
           new ShipmentToDeposit(
-              rs.getInt("shipmentid"),
-              rs.getDate("shippingdate").toLocalDate(),
-              new TransportDAOPostgre().getTransportById(rs.getInt("transportid")),
-              new DepositDAOPostgre().getDepositById(rs.getInt("shippedfrom")),
-              new DepositDAOPostgre().getDepositById(rs.getInt("directedto")));
+              shipmentId,
+              shippingDate,
+              transportDAO.getTransportById(rs.getInt("transportid")),
+              shippedFrom,
+              directedTo);
     }
+
     return shipment;
   }
 
@@ -111,30 +114,30 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
   /** PostgreSQL implementation of the method getCompatibleShipments. {@inheritDoc} */
   @Override
   public List<Shipment> getCompatibleShipments(final Order order) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
-    List<Shipment> shipments = new ArrayList<Shipment>();
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
+    List<Shipment> shipments = new ArrayList<>();
     PreparedStatement st = null;
     ResultSet rs = null;
     int nextField = 1;
     try {
-      // TODO!: @zGenny I'm super unsure about this query, please check it
-      st =
-          con.prepareStatement(
-              "SELECT * FROM shipment S WHERE (hasarrived = FALSE OR hasarrived IS NULL) AND"
-                  + " shippedfrom IN ( SELECT depositid FROM deposit NATURAL JOIN stores WHERE"
-                  + " name=? AND supplier=? AND (directedto IS NOT NULL OR (quantity >= ? AND"
-                  + " isSameCity(zipcode, country, ?,?)))) AND EXISTS ( SELECT 1 FROM transport"
-                  + " NATURAL JOIN covers WHERE S.transportid = transportid AND S.shippingdate ="
-                  + " date AND ((S.directedto IS NOT NULL AND occupiedspace + quantity * ? <="
-                  + " maxcapacity) OR(S.directedto IS NULL AND occupiedspace + ? <= maxcapacity))"
-                  + " ORDER BY (directedto IS NULL) DESC, shippingdate ASC");
+      String query =
+          "SELECT * FROM shipment S WHERE (hasarrived = FALSE OR hasarrived IS NULL) AND"
+              + " shippedfrom IN ( SELECT depositid FROM deposit NATURAL JOIN stores WHERE"
+              + " name=? AND supplier=? AND (directedto IS NOT NULL OR (quantity >= ? AND"
+              + " isSameCity(zipcode, country, ?,?)))) AND EXISTS ( SELECT 1 FROM transport"
+              + " NATURAL JOIN covers WHERE S.transportid = transportid AND S.shippingdate ="
+              + " date AND ((S.directedto IS NOT NULL AND occupiedspace + quantity * ? <="
+              + " maxcapacity) OR(S.directedto IS NULL AND occupiedspace + ? <= maxcapacity))"
+              + " ORDER BY (directedto IS NULL) DESC, shippingdate ASC";
+      st = con.prepareStatement(query);
       st.setString(nextField++, order.getProduct().getName());
       st.setString(nextField++, order.getProduct().getSupplier());
       st.setInt(nextField++, order.getQuantity());
       st.setString(nextField++, order.getAccount().getAddress().getZipCode());
       st.setString(nextField++, order.getAccount().getAddress().getCountry());
-      st.setDouble(nextField++, order.getProduct().getPackageSizeLiters());
-      st.setDouble(nextField++, order.getProduct().getPackageSizeLiters() * order.getQuantity());
+      double packageSizeLiters = order.getProduct().getPackageSizeLiters();
+      st.setDouble(nextField++, packageSizeLiters);
+      st.setDouble(nextField++, packageSizeLiters * order.getQuantity());
 
       rs = st.executeQuery();
       while (rs.next()) {
@@ -144,6 +147,15 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
       e.printStackTrace();
       throw e;
     } finally {
+      closeResources(rs, st, con);
+    }
+
+    return shipments;
+  }
+
+  private void closeResources(
+      final ResultSet rs, final PreparedStatement st, final Connection con) {
+    try {
       if (rs != null) {
         rs.close();
       }
@@ -153,9 +165,9 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
       if (con != null) {
         con.close();
       }
+    } catch (SQLException e) {
+      e.printStackTrace();
     }
-
-    return shipments;
   }
 
   /** PostgreSQL implementation of the method updateShipment. {@inheritDoc} */

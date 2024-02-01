@@ -1,0 +1,6 @@
+/* Main stylesheet of the application.
+   This file contains all the style shared across all the application scenes
+   and all the import common to all the scenes.
+*/
+
+@import url('components/Alerts.css');

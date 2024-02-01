@@ -21,7 +21,7 @@ public class OrderDAOPostgre implements OrderDAO {
   private Connection con;
 
   /** Base query for retrieving orders. */
-  private String baseQuery = "SELECT * FROM \"Order\" ";
+  private static final String BASE_QUERY = "SELECT * FROM \"Order\" ";
 
   /**
    * Internal method to populate an order from a ResultSet.
@@ -98,7 +98,7 @@ public class OrderDAOPostgre implements OrderDAO {
     PreparedStatement psSelect = null;
     ResultSet rs = null;
     try {
-      psSelect = con.prepareStatement(baseQuery + "WHERE orderid = ?");
+      psSelect = con.prepareStatement(BASE_QUERY + "WHERE orderid = ?");
       psSelect.setInt(1, id);
       rs = psSelect.executeQuery();
       while (rs.next()) {
@@ -135,7 +135,7 @@ public class OrderDAOPostgre implements OrderDAO {
     try {
 
       st = con.createStatement();
-      rs = st.executeQuery(baseQuery + " WHERE isCompleted = false OR" + " isCompleted IS NULL");
+      rs = st.executeQuery(BASE_QUERY + " WHERE isCompleted = false OR" + " isCompleted IS NULL");
 
       while (rs.next()) {
         orders.add(populateOrderFromResultSet(rs));
@@ -172,7 +172,7 @@ public class OrderDAOPostgre implements OrderDAO {
     try {
 
       st = con.createStatement();
-      rs = st.executeQuery(baseQuery);
+      rs = st.executeQuery(BASE_QUERY);
 
       while (rs.next()) {
 
@@ -302,7 +302,7 @@ public class OrderDAOPostgre implements OrderDAO {
     PreparedStatement psSelect = null;
     ResultSet rs = null;
     try {
-      psSelect = con.prepareStatement(baseQuery + "WHERE email = ?");
+      psSelect = con.prepareStatement(BASE_QUERY + "WHERE email = ?");
       psSelect.setString(1, client.getEmail());
       rs = psSelect.executeQuery();
       while (rs.next()) {
@@ -340,7 +340,7 @@ public class OrderDAOPostgre implements OrderDAO {
     PreparedStatement psSelect = null;
     ResultSet rs = null;
     try {
-      psSelect = con.prepareStatement(baseQuery + "WHERE emissiondate " + "BETWEEN ? AND ?");
+      psSelect = con.prepareStatement(BASE_QUERY + "WHERE emissiondate " + "BETWEEN ? AND ?");
       psSelect.setDate(1, java.sql.Date.valueOf(start));
       psSelect.setDate(2, java.sql.Date.valueOf(end));
       rs = psSelect.executeQuery();
@@ -377,7 +377,7 @@ public class OrderDAOPostgre implements OrderDAO {
     PreparedStatement psSelect = null;
     ResultSet rs = null;
     try {
-      psSelect = con.prepareStatement(baseQuery + "WHERE emissiondate " + ">= ?");
+      psSelect = con.prepareStatement(BASE_QUERY + "WHERE emissiondate " + ">= ?");
       psSelect.setDate(1, java.sql.Date.valueOf(start));
       rs = psSelect.executeQuery();
       while (rs.next()) {
@@ -418,7 +418,8 @@ public class OrderDAOPostgre implements OrderDAO {
     int nextField = 1;
     try {
       psSelect =
-          con.prepareStatement(baseQuery + "WHERE email = ? " + "AND emissiondate BETWEEN ? AND ?");
+          con.prepareStatement(
+              BASE_QUERY + "WHERE email = ? " + "AND emissiondate BETWEEN ? AND ?");
       psSelect.setString(nextField++, client.getEmail());
       psSelect.setDate(nextField++, java.sql.Date.valueOf(start));
       psSelect.setDate(nextField++, java.sql.Date.valueOf(end));

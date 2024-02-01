@@ -37,7 +37,7 @@
    <right>
       <AnchorPane prefHeight="400.0" prefWidth="380.0" BorderPane.alignment="CENTER">
          <children>
-            <MFXButton fx:id="loginButton" buttonType="RAISED" layoutX="148.0" layoutY="279.0" onAction="#loginButtonAction" prefHeight="38.0" prefWidth="85.0" rippleColor="#f7dba7" style="-fx-background-color: cc4400; -fx-text-fill: f7dba7; -fx-font-weight: bold;" text="ACCEDI" textFill="#f7dba7" />
+            <MFXButton fx:id="loginButton" buttonType="RAISED" layoutX="148.0" layoutY="279.0" onAction="#loginButtonAction" prefHeight="38.0" prefWidth="85.0" rippleColor="#f7dba7" text="ACCEDI" textFill="#f7dba7" />
             <ImageView fitHeight="85.0" fitWidth="73.0" layoutX="153.0" layoutY="8.0" pickOnBounds="true" rotate="90.0">
                <image>
                   <Image url="@../images/loginPage/lock/Oval_1.png" />
@@ -98,7 +98,7 @@
    <top>
       <Pane fx:id="topPane" prefHeight="35.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
-            <MFXButton fx:id="exitButton" buttonType="RAISED" depthLevel="LEVEL1" layoutX="8.0" layoutY="6.0" onAction="#exitButtonAction" prefHeight="24.0" prefWidth="29.0" rippleColor="#f7dba7" style="-fx-background-color: cc4400;" text=" ">
+            <MFXButton fx:id="exitButton" buttonType="RAISED" depthLevel="LEVEL1" layoutX="8.0" layoutY="6.0" onAction="#exitButtonAction" prefHeight="24.0" prefWidth="29.0" rippleColor="#f7dba7" text=" ">
                <graphic>
                   <ImageView fitHeight="23.0" fitWidth="23.0" nodeOrientation="RIGHT_TO_LEFT" pickOnBounds="true" preserveRatio="true">
                      <image>

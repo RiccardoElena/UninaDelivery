@@ -1,21 +1,16 @@
+@import url('Main.css');
+
 .text-field {
-  -fx-background-color: #f7dba7,  #282A37 ;
-  -fx-background-insets: 0, 0 0 1 0 ;
-  -fx-background-radius: 0 ;
-  -fx-text-fill:  #f7dba7 ;
+  -fx-background-color: #f7dba7, #282a37;
+  -fx-background-insets: 0, 0 0 1 0;
+  -fx-background-radius: 0;
+  -fx-text-fill: #f7dba7;
 }
 .text-field:focused {
-  -fx-background-color: #cc4400,  #282A37 ;
-  -fx-text-fill:  #cc4400;
+  -fx-background-color: #cc4400, #282a37;
+  -fx-text-fill: #cc4400;
 }
 
-.button{
-  -fx-background-color:  #cc4400;
-  -fx-text-fill:  #F7DBA7;
-}
-
-.button:hover {
-  -fx-background-color:  #cc5c24;
-  -fx-text-fill:  #feeac5;
-  -fx-cursor: hand;
+#exitButton {
+  -fx-font-size: 0.5em;
 }

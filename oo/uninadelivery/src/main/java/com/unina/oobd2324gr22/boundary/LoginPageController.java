@@ -2,11 +2,8 @@ package com.unina.oobd2324gr22.boundary;
 
 import com.unina.oobd2324gr22.control.LoginControl;
 import io.github.palexdev.materialfx.controls.MFXButton;
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
@@ -18,7 +15,7 @@ import javafx.stage.Stage;
 // FIXME: In refactoring a lot of methods have been moved to LoginControl.
 // After testing that everything works, remove the commented code.
 
-public class LoginPageController implements Initializable {
+public class LoginPageController {
 
   /** Width of the eye icons. */
   static final int ICON_WIDTH = 30;
@@ -42,7 +39,7 @@ public class LoginPageController implements Initializable {
   @FXML private Node topPane;
 
   /** Login functionality control class. */
-  private LoginControl loginControl = new LoginControl();
+  private LoginControl loginControl;
 
   /** Button for toggling password mask. */
   @FXML private Button togglePswVisibilityButton;
@@ -50,9 +47,13 @@ public class LoginPageController implements Initializable {
   /** Plain PasswordField to input the password for the login. */
   @FXML private TextField plainPasswordTextField;
 
-  @Override
-  @FXML
-  public final void initialize(final URL location, final ResourceBundle resources) {
+  /**
+   * Initialize the page.
+   *
+   * @param control
+   */
+  public final void init(final LoginControl control) {
+    this.loginControl = control;
     loginControl.setDraggable(topPane);
     togglePswVisibilityButton.setGraphic(getIcon("/images/loginPage/ClosedEye.png"));
     togglePswVisibilityButton.setOnAction(event -> togglePswVisibility());

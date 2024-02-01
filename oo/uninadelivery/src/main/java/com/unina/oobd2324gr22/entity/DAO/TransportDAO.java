@@ -84,6 +84,16 @@ public interface TransportDAO {
   List<Transport> getTransportsByDeposit(Deposit deposit) throws SQLException;
 
   /**
+   * Retrieve all the transports of a specifc type owned by a deposit from the database.
+   *
+   * @param deposit the deposit to get transports from.
+   * @param type the type of the transport to get.
+   * @return list of transports of the deposit passed.
+   * @throws SQLException possible DB related errors.
+   */
+  List<Transport> getTransportsByDeposit(Deposit deposit, String type) throws SQLException;
+
+  /**
    * Retrieve all available transports from the database.
    *
    * @return list of available transports.

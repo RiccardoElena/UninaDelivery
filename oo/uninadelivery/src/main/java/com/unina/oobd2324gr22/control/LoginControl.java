@@ -1,11 +1,11 @@
 package com.unina.oobd2324gr22.control;
 
+import com.unina.oobd2324gr22.boundary.LoginPageController;
 import com.unina.oobd2324gr22.entity.DAO.AccountDAO;
 import com.unina.oobd2324gr22.entity.DAO.AccountDAOPostgre;
 import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 import com.unina.oobd2324gr22.utils.SHA256;
-import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -38,9 +38,13 @@ public class LoginControl extends BaseControl {
    * @throws Exception if the scene cannot be set
    */
   public void setScene(final Stage primaryStage) throws Exception {
-    URL fxmlUrl = LoginControl.class.getResource("/FXML/login.fxml");
+    this.setStage(primaryStage);
+    System.err.println("wow2 " + this.getStage());
 
-    Parent root = FXMLLoader.load(fxmlUrl);
+    FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/login.fxml"));
+    Parent root = loader.load();
+    LoginPageController pageController = loader.getController();
+    pageController.init(this);
     Scene scene = new Scene(root, WIDTH, HEIGHT);
     scene
         .getStylesheets()

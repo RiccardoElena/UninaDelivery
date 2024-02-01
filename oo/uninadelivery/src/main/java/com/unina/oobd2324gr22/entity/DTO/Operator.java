@@ -23,6 +23,26 @@ public final class Operator extends Account {
     this.businessMail = builder.builderBusinessMail;
   }
 
+  // Constructor - Via account
+
+  /**
+   * Constructor with parameters.
+   *
+   * @param account account of the operator
+   * @param bMail business mail of the operator
+   */
+  public Operator(final Account account, final String bMail) {
+    super(
+        account.getName(),
+        account.getSurname(),
+        account.getEmail(),
+        account.getBirthdate(),
+        account.getPropic(),
+        account.getPassword(),
+        account.getAddress());
+    this.businessMail = businessMail;
+  }
+
   public static class OperatorBuilder {
     /** Name of the operator to be built. */
     private String builderAccName;

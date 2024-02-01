@@ -1,7 +1,7 @@
 package com.unina.oobd2324gr22.control;
 
 import com.unina.oobd2324gr22.entity.DTO.Operator;
-
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -36,6 +36,22 @@ public class NonLoginControl extends BaseControl {
    */
   public void setResizable(final Stage primaryStage) {
     Scene scene = primaryStage.getScene();
+    scene.setCursor(Cursor.SE_RESIZE);
+    scene.setOnMouseMoved(
+        event -> {
+          double test2 = primaryStage.getHeight() - RESIZE_MARGIN;
+          double test1 = primaryStage.getWidth() - RESIZE_MARGIN;
+          // Change cursor icon if we're near the edge of the stage
+          if (event.getX() > primaryStage.getWidth() - RESIZE_MARGIN
+              || event.getY() > primaryStage.getHeight() - RESIZE_MARGIN
+              || event.getX() < RESIZE_MARGIN) {
+            System.err.println(event.getX() + " " + event.getY() + " " + test1 + " " + test2);
+            scene.setCursor(Cursor.SE_RESIZE);
+          } else {
+            scene.setCursor(Cursor.DEFAULT);
+          }
+        });
+    scene.setCursor(Cursor.SE_RESIZE);
     scene.setOnMouseDragged(
         event -> {
           // Only resize if the mouse is near the edge of the stage
@@ -61,7 +77,7 @@ public class NonLoginControl extends BaseControl {
         });
   }
 
-    /**
+  /**
    * Get Logged in operator.
    *
    * @return the logged in operator

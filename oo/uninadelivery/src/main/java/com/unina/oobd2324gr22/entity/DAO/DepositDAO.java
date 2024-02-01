@@ -3,8 +3,10 @@ package com.unina.oobd2324gr22.entity.DAO;
 import com.unina.oobd2324gr22.entity.DTO.CentralDeposit;
 import com.unina.oobd2324gr22.entity.DTO.CountryDeposit;
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
+import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.StateDeposit;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface DepositDAO {
@@ -89,6 +91,28 @@ public interface DepositDAO {
    * @throws SQLException possible DB related errors
    */
   List<Deposit> getDepositsByAreaAndType(String area, String type) throws SQLException;
+
+  /**
+   * Retrieve all the deposit elegible for a shipment towards clients for a specific order in a
+   * certain date.
+   *
+   * @param order order to get compatible deposits
+   * @param date date to get compatible deposits
+   * @return list of compatible deposits
+   * @throws SQLException
+   */
+  List<Deposit> getDepositsForShipmentsToClients(Order order, LocalDate date) throws SQLException;
+
+  /**
+   * Retrieve all the deposit elegible for a shipment towards deposits for a specific order in a
+   * certain date.
+   *
+   * @param order order to get compatible deposits
+   * @param date date to get compatible deposits
+   * @return list of compatible deposits
+   * @throws SQLException
+   */
+  List<Deposit> getDepositsForShipmentsToDeposits(Order order, LocalDate date) throws SQLException;
 
   /**
    * Update a deposit in the database.

@@ -1,55 +1,10 @@
-.button{
-  -fx-background-color:  #cc4400;
-  -fx-text-fill:  #F7DBA7;
-}
-
-.button:hover {
-  -fx-background-color:  #cc5c24;
-  -fx-text-fill:  #feeac5;
-  -fx-cursor: hand;
-}
-.exit {
-  -fx-background-color: red;
-  -fx-border-color: black;
-  -fx-border-width: 1px;
-  -fx-border-radius: 100%;
-}
-
-.exit:hover {
-  -fx-background-color: rgb(255, 84, 84);
-}
-
-.minimize {
-  -fx-background-color: rgb(212, 212, 0);
-  -fx-border-color: black;
-  -fx-border-width: 1px;
-  -fx-border-radius: 100%;
-}
-
-.minimize:hover {
-  -fx-background-color: rgb(255, 255, 84);
-}
-
-.resize {
-  -fx-background-color: green;
-  -fx-border-color: black;
-  -fx-border-width: 1px;
-  -fx-border-radius: 100%;
-}
-
-.resize:hover {
-  -fx-background-color: #00ff00;
-}
+@import url('Main.css');
+@import url('TitleBar.css');
 
 .bigButton {
   -fx-font-size: 32px;
-  -fx-font-weight: bold;
 }
 
 .smallButton {
   -fx-font-size: 17px;
-  -fx-font-weight: bold;
 }
-
-
-

@@ -2,7 +2,6 @@ package com.unina.oobd2324gr22.boundary;
 
 import com.unina.oobd2324gr22.control.DashboardControl;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
-
 import io.github.palexdev.materialfx.controls.MFXButton;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -20,7 +19,7 @@ public class DashboardPageController {
   private DashboardControl dashboardControl = new DashboardControl();
 
   /** Logged account. */
-  private Operator operator = dashboardControl.getLoggedOperator();;
+  private Operator operator = dashboardControl.getLoggedOperator();
 
   /** Custom title bar. */
   @FXML private BorderPane borderPane;
@@ -36,9 +35,6 @@ public class DashboardPageController {
 
   /** Button to open the orders page. */
   @FXML private AnchorPane titleBar;
-
-  /** Button to edit the logged account. */
-  @FXML private MFXButton editButton;
 
   /** Label containing the name of the logged account. */
   @FXML private Label nameLabel;
@@ -75,7 +71,8 @@ public class DashboardPageController {
         });
   }
 
-  /** Button to close the window.
+  /**
+   * Button to close the window.
    *
    * @param event the event that triggered the action
    */
@@ -84,7 +81,8 @@ public class DashboardPageController {
     dashboardControl.exit();
   }
 
-  /** Button to minimize the window.
+  /**
+   * Button to minimize the window.
    *
    * @param event the event that triggered the action
    */
@@ -93,26 +91,29 @@ public class DashboardPageController {
     dashboardControl.minimize();
   }
 
-  /** Button to go to Orders Page.
+  /**
+   * Button to go to Orders Page.
    *
    * @param event the event that triggered the action.
-  */
+   */
   @FXML
   void gestisciOrdiniButtonAction(final ActionEvent event) {
     Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
     dashboardControl.goToGestioneOrdini(stage);
   }
 
-  /** Button to edit the current account.
+  /**
+   * Button to edit the current account.
    *
    * @param event the event that triggered the action
    */
   @FXML
   void editButtonAction(final ActionEvent event) {
-    dashboardControl.goToEdit();
+    dashboardControl.edit();
   }
 
-  /** Button to loggout from the current account.
+  /**
+   * Button to loggout from the current account.
    *
    * @param event the event that triggered the action
    */
@@ -121,7 +122,8 @@ public class DashboardPageController {
     dashboardControl.logout();
   }
 
-  /** Button to resize the window.
+  /**
+   * Button to resize the window.
    *
    * @param event the event that triggered the action
    */
@@ -130,7 +132,6 @@ public class DashboardPageController {
     Stage stage = (Stage) resizeButton.getScene().getWindow();
     stage.setMaximized(!stage.isMaximized());
   }
-
 
   private void displayLoggedOperatorData() {
     if (operator != null) {
