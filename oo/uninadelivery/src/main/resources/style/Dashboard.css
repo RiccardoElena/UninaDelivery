@@ -1,5 +1,5 @@
 @import url('Main.css');
-@import url('TitleBar.css');
+@import url('components/TitleBar.css');
 
 .bigButton {
   -fx-font-size: 32px;

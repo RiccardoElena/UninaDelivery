@@ -9,11 +9,17 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
 public class DashboardPageController {
+
+  /** Width and Height of the logged Operator Profile Pic. */
+  private static final int PRO_PIC_SIZE = 100;
 
   /** Dashboard selection functionality control class. */
   private DashboardControl dashboardControl = new DashboardControl();
@@ -54,6 +60,9 @@ public class DashboardPageController {
   /** Button to go to Orders Page. */
   @FXML private MFXButton gestisciOrdiniButton;
 
+  /** Profile Picture of the logged Operator. */
+  @FXML private ImageView proPic;
+
   /**
    * Initialize the page.
    *
@@ -64,6 +73,22 @@ public class DashboardPageController {
     this.operator = dashboardControl.getLoggedOperator();
     this.displayLoggedOperatorData();
     dashboardControl.setDraggable(titleBar);
+    // Crea un ImageView
+    proPic = new ImageView(new Image("/images/defaultUser.jpg"));
+
+    // Imposta le dimensioni dell'ImageView
+    proPic.setFitWidth(PRO_PIC_SIZE);
+    proPic.setFitHeight(PRO_PIC_SIZE);
+
+    // Crea un cerchio
+    Circle circle =
+        new Circle(
+            proPic.getFitWidth() / 2,
+            proPic.getFitHeight() / 2,
+            Math.min(proPic.getFitWidth(), proPic.getFitHeight()) / 2);
+
+    // Imposta il cerchio come clip dell'ImageView
+    proPic.setClip(circle);
     Platform.runLater(
         () -> {
           Stage stage = (Stage) borderPane.getScene().getWindow();

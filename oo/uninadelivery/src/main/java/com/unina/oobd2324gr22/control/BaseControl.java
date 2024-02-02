@@ -53,7 +53,7 @@ public abstract class BaseControl {
             Alert.AlertType.CONFIRMATION,
             "Conferma",
             "Conferma chiusura",
-            "Sei sicuro di voler uscire?");
+            "Sei sicuro di voler uscire dall'applicazione?");
     if (result.isPresent() && result.get() == ButtonType.OK) {
       // Crea un effetto di fade out
       System.err.println(this.stage);

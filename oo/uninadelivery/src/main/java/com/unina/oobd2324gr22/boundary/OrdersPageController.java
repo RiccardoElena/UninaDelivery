@@ -171,6 +171,11 @@ public class OrdersPageController {
                           public void updateItem(final LocalDate item, final boolean empty) {
                             super.updateItem(item, empty);
                             setDisable(item.isBefore(newDate));
+                            if (!item.isBefore(newDate) && !item.isAfter(newDate)) {
+                              setStyle(
+                                  "-fx-background-color: -fx-primary-color; -fx-text-fill:"
+                                      + " -fx-secondary-color;");
+                            }
                           }
                         });
               }

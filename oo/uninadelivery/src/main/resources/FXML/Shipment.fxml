@@ -41,7 +41,7 @@
                   </Label>
                </children>
             </VBox>
-            <Button fx:id="homeButton" layoutX="30.0" layoutY="29.0" mnemonicParsing="false" prefHeight="38.0" prefWidth="43.0" style="-fx-background-color: nono;">
+            <Button fx:id="homeButton" layoutX="30.0" layoutY="29.0" mnemonicParsing="false" prefHeight="38.0" prefWidth="43.0" style="-fx-background-color: none;">
                <graphic>
                   <ImageView fitHeight="55.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
                      <image>

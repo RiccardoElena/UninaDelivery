@@ -24,7 +24,7 @@ public class OrdersControl extends NonLoginControl {
    * Set Orders scene on Stage.
    *
    * @param currStage the stage to set the scene on
-   * @param op        the operator logged in
+   * @param op the operator logged in
    * @throws Exception if the scene cannot be set
    */
   public void setScene(final Stage currStage, final Operator op) throws Exception {
@@ -71,98 +71,99 @@ public class OrdersControl extends NonLoginControl {
     final int qty = 24;
     final float price = 22.3f;
     final float weight = 0.5f;
-    ObservableList<Order> ordersModels = FXCollections.observableArrayList(
-        new Order(
-            outOfPlaceOrderId,
-            LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            false,
-            0,
-            new Account(
-                "Gennaro",
-                "De Gregorio",
-                "gdgwadawdwadd@gmail.com",
+    ObservableList<Order> ordersModels =
+        FXCollections.observableArrayList(
+            new Order(
+                outOfPlaceOrderId,
                 LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                "gdg.jpg",
-                "password",
-                new Address("80100", "napoli", "italia", "napoli", "euw", "2", "barone")),
-            qty,
-            new Product("Cancellaria", "Penna", "Bic", "Penna bella", price, false, weight)),
-        new Order(
-            orderId,
-            LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            true,
-            0,
-            new Account(
-                "Antonio",
-                "De Luca",
-                "wdd@gmail.com",
+                false,
+                0,
+                new Account(
+                    "Gennaro",
+                    "De Gregorio",
+                    "gdgwadawdwadd@gmail.com",
+                    LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    "gdg.jpg",
+                    "password",
+                    new Address("80100", "napoli", "italia", "napoli", "euw", "2", "barone")),
+                qty,
+                new Product("Cancellaria", "Penna", "Bic", "Penna bella", price, false, weight)),
+            new Order(
+                orderId++,
                 LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                "gdg.jpg",
-                "password",
-                null),
-            qty,
-            new Product("Cancellaria", "Gomma", "Bic", "Gomma bella", price, false, weight)),
-        // indent these orders using the format above
-        new Order(
-            orderId++,
-            LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            false,
-            0,
-            new Account(
-                "Gennaro",
-                "De Gregorio",
-                "gdg@gmail.com",
+                true,
+                0,
+                new Account(
+                    "Antonio",
+                    "De Luca",
+                    "wdd@gmail.com",
+                    LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    "gdg.jpg",
+                    "password",
+                    new Address("80100", "napoli", "italia", "napoli", "euw", "2", "barone")),
+                qty,
+                new Product("Cancellaria", "Gomma", "Bic", "Gomma bella", price, false, weight)),
+            // indent these orders using the format above
+            new Order(
+                orderId++,
                 LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                "gdg.jpg",
-                "password",
-                null),
-            qty,
-            new Product("Cancellaria", "Penna", "Bic", "Penna bella", price, false, weight)),
-        new Order(
-            orderId++,
-            LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            true,
-            0,
-            new Account(
-                "Antonio",
-                "De Luca",
-                "wdd@gmail.com",
+                false,
+                0,
+                new Account(
+                    "Gennaro",
+                    "De Gregorio",
+                    "gdg@gmail.com",
+                    LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    "gdg.jpg",
+                    "password",
+                    new Address("80100", "napoli", "italia", "napoli", "euw", "2", "barone")),
+                qty,
+                new Product("Cancellaria", "Penna", "Bic", "Penna bella", price, false, weight)),
+            new Order(
+                orderId++,
                 LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                "gdg.jpg",
-                "password",
-                null),
-            qty,
-            new Product("Cancellaria", "Gomma", "Bic", "Gomma bella", price, false, weight)),
-        new Order(
-            orderId++,
-            LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            false,
-            0,
-            new Account(
-                "Gennaro",
-                "De Gregorio",
-                "gdg@gmail.com",
+                true,
+                0,
+                new Account(
+                    "Antonio",
+                    "De Luca",
+                    "wdd@gmail.com",
+                    LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    "gdg.jpg",
+                    "password",
+                    new Address("80100", "napoli", "italia", "napoli", "euw", "2", "barone")),
+                qty,
+                new Product("Cancellaria", "Gomma", "Bic", "Gomma bella", price, false, weight)),
+            new Order(
+                orderId++,
                 LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                "gdg.jpg",
-                "password",
-                null),
-            qty,
-            new Product("Cancellaria", "Penna", "Bic", "Penna bella", price, false, weight)),
-        new Order(
-            orderId++,
-            LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            true,
-            0,
-            new Account(
-                "Antonio",
-                "De Luca",
-                "wdd@gmail.com",
+                false,
+                0,
+                new Account(
+                    "Gennaro",
+                    "De Gregorio",
+                    "gdg@gmail.com",
+                    LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    "gdg.jpg",
+                    "password",
+                    new Address("80100", "napoli", "italia", "napoli", "euw", "2", "barone")),
+                qty,
+                new Product("Cancellaria", "Penna", "Bic", "Penna bella", price, false, weight)),
+            new Order(
+                orderId++,
                 LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                "gdg.jpg",
-                "password",
-                null),
-            qty,
-            new Product("Cancellaria", "Gomma", "Bic", "Gomma bella", price, false, weight)));
+                true,
+                0,
+                new Account(
+                    "Antonio",
+                    "De Luca",
+                    "wdd@gmail.com",
+                    LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    "gdg.jpg",
+                    "password",
+                    new Address("80100", "napoli", "italia", "napoli", "euw", "2", "barone")),
+                qty,
+                new Product("Cancellaria", "Gomma", "Bic", "Gomma bella", price, false, weight)));
 
     return ordersModels;
   }

@@ -3,7 +3,6 @@ package com.unina.oobd2324gr22.boundary;
 import com.unina.oobd2324gr22.control.ShipmentControl;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 import com.unina.oobd2324gr22.entity.DTO.Order;
-
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -52,7 +51,7 @@ public class ShipmentPageController {
    * Initialize the page.
    *
    * @param control the Orders selection functionality control class
-   * @param ord     the order to set the scene on
+   * @param ord the order to set the scene on
    */
   public final void init(final ShipmentControl control, final Order ord) {
     this.order = ord;
@@ -63,26 +62,36 @@ public class ShipmentPageController {
     Platform.runLater(
         () -> {
           Stage stage = (Stage) borderPane.getScene().getWindow();
-          //shipmentControl.setResizable(stage); FIXME: NOT WORKIN!!
+          // shipmentControl.setResizable(stage); FIXME: NOT WORKIN!!
         });
   } // ! end initialize
 
   private void displayOrderData() {
     if (order != null) {
-      orderLabel.setText("Ordine N."+order.getOrderId()
-                        +" ordinato il "+ order.getEmissionDate()
-                        +"  e da consegnare entro il "+ order.getExpectedDeliveryDate()
-                        + "\nContenuto: " + order.getProduct().getName()
-                        + " x" + order.getQuantity()
-                        + " del venditore " + order.getProduct().getSupplier()
-                        + "\n Consegnare a " + order.getAccount().getName()
-                        + " " + order.getAccount().getSurname()
-                        + " al seguente indirizzo: " + order.getAccount().getAddress()
-                    );
+      orderLabel.setText(
+          "Ordine N."
+              + order.getOrderId()
+              + " ordinato il "
+              + order.getEmissionDate()
+              + "  e da consegnare entro il "
+              + order.getExpectedDeliveryDate()
+              + "\nContenuto: "
+              + order.getProduct().getName()
+              + " x"
+              + order.getQuantity()
+              + " del venditore "
+              + order.getProduct().getSupplier()
+              + "\n Consegnare a "
+              + order.getAccount().getName()
+              + " "
+              + order.getAccount().getSurname()
+              + " al seguente indirizzo: "
+              + order.getAccount().getAddress());
     }
   }
 
-  /** Button to close the window.
+  /**
+   * Button to close the window.
    *
    * @param event the event that triggered the action
    */
@@ -91,7 +100,8 @@ public class ShipmentPageController {
     shipmentControl.exit();
   }
 
-  /** Button to minimize the window.
+  /**
+   * Button to minimize the window.
    *
    * @param event the event that triggered the action
    */
@@ -100,7 +110,8 @@ public class ShipmentPageController {
     shipmentControl.minimize();
   }
 
-  /** Button to resize the window.
+  /**
+   * Button to resize the window.
    *
    * @param event the event that triggered the action
    */

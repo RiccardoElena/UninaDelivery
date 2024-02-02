@@ -2,10 +2,12 @@ package com.unina.oobd2324gr22.control;
 
 import com.unina.oobd2324gr22.boundary.DashboardPageController;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
+import java.util.Optional;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 
 public class DashboardControl extends NonLoginControl {
@@ -54,18 +56,31 @@ public class DashboardControl extends NonLoginControl {
     this.showAlert(
         Alert.AlertType.INFORMATION,
         "Attenzione!",
-        "Funzione non ancora disponibile",
+        "Funzione non ancora disponibile!",
         "Contattare l'assistenza per ulteriori informazioni!");
   }
 
   /** Logout the logged account. */
   public void logout() {
-    this.setLoggedOperator(null);
-    try {
-      LoginControl loginControl = new LoginControl();
-      loginControl.setScene(this.getStage());
-    } catch (Exception e) {
-      this.showAlert(Alert.AlertType.ERROR, "Errore", "Error", e.getMessage());
-    } // TODO! @RiccardoElena we should change the message of the Alert ig, but in what?
+    Optional<ButtonType> result =
+        showAlert(
+            Alert.AlertType.CONFIRMATION,
+            "Conferma",
+            getLoggedOperator().getName() + " vuoi disconnetterti?",
+            "Premendo OK verrai disconnesso e tornerai alla schermata di login. Continuare?");
+    if (result.isPresent() && result.get() == ButtonType.OK) {
+      this.setLoggedOperator(null);
+      try {
+        LoginControl loginControl = new LoginControl();
+        loginControl.setScene(this.getStage());
+      } catch (Exception e) {
+        this.showAlert(
+            Alert.AlertType.ERROR,
+            "Errore",
+            "Errore inaspettato.",
+            "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
+                + " l'applicazione.");
+      } // TODO! @RiccardoElena we should change the message of the Alert ig, but in what?
+    }
   }
 }

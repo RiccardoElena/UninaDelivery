@@ -1,6 +1,8 @@
+@import url('variables.css');
+
 .button {
-  -fx-background-color: #cc4400;
-  -fx-text-fill: #f7dba7;
+  -fx-background-color: -fx-primary-color;
+  -fx-text-fill: -fx-secondary-color;
   -fx-font-weight: bold;
 }
 

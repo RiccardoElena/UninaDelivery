@@ -3,4 +3,9 @@
    and all the import common to all the scenes.
 */
 
+@import url('components/variables.css');
 @import url('components/Alerts.css');
+@import url('components/TextFields.css');
+@import url('components/DatePickers.css');
+
+

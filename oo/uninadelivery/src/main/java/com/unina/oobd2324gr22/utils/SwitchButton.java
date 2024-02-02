@@ -1,11 +1,11 @@
 package com.unina.oobd2324gr22.utils;
 
+import javafx.animation.TranslateTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.Control;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
-import javafx.animation.TranslateTransition;
 import javafx.util.Duration;
 
 public class SwitchButton extends Control {
@@ -40,9 +40,7 @@ public class SwitchButton extends Control {
   /** Animation time. */
   private final double animationTime = 0.25;
 
-  /**
-   * Create a new SwitchButton.
-   */
+  /** Create a new SwitchButton. */
   public SwitchButton() {
     // Imposta il layout
     switchBackground = new Rectangle(bgWidth, bgHeight);
@@ -60,18 +58,19 @@ public class SwitchButton extends Control {
     transition.setToX(0);
 
     // Aggiunge un listener alla proprietà switchedOn
-    switchedOn.addListener((obs, oldState, newState) -> {
-      if (newState) {
-        transition.setToX(switchBackground.getWidth() - switchThumb.getWidth());
-        switchBackground.getStyleClass().add("switch-pane-on");
-        switchBackground.getStyleClass().remove("switch-pane");
-      } else {
-        transition.setToX(0);
-        switchBackground.getStyleClass().add("switch-pane");
-        switchBackground.getStyleClass().remove("switch-pane-on");
-      }
-      transition.play();
-    });
+    switchedOn.addListener(
+        (obs, oldState, newState) -> {
+          if (newState) {
+            transition.setToX(switchBackground.getWidth() - switchThumb.getWidth());
+            switchBackground.getStyleClass().add("switch-pane-on");
+            switchBackground.getStyleClass().remove("switch-pane");
+          } else {
+            transition.setToX(0);
+            switchBackground.getStyleClass().add("switch-pane");
+            switchBackground.getStyleClass().remove("switch-pane-on");
+          }
+          transition.play();
+        });
 
     // Imposta un gestore clic per cambiare lo stato
     setOnMouseClicked(event -> switchedOn.set(!switchedOn.get()));

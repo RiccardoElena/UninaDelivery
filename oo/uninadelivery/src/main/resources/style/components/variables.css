@@ -1,0 +1,8 @@
+/* Set the default font for the application */
+* {
+	-fx-primary-color: #cc4400;
+	-fx-secondary-color: #f7dba7;
+	-fx-default-bg: #282a37;
+    
+	-fx-focus-color: -fx-primary-color;
+}

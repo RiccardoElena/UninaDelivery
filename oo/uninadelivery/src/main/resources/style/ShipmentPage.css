@@ -1,35 +1,4 @@
-.exit {
-  -fx-background-color: red;
-  -fx-border-color: black;
-  -fx-border-width: 1px;
-  -fx-border-radius: 100%;
-}
-
-.exit:hover {
-  -fx-background-color: rgb(255, 84, 84);
-}
-
-.minimize {
-  -fx-background-color: rgb(212, 212, 0);
-  -fx-border-color: black;
-  -fx-border-width: 1px;
-  -fx-border-radius: 100%;
-}
-
-.minimize:hover {
-  -fx-background-color: rgb(255, 255, 84);
-}
-
-.resize {
-  -fx-background-color: green;
-  -fx-border-color: black;
-  -fx-border-width: 1px;
-  -fx-border-radius: 100%;
-}
-
-.resize:hover {
-  -fx-background-color: #00ff00;
-}
+@import url('components/TitleBar.css');
 
 .switch-button {
   -fx-background-color: transparent;
