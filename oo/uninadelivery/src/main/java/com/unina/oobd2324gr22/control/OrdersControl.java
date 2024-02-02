@@ -2,6 +2,7 @@ package com.unina.oobd2324gr22.control;
 
 import com.unina.oobd2324gr22.boundary.OrdersPageController;
 import com.unina.oobd2324gr22.entity.DTO.Account;
+import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Product;
@@ -15,6 +16,9 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class OrdersControl extends NonLoginControl {
+
+  /** Shipment selection functionality control class. */
+  private ShipmentControl shipmentControl = new ShipmentControl();
 
   /**
    * Set Orders scene on Stage.
@@ -40,7 +44,6 @@ public class OrdersControl extends NonLoginControl {
     return;
   }
 
-
   // FIXME: to be changed to real functionality
   /**
    * Execute an action on an order.
@@ -48,7 +51,12 @@ public class OrdersControl extends NonLoginControl {
    * @param order the order to execute the action on
    */
   public void execAction(final Order order) {
-    System.out.println("Hai cliccato su " + order.getOrderId());
+    System.out.println("Hai cliccato su " + order);
+    try {
+      shipmentControl.setScene(this.getStage(), order, this.getLoggedOperator());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   // TODO! : Test pourpose only, remove this when the DB connection is implemented
@@ -76,7 +84,7 @@ public class OrdersControl extends NonLoginControl {
                 LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                 "gdg.jpg",
                 "password",
-                null),
+                new Address("80100", "napoli", "italia", "napoli", "euw", "2", "barone")),
             qty,
             new Product("Cancellaria", "Penna", "Bic", "Penna bella", price, false, weight)),
         new Order(
