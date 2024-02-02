@@ -3,3 +3,7 @@
 #exitButton {
   -fx-font-size: 0.5em;
 }
+
+.label {
+  -fx-text-fill: -fx-secondary-color;
+}

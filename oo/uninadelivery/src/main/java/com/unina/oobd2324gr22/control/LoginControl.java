@@ -63,6 +63,7 @@ public class LoginControl extends BaseControl {
    */
   public void login(final Stage stage, final String email, final String password) {
     String errorMessage = "";
+    System.err.println(email + " " + password);
     // for email format validation
     // Pattern.matches("^[a-zA-Z0-9]+[a-zA-Z0-9.]*[a-zA-Z0-9]+@[a-zA-Z.]+\\.[a-zA-Z]{2,}$", email)
     if (!email.isBlank() && !password.isBlank()) {

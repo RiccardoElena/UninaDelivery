@@ -1,7 +1,6 @@
 package com.unina.oobd2324gr22.boundary;
 
-import com.unina.oobd2324gr22.control.ShipmentControl;
-import com.unina.oobd2324gr22.entity.DTO.Operator;
+import com.unina.oobd2324gr22.control.OrdersHandlingControl;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -15,13 +14,7 @@ import javafx.stage.Stage;
 public class ShipmentPageController {
 
   /** Shipment selection functionality control class. */
-  private ShipmentControl shipmentControl = new ShipmentControl();
-
-  /** Logged account. */
-  private Operator operator = shipmentControl.getLoggedOperator();
-
-  /** Order selected. */
-  private Order order;
+  private OrdersHandlingControl ordersHandlingControl;
 
   /** Back button. */
   @FXML private Button backButton;
@@ -51,22 +44,20 @@ public class ShipmentPageController {
    * Initialize the page.
    *
    * @param control the Orders selection functionality control class
-   * @param ord the order to set the scene on
    */
-  public final void init(final ShipmentControl control, final Order ord) {
-    this.order = ord;
-    this.shipmentControl = control;
-    this.operator = control.getLoggedOperator();
+  public final void init(final OrdersHandlingControl control) {
+    this.ordersHandlingControl = control;
     this.displayOrderData();
-    shipmentControl.setDraggable(titleBar);
+    ordersHandlingControl.setDraggable(titleBar);
     Platform.runLater(
         () -> {
           Stage stage = (Stage) borderPane.getScene().getWindow();
-          // shipmentControl.setResizable(stage); FIXME: NOT WORKIN!!
+          ordersHandlingControl.setResizable(stage);
         });
   } // ! end initialize
 
   private void displayOrderData() {
+    Order order = ordersHandlingControl.getOrder();
     if (order != null) {
       orderLabel.setText(
           "Ordine N."
@@ -97,7 +88,7 @@ public class ShipmentPageController {
    */
   @FXML
   void exitButtonAction(final ActionEvent event) {
-    shipmentControl.exit();
+    ordersHandlingControl.exit();
   }
 
   /**
@@ -107,7 +98,7 @@ public class ShipmentPageController {
    */
   @FXML
   void minimizeButtonAction(final ActionEvent event) {
-    shipmentControl.minimize();
+    ordersHandlingControl.minimize();
   }
 
   /**
@@ -119,5 +110,30 @@ public class ShipmentPageController {
   void resizeButtonAction(final ActionEvent event) {
     Stage stage = (Stage) resizeButton.getScene().getWindow();
     stage.setMaximized(!stage.isMaximized());
+  }
+
+  /**
+   * Button to go back to the previous page.
+   *
+   * @param event the event that triggered the action
+   */
+  @FXML
+  void backButtonAction(final ActionEvent event) {
+    ordersHandlingControl.returnToOrdersPage();
+  }
+
+  /**
+   * Button to go back to the home page.
+   *
+   * @param event the event that triggered the action
+   */
+  @FXML
+  void homeButtonAction(final ActionEvent event) {
+    Stage stage = (Stage) homeButton.getScene().getWindow();
+    try {
+      ordersHandlingControl.returnToHomePage(stage);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }

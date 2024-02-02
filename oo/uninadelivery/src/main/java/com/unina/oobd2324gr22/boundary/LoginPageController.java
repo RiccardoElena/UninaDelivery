@@ -68,7 +68,12 @@ public class LoginPageController {
    */
   public final void loginButtonAction(final ActionEvent event) {
     Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-    loginControl.login(stage, emailTextField.getText(), passwordTextField.getText());
+    loginControl.login(
+        stage,
+        emailTextField.getText(),
+        passwordTextField.isVisible()
+            ? passwordTextField.getText()
+            : plainPasswordTextField.getText());
   }
 
   // FIXME: Renamed the button to match naming convention.

@@ -17,7 +17,7 @@
 
 <BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.unina.oobd2324gr22.boundary.OrdersPageController">
    <center>
-      <AnchorPane prefHeight="690.0" prefWidth="1080.0" style="-fx-background-color: #282A37;" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="690.0" prefWidth="1080.0" style="-fx-background-color: -fx-default-bg;" BorderPane.alignment="CENTER">
          <children>
             <TableView fx:id="ordersTable" layoutX="80.0" layoutY="236.0" prefHeight="415.0" prefWidth="930.0" AnchorPane.bottomAnchor="34.0" AnchorPane.leftAnchor="80.0" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="236.0">
               <columns>
@@ -37,7 +37,7 @@
                   <Image url="@../../../../../../AppData/Local/Temp/Icons8/Pichon/Arrow.png" />
                </image>
             </ImageView>
-            <MFXButton fx:id="filterButton" buttonType="RAISED" layoutX="699.0" layoutY="182.0" prefHeight="32.0" prefWidth="85.0" text="Filtra" AnchorPane.rightAnchor="296.0" />
+            <MFXButton fx:id="filterButton" onAction="#filterButtonAction" buttonType="RAISED" layoutX="699.0" layoutY="182.0" prefHeight="32.0" prefWidth="85.0" text="Filtra" AnchorPane.rightAnchor="296.0" />
             <TextField fx:id="clientTextField" layoutX="80.0" layoutY="187.0" AnchorPane.leftAnchor="80.0" />
             <DatePicker fx:id="startDatePicker" layoutX="254.0" layoutY="187.0" AnchorPane.leftAnchor="254.0" />
             <DatePicker fx:id="endDatePicker" layoutX="460.0" layoutY="186.0" AnchorPane.leftAnchor="460.0" />
@@ -64,7 +64,7 @@
             </Label>
             <ImageView fitHeight="112.0" fitWidth="30.0" layoutX="3.0" layoutY="1.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@../images/titleBar/UninaDelivery_logo.png" />
+                  <Image url="@../images/UninaDelivery_logo.png" />
                </image>
             </ImageView>
             <HBox alignment="CENTER" layoutX="1010.0" layoutY="8.0" prefHeight="18.0" prefWidth="61.0" AnchorPane.rightAnchor="9.0">

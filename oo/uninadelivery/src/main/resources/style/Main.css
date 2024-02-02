@@ -8,4 +8,6 @@
 @import url('components/TextFields.css');
 @import url('components/DatePickers.css');
 
-
+* {
+  -fx-text-fill: -fx-primary-color;
+}

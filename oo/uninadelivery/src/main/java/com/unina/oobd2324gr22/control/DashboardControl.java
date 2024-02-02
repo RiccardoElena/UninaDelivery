@@ -13,7 +13,7 @@ import javafx.stage.Stage;
 public class DashboardControl extends NonLoginControl {
 
   /** Order selection functionality control class. */
-  private OrdersControl ordersControl = new OrdersControl();
+  private OrdersHandlingControl ordersControl = new OrdersHandlingControl();
 
   /**
    * Set Orders scene on Stage.
@@ -30,7 +30,10 @@ public class DashboardControl extends NonLoginControl {
     Parent root = loader.load();
     DashboardPageController pageController = loader.getController();
     pageController.init(this);
-    Scene scene = new Scene(root, WIDTH, HEIGHT);
+    System.err.println(
+        Math.max(stage.getWidth(), WIDTH) + " " + Math.max(stage.getHeight(), HEIGHT));
+    Scene scene =
+        new Scene(root, Math.max(stage.getWidth(), WIDTH), Math.max(stage.getHeight(), HEIGHT));
     scene
         .getStylesheets()
         .add(LoginControl.class.getResource("/style/Dashboard.css").toExternalForm());
@@ -45,9 +48,15 @@ public class DashboardControl extends NonLoginControl {
    */
   public void goToGestioneOrdini(final Stage stage) {
     try {
-      ordersControl.setScene(stage, this.getLoggedOperator());
+      ordersControl.setOrdersScene(stage, this.getLoggedOperator());
     } catch (Exception e) {
-      this.showAlert(Alert.AlertType.ERROR, "Errore", "Error", e.getMessage());
+      e.printStackTrace();
+      this.showAlert(
+          Alert.AlertType.ERROR,
+          "Errore",
+          "Errore inaspettato.",
+          "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
+              + " l'applicazione.");
     } // TODO! @RiccardoElena we should change the message of the Alert ig, but in what?
   }
 
@@ -74,6 +83,7 @@ public class DashboardControl extends NonLoginControl {
         LoginControl loginControl = new LoginControl();
         loginControl.setScene(this.getStage());
       } catch (Exception e) {
+        e.printStackTrace();
         this.showAlert(
             Alert.AlertType.ERROR,
             "Errore",

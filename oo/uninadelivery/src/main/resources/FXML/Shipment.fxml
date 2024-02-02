@@ -18,20 +18,20 @@
 
 <BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" stylesheets="@../style/ShipmentPage.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.unina.oobd2324gr22.boundary.ShipmentPageController">
    <center>
-      <AnchorPane prefHeight="690.0" prefWidth="1080.0" style="-fx-background-color: #282A37;" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="690.0" prefWidth="1080.0" style="-fx-background-color: -fx-default-bg;" BorderPane.alignment="CENTER">
          <children>
             <VBox layoutY="82.0" prefHeight="141.0" prefWidth="1080.0">
                <children>
                   <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="1080.0">
                      <children>
-                        <Label alignment="CENTER" prefHeight="39.0" prefWidth="261.0" text="CREA NUOVA SPEDIZIONE" textFill="WHITE">
+                        <Label alignment="CENTER" prefHeight="39.0" prefWidth="261.0" text="CREA NUOVA SPEDIZIONE" >
                            <font>
                               <Font name="System Bold" size="19.0" />
                            </font>
                         </Label>
                      </children>
                   </HBox>
-                  <Label fx:id="orderLabel" prefHeight="36.0" prefWidth="1039.0" text="{ordine}" textFill="#cc4400">
+                  <Label fx:id="orderLabel" prefHeight="36.0" prefWidth="1039.0" text="{ordine}" >
                      <font>
                         <Font name="System Bold" size="25.0" />
                      </font>
@@ -41,7 +41,7 @@
                   </Label>
                </children>
             </VBox>
-            <Button fx:id="homeButton" layoutX="30.0" layoutY="29.0" mnemonicParsing="false" prefHeight="38.0" prefWidth="43.0" style="-fx-background-color: none;">
+            <Button fx:id="homeButton" onAction="#homeButtonAction" layoutX="30.0" layoutY="29.0" mnemonicParsing="false" prefHeight="38.0" prefWidth="43.0" style="-fx-background-color: none;">
                <graphic>
                   <ImageView fitHeight="55.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -53,7 +53,7 @@
                   <Insets bottom="-1.0" left="-1.0" right="-1.0" top="-1.0" />
                </padding>
             </Button>
-            <Button fx:id="backButton" layoutX="85.0" layoutY="29.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="43.0" style="-fx-background-color: none;">
+            <Button fx:id="backButton" onAction="#backButtonAction" layoutX="85.0" layoutY="29.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="43.0" style="-fx-background-color: none;">
                <graphic>
                   <ImageView fitHeight="55.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -85,15 +85,15 @@
    <top>
       <AnchorPane fx:id="titleBar" prefHeight="35.0" prefWidth="975.0" style="-fx-background-color: #F7DBA7;" BorderPane.alignment="CENTER">
          <children>
-            <Label layoutX="39.0" layoutY="9.0" text="UninaDelivery - " textFill="#cc4400" />
-            <Label layoutX="124.0" layoutY="9.0" text="Ordini" textFill="#cc4400">
+            <Label layoutX="39.0" layoutY="9.0" text="UninaDelivery - " />
+            <Label layoutX="124.0" layoutY="9.0" text="Ordini">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
             </Label>
             <ImageView fitHeight="112.0" fitWidth="30.0" layoutX="3.0" layoutY="1.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@../images/titleBar/UninaDelivery_logo.png" />
+                  <Image url="@../images/UninaDelivery_logo.png" />
                </image>
             </ImageView>
             <HBox alignment="CENTER" layoutX="1010.0" layoutY="8.0" prefHeight="18.0" prefWidth="61.0" AnchorPane.rightAnchor="9.0">

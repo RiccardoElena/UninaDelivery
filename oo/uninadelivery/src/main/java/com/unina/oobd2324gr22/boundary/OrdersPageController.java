@@ -1,6 +1,6 @@
 package com.unina.oobd2324gr22.boundary;
 
-import com.unina.oobd2324gr22.control.OrdersControl;
+import com.unina.oobd2324gr22.control.OrdersHandlingControl;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import java.time.LocalDate;
 import javafx.application.Platform;
@@ -14,6 +14,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -23,7 +24,7 @@ import javafx.util.Callback;
 public class OrdersPageController {
 
   /** Orders selection functionality control class. */
-  private OrdersControl ordersControl;
+  private OrdersHandlingControl ordersHandlingControl;
 
   /** Custom title bar. */
   @FXML private AnchorPane titleBar;
@@ -76,6 +77,12 @@ public class OrdersPageController {
   /** DatePicker to select the end date of the orders. */
   @FXML private DatePicker endDatePicker;
 
+  /** Button to filter the orders. */
+  @FXML private Button filterButton;
+
+  /** TextField to filter the orders by client. */
+  @FXML private TextField clientTextField;
+
   /** BorderPane. */
   @FXML private BorderPane borderPane;
 
@@ -84,25 +91,25 @@ public class OrdersPageController {
    *
    * @param control the Orders selection functionality control class
    */
-  public final void init(final OrdersControl control) {
+  public final void init(final OrdersHandlingControl control) {
 
-    this.setOrdersControl(control);
+    this.setOrdersHandlingControl(control);
     // FIXME: this is a test pourpose only, remove this when the DB connection
     this.displayLoggedAccountName();
 
-    ordersControl.setDraggable(titleBar);
+    ordersHandlingControl.setDraggable(titleBar);
 
     Platform.runLater(
         () -> {
           Stage stage = (Stage) borderPane.getScene().getWindow();
-          ordersControl.setResizable(stage);
+          ordersHandlingControl.setResizable(stage);
         });
 
     this.setTableColumns();
 
     // FIXME: this line is using a test function with dummy data
     // when DB connection is implemented, this line should be changed
-    ordersTable.setItems(ordersControl.getTestOrders());
+    ordersTable.setItems(ordersHandlingControl.getTestOrders());
 
     setDatePickerLowerBound();
   } // ! end initialize
@@ -112,8 +119,8 @@ public class OrdersPageController {
    *
    * @param control the Orders selection functionality control class
    */
-  public void setOrdersControl(final OrdersControl control) {
-    this.ordersControl = control;
+  public void setOrdersHandlingControl(final OrdersHandlingControl control) {
+    this.ordersHandlingControl = control;
   }
 
   /**
@@ -123,7 +130,7 @@ public class OrdersPageController {
    * @param event
    */
   public final void exitButtonAction(final ActionEvent event) {
-    ordersControl.exit();
+    ordersHandlingControl.exit();
   }
 
   /**
@@ -132,7 +139,7 @@ public class OrdersPageController {
    * @param event the event that triggered the method
    */
   public final void minimizeButtonAction(final ActionEvent event) {
-    ordersControl.minimize();
+    ordersHandlingControl.minimize();
   }
 
   /**
@@ -145,10 +152,20 @@ public class OrdersPageController {
     stage.setMaximized(!stage.isMaximized());
   }
 
+  /**
+   * On filterButton click, it filters the orders.
+   *
+   * @param event the event that triggered the method
+   */
+  public final void filterButtonAction(final ActionEvent event) {
+    ordersHandlingControl.filterOrders(
+        clientTextField.getText(), startDatePicker.getValue(), endDatePicker.getValue());
+  }
+
   private void displayLoggedAccountName() {
     // TODO! : Test pourpose only, remove this when the DB connection is implemented
 
-    nameLabel.setText(ordersControl.getLoggedOperator().getName());
+    nameLabel.setText(ordersHandlingControl.getLoggedOperator().getName());
   }
 
   private void setDatePickerLowerBound() {
@@ -221,7 +238,7 @@ public class OrdersPageController {
                     btn.setOnAction(
                         event -> {
                           Order order = getTableView().getItems().get(getIndex());
-                          ordersControl.execAction(order);
+                          ordersHandlingControl.execAction(order);
                         });
                   }
 

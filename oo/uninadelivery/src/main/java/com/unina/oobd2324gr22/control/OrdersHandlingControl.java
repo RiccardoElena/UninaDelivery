@@ -1,6 +1,7 @@
 package com.unina.oobd2324gr22.control;
 
 import com.unina.oobd2324gr22.boundary.OrdersPageController;
+import com.unina.oobd2324gr22.boundary.ShipmentPageController;
 import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
@@ -15,10 +16,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class OrdersControl extends NonLoginControl {
+public class OrdersHandlingControl extends NonLoginControl {
 
-  /** Shipment selection functionality control class. */
-  private ShipmentControl shipmentControl = new ShipmentControl();
+  /** Order selected. */
+  private Order selectedOrder;
 
   /**
    * Set Orders scene on Stage.
@@ -27,14 +28,16 @@ public class OrdersControl extends NonLoginControl {
    * @param op the operator logged in
    * @throws Exception if the scene cannot be set
    */
-  public void setScene(final Stage currStage, final Operator op) throws Exception {
+  public void setOrdersScene(final Stage currStage, final Operator op) throws Exception {
     this.setLoggedOperator(op);
     this.setStage(currStage);
     FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Ordini.fxml"));
     Parent root = loader.load();
     OrdersPageController pageController = loader.getController();
     pageController.init(this);
-    Scene scene = new Scene(root, WIDTH, HEIGHT);
+    Scene scene =
+        new Scene(
+            root, Math.max(currStage.getWidth(), WIDTH), Math.max(currStage.getHeight(), HEIGHT));
     scene
         .getStylesheets()
         .add(LoginControl.class.getResource("/style/OrdersPage.css").toExternalForm());
@@ -52,11 +55,80 @@ public class OrdersControl extends NonLoginControl {
    */
   public void execAction(final Order order) {
     System.out.println("Hai cliccato su " + order);
+    this.selectedOrder = order;
     try {
-      shipmentControl.setScene(this.getStage(), order, this.getLoggedOperator());
+      this.setShipmentScene();
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  /**
+   * Filter orders.
+   *
+   * @param name the name to filter by
+   * @param startingDate the starting date to filter by
+   * @param endingDate the ending date to filter by
+   */
+  public void filterOrders(
+      final String name, final LocalDate startingDate, final LocalDate endingDate) {
+    if (name != null && !name.isEmpty()) {
+      System.out.println("Filtering by name: " + name);
+    }
+    if (startingDate != null) {
+      System.out.println("Filtering by starting date: " + startingDate);
+    }
+    if (endingDate != null) {
+      System.out.println("Filtering by ending date: " + endingDate);
+    }
+  }
+
+  /**
+   * Set Orders scene on Stage.
+   *
+   * @throws Exception if the scene cannot be set
+   */
+  public void setShipmentScene() throws Exception {
+    Stage stage = this.getStage();
+    FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Shipment.fxml"));
+    Parent root = loader.load();
+    ShipmentPageController pageController = loader.getController();
+    pageController.init(this);
+    Scene scene =
+        new Scene(root, Math.max(stage.getWidth(), WIDTH), Math.max(stage.getHeight(), HEIGHT));
+    scene
+        .getStylesheets()
+        .add(LoginControl.class.getResource("/style/ShipmentPage.css").toExternalForm());
+    stage.setScene(scene);
+    stage.show();
+  }
+
+  /**
+   * Go to the Dashboard page.
+   *
+   * @param stage the stage to set the scene on
+   */
+  public void returnToHomePage(final Stage stage) throws Exception {
+    DashboardControl dashboardControl = new DashboardControl();
+    dashboardControl.setScene(stage, this.getLoggedOperator());
+  }
+
+  /** Go to the Orders page. */
+  public void returnToOrdersPage() {
+    try {
+      this.setOrdersScene(this.getStage(), this.getLoggedOperator());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Get the order.
+   *
+   * @return the selected order
+   */
+  public Order getOrder() {
+    return selectedOrder;
   }
 
   // TODO! : Test pourpose only, remove this when the DB connection is implemented

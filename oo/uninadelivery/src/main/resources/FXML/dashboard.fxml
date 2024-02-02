@@ -27,7 +27,7 @@
             </Label>
             <ImageView fitHeight="112.0" fitWidth="30.0" layoutX="3.0" layoutY="1.0" pickOnBounds="true" preserveRatio="true" >
                <image>
-                  <Image url="@../images/titleBar/UninaDelivery_logo.png" />
+                  <Image url="@../images/UninaDelivery_logo.png" />
                </image>
             </ImageView>
             <HBox alignment="CENTER" layoutX="1010.0" layoutY="8.0" prefHeight="18.0" prefWidth="61.0" AnchorPane.rightAnchor="9.0">
@@ -156,13 +156,13 @@
       </VBox>
    </left>
    <center>
-      <VBox alignment="CENTER" prefHeight="200.0" prefWidth="780.0" spacing="5.0" style="-fx-background-color: #282A37;" BorderPane.alignment="CENTER">
+      <VBox alignment="CENTER" prefHeight="200.0" prefWidth="780.0" spacing="5.0" style="-fx-background-color: -fx-default-bg;" BorderPane.alignment="CENTER">
          <children>
             <VBox alignment="CENTER" prefHeight="518.0" prefWidth="780.0">
                <children>
                   <ImageView fitHeight="337.0" fitWidth="389.0" pickOnBounds="true" preserveRatio="true" VBox.vgrow="ALWAYS">
                      <image>
-                        <Image url="@../images/loginPage/UninaDelivery_logo.png" />
+                        <Image url="@../images/UninaDelivery_logo.png" />
                      </image>
                   </ImageView>
                   <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="52.0" prefWidth="366.0" style="-fx-font-weight: bold;" text="Operator Dashboard" textFill="#f7dba7" VBox.vgrow="ALWAYS">
