@@ -77,7 +77,16 @@ public class ShipmentPageController {
               + " "
               + order.getAccount().getSurname()
               + " al seguente indirizzo: "
-              + order.getAccount().getAddress());
+              + order.getAccount().getAddress().getCountry()
+              + ", "
+              + order.getAccount().getAddress().getCity()
+              + ", "
+              + order.getAccount().getAddress().getStreet()
+              + " n."
+              + order.getAccount().getAddress().getAddressNumber()
+              + ", "
+              + order.getAccount().getAddress().getZipCode()
+              );
     }
   }
 

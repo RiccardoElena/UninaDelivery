@@ -20,7 +20,7 @@
    <center>
       <AnchorPane prefHeight="690.0" prefWidth="1080.0" style="-fx-background-color: -fx-default-bg;" BorderPane.alignment="CENTER">
          <children>
-            <VBox layoutY="82.0" prefHeight="141.0" prefWidth="1080.0">
+            <VBox layoutY="82.0" prefHeight="182.0" prefWidth="1080.0">
                <children>
                   <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="1080.0">
                      <children>
@@ -31,9 +31,9 @@
                         </Label>
                      </children>
                   </HBox>
-                  <Label fx:id="orderLabel" prefHeight="36.0" prefWidth="1039.0" text="{ordine}">
+                  <Label fx:id="orderLabel" prefHeight="185.0" prefWidth="1039.0" text="{ordine}">
                      <font>
-                        <Font name="System Bold" size="25.0" />
+                        <Font name="System Bold" size="17.0" />
                      </font>
                      <VBox.margin>
                         <Insets left="13.0" />

@@ -79,7 +79,8 @@ public class DashboardPageController {
     // Imposta le dimensioni dell'ImageView
     proPic.setFitWidth(PRO_PIC_SIZE);
     proPic.setFitHeight(PRO_PIC_SIZE);
-
+    // TODO!: non so se funzionava a te, ma a me non appariva il cerchio; 
+    //!       allor ho aggiunto un png visto che tanto l'immagine la mettiamo con una grandezza fissa
     // Crea un cerchio
     Circle circle =
         new Circle(
