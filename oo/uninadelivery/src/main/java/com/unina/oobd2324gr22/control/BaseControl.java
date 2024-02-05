@@ -9,6 +9,8 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -16,6 +18,12 @@ public abstract class BaseControl {
 
   /** Transition duration. */
   private static final double FADE_OUT_DURATION = 0.2;
+
+  /** Width of the eye icons. */
+  static final int ICON_WIDTH = 30;
+
+  /** Height of the eye icons. */
+  static final int ICON_HEIGHT = 30;
 
   /** Application stage. */
   private Stage stage;
@@ -122,5 +130,18 @@ public abstract class BaseControl {
     this.stage = currStage;
     System.err.println(getStage());
     System.err.println("wow " + this.stage);
+  }
+
+  /**
+   * Get an icon.
+   *
+   * @param path the path of the icon
+   * @return the icon
+   */
+  public ImageView getIcon(final String path) {
+    ImageView icon = new ImageView(new Image(path));
+    icon.setFitWidth(ICON_WIDTH); // Set the width
+    icon.setFitHeight(ICON_HEIGHT);
+    return icon;
   }
 }

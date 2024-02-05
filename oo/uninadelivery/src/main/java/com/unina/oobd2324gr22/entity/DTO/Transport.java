@@ -1,6 +1,6 @@
 package com.unina.oobd2324gr22.entity.DTO;
 
-public abstract class Transport {
+public class Transport {
 
   // Attributes
 
@@ -49,6 +49,7 @@ public abstract class Transport {
     this.occupiedSpace = tOccupiedSpace < 0 ? 0 : tOccupiedSpace;
     this.isAvailable = tIsAvailable;
     this.depositOwner = tDepositOwner;
+    tDepositOwner.addTransport(this);
   }
 
   // Getters

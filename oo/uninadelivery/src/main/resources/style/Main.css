@@ -7,7 +7,20 @@
 @import url('components/Alerts.css');
 @import url('components/TextFields.css');
 @import url('components/DatePickers.css');
+@import url('components/TableView.css');
 
 * {
+  -fx-text-fill: -fx-secondary-color;
+}
+
+.title {
+  -fx-text-fill: -fx-secondary-color;
+}
+
+.light-background {
+  -fx-background-color: -fx-secondary-color;
+}
+
+.light-background .label {
   -fx-text-fill: -fx-primary-color;
 }

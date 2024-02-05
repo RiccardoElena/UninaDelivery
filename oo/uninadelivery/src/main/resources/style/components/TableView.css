@@ -1,0 +1,37 @@
+.table-view .table-row-cell .table-cell {
+  -fx-text-fill: -fx-primary-color;
+}
+
+
+/* Modifica lo stile delle celle delle TableView quando sono selezionate */
+.table-view .table-row-cell:selected .table-cell {
+  -fx-background-color: -fx-primary-color;
+  -fx-text-fill: -fx-secondary-color;
+  -fx-border-color: -fx-secondary-color;
+  -fx-border-width: 0 0.5 0 0.5;
+}
+
+/* Modifica lo stile delle celle delle TableView quando sono selezionate */
+.table-view .table-row-cell:focused .table-cell {
+  -fx-border-color: -fx-secondary-color;
+  -fx-border-width: 0.5;
+}
+
+/* Modifica lo stile delle celle delle TableView quando sono selezionate */
+.table-view .table-row-cell:focused {
+  -fx-border-color: -fx-secondary-color;
+  -fx-border-width: 0.5;
+}
+
+.table-view .table-row-cell:selected .button {
+  -fx-background-color: -fx-secondary-color;
+  -fx-text-fill: -fx-primary-color;
+}
+
+.table-view .column-header {
+  -fx-background-color: -fx-primary-color;
+}
+
+.table-view .column-header .label {
+  -fx-text-fill: -fx-secondary-color;
+}

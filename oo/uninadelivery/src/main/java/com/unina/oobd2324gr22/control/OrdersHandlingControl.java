@@ -4,9 +4,12 @@ import com.unina.oobd2324gr22.boundary.OrdersPageController;
 import com.unina.oobd2324gr22.boundary.ShipmentPageController;
 import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Address;
+import com.unina.oobd2324gr22.entity.DTO.Deposit;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Product;
+import com.unina.oobd2324gr22.entity.DTO.Shipment;
+import com.unina.oobd2324gr22.entity.DTO.Transport;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import javafx.collections.FXCollections;
@@ -31,7 +34,7 @@ public class OrdersHandlingControl extends NonLoginControl {
   public void setOrdersScene(final Stage currStage, final Operator op) throws Exception {
     this.setLoggedOperator(op);
     this.setStage(currStage);
-    FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Ordini.fxml"));
+    FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Orders.fxml"));
     Parent root = loader.load();
     OrdersPageController pageController = loader.getController();
     pageController.init(this);
@@ -147,7 +150,8 @@ public class OrdersHandlingControl extends NonLoginControl {
         FXCollections.observableArrayList(
             new Order(
                 outOfPlaceOrderId,
-                LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                LocalDate.parse(
+                    LocalDate.now().toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                 false,
                 0,
                 new Account(
@@ -157,7 +161,7 @@ public class OrdersHandlingControl extends NonLoginControl {
                     LocalDate.parse("2020-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                     "gdg.jpg",
                     "password",
-                    new Address("80100", "napoli", "italia", "napoli", "euw", "2", "barone")),
+                    new Address("80100", "Napoli", "NA", "Italia", "euw", "2", "Via Barone")),
                 qty,
                 new Product("Cancellaria", "Penna", "Bic", "Penna bella", price, false, weight)),
             new Order(
@@ -238,5 +242,42 @@ public class OrdersHandlingControl extends NonLoginControl {
                 new Product("Cancellaria", "Gomma", "Bic", "Gomma bella", price, false, weight)));
 
     return ordersModels;
+  }
+
+  // TODO! : Test pourpose only, remove this when the DB connection is implemented
+  /**
+   * Get test shipments.
+   *
+   * @return a list of test shipments
+   */
+  public ObservableList<Shipment> getTestShipments() {
+    Deposit deposit = new Deposit(1, ICON_HEIGHT, ICON_HEIGHT * 2, null);
+    ObservableList<Shipment> shipments =
+        FXCollections.observableArrayList(
+            new Shipment(
+                1,
+                LocalDate.now().minusDays(1),
+                new Transport(1, ICON_WIDTH, ICON_HEIGHT, false, deposit),
+                deposit,
+                (float) ICON_HEIGHT / (2 + 1)),
+            new Shipment(
+                2,
+                LocalDate.now().minusDays(2),
+                new Transport(1, ICON_WIDTH, ICON_HEIGHT, false, deposit),
+                deposit,
+                ICON_HEIGHT / (2 + 1)),
+            new Shipment(
+                2 + 1,
+                LocalDate.now().minusDays(2 + 1),
+                new Transport(1, ICON_WIDTH, ICON_HEIGHT, false, deposit),
+                deposit,
+                ICON_HEIGHT / (2 + 1)),
+            new Shipment(
+                2 + 2,
+                LocalDate.now().minusDays(2 + 2),
+                new Transport(1, ICON_WIDTH, ICON_HEIGHT, false, deposit),
+                deposit,
+                ICON_HEIGHT / (2 + 1)));
+    return shipments;
   }
 }

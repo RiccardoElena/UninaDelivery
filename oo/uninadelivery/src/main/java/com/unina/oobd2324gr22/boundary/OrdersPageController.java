@@ -10,7 +10,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -31,9 +30,6 @@ public class OrdersPageController {
 
   // All this parameter are a mess, isn't a better way to encapsulate them
   // in a custom table class?
-
-  /** Label containing the name of the logged account. */
-  @FXML private Label nameLabel;
 
   /** Table containing the orders. */
   @FXML private TableView<Order> ordersTable;
@@ -80,6 +76,12 @@ public class OrdersPageController {
   /** Button to filter the orders. */
   @FXML private Button filterButton;
 
+  /** Button to go back to the home page. */
+  @FXML private Button homeButton;
+
+  /** Button to go back to the previous page. */
+  @FXML private Button backButton;
+
   /** TextField to filter the orders by client. */
   @FXML private TextField clientTextField;
 
@@ -94,8 +96,6 @@ public class OrdersPageController {
   public final void init(final OrdersHandlingControl control) {
 
     this.setOrdersHandlingControl(control);
-    // FIXME: this is a test pourpose only, remove this when the DB connection
-    this.displayLoggedAccountName();
 
     ordersHandlingControl.setDraggable(titleBar);
 
@@ -106,6 +106,8 @@ public class OrdersPageController {
         });
 
     this.setTableColumns();
+
+    ordersHandlingControl.setNavigationButtons(homeButton, backButton);
 
     // FIXME: this line is using a test function with dummy data
     // when DB connection is implemented, this line should be changed
@@ -119,6 +121,7 @@ public class OrdersPageController {
    *
    * @param control the Orders selection functionality control class
    */
+  @FXML
   public void setOrdersHandlingControl(final OrdersHandlingControl control) {
     this.ordersHandlingControl = control;
   }
@@ -129,6 +132,7 @@ public class OrdersPageController {
    *
    * @param event
    */
+  @FXML
   public final void exitButtonAction(final ActionEvent event) {
     ordersHandlingControl.exit();
   }
@@ -138,6 +142,7 @@ public class OrdersPageController {
    *
    * @param event the event that triggered the method
    */
+  @FXML
   public final void minimizeButtonAction(final ActionEvent event) {
     ordersHandlingControl.minimize();
   }
@@ -147,6 +152,7 @@ public class OrdersPageController {
    *
    * @param event
    */
+  @FXML
   public final void resizeButtonAction(final ActionEvent event) {
     Stage stage = (Stage) resizeButton.getScene().getWindow();
     stage.setMaximized(!stage.isMaximized());
@@ -157,15 +163,10 @@ public class OrdersPageController {
    *
    * @param event the event that triggered the method
    */
+  @FXML
   public final void filterButtonAction(final ActionEvent event) {
     ordersHandlingControl.filterOrders(
         clientTextField.getText(), startDatePicker.getValue(), endDatePicker.getValue());
-  }
-
-  private void displayLoggedAccountName() {
-    // TODO! : Test pourpose only, remove this when the DB connection is implemented
-
-    nameLabel.setText(ordersHandlingControl.getLoggedOperator().getName());
   }
 
   private void setDatePickerLowerBound() {
@@ -266,6 +267,31 @@ public class OrdersPageController {
       column
           .prefWidthProperty()
           .bind(ordersTable.widthProperty().divide(ordersTable.getColumns().size()));
+    }
+  }
+
+  /**
+   * Button to go back to the previous page.
+   *
+   * @param event the event that triggered the action
+   */
+  @FXML
+  void backButtonAction(final ActionEvent event) {
+    ordersHandlingControl.returnToOrdersPage();
+  }
+
+  /**
+   * Button to go back to the home page.
+   *
+   * @param event the event that triggered the action
+   */
+  @FXML
+  void homeButtonAction(final ActionEvent event) {
+    Stage stage = (Stage) homeButton.getScene().getWindow();
+    try {
+      ordersHandlingControl.returnToHomePage(stage);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 }

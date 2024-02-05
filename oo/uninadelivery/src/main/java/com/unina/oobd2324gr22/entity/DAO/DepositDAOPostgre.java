@@ -2,11 +2,8 @@ package com.unina.oobd2324gr22.entity.DAO;
 
 import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Area;
-import com.unina.oobd2324gr22.entity.DTO.CentralDeposit;
-import com.unina.oobd2324gr22.entity.DTO.CountryDeposit;
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
 import com.unina.oobd2324gr22.entity.DTO.Order;
-import com.unina.oobd2324gr22.entity.DTO.StateDeposit;
 import com.unina.oobd2324gr22.utils.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,48 +19,7 @@ public class DepositDAOPostgre implements DepositDAO {
   private Connection con;
 
   private Deposit populateDepositFromResultSet(final ResultSet rs) throws SQLException {
-    String depositType = rs.getString("deposittype");
-
-    switch (depositType) {
-      case "City":
-        return createDeposit(rs);
-      case "State":
-        return createStateDeposit(rs);
-      case "Country":
-        return createCountryDeposit(rs);
-      case "Central":
-        return createCentralDeposit(rs);
-      default:
-        throw new SQLException("Invalid deposit type");
-    }
-  }
-
-  private Deposit createDeposit(final ResultSet rs) throws SQLException {
     return new Deposit(
-        rs.getInt("depositid"),
-        rs.getInt("occupiedspace"),
-        rs.getInt("maxcapacity"),
-        createAddress(rs));
-  }
-
-  private StateDeposit createStateDeposit(final ResultSet rs) throws SQLException {
-    return new StateDeposit(
-        rs.getInt("depositid"),
-        rs.getInt("occupiedspace"),
-        rs.getInt("maxcapacity"),
-        createAddress(rs));
-  }
-
-  private CountryDeposit createCountryDeposit(final ResultSet rs) throws SQLException {
-    return new CountryDeposit(
-        rs.getInt("depositid"),
-        rs.getInt("occupiedspace"),
-        rs.getInt("maxcapacity"),
-        createAddress(rs));
-  }
-
-  private CentralDeposit createCentralDeposit(final ResultSet rs) throws SQLException {
-    return new CentralDeposit(
         rs.getInt("depositid"),
         rs.getInt("occupiedspace"),
         rs.getInt("maxcapacity"),
@@ -89,25 +45,7 @@ public class DepositDAOPostgre implements DepositDAO {
    * {@inheritDoc}
    */
   @Override
-  public final int insertCityDeposit(final Deposit deposit) throws SQLException {
-    // TODO @RiccardoElena @zGenny Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public final int insertStateDeposit(final StateDeposit deposit) throws SQLException {
-    // TODO @RiccardoElena @zGenny Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public final int insertCountryDeposit(final CountryDeposit deposit) throws SQLException {
-    // TODO @RiccardoElena @zGenny Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public final int insertCentralDeposit(final CentralDeposit deposit) throws SQLException {
+  public final int insertDeposit(final Deposit deposit) throws SQLException {
     // TODO @RiccardoElena @zGenny Auto-generated method stub
     return 0;
   }

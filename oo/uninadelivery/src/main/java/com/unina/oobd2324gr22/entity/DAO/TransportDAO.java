@@ -1,61 +1,20 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
-import com.unina.oobd2324gr22.entity.DTO.AirTransport;
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
-import com.unina.oobd2324gr22.entity.DTO.RailsTransport;
 import com.unina.oobd2324gr22.entity.DTO.Transport;
-import com.unina.oobd2324gr22.entity.DTO.WaterTransport;
-import com.unina.oobd2324gr22.entity.DTO.WheeledLarge;
-import com.unina.oobd2324gr22.entity.DTO.WheeledSmall;
 import java.sql.SQLException;
 import java.util.List;
 
 public interface TransportDAO {
 
   /**
-   * Insert a new WheeledSmall transport in the database.
+   * Insert a new Transport in the database.
    *
-   * @param wheeledSmall WheeledSmall transport to insert.
+   * @param transport Transport to insert.
    * @return the number of rows affected by the insert.
    * @throws SQLException possible DB related errors.
    */
-  int insertWheeledSmall(WheeledSmall wheeledSmall) throws SQLException;
-
-  /**
-   * Insert a new WheeledLarge transport in the database.
-   *
-   * @param wheeledLarge WheeledLarge transport to insert.
-   * @return the number of rows affected by the insert.
-   * @throws SQLException possible DB related errors.
-   */
-  int insertWheeledLarge(WheeledLarge wheeledLarge) throws SQLException;
-
-  /**
-   * Insert a new Rails transport in the database.
-   *
-   * @param railsTransport Rails transport to insert.
-   * @return the number of rows affected by the insert.
-   * @throws SQLException possible DB related errors.
-   */
-  int insertRails(RailsTransport railsTransport) throws SQLException;
-
-  /**
-   * Insert a new Water transport in the database.
-   *
-   * @param waterTransport Water transport to insert.
-   * @return the number of rows affected by the insert.
-   * @throws SQLException possible DB related errors.
-   */
-  int insertWater(WaterTransport waterTransport) throws SQLException;
-
-  /**
-   * Insert a new Air transport in the database.
-   *
-   * @param airTransport Air transport to insert.
-   * @return the number of rows affected by the insert.
-   * @throws SQLException possible DB related errors.
-   */
-  int insertAir(AirTransport airTransport) throws SQLException;
+  int insertTransport(Transport transport) throws SQLException;
 
   /**
    * Retrieve all the transports from the database.

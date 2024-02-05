@@ -8,20 +8,12 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 // FIXME: In refactoring a lot of methods have been moved to LoginControl.
 // After testing that everything works, remove the commented code.
 
 public class LoginPageController {
-
-  /** Width of the eye icons. */
-  static final int ICON_WIDTH = 30;
-
-  /** Height of the eye icons. */
-  static final int ICON_HEIGHT = 30;
 
   /** Text field to input the email for the login. */
   @FXML private TextField emailTextField;
@@ -55,7 +47,7 @@ public class LoginPageController {
   public final void init(final LoginControl control) {
     this.loginControl = control;
     loginControl.setDraggable(topPane);
-    togglePswVisibilityButton.setGraphic(getIcon("/images/loginPage/ClosedEye.png"));
+    togglePswVisibilityButton.setGraphic(loginControl.getIcon("/images/loginPage/ClosedEye.png"));
     togglePswVisibilityButton.setOnAction(event -> togglePswVisibility());
   }
 
@@ -92,22 +84,15 @@ public class LoginPageController {
 
   private void togglePswVisibility() {
     if (passwordTextField.isVisible()) {
-      togglePswVisibilityButton.setGraphic(getIcon("/images/loginPage/Eye.png"));
+      togglePswVisibilityButton.setGraphic(loginControl.getIcon("/images/loginPage/Eye.png"));
       plainPasswordTextField.setText(passwordTextField.getText());
       passwordTextField.setVisible(false);
       plainPasswordTextField.setVisible(true);
     } else {
-      togglePswVisibilityButton.setGraphic(getIcon("/images/loginPage/ClosedEye.png"));
+      togglePswVisibilityButton.setGraphic(loginControl.getIcon("/images/loginPage/ClosedEye.png"));
       passwordTextField.setText(plainPasswordTextField.getText());
       plainPasswordTextField.setVisible(false);
       passwordTextField.setVisible(true);
     }
-  }
-
-  private ImageView getIcon(final String path) {
-    ImageView eyeView = new ImageView(new Image(path));
-    eyeView.setFitWidth(ICON_WIDTH); // Set the width
-    eyeView.setFitHeight(ICON_HEIGHT);
-    return eyeView;
   }
 }

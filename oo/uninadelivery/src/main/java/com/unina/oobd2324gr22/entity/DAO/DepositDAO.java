@@ -1,10 +1,7 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
-import com.unina.oobd2324gr22.entity.DTO.CentralDeposit;
-import com.unina.oobd2324gr22.entity.DTO.CountryDeposit;
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
 import com.unina.oobd2324gr22.entity.DTO.Order;
-import com.unina.oobd2324gr22.entity.DTO.StateDeposit;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
@@ -18,34 +15,7 @@ public interface DepositDAO {
    * @return the number of rows affected by the insert
    * @throws SQLException possible DB related errors
    */
-  int insertCityDeposit(Deposit deposit) throws SQLException;
-
-  /**
-   * Insert a new state deposit in the database.
-   *
-   * @param deposit deposit to insert
-   * @return the number of rows affected by the insert
-   * @throws SQLException possible DB related errors
-   */
-  int insertStateDeposit(StateDeposit deposit) throws SQLException;
-
-  /**
-   * Insert a new country deposit in the database.
-   *
-   * @param deposit deposit to insert
-   * @return the number of rows affected by the insert
-   * @throws SQLException possible DB related errors
-   */
-  int insertCountryDeposit(CountryDeposit deposit) throws SQLException;
-
-  /**
-   * Insert a new central deposit in the database.
-   *
-   * @param deposit deposit to insert
-   * @return the number of rows affected by the insert
-   * @throws SQLException possible DB related errors
-   */
-  int insertCentralDeposit(CentralDeposit deposit) throws SQLException;
+  int insertDeposit(Deposit deposit) throws SQLException;
 
   /**
    * Retrieve all the deposits from the database.

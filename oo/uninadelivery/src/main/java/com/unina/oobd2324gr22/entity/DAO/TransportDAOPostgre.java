@@ -1,15 +1,7 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
-import com.unina.oobd2324gr22.entity.DTO.AirTransport;
-import com.unina.oobd2324gr22.entity.DTO.CentralDeposit;
-import com.unina.oobd2324gr22.entity.DTO.CountryDeposit;
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
-import com.unina.oobd2324gr22.entity.DTO.RailsTransport;
-import com.unina.oobd2324gr22.entity.DTO.StateDeposit;
 import com.unina.oobd2324gr22.entity.DTO.Transport;
-import com.unina.oobd2324gr22.entity.DTO.WaterTransport;
-import com.unina.oobd2324gr22.entity.DTO.WheeledLarge;
-import com.unina.oobd2324gr22.entity.DTO.WheeledSmall;
 import com.unina.oobd2324gr22.utils.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,72 +24,15 @@ public class TransportDAOPostgre implements TransportDAO {
     boolean isAvailable = rs.getBoolean("isavailable");
     Deposit deposit = depositDAO.getDepositById(rs.getInt("depositid"));
 
-    switch (transportType) {
-      case "WheeledSmall":
-        return new WheeledSmall(transportId, maxCapacity, occupiedSpace, isAvailable, deposit);
-      case "WheeledLarge":
-        return new WheeledLarge(
-            transportId, maxCapacity, occupiedSpace, isAvailable, (StateDeposit) deposit);
-      case "Rails":
-        return new RailsTransport(
-            transportId, maxCapacity, occupiedSpace, isAvailable, (CountryDeposit) deposit);
-      case "Water":
-        return new WaterTransport(
-            transportId, maxCapacity, occupiedSpace, isAvailable, (CentralDeposit) deposit);
-      case "Air":
-        return new AirTransport(
-            transportId, maxCapacity, occupiedSpace, isAvailable, (CentralDeposit) deposit);
-      default:
-        return null;
-    }
+    return new Transport(transportId, maxCapacity, occupiedSpace, isAvailable, deposit);
   }
 
   /**
-   * PostgreSQL implementation of the method insertWheeledSmall.<br>
+   * PostgreSQL implementation of the method insertTransport.<br>
    * {@inheritDoc}
    */
   @Override
-  public int insertWheeledSmall(final WheeledSmall wheeledSmall) throws SQLException {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  /**
-   * PostgreSQL implementation of the method insertWheeledLarge.<br>
-   * {@inheritDoc}
-   */
-  @Override
-  public final int insertWheeledLarge(final WheeledLarge wheeledLarge) throws SQLException {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  /**
-   * PostgreSQL implementation of the method insertRails.<br>
-   * {@inheritDoc}
-   */
-  @Override
-  public final int insertRails(final RailsTransport railsTransport) throws SQLException {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  /**
-   * PostgreSQL implementation of the method insertWater.<br>
-   * {@inheritDoc}
-   */
-  @Override
-  public final int insertWater(final WaterTransport waterTransport) throws SQLException {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  /**
-   * PostgreSQL implementation of the method insertAir.<br>
-   * {@inheritDoc}
-   */
-  @Override
-  public final int insertAir(final AirTransport airTransport) throws SQLException {
+  public final int insertTransport(final Transport transport) throws SQLException {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'insertAir'");
   }

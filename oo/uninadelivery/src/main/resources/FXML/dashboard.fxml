@@ -38,7 +38,7 @@
                            <graphic>
                               <ImageView fitHeight="9.0" fitWidth="9.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@../images/titleBar/Close.png" />
+                                    <Image url="@../images/nonLoginPage/titleBar/Close.png" />
                                  </image>
                               </ImageView>
                            </graphic>
@@ -50,7 +50,7 @@
                            <graphic>
                               <ImageView fitHeight="9.0" fitWidth="9.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@../images/titleBar/Enlarge_3.png" />
+                                    <Image url="@../images/nonLoginPage/titleBar/Enlarge_3.png" />
                                  </image>
                               </ImageView>
                            </graphic>
@@ -62,7 +62,7 @@
                            <graphic>
                               <ImageView fitHeight="9.0" fitWidth="9.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@../images/titleBar/Subtract_2.png" />
+                                    <Image url="@../images/nonLoginPage/titleBar/Subtract_2.png" />
                                  </image>
                               </ImageView>
                            </graphic>
@@ -78,7 +78,7 @@
       </AnchorPane>
    </top>
    <left>
-      <VBox alignment="CENTER" prefHeight="685.0" prefWidth="300.0" spacing="25.0" style="-fx-background-color: #F7DBA7;" BorderPane.alignment="CENTER">
+      <VBox alignment="CENTER" prefHeight="685.0" prefWidth="300.0" spacing="25.0" style="-fx-background-color: #F7DBA7;" styleClass="light-background" BorderPane.alignment="CENTER">
          <children>
             <VBox alignment="TOP_CENTER" prefHeight="477.0" prefWidth="300.0" spacing="16.0">
                <children>
@@ -118,7 +118,7 @@
                <children>
                   <HBox alignment="BOTTOM_CENTER" prefHeight="85.0" prefWidth="300.0" spacing="40.0">
                      <children>
-                        <MFXButton fx:id="logoutButton" buttonType="RAISED" onAction="#logoutButtonAction" prefHeight="45.0" prefWidth="96.0" text="LOGOUT" textFill="#f7dba7">
+                        <MFXButton fx:id="logoutButton" buttonType="RAISED" onAction="#logoutButtonAction" prefHeight="45.0" prefWidth="96.0" rippleColor="#f7dba7" text="LOGOUT" textFill="#f7dba7">
                            <font>
                               <Font size="17.0" />
                            </font>
@@ -130,7 +130,7 @@
                               <String fx:value="bottoncino" />
                            </styleClass>
                         </MFXButton>
-                        <MFXButton fx:id="editButton" buttonType="RAISED" onAction="#editButtonAction" prefHeight="45.0" prefWidth="80.0" text="EDIT">
+                        <MFXButton fx:id="editButton" buttonType="RAISED" onAction="#editButtonAction" prefHeight="45.0" prefWidth="80.0" rippleColor="#f7dba7" text="EDIT">
                            <font>
                               <Font name="System Bold" size="17.0" />
                            </font>
@@ -171,21 +171,21 @@
                         <Image url="@../images/UninaDelivery_logo.png" />
                      </image>
                   </ImageView>
-                  <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="52.0" prefWidth="366.0" style="-fx-font-weight: bold;" text="Operator Dashboard" textFill="#f7dba7" VBox.vgrow="ALWAYS">
-                     <font>
-                        <Font size="35.0" />
-                     </font>
-                  </Label>
-                  <Label style="-fx-font-weight: bold;" text="UninaDelivery" textFill="#f7dba7" VBox.vgrow="ALWAYS">
+                  <Label style="-fx-font-weight: bold;" styleClass="title" text="UninaDelivery" textFill="#f7dba7" VBox.vgrow="ALWAYS">
                      <font>
                         <Font size="40.0" />
+                     </font>
+                  </Label>
+                  <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="52.0" prefWidth="366.0" style="-fx-font-weight: bold;" styleClass="title" text="Operator Dashboard" textFill="#f7dba7" VBox.vgrow="ALWAYS">
+                     <font>
+                        <Font size="35.0" />
                      </font>
                   </Label>
                </children>
             </VBox>
             <VBox alignment="CENTER" prefHeight="249.0" prefWidth="780.0" spacing="10.0">
                <children>
-                  <MFXButton fx:id="gestisciOrdiniButton" buttonType="RAISED" onAction="#gestisciOrdiniButtonAction" prefHeight="64.0" prefWidth="310.0" text="Gestisci Ordini" VBox.vgrow="ALWAYS">
+                  <MFXButton fx:id="gestisciOrdiniButton" buttonType="RAISED" onAction="#gestisciOrdiniButtonAction" prefHeight="64.0" prefWidth="310.0" rippleColor="#f7dba7" text="Gestisci Ordini" VBox.vgrow="ALWAYS">
                      <font>
                         <Font name="System Bold" size="32.0" />
                      </font>
@@ -197,7 +197,7 @@
                         <String fx:value="bigButton" />
                      </styleClass>
                   </MFXButton>
-                  <MFXButton buttonType="RAISED" prefHeight="64.0" prefWidth="310.0" text="Resoconti Mensili">
+                  <MFXButton buttonType="RAISED" prefHeight="64.0" prefWidth="310.0" rippleColor="#f7dba7" text="Resoconti Mensili">
                      <font>
                         <Font size="32.0" />
                      </font>

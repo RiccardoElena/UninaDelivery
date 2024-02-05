@@ -2,11 +2,20 @@ package com.unina.oobd2324gr22.boundary;
 
 import com.unina.oobd2324gr22.control.OrdersHandlingControl;
 import com.unina.oobd2324gr22.entity.DTO.Order;
+import com.unina.oobd2324gr22.entity.DTO.Shipment;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.DateCell;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -37,8 +46,44 @@ public class ShipmentPageController {
   /** Button to open the orders page. */
   @FXML private AnchorPane titleBar;
 
-  /** Order label. */
-  @FXML private Label orderLabel;
+  /** Order Id label. */
+  @FXML private Label orderIdLabel;
+
+  /** Order Expected Delivery Date label. */
+  @FXML private Label orderExpectedDeliveryDateLabel;
+
+  /** Order Product label. */
+  @FXML private Label orderProductLabel;
+
+  /** Order Quantity label. */
+  @FXML private Label orderQuantityLabel;
+
+  /** Order Client label. */
+  @FXML private Label orderClientLabel;
+
+  /** Order Address label. */
+  @FXML private Label orderAddressLabel;
+
+  /** Shipment Date picker. */
+  @FXML private DatePicker shipmentDatePicker;
+
+  /** Table of shipments. */
+  @FXML private TableView<Shipment> shipmentsTable;
+
+  /** Column containing the shipment id. */
+  @FXML private TableColumn<Shipment, Integer> shipmentIdTableColumn;
+
+  /** Column containing the shipment date. */
+  @FXML private TableColumn<Shipment, LocalDate> shipmentDateTableColumn;
+
+  /** Column containing starting deposit. */
+  @FXML private TableColumn<Shipment, String> startingDepositTableColumn;
+
+  /** Column containing the transport. */
+  @FXML private TableColumn<Shipment, String> transportTableColumn;
+
+  /** Column containing the remaining space. */
+  @FXML private TableColumn<Shipment, Float> remainingSpaceTableColumn;
 
   /**
    * Initialize the page.
@@ -54,40 +99,84 @@ public class ShipmentPageController {
           Stage stage = (Stage) borderPane.getScene().getWindow();
           ordersHandlingControl.setResizable(stage);
         });
+
+    this.setTableColumns();
+
+    shipmentsTable.setItems(ordersHandlingControl.getTestShipments());
+
+    this.setDatePickerLowerBound();
+
+    ordersHandlingControl.setNavigationButtons(homeButton, backButton);
   } // ! end initialize
+
+  private void setColumnSize() {
+    for (TableColumn<Shipment, ?> column : shipmentsTable.getColumns()) {
+      column
+          .prefWidthProperty()
+          .bind(shipmentsTable.widthProperty().divide(shipmentsTable.getColumns().size()));
+    }
+  }
 
   private void displayOrderData() {
     Order order = ordersHandlingControl.getOrder();
     if (order != null) {
-      orderLabel.setText(
-          "Ordine N."
-              + order.getOrderId()
-              + " ordinato il "
-              + order.getEmissionDate()
-              + "  e da consegnare entro il "
-              + order.getExpectedDeliveryDate()
-              + "\nContenuto: "
-              + order.getProduct().getName()
-              + " x"
+      orderIdLabel.setText("Ordine N." + order.getOrderId());
+      orderExpectedDeliveryDateLabel.setText(
+          "Da consegnare entro il: "
+              + order.getExpectedDeliveryDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+      orderProductLabel.setText(
+          "Contenente: "
               + order.getQuantity()
-              + " del venditore "
-              + order.getProduct().getSupplier()
-              + "\n Consegnare a "
-              + order.getAccount().getName()
               + " "
-              + order.getAccount().getSurname()
-              + " al seguente indirizzo: "
-              + order.getAccount().getAddress().getCountry()
-              + ", "
-              + order.getAccount().getAddress().getCity()
-              + ", "
-              + order.getAccount().getAddress().getStreet()
-              + " n."
-              + order.getAccount().getAddress().getAddressNumber()
-              + ", "
-              + order.getAccount().getAddress().getZipCode()
-              );
+              + order.getProduct().getName()
+              + " - "
+              + order.getProduct().getSupplier());
+      orderAddressLabel.setText("Diretto a: " + order.getAccount().getAddress().toString());
     }
+  }
+
+  private void setDatePickerLowerBound() {
+    LocalDate defaultDate = LocalDate.now().plusDays(1);
+    shipmentDatePicker.setValue(defaultDate);
+    shipmentDatePicker.setDayCellFactory(
+        d ->
+            new DateCell() {
+              @Override
+              public void updateItem(final LocalDate item, final boolean empty) {
+                super.updateItem(item, empty);
+                setDisable(item.isBefore(defaultDate));
+                if (!item.isBefore(defaultDate)) {
+
+                  if (item.isBefore(
+                      ordersHandlingControl.getOrder().getExpectedDeliveryDate().plusDays(1))) {
+                    setStyle(
+                        "-fx-background-color: -fx-secondary-color; -fx-text-fill:"
+                            + " -fx-primary-color;");
+                  } else {
+                    setStyle("-fx-background-color: red; -fx-text-fill:" + " white;");
+                  }
+                }
+              }
+            });
+  }
+
+  private void setTableColumns() {
+    shipmentIdTableColumn.setCellValueFactory(new PropertyValueFactory<>("Id"));
+    shipmentDateTableColumn.setCellValueFactory(new PropertyValueFactory<>("ShippingDate"));
+    remainingSpaceTableColumn.setCellValueFactory(new PropertyValueFactory<>("RemainingSpace"));
+
+    // TODO! @zGenny: we can consider to add the getAccountEmail method to the
+    // Order class if this makes the code more readable
+    startingDepositTableColumn.setCellValueFactory(
+        cellData ->
+            new SimpleStringProperty(
+                String.valueOf(cellData.getValue().getStartingDeposit().getId())));
+    // Same here!
+    transportTableColumn.setCellValueFactory(
+        cellData ->
+            new SimpleStringProperty(String.valueOf(cellData.getValue().getTransport().getId())));
+
+    this.setColumnSize();
   }
 
   /**

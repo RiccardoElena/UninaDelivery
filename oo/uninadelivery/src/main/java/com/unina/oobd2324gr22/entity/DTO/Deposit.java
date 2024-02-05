@@ -1,5 +1,6 @@
 package com.unina.oobd2324gr22.entity.DTO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 // TODO we should consider to make an abstract class from this
@@ -20,10 +21,10 @@ public class Deposit {
   private Address address;
 
   /** Transports owned by the deposit. */
-  private List<Transport> transports;
+  private List<Transport> transports = new ArrayList<>();
 
   /** Stored products of the deposit. */
-  private List<StoredProduct> storedProducts;
+  private List<StoredProduct> storedProducts = new ArrayList<>();
 
   /** Inner util class needed to store quantity along with the product. */
   // TODO we should consider to move this class in his own file in utils package
@@ -232,7 +233,7 @@ public class Deposit {
    *
    * @param transport wheeled small transport to add
    */
-  public void addTransport(final WheeledSmall transport) {
+  public void addTransport(final Transport transport) {
     if (transport == null) {
       throw new IllegalArgumentException("Transport cannot be null");
     }

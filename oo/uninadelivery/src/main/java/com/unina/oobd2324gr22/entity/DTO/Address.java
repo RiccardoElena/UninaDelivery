@@ -91,28 +91,16 @@ public class Address extends Area {
    */
   @Override
   public String toString() {
-    return "Address ["
-        + "\naddressNumber = "
-        + this.addressNumber
-        + ','
-        + "\nstreet = '"
-        + this.street
-        + "',"
-        + "\nzipCode = '"
+    return this.getStreet()
+        + " "
+        + this.getAddressNumber()
+        + ", "
         + this.getZipCode()
-        + "',"
-        + "\ncity = '"
+        + " "
         + this.getCity()
-        + "',"
-        + "\nstate = '"
+        + "("
         + this.getState()
-        + "',"
-        + "\ncountry = '"
-        + this.getCountry()
-        + "',"
-        + "\nworldZone = '"
-        + this.getWorldZone()
-        + "'"
-        + '}';
+        + "), "
+        + this.getCountry();
   }
 }

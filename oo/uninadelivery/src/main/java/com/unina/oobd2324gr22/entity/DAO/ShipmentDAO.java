@@ -2,8 +2,6 @@ package com.unina.oobd2324gr22.entity.DAO;
 
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
-import com.unina.oobd2324gr22.entity.DTO.ShipmentToClient;
-import com.unina.oobd2324gr22.entity.DTO.ShipmentToDeposit;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -16,16 +14,7 @@ public interface ShipmentDAO {
    * @return the number of rows affected by the insert
    * @throws SQLException possible DB related errors
    */
-  int insertShipment(ShipmentToClient shipment) throws SQLException;
-
-  /**
-   * Insert a new shipment towards a deposit in the database.
-   *
-   * @param shipment shipment to insert
-   * @return the number of rows affected by the insert
-   * @throws SQLException possible DB related errors
-   */
-  int insertShipment(ShipmentToDeposit shipment) throws SQLException;
+  int insertShipment(Shipment shipment) throws SQLException;
 
   /**
    * Retrieve all the unfinished the from the database.
@@ -50,15 +39,7 @@ public interface ShipmentDAO {
    * @return list of shipments towards clients
    * @throws SQLException possible DB related errors
    */
-  List<ShipmentToClient> getUnfinishedShipmentsToClient() throws SQLException;
-
-  /**
-   * Retrieve all the unfinished the towards a deposit from the database.
-   *
-   * @return list of shipments towards a deposit
-   * @throws SQLException possible DB related errors
-   */
-  List<ShipmentToDeposit> getUnfinishedShipmentsToDeposit() throws SQLException;
+  List<Shipment> getUnfinishedShipmentsToClient() throws SQLException;
 
   /**
    * Retrieve all unfinished shipments towards clients by its destination area from the database.
@@ -66,16 +47,7 @@ public interface ShipmentDAO {
    * @param area area of the shipments to get
    * @return list of shipments towards clients of the area passed
    */
-  List<ShipmentToClient> getUnfinishedShipmentsToClientByArea(String area) throws SQLException;
-
-  /**
-   * Retrieve all unfinished shipments towards a deposit from the database.
-   *
-   * @param deposit deposit of the shipments to get
-   * @return list of shipments towards a deposit
-   */
-  List<ShipmentToDeposit> getUnfinishedShipmentsByDestinationDeposit(int deposit)
-      throws SQLException;
+  List<Shipment> getUnfinishedShipmentsToClientByArea(String area) throws SQLException;
 
   /**
    * Retrieve all the shipments a certain order can be assigned to.
@@ -93,16 +65,7 @@ public interface ShipmentDAO {
    * @return the number of rows affected by the update
    * @throws SQLException possible DB related errors
    */
-  int updateShipment(ShipmentToClient shipment) throws SQLException;
-
-  /**
-   * Update a shipment towards a deposit in the database.
-   *
-   * @param shipment shipment to update
-   * @return the number of rows affected by the update
-   * @throws SQLException possible DB related errors
-   */
-  int updateShipmentToDeposit(ShipmentToDeposit shipment) throws SQLException;
+  int updateShipment(Shipment shipment) throws SQLException;
 
   /**
    * Delete a shipment in the database.

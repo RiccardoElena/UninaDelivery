@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import io.github.palexdev.materialfx.controls.MFXButton?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
@@ -7,81 +8,19 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
 <BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" stylesheets="@../style/ShipmentPage.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.unina.oobd2324gr22.boundary.ShipmentPageController">
-   <center>
-      <AnchorPane prefHeight="690.0" prefWidth="1080.0" style="-fx-background-color: -fx-default-bg;" BorderPane.alignment="CENTER">
-         <children>
-            <VBox layoutY="82.0" prefHeight="182.0" prefWidth="1080.0">
-               <children>
-                  <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="1080.0">
-                     <children>
-                        <Label alignment="CENTER" prefHeight="39.0" prefWidth="261.0" text="CREA NUOVA SPEDIZIONE">
-                           <font>
-                              <Font name="System Bold" size="19.0" />
-                           </font>
-                        </Label>
-                     </children>
-                  </HBox>
-                  <Label fx:id="orderLabel" prefHeight="185.0" prefWidth="1039.0" text="{ordine}">
-                     <font>
-                        <Font name="System Bold" size="17.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets left="13.0" />
-                     </VBox.margin>
-                  </Label>
-               </children>
-            </VBox>
-            <Button fx:id="homeButton" layoutX="30.0" layoutY="29.0" mnemonicParsing="false" onAction="#homeButtonAction" prefHeight="38.0" prefWidth="43.0" style="-fx-background-color: none;" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="29.0">
-               <graphic>
-                  <ImageView fitHeight="55.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/shipmentPage/Home.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <padding>
-                  <Insets bottom="-1.0" left="-1.0" right="-1.0" top="-1.0" />
-               </padding>
-            </Button>
-            <Button fx:id="backButton" layoutX="85.0" layoutY="29.0" mnemonicParsing="false" onAction="#backButtonAction" prefHeight="34.0" prefWidth="43.0" style="-fx-background-color: none;" AnchorPane.leftAnchor="85.0" AnchorPane.topAnchor="29.0">
-               <graphic>
-                  <ImageView fitHeight="55.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/shipmentPage/BackArrow.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <padding>
-                  <Insets bottom="-1.0" left="-1.0" right="-1.0" top="-1.0" />
-               </padding>
-            </Button>
-            <TableView layoutX="50.0" layoutY="277.0" prefHeight="327.0" prefWidth="461.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="569.0">
-              <columns>
-                <TableColumn prefWidth="75.0" text="ID" />
-                <TableColumn prefWidth="109.66665649414062" text="Data Spedizione" />
-                  <TableColumn prefWidth="75.0" text="Partenza" />
-                  <TableColumn prefWidth="75.0" text="Trasporto" />
-              </columns>
-            </TableView>
-            <DatePicker layoutX="554.0" layoutY="329.0" AnchorPane.rightAnchor="352.0" />
-            <ComboBox layoutX="764.0" layoutY="330.0" prefHeight="25.0" prefWidth="154.0" promptText="deposito di partenza" AnchorPane.rightAnchor="162.0" />
-            <ComboBox layoutX="764.0" layoutY="360.0" prefHeight="25.0" prefWidth="154.0" promptText="deposito di arrivo" AnchorPane.rightAnchor="162.0" />
-            <ComboBox layoutX="764.0" layoutY="390.0" prefHeight="25.0" prefWidth="154.0" promptText="trasporto" AnchorPane.rightAnchor="162.0" />
-            <ComboBox layoutX="764.0" layoutY="420.0" prefHeight="25.0" prefWidth="154.0" promptText="autista" AnchorPane.rightAnchor="162.0" />
-            <ToggleButton layoutX="586.0" layoutY="281.0" mnemonicParsing="false" text="ToggleButton" AnchorPane.rightAnchor="405.0" />
-         </children>
-      </AnchorPane>
-   </center>
    <top>
       <AnchorPane fx:id="titleBar" prefHeight="35.0" prefWidth="975.0" style="-fx-background-color: #F7DBA7;" BorderPane.alignment="CENTER">
          <children>
@@ -104,7 +43,7 @@
                            <graphic>
                               <ImageView fitHeight="9.0" fitWidth="9.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@../images/titleBar/Close.png" />
+                                    <Image url="@../images/nonLoginPage/titleBar/Close.png" />
                                  </image>
                               </ImageView>
                            </graphic>
@@ -116,7 +55,7 @@
                            <graphic>
                               <ImageView fitHeight="9.0" fitWidth="9.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@../images/titleBar/Enlarge_3.png" />
+                                    <Image url="@../images/nonLoginPage/titleBar/Enlarge_3.png" />
                                  </image>
                               </ImageView>
                            </graphic>
@@ -128,7 +67,7 @@
                            <graphic>
                               <ImageView fitHeight="9.0" fitWidth="9.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@../images/titleBar/Subtract_2.png" />
+                                    <Image url="@../images/nonLoginPage/titleBar/Subtract_2.png" />
                                  </image>
                               </ImageView>
                            </graphic>
@@ -143,4 +82,161 @@
          </children>
       </AnchorPane>
    </top>
+   <center>
+      <AnchorPane prefHeight="690.0" prefWidth="1080.0" style="-fx-background-color: -fx-default-bg;" BorderPane.alignment="CENTER">
+         <children>
+            <VBox alignment="CENTER" layoutY="32.0" prefHeight="616.0" prefWidth="1080.0" AnchorPane.bottomAnchor="37.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="32.0">
+               <children>
+                  <HBox alignment="CENTER" prefHeight="73.0" prefWidth="1080.0" VBox.vgrow="ALWAYS">
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="SPEDISCI ORDINE" textFill="#f5d9a6">
+                           <font>
+                              <Font name="System Bold" size="48.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox alignment="TOP_CENTER" prefHeight="142.0" prefWidth="1080.0" VBox.vgrow="ALWAYS">
+                     <children>
+                        <Pane prefHeight="92.0" prefWidth="150.0" HBox.hgrow="SOMETIMES" />
+                        <VBox prefHeight="58.0" prefWidth="780.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" styleClass="light-background">
+                           <children>
+                              <HBox prefHeight="100.0" prefWidth="200.0">
+                                 <children>
+                                    <Label fx:id="orderIdLabel" alignment="CENTER" prefHeight="22.0" prefWidth="360.0" text="{orderId} ">
+                                       <font>
+                                          <Font name="System Bold" size="17.0" />
+                                       </font>
+                                    </Label>
+                                    <Label fx:id="orderExpectedDeliveryDateLabel" alignment="CENTER" prefHeight="22.0" prefWidth="360.0" text="{expectedDeliveryDate}">
+                                       <font>
+                                          <Font name="System Bold" size="17.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="100.0" prefWidth="200.0">
+                                 <children>
+                                    <Label fx:id="orderProductLabel" alignment="CENTER" prefHeight="15.0" prefWidth="360.0" text="{product}">
+                                       <font>
+                                          <Font name="System Bold" size="17.0" />
+                                       </font>
+                                    </Label>
+                                    <Label fx:id="orderAddressLabel" alignment="CENTER" prefHeight="76.0" prefWidth="360.0" text="{address}">
+                                       <font>
+                                          <Font name="System Bold" size="17.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                        <Pane prefHeight="100.0" prefWidth="150.0" HBox.hgrow="SOMETIMES" />
+                     </children>
+                  </HBox>
+                  <Pane prefHeight="123.0" prefWidth="1080.0" />
+                  <GridPane alignment="CENTER" prefHeight="472.0" prefWidth="1080.0" VBox.vgrow="ALWAYS">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints maxHeight="124.44622802734375" minHeight="2.787322998046875" prefHeight="56.033782958984375" vgrow="SOMETIMES" />
+                      <RowConstraints maxHeight="339.7126770019531" minHeight="10.0" prefHeight="318.4662170410156" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <TableView fx:id="shipmentsTable" prefHeight="274.0" prefWidth="500.0" GridPane.rowIndex="1">
+                          <columns>
+                            <TableColumn fx:id="shipmentIdTableColumn" prefWidth="75.0" text="ID" />
+                            <TableColumn fx:id="shipmentDateTableColumn" prefWidth="109.66665649414062" text="Data Spedizione" />
+                              <TableColumn fx:id="startingDepositTableColumn" prefWidth="126.0" text="Deposito Partenza" />
+                              <TableColumn fx:id="transportTableColumn" minWidth="7.0" prefWidth="85.0" text="Trasporto" />
+                              <TableColumn fx:id="remainingSpaceTableColumn" prefWidth="103.0" text="Spazio Rimasto" />
+                          </columns>
+                           <GridPane.margin>
+                              <Insets left="20.0" right="20.0" />
+                           </GridPane.margin>
+                        </TableView>
+                        <GridPane alignment="CENTER" prefHeight="201.0" prefWidth="667.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <columnConstraints>
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                           </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints maxHeight="103.0" minHeight="10.0" prefHeight="93.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="104.0" minHeight="10.0" prefHeight="104.0" vgrow="SOMETIMES" />
+                           </rowConstraints>
+                           <children>
+                              <DatePicker fx:id="shipmentDatePicker" prefHeight="26.0" prefWidth="221.0" promptText="Data di Spedizione" style="-fx-background-color: none;">
+                                 <GridPane.margin>
+                                    <Insets left="15.0" right="10.0" />
+                                 </GridPane.margin>
+                              </DatePicker>
+                              <ComboBox prefHeight="26.0" prefWidth="211.0" promptText="Deposito di Partenza" GridPane.columnIndex="1">
+                                 <GridPane.margin>
+                                    <Insets left="15.0" right="10.0" />
+                                 </GridPane.margin>
+                              </ComboBox>
+                              <ComboBox prefHeight="26.0" prefWidth="211.0" promptText="Corriere" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <GridPane.margin>
+                                    <Insets left="15.0" right="10.0" />
+                                 </GridPane.margin>
+                              </ComboBox>
+                              <ComboBox prefHeight="26.0" prefWidth="211.0" promptText="Mezzo di Transporto" GridPane.rowIndex="1">
+                                 <GridPane.margin>
+                                    <Insets left="15.0" right="10.0" />
+                                 </GridPane.margin>
+                              </ComboBox>
+                           </children>
+                           <GridPane.margin>
+                              <Insets left="20.0" right="20.0" />
+                           </GridPane.margin>
+                        </GridPane>
+                        <Label fx:id="orderLabel21" alignment="CENTER" prefHeight="76.0" prefWidth="973.0" styleClass="title" text="Crea Nuova Spedizione" GridPane.columnIndex="1">
+                           <font>
+                              <Font name="System Bold" size="32.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="orderLabel211" alignment="CENTER" prefHeight="304.0" prefWidth="540.0" styleClass="title" text="Aggiungi a Spedizione Esistente">
+                           <font>
+                              <Font name="System Bold" size="32.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </GridPane>
+                  <Pane prefHeight="154.0" prefWidth="1080.0" />
+                  <MFXButton fx:id="filterButton" buttonType="RAISED" prefHeight="70.0" prefWidth="151.0" rippleColor="#f7dba7" rippleRadius="100.0" text="Spedisci">
+                     <font>
+                        <Font size="28.0" />
+                     </font>
+                  </MFXButton>
+               </children>
+            </VBox>
+            <Button fx:id="homeButton" layoutX="5.0" layoutY="4.0" mnemonicParsing="false" onAction="#homeButtonAction" prefHeight="30.0" prefWidth="30.0" style="-fx-background-color: none;">
+               <padding>
+                  <Insets bottom="-1.0" left="-1.0" right="-1.0" top="-1.0" />
+               </padding>
+               <graphic>
+                  <ImageView fitHeight="37.0" fitWidth="33.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/nonLoginPage/Home.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Button>
+            <Button fx:id="backButton" layoutX="46.0" layoutY="4.0" mnemonicParsing="false" onAction="#backButtonAction" prefHeight="30.0" prefWidth="30.0" style="-fx-background-color: none;">
+               <padding>
+                  <Insets bottom="-1.0" left="-1.0" right="-1.0" top="-1.0" />
+               </padding>
+               <graphic>
+                  <ImageView fitHeight="41.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/nonLoginPage/BackArrow.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Button>
+         </children>
+      </AnchorPane>
+   </center>
 </BorderPane>

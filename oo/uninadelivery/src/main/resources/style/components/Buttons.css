@@ -12,3 +12,7 @@
   -fx-text-fill: #feeac5;
   -fx-cursor: hand;
 }
+
+.m-ripple {
+    -fx-background-radius: 50%;
+}
