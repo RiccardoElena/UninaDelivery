@@ -44,7 +44,7 @@ public class OrdersPageController {
   @FXML private TableColumn<Order, Integer> extraWarrantyColumn;
 
   /** Column containing the express delivery of the order. */
-  @FXML private TableColumn<Order, String> isExpressColumn;
+  @FXML private TableColumn<Order, Boolean> isExpressColumn;
 
   /** Column containing the order number of the order. */
   @FXML private TableColumn<Order, Integer> orderNumberColumn;
@@ -205,6 +205,18 @@ public class OrdersPageController {
     supplierColumn.setCellValueFactory(new PropertyValueFactory<>("Product"));
     emissionDateColumn.setCellValueFactory(new PropertyValueFactory<>("EmissionDate"));
     isExpressColumn.setCellValueFactory(new PropertyValueFactory<>("IsExpress"));
+    isExpressColumn.setCellFactory(column -> new TableCell<Order, Boolean>() {
+      @Override
+      public void updateItem(final Boolean item, final boolean empty) {
+        super.updateItem(item, empty);
+          super.updateItem(item, empty);
+          if (item == null || empty) {
+              setText(null);
+          } else {
+              setText(item ? "🚚" : ""); // Emoji per true e false
+          }
+      }
+  });
     extraWarrantyColumn.setCellValueFactory(new PropertyValueFactory<>("ExtraWarranty"));
     quantityColumn.setCellValueFactory(new PropertyValueFactory<>("Quantity"));
 

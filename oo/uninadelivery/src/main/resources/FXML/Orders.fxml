@@ -94,11 +94,11 @@
               </columns>
             </TableView>
             <MFXButton fx:id="filterButton" buttonType="RAISED" layoutX="926.0" layoutY="183.0" onAction="#filterButtonAction" prefHeight="32.0" prefWidth="85.0" rippleRadius="100.0" text="Filtra" AnchorPane.rightAnchor="69.0" />
-            <TextField fx:id="clientTextField" layoutX="156.0" layoutY="186.0" AnchorPane.leftAnchor="156.0">
+            <TextField fx:id="clientTextField" layoutX="164.0" layoutY="186.0" AnchorPane.leftAnchor="164.0">
                <tooltip>
                   <Tooltip text="Email o Cognome del cliente" />
                </tooltip></TextField>
-            <DatePicker fx:id="startDatePicker" layoutX="377.0" layoutY="186.0" AnchorPane.leftAnchor="377.0">
+            <DatePicker fx:id="startDatePicker" layoutX="382.0" layoutY="186.0" AnchorPane.leftAnchor="382.0">
                <tooltip>
                   <Tooltip text="Data di inizio del periodo per cui filtrare" />
                </tooltip></DatePicker>
@@ -115,7 +115,7 @@
                   </Label>
                </children>
             </HBox>
-            <Label layoutX="80.0" layoutY="185.0" prefHeight="28.0" prefWidth="79.0" text="Cliente:">
+            <Label layoutX="80.0" layoutY="185.0" prefHeight="34.0" prefWidth="83.0" text="Cliente:">
                <font>
                   <Font name="System Bold" size="23.0" />
                </font>

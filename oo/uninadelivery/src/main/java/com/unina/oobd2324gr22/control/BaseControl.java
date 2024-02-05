@@ -106,6 +106,9 @@ public abstract class BaseControl {
     // Evento trascinamento mouse sulla barra del titolo
     titleBar.setOnMouseDragged(
         event -> {
+          if (stage.isMaximized()) {
+            stage.setMaximized(false);
+          }
           stage.setX(event.getScreenX() - xOffset[0]);
           stage.setY(event.getScreenY() - yOffset[0]);
         });
