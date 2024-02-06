@@ -8,6 +8,7 @@
 @import url('components/TextFields.css');
 @import url('components/DatePickers.css');
 @import url('components/TableView.css');
+@import url('components/ComboBox.css');
 
 * {
   -fx-text-fill: -fx-secondary-color;

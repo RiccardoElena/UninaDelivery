@@ -98,14 +98,6 @@
                <tooltip>
                   <Tooltip text="Email o Cognome del cliente" />
                </tooltip></TextField>
-            <DatePicker fx:id="startDatePicker" layoutX="382.0" layoutY="186.0" AnchorPane.leftAnchor="382.0">
-               <tooltip>
-                  <Tooltip text="Data di inizio del periodo per cui filtrare" />
-               </tooltip></DatePicker>
-            <DatePicker fx:id="endDatePicker" layoutX="638.0" layoutY="186.0" AnchorPane.leftAnchor="638.0">
-               <tooltip>
-                  <Tooltip text="Data di fine del periodo per cui filtrare" />
-               </tooltip></DatePicker>
             <HBox alignment="CENTER" layoutY="56.0" prefHeight="100.0" prefWidth="1080.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                <children>
                   <Label alignment="CENTER" styleClass="title" text="SELEZIONA ORDINE" textFill="WHITE">
@@ -130,18 +122,6 @@
                   <Font name="System Bold" size="23.0" />
                </font>
             </Label>
-            <Button fx:id="backButton" layoutX="46.0" layoutY="4.0" mnemonicParsing="false" onAction="#backButtonAction" prefHeight="30.0" prefWidth="30.0" style="-fx-background-color: none;">
-               <padding>
-                  <Insets bottom="-1.0" left="-1.0" right="-1.0" top="-1.0" />
-               </padding>
-               <graphic>
-                  <ImageView fitHeight="41.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/nonLoginPage/BackArrow.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-            </Button>
             <Button fx:id="homeButton" layoutX="5.0" layoutY="4.0" mnemonicParsing="false" onAction="#homeButtonAction" prefHeight="30.0" prefWidth="30.0" style="-fx-background-color: none;">
                <padding>
                   <Insets bottom="-1.0" left="-1.0" right="-1.0" top="-1.0" />
@@ -154,6 +134,8 @@
                   </ImageView>
                </graphic>
             </Button>
+            <DatePicker fx:id="startDatePicker" layoutX="381.0" layoutY="186.0" prefHeight="26.0" prefWidth="221.0" promptText="Data di Spedizione" style="-fx-background-color: none;" AnchorPane.leftAnchor="381.0" />
+            <DatePicker fx:id="endDatePicker" layoutX="636.0" layoutY="186.0" prefHeight="26.0" prefWidth="221.0" promptText="Data di Spedizione" style="-fx-background-color: none;" />
          </children>
       </AnchorPane>
    </center>

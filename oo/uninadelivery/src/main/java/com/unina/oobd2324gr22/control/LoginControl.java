@@ -107,7 +107,7 @@ public class LoginControl extends BaseControl {
 
   private Operator checkLogin(final String email, final String password) {
     try {
-      return accountDAO.getOperatorByBmailAndPassword(email, new SHA256().toSHA256(password));
+      return accountDAO.getOperatorByBmailAndPassword(email, SHA256.toSHA256(password));
     } catch (SQLException e) {
       this.showAlert(
           Alert.AlertType.ERROR,

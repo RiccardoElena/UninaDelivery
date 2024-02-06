@@ -172,17 +172,17 @@
                                     <Insets left="15.0" right="10.0" />
                                  </GridPane.margin>
                               </DatePicker>
-                              <ComboBox prefHeight="26.0" prefWidth="211.0" promptText="Deposito di Partenza" GridPane.columnIndex="1">
+                              <ComboBox prefHeight="26.0" prefWidth="221.0" promptText="Deposito di Partenza" GridPane.columnIndex="1">
                                  <GridPane.margin>
                                     <Insets left="15.0" right="10.0" />
                                  </GridPane.margin>
                               </ComboBox>
-                              <ComboBox prefHeight="26.0" prefWidth="211.0" promptText="Corriere" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                              <ComboBox prefHeight="26.0" prefWidth="221.0" promptText="Corriere" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                  <GridPane.margin>
                                     <Insets left="15.0" right="10.0" />
                                  </GridPane.margin>
                               </ComboBox>
-                              <ComboBox prefHeight="26.0" prefWidth="211.0" promptText="Mezzo di Transporto" GridPane.rowIndex="1">
+                              <ComboBox prefHeight="26.0" prefWidth="221.0" promptText="Mezzo di Transporto" GridPane.rowIndex="1">
                                  <GridPane.margin>
                                     <Insets left="15.0" right="10.0" />
                                  </GridPane.margin>

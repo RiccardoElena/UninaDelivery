@@ -1,6 +1,2 @@
 @import url('Main.css');
 @import url('components/TitleBar.css');
-
-#ordersTable .table-column {
-  -fx-alignment: CENTER;
-}

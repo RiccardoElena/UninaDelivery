@@ -227,9 +227,8 @@ public class ShipmentPageController {
    */
   @FXML
   void homeButtonAction(final ActionEvent event) {
-    Stage stage = (Stage) homeButton.getScene().getWindow();
     try {
-      ordersHandlingControl.returnToHomePage(stage);
+      ordersHandlingControl.returnToHomePage();
     } catch (Exception e) {
       e.printStackTrace();
     }

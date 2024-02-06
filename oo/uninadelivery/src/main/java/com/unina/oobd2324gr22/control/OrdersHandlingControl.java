@@ -24,6 +24,12 @@ public class OrdersHandlingControl extends NonLoginControl {
   /** Order selected. */
   private Order selectedOrder;
 
+  /** Order Selection scene. */
+  private Scene ordersScene;
+
+  /** Shipment Creation scene. */
+  private Scene shipmentScene;
+
   /**
    * Set Orders scene on Stage.
    *
@@ -34,18 +40,19 @@ public class OrdersHandlingControl extends NonLoginControl {
   public void setOrdersScene(final Stage currStage, final Operator op) throws Exception {
     this.setLoggedOperator(op);
     this.setStage(currStage);
-    FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Orders.fxml"));
-    Parent root = loader.load();
-    OrdersPageController pageController = loader.getController();
-    pageController.init(this);
-    Scene scene =
-        new Scene(
-            root, Math.max(currStage.getWidth(), WIDTH), Math.max(currStage.getHeight(), HEIGHT));
-    scene
-        .getStylesheets()
-        .add(LoginControl.class.getResource("/style/OrdersPage.css").toExternalForm());
-
-    currStage.setScene(scene);
+    if (ordersScene == null) {
+      FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Orders.fxml"));
+      Parent root = loader.load();
+      OrdersPageController pageController = loader.getController();
+      pageController.init(this);
+      ordersScene =
+          new Scene(
+              root, Math.max(currStage.getWidth(), WIDTH), Math.max(currStage.getHeight(), HEIGHT));
+      ordersScene
+          .getStylesheets()
+          .add(LoginControl.class.getResource("/style/OrdersPage.css").toExternalForm());
+    }
+    currStage.setScene(ordersScene);
     currStage.show();
     return;
   }
@@ -93,27 +100,25 @@ public class OrdersHandlingControl extends NonLoginControl {
    */
   public void setShipmentScene() throws Exception {
     Stage stage = this.getStage();
-    FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Shipment.fxml"));
-    Parent root = loader.load();
-    ShipmentPageController pageController = loader.getController();
-    pageController.init(this);
-    Scene scene =
-        new Scene(root, Math.max(stage.getWidth(), WIDTH), Math.max(stage.getHeight(), HEIGHT));
-    scene
-        .getStylesheets()
-        .add(LoginControl.class.getResource("/style/ShipmentPage.css").toExternalForm());
-    stage.setScene(scene);
+    if (shipmentScene == null) {
+      FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Shipment.fxml"));
+      Parent root = loader.load();
+      ShipmentPageController pageController = loader.getController();
+      pageController.init(this);
+      shipmentScene =
+          new Scene(root, Math.max(stage.getWidth(), WIDTH), Math.max(stage.getHeight(), HEIGHT));
+      shipmentScene
+          .getStylesheets()
+          .add(LoginControl.class.getResource("/style/ShipmentPage.css").toExternalForm());
+    }
+    stage.setScene(shipmentScene);
     stage.show();
   }
 
-  /**
-   * Go to the Dashboard page.
-   *
-   * @param stage the stage to set the scene on
-   */
-  public void returnToHomePage(final Stage stage) throws Exception {
+  /** Go to the Dashboard page. */
+  public void returnToHomePage() throws Exception {
     DashboardControl dashboardControl = new DashboardControl();
-    dashboardControl.setScene(stage, this.getLoggedOperator());
+    dashboardControl.setScene(this.getStage(), this.getLoggedOperator());
   }
 
   /** Go to the Orders page. */
@@ -257,25 +262,25 @@ public class OrdersHandlingControl extends NonLoginControl {
             new Shipment(
                 1,
                 LocalDate.now().minusDays(1),
-                new Transport(1, ICON_WIDTH, ICON_HEIGHT, false, deposit),
+                new Transport(1, ICON_HEIGHT, false, deposit),
                 deposit,
                 (float) ICON_HEIGHT / (2 + 1)),
             new Shipment(
                 2,
                 LocalDate.now().minusDays(2),
-                new Transport(1, ICON_WIDTH, ICON_HEIGHT, false, deposit),
+                new Transport(1, ICON_HEIGHT, false, deposit),
                 deposit,
                 ICON_HEIGHT / (2 + 1)),
             new Shipment(
                 2 + 1,
                 LocalDate.now().minusDays(2 + 1),
-                new Transport(1, ICON_WIDTH, ICON_HEIGHT, false, deposit),
+                new Transport(1, ICON_HEIGHT, false, deposit),
                 deposit,
                 ICON_HEIGHT / (2 + 1)),
             new Shipment(
                 2 + 2,
                 LocalDate.now().minusDays(2 + 2),
-                new Transport(1, ICON_WIDTH, ICON_HEIGHT, false, deposit),
+                new Transport(1, ICON_HEIGHT, false, deposit),
                 deposit,
                 ICON_HEIGHT / (2 + 1)));
     return shipments;

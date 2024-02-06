@@ -79,9 +79,6 @@ public class OrdersPageController {
   /** Button to go back to the home page. */
   @FXML private Button homeButton;
 
-  /** Button to go back to the previous page. */
-  @FXML private Button backButton;
-
   /** TextField to filter the orders by client. */
   @FXML private TextField clientTextField;
 
@@ -107,7 +104,7 @@ public class OrdersPageController {
 
     this.setTableColumns();
 
-    ordersHandlingControl.setNavigationButtons(homeButton, backButton);
+    ordersHandlingControl.setNavigationButtons(homeButton);
 
     // FIXME: this line is using a test function with dummy data
     // when DB connection is implemented, this line should be changed
@@ -180,23 +177,22 @@ public class OrdersPageController {
 
               if (endDatePicker.getValue() != null && newDate.isAfter(endDatePicker.getValue())) {
                 endDatePicker.setValue(null);
-              } else {
-                // Imposta la data minima del secondo DatePicker a newDate
-                endDatePicker.setDayCellFactory(
-                    d ->
-                        new DateCell() {
-                          @Override
-                          public void updateItem(final LocalDate item, final boolean empty) {
-                            super.updateItem(item, empty);
-                            setDisable(item.isBefore(newDate));
-                            if (!item.isBefore(newDate) && !item.isAfter(newDate)) {
-                              setStyle(
-                                  "-fx-background-color: -fx-primary-color; -fx-text-fill:"
-                                      + " -fx-secondary-color;");
-                            }
-                          }
-                        });
               }
+              // Imposta la data minima del secondo DatePicker a newDate
+              endDatePicker.setDayCellFactory(
+                  d ->
+                      new DateCell() {
+                        @Override
+                        public void updateItem(final LocalDate item, final boolean empty) {
+                          super.updateItem(item, empty);
+                          setDisable(item.isBefore(newDate));
+                          if (!item.isBefore(newDate) && !item.isAfter(newDate)) {
+                            setStyle(
+                                "-fx-background-color: -fx-primary-color; -fx-text-fill:"
+                                    + " -fx-secondary-color;");
+                          }
+                        }
+                      });
             });
   }
 
@@ -205,18 +201,20 @@ public class OrdersPageController {
     supplierColumn.setCellValueFactory(new PropertyValueFactory<>("Product"));
     emissionDateColumn.setCellValueFactory(new PropertyValueFactory<>("EmissionDate"));
     isExpressColumn.setCellValueFactory(new PropertyValueFactory<>("IsExpress"));
-    isExpressColumn.setCellFactory(column -> new TableCell<Order, Boolean>() {
-      @Override
-      public void updateItem(final Boolean item, final boolean empty) {
-        super.updateItem(item, empty);
-          super.updateItem(item, empty);
-          if (item == null || empty) {
-              setText(null);
-          } else {
-              setText(item ? "🚚" : ""); // Emoji per true e false
-          }
-      }
-  });
+    isExpressColumn.setCellFactory(
+        column ->
+            new TableCell<Order, Boolean>() {
+              @Override
+              public void updateItem(final Boolean item, final boolean empty) {
+                super.updateItem(item, empty);
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                  setText(null);
+                } else {
+                  setText(item ? "🚚" : ""); // Emoji per true e false
+                }
+              }
+            });
     extraWarrantyColumn.setCellValueFactory(new PropertyValueFactory<>("ExtraWarranty"));
     quantityColumn.setCellValueFactory(new PropertyValueFactory<>("Quantity"));
 
@@ -299,9 +297,8 @@ public class OrdersPageController {
    */
   @FXML
   void homeButtonAction(final ActionEvent event) {
-    Stage stage = (Stage) homeButton.getScene().getWindow();
     try {
-      ordersHandlingControl.returnToHomePage(stage);
+      ordersHandlingControl.returnToHomePage();
     } catch (Exception e) {
       e.printStackTrace();
     }

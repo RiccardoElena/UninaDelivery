@@ -115,4 +115,18 @@ public class NonLoginControl extends BaseControl {
     backButton.setOnMouseExited(
         event -> backButton.setGraphic(getIcon("/images/nonLoginPage/BackArrow.png")));
   }
+
+  /**
+   * Set navigation buttons base icon and hover effect.
+   *
+   * @param homeButton the home button
+   */
+  public void setNavigationButtons(final Button homeButton) {
+    homeButton.setGraphic(getIcon("/images/nonLoginPage/Home.png"));
+
+    homeButton.setOnMouseEntered(
+        event -> homeButton.setGraphic(getIcon("/images/nonLoginPage/HomeHover.png")));
+    homeButton.setOnMouseExited(
+        event -> homeButton.setGraphic(getIcon("/images/nonLoginPage/Home.png")));
+  }
 }

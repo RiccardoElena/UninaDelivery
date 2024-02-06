@@ -1,5 +1,20 @@
+.date-picker{
+  -fx-text-fill: -fx-secondary-color;
+  -fx-border-color: -fx-secondary-color;
+  -fx-border-width: 0 0 1px 0;
+}
+
+.date-picker .text-field {
+  -fx-background-color: -fx-default-bg;
+}
+
+.date-picker:focused {
+  -fx-text-fill: -fx-focus-color;
+  -fx-border-color: -fx-focus-color;
+}
+
 .date-picker .arrow-button {
-	-fx-background-color: -fx-primary-color;
+	-fx-background-color: -fx-default-bg;
 	-fx-background-radius: 1px;
 }
 .date-picker .arrow-button:hover {
@@ -14,11 +29,16 @@
 .date-picker .arrow-button .arrow {
 	-fx-background-color: -fx-secondary-color;
 }
-.date-picker .arrow-button .arrow:hover {
+
+.date-picker:focused .arrow-button .arrow {
+	-fx-background-color: -fx-primary-color;
+}
+.date-picker:focused .arrow-button:hover .arrow {
 	-fx-background-color: -fx-secondary-color;
 }
 .date-picker .cell {
 	-fx-background-color: white;
+  -fx-text-fill: -fx-primary-color;
 }
 .date-picker .cell:hover {
 	-fx-background-color: -fx-secondary-color;
@@ -29,7 +49,7 @@
 }
 .date-picker .selected {
 	-fx-background-color: -fx-primary-color;
-	-fx-text-fill: -fx-secondary-color;
+	-fx-text-fill: red;
 }
 .date-picker .selected:focused {
 	-fx-background-color: -fx-focus-color;
