@@ -197,7 +197,7 @@
                         <String fx:value="bigButton" />
                      </styleClass>
                   </MFXButton>
-                  <MFXButton buttonType="RAISED" prefHeight="64.0" prefWidth="310.0" rippleColor="#f7dba7" text="Resoconti Mensili">
+                  <MFXButton fx:id="resocontiMensiliButton" buttonType="RAISED" onAction="#resocontiMensiliButtonOnAction" prefHeight="64.0" prefWidth="310.0" rippleColor="#f7dba7" text="Resoconti Mensili">
                      <font>
                         <Font size="32.0" />
                      </font>

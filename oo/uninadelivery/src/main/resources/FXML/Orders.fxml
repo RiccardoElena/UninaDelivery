@@ -90,8 +90,11 @@
                   <TableColumn fx:id="emissionDateColumn" editable="false" prefWidth="102.0" styleClass="tableColumn" text="Data Emissione" />
                   <TableColumn fx:id="isExpressColumn" editable="false" prefWidth="54.0" styleClass="tableColumn" text="Express" />
                   <TableColumn fx:id="extraWarrantyColumn" editable="false" prefWidth="119.0" styleClass="tableColumn" text="Garanzia Extra" />
-                  <TableColumn fx:id="clientColumn" editable="false" prefWidth="196.0" styleClass="tableColumn" text="Cliente" />
+                  <TableColumn fx:id="clientColumn" editable="false" prefWidth="322.0" styleClass="tableColumn" text="Cliente" />
               </columns>
+               <columnResizePolicy>
+                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+               </columnResizePolicy>
             </TableView>
             <MFXButton fx:id="filterButton" buttonType="RAISED" layoutX="926.0" layoutY="183.0" onAction="#filterButtonAction" prefHeight="32.0" prefWidth="85.0" rippleRadius="100.0" text="Filtra" AnchorPane.rightAnchor="69.0" />
             <TextField fx:id="clientTextField" layoutX="164.0" layoutY="186.0" AnchorPane.leftAnchor="164.0">

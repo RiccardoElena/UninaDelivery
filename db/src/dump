@@ -2021,14 +2021,14 @@ ALTER TABLE ONLY uninadelivery.transport ALTER COLUMN transportid SET DEFAULT ne
 --
 
 COPY uninadelivery."Order" (orderid, emissiondate, isexpress, extrawarranty, iscompleted, email, quantity, name, supplier) FROM stdin;
-5	2024-01-03	\N	0	\N	relena@gmail.com	1	Penna	Bic
-6	2024-01-03	\N	0	\N	relena@gmail.com	100	Penna	Bic
-52	2024-01-07	\N	0	\N	fiorosa@gmail.com	10000	Gomma	Bic
+5	2023-01-03	\N	0	\N	relena@gmail.com	1	Penna	Bic
+6	2023-01-03	\N	0	\N	relena@gmail.com	100	Penna	Bic
+52	2023-01-07	\N	0	\N	fiorosa@gmail.com	10000	Gomma	Bic
 2	2023-12-31	\N	0	\N	lucabest@gmail.com	2	Gomma	Bic
-41	2024-01-04	t	0	\N	lucabest@gmail.com	2	Smartphone	Samsung
-44	2024-01-02	\N	1	\N	jane.smith@example.com	1	Laptop	Dell
-46	2024-01-03	\N	1	\N	ivanov@example.com	1	Scarpe da Ginnastica	Nike
-50	2024-01-01	\N	1	\N	lucabest@gmail.com	1	Aspirapolvere Robot	iRobot
+41	2023-01-04	t	0	\N	lucabest@gmail.com	2	Smartphone	Samsung
+44	2023-01-02	\N	1	\N	jane.smith@example.com	1	Laptop	Dell
+46	2023-01-03	\N	1	\N	ivanov@example.com	1	Scarpe da Ginnastica	Nike
+50	2023-01-01	\N	1	\N	lucabest@gmail.com	1	Aspirapolvere Robot	iRobot
 43	2022-05-06	t	0	\N	john.doe@example.com	3	Tavolo da Pranzo	IKEA
 45	2020-12-08	t	0	\N	mike.johnson@example.com	2	Frigorifero	Whirlpool
 47	2019-06-10	t	0	\N	patel@example.com	1	Smart TV	Sony
@@ -2036,7 +2036,7 @@ COPY uninadelivery."Order" (orderid, emissiondate, isexpress, extrawarranty, isc
 42	2023-02-05	\N	1	\N	relena@gmail.com	1	Maglione	Gucci
 48	2020-04-11	\N	2	\N	mthembu@example.com	2	Forno a Microonde	Panasonic
 1	2023-12-31	\N	0	\N	lucabest@gmail.com	3	Penna	Bic
-53	2024-01-09	\N	0	\N	test@gmail.com	1	Scarpe da Ginnastica	Nike
+53	2023-01-09	\N	0	\N	test@gmail.com	1	Scarpe da Ginnastica	Nike
 \.
 
 
@@ -2163,10 +2163,10 @@ COPY uninadelivery.area (zipcode, city, state, country, worldzone) FROM stdin;
 --
 
 COPY uninadelivery.covers (transportid, zipcode, country, date, occupiedspace) FROM stdin;
-1	00123	Italia	2024-02-04	4.800
-20	67890	Cina	2024-01-22	0.800
-19	67890	Cina	2024-01-21	0.800
-18	12345	Corea del Sud	2024-01-20	0.800
+1	00123	Italia	2025-02-04	4.800
+20	67890	Cina	2025-01-22	0.800
+19	67890	Cina	2025-01-21	0.800
+18	12345	Corea del Sud	2025-01-20	0.800
 \.
 
 
@@ -2273,9 +2273,9 @@ J.Park@uninadelivery.driver.com	CE	89btshater@redpil.org	191
 --
 
 COPY uninadelivery.drives (transportid, businessmail, date) FROM stdin;
-1	L.Bianchi1@uninadelivery.driver.com	2024-02-04
-18	M.Kim@uninadelivery.driver.com	2024-01-20
-20	J.Park@uninadelivery.driver.com	2024-01-22
+1	L.Bianchi1@uninadelivery.driver.com	2025-02-04
+18	M.Kim@uninadelivery.driver.com	2025-01-20
+20	J.Park@uninadelivery.driver.com	2025-01-22
 \.
 
 
@@ -2328,11 +2328,11 @@ Cancelleria	Gomma	UninaDelivery	La meno famosa gomma nera di UninaDelivery che m
 --
 
 COPY uninadelivery.shipment (shipmentid, shippingdate, hasarrived, shippedfrom, directedto, businessmail, transportid) FROM stdin;
-14	2024-02-05	\N	1	\N	R.Patel@uninadelivery.operator.com	1
-7	2024-02-04	\N	1	\N	R.Elena@uninadelivery.operator.com	1
-17	2024-01-22	\N	191	\N	T.Yamamoto@uninadelivery.operator.com	20
-16	2024-01-21	t	190	191	T.Yamamoto@uninadelivery.operator.com	19
-15	2024-01-20	t	161	190	T.Yamamoto@uninadelivery.operator.com	18
+14	2025-02-05	\N	1	\N	R.Patel@uninadelivery.operator.com	1
+7	2025-02-04	\N	1	\N	R.Elena@uninadelivery.operator.com	1
+17	2025-01-22	\N	191	\N	T.Yamamoto@uninadelivery.operator.com	20
+16	2025-01-21	t	190	191	T.Yamamoto@uninadelivery.operator.com	19
+15	2025-01-20	t	161	190	T.Yamamoto@uninadelivery.operator.com	18
 \.
 
 

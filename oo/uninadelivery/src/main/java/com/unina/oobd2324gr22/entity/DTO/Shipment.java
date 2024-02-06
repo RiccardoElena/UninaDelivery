@@ -54,7 +54,7 @@ public class Shipment {
     this.hasArrived = sHasArrived;
     this.operator = sOperator;
     this.startingDeposit = startDeposit;
-    if (sTransport.getDepositOwner().equals(startDeposit)) {
+    if (!sTransport.getDepositOwner().equals(startDeposit)) {
       throw new IllegalArgumentException(
           "The transport must be in the same deposit of the shipment");
     } else {
@@ -81,7 +81,7 @@ public class Shipment {
     this.hasArrived = false;
     this.operator = sOperator;
     this.startingDeposit = startDeposit;
-    if (sTransport.getDepositOwner().equals(startDeposit)) {
+    if (!sTransport.getDepositOwner().equals(startDeposit)) {
       throw new IllegalArgumentException(
           "The transport must be in the same deposit of the shipment");
     } else {
@@ -110,8 +110,7 @@ public class Shipment {
     this.hasArrived = false;
     this.startingDeposit = startDeposit;
     this.occupiedSpace = oSpace;
-
-    if (sTransport.getDepositOwner().equals(startDeposit)) {
+    if (!sTransport.getDepositOwner().equals(startDeposit)) {
       throw new IllegalArgumentException(
           "The transport must be in the same deposit of the shipment");
     } else {

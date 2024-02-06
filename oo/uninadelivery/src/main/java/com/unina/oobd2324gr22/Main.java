@@ -9,6 +9,7 @@ import com.unina.oobd2324gr22.entity.DAO.ShipmentDAOPostgre;
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
+import com.unina.oobd2324gr22.utils.App;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
@@ -64,6 +65,6 @@ public final class Main {
     System.out.println(
         "Bypass NON Attivo, per testare l'app lanciare App.launchApp(args) scommentando l'utlima"
             + " linea del main()");
-    // App.launchApp(args);
+    App.launchApp(args);
   }
 }

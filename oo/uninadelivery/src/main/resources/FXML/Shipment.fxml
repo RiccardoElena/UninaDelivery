@@ -20,7 +20,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" stylesheets="@../style/ShipmentPage.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.unina.oobd2324gr22.boundary.ShipmentPageController">
+<BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: -fx-default-bg;" stylesheets="@../style/ShipmentPage.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.unina.oobd2324gr22.boundary.ShipmentPageController">
    <top>
       <AnchorPane fx:id="titleBar" prefHeight="35.0" prefWidth="975.0" style="-fx-background-color: #F7DBA7;" BorderPane.alignment="CENTER">
          <children>
@@ -85,44 +85,43 @@
    <center>
       <AnchorPane prefHeight="690.0" prefWidth="1080.0" style="-fx-background-color: -fx-default-bg;" BorderPane.alignment="CENTER">
          <children>
-            <VBox alignment="CENTER" layoutY="32.0" prefHeight="616.0" prefWidth="1080.0" AnchorPane.bottomAnchor="37.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="32.0">
+            <VBox alignment="CENTER" layoutY="41.0" prefHeight="141.0" prefWidth="1080.0" spacing="1.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="41.0">
                <children>
-                  <HBox alignment="CENTER" prefHeight="73.0" prefWidth="1080.0" VBox.vgrow="ALWAYS">
+                  <HBox alignment="CENTER" prefHeight="73.0" prefWidth="1080.0" VBox.vgrow="NEVER">
                      <children>
-                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="SPEDISCI ORDINE" textFill="#f5d9a6">
+                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="SPEDISCI ORDINE" textFill="#f5d9a6" HBox.hgrow="ALWAYS">
                            <font>
                               <Font name="System Bold" size="48.0" />
                            </font>
                         </Label>
                      </children>
                   </HBox>
-                  <HBox alignment="TOP_CENTER" prefHeight="142.0" prefWidth="1080.0" VBox.vgrow="ALWAYS">
+                  <HBox alignment="TOP_CENTER" prefHeight="142.0" prefWidth="1080.0" VBox.vgrow="NEVER">
                      <children>
-                        <Pane prefHeight="92.0" prefWidth="150.0" HBox.hgrow="SOMETIMES" />
-                        <VBox prefHeight="58.0" prefWidth="780.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" styleClass="light-background">
+                        <VBox alignment="CENTER" maxHeight="-Infinity" prefHeight="58.0" prefWidth="780.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" styleClass="light-background" HBox.hgrow="ALWAYS">
                            <children>
-                              <HBox prefHeight="100.0" prefWidth="200.0">
+                              <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
                                  <children>
-                                    <Label fx:id="orderIdLabel" alignment="CENTER" prefHeight="22.0" prefWidth="360.0" text="{orderId} ">
+                                    <Label fx:id="orderIdLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{orderId} " HBox.hgrow="ALWAYS">
                                        <font>
                                           <Font name="System Bold" size="17.0" />
                                        </font>
                                     </Label>
-                                    <Label fx:id="orderExpectedDeliveryDateLabel" alignment="CENTER" prefHeight="22.0" prefWidth="360.0" text="{expectedDeliveryDate}">
+                                    <Label fx:id="orderExpectedDeliveryDateLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1372.0" text="{expectedDeliveryDate}">
                                        <font>
                                           <Font name="System Bold" size="17.0" />
                                        </font>
                                     </Label>
                                  </children>
                               </HBox>
-                              <HBox prefHeight="100.0" prefWidth="200.0">
+                              <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
                                  <children>
-                                    <Label fx:id="orderProductLabel" alignment="CENTER" prefHeight="15.0" prefWidth="360.0" text="{product}">
+                                    <Label fx:id="orderProductLabel" alignment="CENTER" prefHeight="26.0" prefWidth="1144.0" text="{product}">
                                        <font>
                                           <Font name="System Bold" size="17.0" />
                                        </font>
                                     </Label>
-                                    <Label fx:id="orderAddressLabel" alignment="CENTER" prefHeight="76.0" prefWidth="360.0" text="{address}">
+                                    <Label fx:id="orderAddressLabel" alignment="CENTER" prefHeight="26.0" prefWidth="1313.0" text="{address}">
                                        <font>
                                           <Font name="System Bold" size="17.0" />
                                        </font>
@@ -130,22 +129,50 @@
                                  </children>
                               </HBox>
                            </children>
+                           <HBox.margin>
+                              <Insets left="150.0" right="150.0" />
+                           </HBox.margin>
                         </VBox>
-                        <Pane prefHeight="100.0" prefWidth="150.0" HBox.hgrow="SOMETIMES" />
+                     </children>
+                     <VBox.margin>
+                        <Insets bottom="20.0" />
+                     </VBox.margin>
+                  </HBox>
+               </children>
+            </VBox>
+            <VBox layoutY="184.0" prefHeight="434.0" prefWidth="1080.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="172.0">
+               <children>
+                  <HBox alignment="CENTER" prefHeight="93.0" prefWidth="1080.0" VBox.vgrow="NEVER">
+                     <children>
+                        <VBox alignment="CENTER" maxHeight="-Infinity" prefHeight="58.0" prefWidth="880.0" HBox.hgrow="ALWAYS">
+                           <children>
+                              <HBox alignment="CENTER" prefHeight="54.0" prefWidth="898.0" VBox.vgrow="NEVER">
+                                 <children>
+                                    <Pane prefHeight="47.0" prefWidth="37.0" HBox.hgrow="ALWAYS" />
+                                    <Label fx:id="orderIdLabel1" alignment="CENTER" contentDisplay="CENTER" prefHeight="47.0" styleClass="title" text="Aggiungi a Spedizione Esistente" HBox.hgrow="ALWAYS">
+                                       <font>
+                                          <Font name="System Bold" size="32.0" />
+                                       </font>
+                                    </Label>
+                                    <Pane prefHeight="47.0" prefWidth="142.0" HBox.hgrow="ALWAYS" />
+                                    <Label fx:id="orderExpectedDeliveryDateLabel1" alignment="CENTER" contentDisplay="CENTER" prefHeight="47.0" styleClass="title" text="Crea Nuova Spedizione" HBox.hgrow="ALWAYS">
+                                       <font>
+                                          <Font name="System Bold" size="32.0" />
+                                       </font>
+                                    </Label>
+                                    <Pane prefHeight="47.0" prefWidth="63.0" HBox.hgrow="ALWAYS" />
+                                 </children>
+                              </HBox>
+                           </children>
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                        </VBox>
                      </children>
                   </HBox>
-                  <Pane prefHeight="123.0" prefWidth="1080.0" />
-                  <GridPane alignment="CENTER" prefHeight="472.0" prefWidth="1080.0" VBox.vgrow="ALWAYS">
-                    <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                    </columnConstraints>
-                    <rowConstraints>
-                      <RowConstraints maxHeight="124.44622802734375" minHeight="2.787322998046875" prefHeight="56.033782958984375" vgrow="SOMETIMES" />
-                      <RowConstraints maxHeight="339.7126770019531" minHeight="10.0" prefHeight="318.4662170410156" vgrow="SOMETIMES" />
-                    </rowConstraints>
+                  <HBox alignment="CENTER" prefHeight="434.0" prefWidth="1080.0" spacing="20.0" VBox.vgrow="ALWAYS">
                      <children>
-                        <TableView fx:id="shipmentsTable" prefHeight="274.0" prefWidth="500.0" GridPane.rowIndex="1">
+                        <TableView fx:id="shipmentsTable" prefHeight="434.0" prefWidth="560.0" HBox.hgrow="ALWAYS">
                           <columns>
                             <TableColumn fx:id="shipmentIdTableColumn" prefWidth="75.0" text="ID" />
                             <TableColumn fx:id="shipmentDateTableColumn" prefWidth="109.66665649414062" text="Data Spedizione" />
@@ -153,26 +180,29 @@
                               <TableColumn fx:id="transportTableColumn" minWidth="7.0" prefWidth="85.0" text="Trasporto" />
                               <TableColumn fx:id="remainingSpaceTableColumn" prefWidth="103.0" text="Spazio Rimasto" />
                           </columns>
-                           <GridPane.margin>
-                              <Insets left="20.0" right="20.0" />
-                           </GridPane.margin>
+                           <columnResizePolicy>
+                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                           </columnResizePolicy>
+                           <HBox.margin>
+                              <Insets bottom="20.0" left="10.0" right="10.0" />
+                           </HBox.margin>
                         </TableView>
-                        <GridPane alignment="CENTER" prefHeight="201.0" prefWidth="667.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <GridPane alignment="CENTER" prefHeight="100.0" prefWidth="500.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" HBox.hgrow="ALWAYS">
                            <columnConstraints>
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                              <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+                              <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
                            </columnConstraints>
                            <rowConstraints>
-                              <RowConstraints maxHeight="103.0" minHeight="10.0" prefHeight="93.0" vgrow="SOMETIMES" />
-                              <RowConstraints maxHeight="104.0" minHeight="10.0" prefHeight="104.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" valignment="CENTER" vgrow="ALWAYS" />
+                              <RowConstraints minHeight="0.0" valignment="CENTER" vgrow="ALWAYS" />
                            </rowConstraints>
                            <children>
-                              <DatePicker fx:id="shipmentDatePicker" prefHeight="26.0" prefWidth="221.0" promptText="Data di Spedizione" style="-fx-background-color: none;">
+                              <DatePicker fx:id="shipmentDatePicker" prefHeight="26.0" prefWidth="221.0" promptText="Data di Spedizione" style="-fx-background-color: none;" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
                                  <GridPane.margin>
                                     <Insets left="15.0" right="10.0" />
                                  </GridPane.margin>
                               </DatePicker>
-                              <ComboBox prefHeight="26.0" prefWidth="221.0" promptText="Deposito di Partenza" GridPane.columnIndex="1">
+                              <ComboBox prefHeight="26.0" prefWidth="221.0" promptText="Deposito di Partenza" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
                                  <GridPane.margin>
                                     <Insets left="15.0" right="10.0" />
                                  </GridPane.margin>
@@ -182,34 +212,18 @@
                                     <Insets left="15.0" right="10.0" />
                                  </GridPane.margin>
                               </ComboBox>
-                              <ComboBox prefHeight="26.0" prefWidth="221.0" promptText="Mezzo di Transporto" GridPane.rowIndex="1">
+                              <ComboBox prefHeight="26.0" prefWidth="221.0" promptText="Mezzo di Transporto" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                                  <GridPane.margin>
                                     <Insets left="15.0" right="10.0" />
                                  </GridPane.margin>
                               </ComboBox>
                            </children>
-                           <GridPane.margin>
-                              <Insets left="20.0" right="20.0" />
-                           </GridPane.margin>
+                           <HBox.margin>
+                              <Insets bottom="30.0" left="10.0" right="10.0" top="10.0" />
+                           </HBox.margin>
                         </GridPane>
-                        <Label fx:id="orderLabel21" alignment="CENTER" prefHeight="76.0" prefWidth="973.0" styleClass="title" text="Crea Nuova Spedizione" GridPane.columnIndex="1">
-                           <font>
-                              <Font name="System Bold" size="32.0" />
-                           </font>
-                        </Label>
-                        <Label fx:id="orderLabel211" alignment="CENTER" prefHeight="304.0" prefWidth="540.0" styleClass="title" text="Aggiungi a Spedizione Esistente">
-                           <font>
-                              <Font name="System Bold" size="32.0" />
-                           </font>
-                        </Label>
                      </children>
-                  </GridPane>
-                  <Pane prefHeight="154.0" prefWidth="1080.0" />
-                  <MFXButton fx:id="filterButton" buttonType="RAISED" prefHeight="70.0" prefWidth="151.0" rippleColor="#f7dba7" rippleRadius="100.0" text="Spedisci">
-                     <font>
-                        <Font size="28.0" />
-                     </font>
-                  </MFXButton>
+                  </HBox>
                </children>
             </VBox>
             <Button fx:id="homeButton" layoutX="5.0" layoutY="4.0" mnemonicParsing="false" onAction="#homeButtonAction" prefHeight="30.0" prefWidth="30.0" style="-fx-background-color: none;">
@@ -239,4 +253,14 @@
          </children>
       </AnchorPane>
    </center>
+   <bottom>
+      <MFXButton fx:id="filterButton" buttonType="RAISED" prefHeight="69.0" prefWidth="186.0" rippleColor="#f7dba7" rippleRadius="100.0" styleClass="bigButton" text="Spedisci" BorderPane.alignment="CENTER">
+         <font>
+            <Font size="28.0" />
+         </font>
+         <BorderPane.margin>
+            <Insets bottom="10.0" />
+         </BorderPane.margin>
+      </MFXButton>
+   </bottom>
 </BorderPane>

@@ -15,3 +15,7 @@
   -fx-background-color: red;
   -fx-background-radius: 15;
 }
+
+.bigButton {
+  -fx-font-size: 32px;
+}

@@ -24,12 +24,6 @@ public class OrdersHandlingControl extends NonLoginControl {
   /** Order selected. */
   private Order selectedOrder;
 
-  /** Order Selection scene. */
-  private Scene ordersScene;
-
-  /** Shipment Creation scene. */
-  private Scene shipmentScene;
-
   /**
    * Set Orders scene on Stage.
    *
@@ -40,18 +34,16 @@ public class OrdersHandlingControl extends NonLoginControl {
   public void setOrdersScene(final Stage currStage, final Operator op) throws Exception {
     this.setLoggedOperator(op);
     this.setStage(currStage);
-    if (ordersScene == null) {
-      FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Orders.fxml"));
-      Parent root = loader.load();
-      OrdersPageController pageController = loader.getController();
-      pageController.init(this);
-      ordersScene =
-          new Scene(
-              root, Math.max(currStage.getWidth(), WIDTH), Math.max(currStage.getHeight(), HEIGHT));
-      ordersScene
-          .getStylesheets()
-          .add(LoginControl.class.getResource("/style/OrdersPage.css").toExternalForm());
-    }
+    FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Orders.fxml"));
+    Parent root = loader.load();
+    OrdersPageController pageController = loader.getController();
+    pageController.init(this);
+    Scene ordersScene =
+        new Scene(
+            root, Math.max(currStage.getWidth(), WIDTH), Math.max(currStage.getHeight(), HEIGHT));
+    ordersScene
+        .getStylesheets()
+        .add(LoginControl.class.getResource("/style/OrdersPage.css").toExternalForm());
     currStage.setScene(ordersScene);
     currStage.show();
     return;
@@ -100,17 +92,15 @@ public class OrdersHandlingControl extends NonLoginControl {
    */
   public void setShipmentScene() throws Exception {
     Stage stage = this.getStage();
-    if (shipmentScene == null) {
-      FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Shipment.fxml"));
-      Parent root = loader.load();
-      ShipmentPageController pageController = loader.getController();
-      pageController.init(this);
-      shipmentScene =
-          new Scene(root, Math.max(stage.getWidth(), WIDTH), Math.max(stage.getHeight(), HEIGHT));
-      shipmentScene
-          .getStylesheets()
-          .add(LoginControl.class.getResource("/style/ShipmentPage.css").toExternalForm());
-    }
+    FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Shipment.fxml"));
+    Parent root = loader.load();
+    ShipmentPageController pageController = loader.getController();
+    pageController.init(this);
+    Scene shipmentScene =
+        new Scene(root, Math.max(stage.getWidth(), WIDTH), Math.max(stage.getHeight(), HEIGHT));
+    shipmentScene
+        .getStylesheets()
+        .add(LoginControl.class.getResource("/style/ShipmentPage.css").toExternalForm());
     stage.setScene(shipmentScene);
     stage.show();
   }
@@ -256,7 +246,8 @@ public class OrdersHandlingControl extends NonLoginControl {
    * @return a list of test shipments
    */
   public ObservableList<Shipment> getTestShipments() {
-    Deposit deposit = new Deposit(1, ICON_HEIGHT, ICON_HEIGHT * 2, null);
+    Deposit deposit = new Deposit(1, ICON_HEIGHT, ICON_HEIGHT * 2,
+    new Address("80100", "napoli", "italia", "napoli", "euw", "2", "barone"));
     ObservableList<Shipment> shipments =
         FXCollections.observableArrayList(
             new Shipment(

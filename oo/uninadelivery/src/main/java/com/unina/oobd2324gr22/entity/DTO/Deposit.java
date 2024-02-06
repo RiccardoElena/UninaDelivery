@@ -264,4 +264,23 @@ public class Deposit {
         + this.getStoredProducts().toString().replace("\n", "\n\t")
         + "\n}";
   }
+
+  /** Equals method to comparing deposit's id. */
+  @Override
+  public boolean equals(final Object dep) {
+    if (this == dep) {
+      return true;
+    }
+    if (dep == null || getClass() != dep.getClass()) {
+      return false;
+    }
+    Deposit deposit = (Deposit) dep;
+    return id == deposit.id;
+  }
+
+  /** Hash code method. */
+  @Override
+  public int hashCode() {
+    return super.hashCode();
+  }
 }
