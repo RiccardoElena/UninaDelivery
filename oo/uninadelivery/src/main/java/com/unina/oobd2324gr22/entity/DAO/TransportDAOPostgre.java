@@ -17,14 +17,12 @@ public class TransportDAOPostgre implements TransportDAO {
 
   private Transport populateTransportFromResultSet(final ResultSet rs) throws SQLException {
     DepositDAO depositDAO = new DepositDAOPostgre();
-    String transportType = rs.getString("transporttype");
     int transportId = rs.getInt("transportid");
     int maxCapacity = rs.getInt("maxcapacity");
-    int occupiedSpace = rs.getInt("occupiedspace");
     boolean isAvailable = rs.getBoolean("isavailable");
     Deposit deposit = depositDAO.getDepositById(rs.getInt("depositid"));
 
-    return new Transport(transportId, maxCapacity, occupiedSpace, isAvailable, deposit);
+    return new Transport(transportId, maxCapacity, isAvailable, deposit);
   }
 
   /**
@@ -58,7 +56,7 @@ public class TransportDAOPostgre implements TransportDAO {
     PreparedStatement psSelect = null;
     ResultSet rs = null;
     try {
-      psSelect = con.prepareStatement("SELECT * FROM deposit WHERE orderid = ?");
+      psSelect = con.prepareStatement("SELECT * FROM transport WHERE transportid = ?");
       psSelect.setInt(1, id);
       rs = psSelect.executeQuery();
       while (rs.next()) {

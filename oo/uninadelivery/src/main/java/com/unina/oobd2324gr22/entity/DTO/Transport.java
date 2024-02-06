@@ -31,14 +31,12 @@ public class Transport {
    *
    * @param tId id of the transport.
    * @param tMaxCapacity max capacity of the transport.
-   * @param tOccupiedSpace occupied space of the transport.
    * @param tIsAvailable availability of the transport.
    * @param tDepositOwner owner of the transport.
    */
   public Transport(
       final int tId,
       final float tMaxCapacity,
-      final float tOccupiedSpace,
       final boolean tIsAvailable,
       final Deposit tDepositOwner) {
     if (tDepositOwner == null) {
@@ -46,7 +44,7 @@ public class Transport {
     }
     this.id = tId;
     this.maxCapacity = tMaxCapacity < 0 ? DEFAULT_MAX_CAPACITY : tMaxCapacity;
-    this.occupiedSpace = tOccupiedSpace < 0 ? 0 : tOccupiedSpace;
+    // this.occupiedSpace = tOccupiedSpace < 0 ? 0 : tOccupiedSpace;
     this.isAvailable = tIsAvailable;
     this.depositOwner = tDepositOwner;
     tDepositOwner.addTransport(this);
@@ -144,5 +142,26 @@ public class Transport {
    */
   public void setDepositOwner(final Deposit tDepositOwner) {
     this.depositOwner = tDepositOwner;
+  }
+
+  /** To string. */
+  @Override
+  public String toString() {
+    return "Transport{"
+        + "\n\tid = "
+        + id
+        + ","
+        + "\n\tmaxCapacity = "
+        + maxCapacity
+        + ","
+        + "\n\toccupiedSpace = "
+        + occupiedSpace
+        + ","
+        + "\n\tisAvailable = "
+        + isAvailable
+        + ","
+        + "\n\tdepositOwner = "
+        + depositOwner.toString().replace("\n", "\n\t")
+        + "\n}";
   }
 }

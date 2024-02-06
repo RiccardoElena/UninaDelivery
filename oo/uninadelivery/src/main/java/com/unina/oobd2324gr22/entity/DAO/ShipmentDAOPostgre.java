@@ -80,12 +80,12 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
     int nextField = 1;
     try {
       String query =
-          "SELECT S.*, COALESCE(C.occupiedspace,0) AS occupiedspace "
-              + "FROM shipment S LEFT JOIN covers C NATURAL JOIN transport "
-              + "ON S.transportid = transportid AND S.shippingdate = date "
+          "SELECT *"
+              + "FROM shipment S LEFT JOIN (covers NATURAL JOIN transport) C "
+              + "ON S.transportid = C.transportid AND S.shippingdate = date "
               + "WHERE S.directedto IS NULL AND "
               + "(hasarrived = FALSE OR hasarrived IS NULL) AND "
-              + "C.occupiedspace + ? <= transport.maxcapacity "
+              + "C.occupiedspace + ? <= C.maxcapacity AND "
               + "shippedfrom IN ( "
               + "SELECT depositid "
               + "FROM deposit NATURAL JOIN stores "

@@ -244,4 +244,24 @@ public class Deposit {
 
     this.transports.add(transport);
   }
+
+  /** To string method. */
+  @Override
+  public String toString() {
+    return "Deposit{"
+        + "\n\tid = "
+        + this.getId()
+        + "\n\toccupiedSpace = "
+        + this.getOccupiedSpace()
+        + ","
+        + "\n\tmaxCapacity = "
+        + this.getMaxCapacity()
+        + ","
+        + "\n\taddress = "
+        + this.getAddress().toString().replace("\n", "\n\t")
+        + ","
+        + "\n\tstoredProducts = "
+        + this.getStoredProducts().toString().replace("\n", "\n\t")
+        + "\n}";
+  }
 }

@@ -2,6 +2,7 @@ package com.unina.oobd2324gr22.entity.DTO;
 
 import com.unina.oobd2324gr22.entity.DTO.Deposit.StoredProduct;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Shipment {
@@ -22,7 +23,7 @@ public class Shipment {
   private Deposit startingDeposit;
 
   /** The orders shipped. */
-  private List<Order> orders;
+  private List<Order> orders = new ArrayList<>();
 
   /** The veichle transporting the shipment. */
   private Transport transport;
@@ -53,7 +54,7 @@ public class Shipment {
     this.hasArrived = sHasArrived;
     this.operator = sOperator;
     this.startingDeposit = startDeposit;
-    if (sTransport.getDepositOwner() != startDeposit) {
+    if (sTransport.getDepositOwner().equals(startDeposit)) {
       throw new IllegalArgumentException(
           "The transport must be in the same deposit of the shipment");
     } else {
@@ -80,7 +81,7 @@ public class Shipment {
     this.hasArrived = false;
     this.operator = sOperator;
     this.startingDeposit = startDeposit;
-    if (sTransport.getDepositOwner() != startDeposit) {
+    if (sTransport.getDepositOwner().equals(startDeposit)) {
       throw new IllegalArgumentException(
           "The transport must be in the same deposit of the shipment");
     } else {
@@ -110,7 +111,7 @@ public class Shipment {
     this.startingDeposit = startDeposit;
     this.occupiedSpace = oSpace;
 
-    if (sTransport.getDepositOwner() != startDeposit) {
+    if (sTransport.getDepositOwner().equals(startDeposit)) {
       throw new IllegalArgumentException(
           "The transport must be in the same deposit of the shipment");
     } else {
@@ -287,5 +288,35 @@ public class Shipment {
    */
   public float getRemainingSpace() {
     return this.getTransport().getMaxCapacity() - this.getOccupiedSpace();
+  }
+
+  /** To strig method. */
+  @Override
+  public String toString() {
+    String op = this.getOperator() == null ? "null" : this.getOperator().toString();
+    return "Shipment{"
+        + "\n\tid="
+        + getId()
+        + "\n\thasArrived="
+        + hasArrived()
+        + ","
+        + "\n\toperator="
+        + op
+        + ","
+        + "\n\tstartingDeposit="
+        + getStartingDeposit().toString().replace("\n", "\n\t")
+        + ","
+        + "\n\ttransport="
+        + getTransport().toString().replace("\n", "\n\t")
+        + ","
+        + "\n\torders="
+        + getOrders().toString().replace("\n", "\n\t")
+        + ","
+        + "\n\toccupiedSpace="
+        + getOccupiedSpace()
+        + ","
+        + "\n\tremainingSpace="
+        + getRemainingSpace()
+        + "\n}";
   }
 }

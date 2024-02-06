@@ -71,18 +71,7 @@ public interface DepositDAO {
    * @return list of compatible deposits
    * @throws SQLException
    */
-  List<Deposit> getDepositsForShipmentsToClients(Order order, LocalDate date) throws SQLException;
-
-  /**
-   * Retrieve all the deposit elegible for a shipment towards deposits for a specific order in a
-   * certain date.
-   *
-   * @param order order to get compatible deposits
-   * @param date date to get compatible deposits
-   * @return list of compatible deposits
-   * @throws SQLException
-   */
-  List<Deposit> getDepositsForShipmentsToDeposits(Order order, LocalDate date) throws SQLException;
+  List<Deposit> getCompatibleDeposits(Order order, LocalDate date) throws SQLException;
 
   /**
    * Update a deposit in the database.

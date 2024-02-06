@@ -67,7 +67,7 @@ public class DepositDAOPostgre implements DepositDAO {
     PreparedStatement psSelect = null;
     ResultSet rs = null;
     try {
-      psSelect = con.prepareStatement("SELECT * FROM deposit WHERE orderid = ?");
+      psSelect = con.prepareStatement("SELECT * FROM deposit WHERE depositid = ?");
       psSelect.setInt(1, id);
       rs = psSelect.executeQuery();
       while (rs.next()) {
@@ -97,8 +97,8 @@ public class DepositDAOPostgre implements DepositDAO {
   // XXX @zGenny not sure about type of date. Change LocalDate to the correct type retuned by jfx
   // datepicker
   @Override
-  public final List<Deposit> getDepositsForShipmentsToClients(
-      final Order order, final LocalDate date) throws SQLException {
+  public final List<Deposit> getCompatibleDeposits(final Order order, final LocalDate date)
+      throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Deposit> deposits = new ArrayList<>();
     PreparedStatement psSelect = null;
@@ -110,72 +110,18 @@ public class DepositDAOPostgre implements DepositDAO {
       psSelect =
           con.prepareStatement(
               "SELECT * FROM deposit D WHERE isSameCity(D.zipcode, D.country, ?, ?) AND EXISTS"
-                  + " (SELECT 1 FROM stores WHERE D.depositid = depositid AND name=? AND supplier=?"
-                  + " AND quantity>=?) AND EXISTS (SELECT 1 FROM transport WHERE D.depositid ="
-                  + " depositid AND transporttype='WheeledSmall' AND transportid NOT IN (SELECT"
-                  + " transportid FROM covers WHERE date = ?)) OR ) AND EXISTS (SELECT 1 FROM"
-                  + " driver WHERE D.depositid = depositid AND businessmail NOT IN (SELECT"
-                  + " businessmail FROM drives WHERE date = ?))");
+                  + " (SELECT 1 FROM stores WHERE D.depositid = depositid AND name = ? AND supplier"
+                  + " = ? AND quantity >= ?) AND EXISTS (SELECT 1 FROM transport WHERE D.depositid"
+                  + " = depositid AND transporttype = 'WheeledSmall' AND transportid NOT IN (SELECT"
+                  + " transportid FROM covers WHERE date = ?)) AND EXISTS (SELECT 1 FROM driver"
+                  + " WHERE D.depositid = depositid AND businessmail NOT IN (SELECT businessmail"
+                  + " FROM drives WHERE date = ?))");
       psSelect.setString(nextField++, zipCode);
       psSelect.setString(nextField++, country);
       psSelect.setString(nextField++, order.getProduct().getName());
       psSelect.setString(nextField++, order.getProduct().getSupplier());
       psSelect.setInt(nextField++, order.getQuantity());
       psSelect.setDate(nextField++, java.sql.Date.valueOf(date));
-      rs = psSelect.executeQuery();
-      while (rs.next()) {
-        deposits.add(populateDepositFromResultSet(rs));
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (psSelect != null) {
-        psSelect.close();
-      }
-      if (con != null) {
-        con.close();
-      }
-    }
-    return deposits;
-  }
-
-  /**
-   * PostgreSQL implementation of the method insertCityDeposit.<br>
-   * {@inheritDoc}
-   */
-  // XXX @zGenny not sure about type of date. Change LocalDate to the correct type retuned by jfx
-  // datepicker
-  // FIXME @zGenny I'm unsure about the correctness of this query and the one above please check it
-  @Override
-  public final List<Deposit> getDepositsForShipmentsToDeposits(
-      final Order order, final LocalDate date) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
-    List<Deposit> deposits = new ArrayList<>();
-    PreparedStatement psSelect = null;
-    ResultSet rs = null;
-    int nextField = 1;
-    String zipCode = order.getAccount().getAddress().getZipCode();
-    String country = order.getAccount().getAddress().getCountry();
-    try {
-      psSelect =
-          con.prepareStatement(
-              "SELECT * FROM deposit D WHERE isSameCity(D.zipcode, D.country, ?, ?) AND EXISTS"
-                  + " (SELECT 1 FROM stores WHERE D.depositid = depositid AND name=? AND"
-                  + " supplier=?) AND (EXISTS (SELECT 1 FROM transport WHERE D.depositid ="
-                  + " depositid AND maxcapacity >= ? AND transportid NOT IN (SELECT transportid"
-                  + " FROM covers WHERE date = ?)) OR (transporttype <> 'WheeledSmall' AND"
-                  + " transporttype <> 'WheeledLarge') OR EXISTS (SELECT 1 FROM driver WHERE"
-                  + " D.depositid = depositid AND businessmail NOT IN (SELECT businessmail FROM"
-                  + " drives WHERE date = ?)))");
-      psSelect.setString(nextField++, zipCode);
-      psSelect.setString(nextField++, country);
-      psSelect.setString(nextField++, order.getProduct().getName());
-      psSelect.setString(nextField++, order.getProduct().getSupplier());
-      psSelect.setInt(nextField++, order.getQuantity());
       psSelect.setDate(nextField++, java.sql.Date.valueOf(date));
       rs = psSelect.executeQuery();
       while (rs.next()) {
