@@ -3,12 +3,10 @@ package com.unina.oobd2324gr22.control;
 import com.unina.oobd2324gr22.boundary.LoginPageController;
 import com.unina.oobd2324gr22.entity.DAO.AccountDAO;
 import com.unina.oobd2324gr22.entity.DAO.AccountDAOPostgre;
-import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 import com.unina.oobd2324gr22.utils.SHA256;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.regex.Pattern;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -44,14 +42,28 @@ public class LoginControl extends BaseControl {
     FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/login.fxml"));
     Parent root = loader.load();
     LoginPageController pageController = loader.getController();
-    pageController.init(this);
     Scene scene = new Scene(root, WIDTH, HEIGHT);
     scene
         .getStylesheets()
         .add(LoginControl.class.getResource("/style/LoginPage.css").toExternalForm());
+    pageController.init(this);
 
     primaryStage.setScene(scene);
     primaryStage.show();
+  }
+
+  private void showErrorMessage(final String msg) {
+    this.showAlert(Alert.AlertType.ERROR, "Errore", "Errore di login", msg);
+  }
+
+  private boolean isEmailValid(final String email) {
+    return Pattern.matches(
+        "^([a-zA-Z0-9]+\\.[a-zA-Z0-9]+|[a-zA-Z0-9]+)@[a-zA-Z.]+\\.[a-zA-Z]{2,}$", email);
+  }
+
+  private boolean isOperatorEmail(final String email) {
+    return Pattern.matches(
+        "^[A-Z]\\.([A-Za-z]+\\_[A-Za-z]+|[A-Za-z]+)[0-9]*@uninadelivery\\.operator\\.com$", email);
   }
 
   /**
@@ -62,47 +74,39 @@ public class LoginControl extends BaseControl {
    * @param password the password to check
    */
   public void login(final Stage stage, final String email, final String password) {
-    String errorMessage = "";
     System.err.println(email + " " + password);
-    // for email format validation
-    // Pattern.matches("^[a-zA-Z0-9]+[a-zA-Z0-9.]*[a-zA-Z0-9]+@[a-zA-Z.]+\\.[a-zA-Z]{2,}$", email)
-    if (!email.isBlank() && !password.isBlank()) {
 
-      /* Account client = checkLogin( emailTextField.getText(),
-      passwordTextField.getText()); */
-      Operator client = null; // TODO!: test pourpose only. Line to be removed
-
-      // TODO!: == is for test pourpose only. Change to != when done
-
-      if (client == null) {
-        /* TODO!: this implementation is for test pourpose only
-        Remove this block when done and uncomment the previous line */
-        try {
-
-          LocalDate bdate =
-              LocalDate.parse("1999-12-31", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-          client =
-              new Operator.OperatorBuilder(
-                      "Gennaro",
-                      "De Gregorio",
-                      "gdg@gmail.com",
-                      bdate,
-                      password,
-                      new Address("80100", "Napoli", "NA", "Italia", "EUW", "12A", "Via Roma"),
-                      "G.DeGregorio@uninadelivery.operator.com")
-                  .build();
-          dashboardControl.setScene(stage, client);
-          return;
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      } else {
-        errorMessage = "Email o password errati";
-      }
-    } else {
-      errorMessage = "Inserire email e password";
+    if (email.isBlank() || password.isBlank()) {
+      showErrorMessage("Inserire email e password");
+      return;
     }
-    this.showAlert(Alert.AlertType.ERROR, "Errore", "Errore di login", errorMessage);
+
+    if (!isEmailValid(email)) {
+      showErrorMessage("Email non valida");
+      return;
+    }
+
+    if (!isOperatorEmail(email)) {
+      showErrorMessage("Accesso consentito solo ad account operatori");
+      return;
+    }
+
+    Operator client = checkLogin(email, password);
+
+    if (client != null) {
+      try {
+        dashboardControl.setScene(stage, client);
+        return;
+      } catch (Exception e) {
+        e.printStackTrace();
+        showErrorMessage(
+            "Si è verificato un errore interno, si prega di riprovare più tardi o contattare"
+                + " l'assistenza");
+      }
+    }
+
+    showErrorMessage(
+        "Email o password errati.\nUsare R.Elena@uninadelivery.operator.com e securepassword");
   }
 
   private Operator checkLogin(final String email, final String password) {

@@ -19,7 +19,7 @@ public class AccountDAOPostgre implements AccountDAO {
   private Connection con;
 
   private Operator populateOperatorFromResultSet(final ResultSet rs) throws SQLException {
-    return new Operator(populateAccountFromResultSet(rs), rs.getString("bmail"));
+    return new Operator(populateAccountFromResultSet(rs), rs.getString("businessmail"));
   }
 
   // private Driver populateDriverFromResultSet(final ResultSet rs) throws SQLException {
@@ -119,7 +119,8 @@ public class AccountDAOPostgre implements AccountDAO {
     try {
       st =
           con.prepareStatement(
-              "SELECT * FROM account NATURAL JOIN operator WHERE bmail = ? AND" + " password = ?");
+              "SELECT * FROM account NATURAL JOIN operator WHERE businessmail = ? AND"
+                  + " password = ?");
       st.setString(1, bmail);
       st.setString(2, password);
       rs = st.executeQuery();

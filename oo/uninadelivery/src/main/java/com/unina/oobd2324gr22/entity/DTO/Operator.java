@@ -37,10 +37,10 @@ public final class Operator extends Account {
         account.getSurname(),
         account.getEmail(),
         account.getBirthdate(),
-        account.getPropic(),
         account.getPassword(),
+        account.getPropic(),
         account.getAddress());
-    this.businessMail = businessMail;
+    this.businessMail = bMail;
   }
 
   public static class OperatorBuilder {

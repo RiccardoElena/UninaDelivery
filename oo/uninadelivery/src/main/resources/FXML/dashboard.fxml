@@ -185,7 +185,7 @@
             </VBox>
             <VBox alignment="CENTER" prefHeight="249.0" prefWidth="780.0" spacing="10.0">
                <children>
-                  <MFXButton fx:id="gestisciOrdiniButton" buttonType="RAISED" onAction="#gestisciOrdiniButtonAction" prefHeight="64.0" prefWidth="310.0" rippleColor="#f7dba7" text="Gestisci Ordini" VBox.vgrow="ALWAYS">
+                  <MFXButton fx:id="ordersHandlingButton" buttonType="RAISED" onAction="#ordersHandlingButtonAction" prefHeight="64.0" prefWidth="310.0" rippleColor="#f7dba7" text="Gestisci Ordini" VBox.vgrow="ALWAYS">
                      <font>
                         <Font name="System Bold" size="32.0" />
                      </font>
@@ -197,7 +197,7 @@
                         <String fx:value="bigButton" />
                      </styleClass>
                   </MFXButton>
-                  <MFXButton fx:id="resocontiMensiliButton" buttonType="RAISED" onAction="#resocontiMensiliButtonOnAction" prefHeight="64.0" prefWidth="310.0" rippleColor="#f7dba7" text="Resoconti Mensili">
+                  <MFXButton fx:id="monthlyReportsButton" buttonType="RAISED" onAction="#monthlyReportsButtonOnAction" prefHeight="64.0" prefWidth="310.0" rippleColor="#f7dba7" text="Resoconti Mensili">
                      <font>
                         <Font size="32.0" />
                      </font>

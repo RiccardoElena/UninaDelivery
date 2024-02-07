@@ -18,7 +18,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 
 public class OrdersPageController {
 
@@ -110,7 +109,7 @@ public class OrdersPageController {
     // when DB connection is implemented, this line should be changed
     ordersTable.setItems(ordersHandlingControl.getTestOrders());
 
-    setDatePickerLowerBound();
+    updateEndDatePickerAccordingToStart();
   } // ! end initialize
 
   /**
@@ -166,7 +165,7 @@ public class OrdersPageController {
         clientTextField.getText(), startDatePicker.getValue(), endDatePicker.getValue());
   }
 
-  private void setDatePickerLowerBound() {
+  private void updateEndDatePickerAccordingToStart() {
     startDatePicker
         .valueProperty()
         .addListener(
@@ -178,7 +177,7 @@ public class OrdersPageController {
               if (endDatePicker.getValue() != null && newDate.isAfter(endDatePicker.getValue())) {
                 endDatePicker.setValue(null);
               }
-              // Imposta la data minima del secondo DatePicker a newDate
+
               endDatePicker.setDayCellFactory(
                   d ->
                       new DateCell() {
@@ -211,7 +210,7 @@ public class OrdersPageController {
                 if (item == null || empty) {
                   setText(null);
                 } else {
-                  setText(item ? "🚚" : ""); // Emoji per true e false
+                  setText(item ? "⚡" : "🐌"); // Emoji per true e false
                 }
               }
             });
@@ -228,56 +227,10 @@ public class OrdersPageController {
     supplierColumn.setCellValueFactory(
         cellData -> new SimpleStringProperty(cellData.getValue().getProduct().getSupplier()));
 
-    this.addButtonToTable();
+    // this.addButtonToTable();
 
-    this.setColumnSize();
-  }
-
-  private void addButtonToTable() {
-    TableColumn<Order, Void> actionColumn = new TableColumn<>("");
-
-    Callback<TableColumn<Order, Void>, TableCell<Order, Void>> cellFactory =
-        new Callback<>() {
-          @Override
-          public TableCell<Order, Void> call(final TableColumn<Order, Void> param) {
-            final TableCell<Order, Void> cell =
-                new TableCell<>() {
-
-                  private final Button btn = new Button("Crea");
-
-                  {
-                    btn.setOnAction(
-                        event -> {
-                          Order order = getTableView().getItems().get(getIndex());
-                          ordersHandlingControl.execAction(order);
-                        });
-                  }
-
-                  @Override
-                  public void updateItem(final Void item, final boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty) {
-                      setGraphic(null);
-                    } else {
-                      setGraphic(btn);
-                    }
-                  }
-                };
-            return cell;
-          }
-        };
-
-    actionColumn.setCellFactory(cellFactory);
-
-    ordersTable.getColumns().add(actionColumn);
-  }
-
-  private void setColumnSize() {
-    for (TableColumn<Order, ?> column : ordersTable.getColumns()) {
-      column
-          .prefWidthProperty()
-          .bind(ordersTable.widthProperty().divide(ordersTable.getColumns().size()));
-    }
+    ordersHandlingControl.setTableFunctionality(
+        ordersTable, "Azioni", "Crea", ordersHandlingControl::execAction);
   }
 
   /**

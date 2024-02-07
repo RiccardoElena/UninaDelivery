@@ -1,5 +1,6 @@
 package com.unina.oobd2324gr22;
 
+import com.unina.oobd2324gr22.entity.DAO.AccountDAOPostgre;
 import com.unina.oobd2324gr22.entity.DAO.DepositDAO;
 import com.unina.oobd2324gr22.entity.DAO.DepositDAOPostgre;
 import com.unina.oobd2324gr22.entity.DAO.OrderDAO;
@@ -7,9 +8,11 @@ import com.unina.oobd2324gr22.entity.DAO.OrderDAOPostgre;
 import com.unina.oobd2324gr22.entity.DAO.ShipmentDAO;
 import com.unina.oobd2324gr22.entity.DAO.ShipmentDAOPostgre;
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
+import com.unina.oobd2324gr22.entity.DTO.Operator;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import com.unina.oobd2324gr22.utils.App;
+import com.unina.oobd2324gr22.utils.SHA256;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
@@ -59,6 +62,11 @@ public final class Main {
       for (Deposit d : deposit) {
         System.out.println(d);
       }
+      Operator op =
+          new AccountDAOPostgre()
+              .getOperatorByBmailAndPassword(
+                  "R.Elena@uninadelivery.operator.com", SHA256.toSHA256("securepassword"));
+      System.out.println(op);
     } catch (SQLException e) {
       e.printStackTrace();
     }

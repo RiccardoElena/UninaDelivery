@@ -6,14 +6,12 @@ import io.github.palexdev.materialfx.controls.MFXButton;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
 public class DashboardPageController {
@@ -58,7 +56,7 @@ public class DashboardPageController {
   @FXML private MFXButton editAccountButton;
 
   /** Button to go to Orders Page. */
-  @FXML private MFXButton gestisciOrdiniButton;
+  @FXML private MFXButton ordersHandlingButton;
 
   /** Profile Picture of the logged Operator. */
   @FXML private ImageView proPic;
@@ -73,24 +71,12 @@ public class DashboardPageController {
     this.operator = dashboardControl.getLoggedOperator();
     this.displayLoggedOperatorData();
     dashboardControl.setDraggable(titleBar);
-    // Crea un ImageView
+
     proPic = new ImageView(new Image("/images/defaultUser.jpg"));
 
-    // Imposta le dimensioni dell'ImageView
     proPic.setFitWidth(PRO_PIC_SIZE);
     proPic.setFitHeight(PRO_PIC_SIZE);
-    // TODO!: non so se funzionava a te, ma a me non appariva il cerchio;
-    // !       allor ho aggiunto un png visto che tanto l'immagine la mettiamo con una grandezza
-    // fissa
-    // Crea un cerchio
-    Circle circle =
-        new Circle(
-            proPic.getFitWidth() / 2,
-            proPic.getFitHeight() / 2,
-            Math.min(proPic.getFitWidth(), proPic.getFitHeight()) / 2);
 
-    // Imposta il cerchio come clip dell'ImageView
-    proPic.setClip(circle);
     Platform.runLater(
         () -> {
           Stage stage = (Stage) borderPane.getScene().getWindow();
@@ -119,14 +105,24 @@ public class DashboardPageController {
   }
 
   /**
-   * Button to go to Orders Page.
+   * Go to the Orders Handling page.
    *
    * @param event the event that triggered the action.
    */
   @FXML
-  void gestisciOrdiniButtonAction(final ActionEvent event) {
-    Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-    dashboardControl.goToGestioneOrdini(stage);
+  void ordersHandlingButtonAction(final ActionEvent event) {
+    dashboardControl.goToOrdersHandlingPage();
+  }
+
+  /**
+   * Button to go to Monthly Reports page.
+   *
+   * @param event the event that triggered the action
+   */
+  @FXML
+  void monthlyReportsButtonOnAction(final ActionEvent event) {
+
+    dashboardControl.goToMonthlyReports();
   }
 
   /**
@@ -160,11 +156,12 @@ public class DashboardPageController {
     stage.setMaximized(!stage.isMaximized());
   }
 
+  // FIXME @zGenny label display is causing errors abouth string length. We should FIX
   private void displayLoggedOperatorData() {
     if (operator != null) {
       nameLabel.setText(dashboardControl.getLoggedOperator().getName());
       surnameLabel.setText(dashboardControl.getLoggedOperator().getSurname());
-      emailLabel.setText(dashboardControl.getLoggedOperator().getEmail());
+      emailLabel.setText(dashboardControl.getLoggedOperator().getBusinessMail());
     }
   }
 }

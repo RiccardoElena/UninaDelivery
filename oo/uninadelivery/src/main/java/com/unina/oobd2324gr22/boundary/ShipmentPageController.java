@@ -1,7 +1,9 @@
 package com.unina.oobd2324gr22.boundary;
 
 import com.unina.oobd2324gr22.control.OrdersHandlingControl;
+import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Order;
+import com.unina.oobd2324gr22.entity.DTO.Product;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -109,55 +111,55 @@ public class ShipmentPageController {
     ordersHandlingControl.setNavigationButtons(homeButton, backButton);
   } // ! end initialize
 
-  private void setColumnSize() {
-    for (TableColumn<Shipment, ?> column : shipmentsTable.getColumns()) {
-      column
-          .prefWidthProperty()
-          .bind(shipmentsTable.widthProperty().divide(shipmentsTable.getColumns().size()));
-    }
-  }
-
   private void displayOrderData() {
     Order order = ordersHandlingControl.getOrder();
-    if (order != null) {
-      orderIdLabel.setText("Ordine N." + order.getOrderId());
-      orderExpectedDeliveryDateLabel.setText(
-          "Da consegnare entro il: "
-              + order.getExpectedDeliveryDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-      orderProductLabel.setText(
-          "Contenente: "
-              + order.getQuantity()
-              + " "
-              + order.getProduct().getName()
-              + " - "
-              + order.getProduct().getSupplier());
-      orderAddressLabel.setText("Diretto a: " + order.getAccount().getAddress().toString());
+    if (order == null) {
+      return;
     }
+
+    orderIdLabel.setText("Ordine N." + order.getOrderId());
+
+    LocalDate expectedDeliveryDate = order.getExpectedDeliveryDate();
+    String formattedDeliveryDate =
+        expectedDeliveryDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    orderExpectedDeliveryDateLabel.setText("Da consegnare entro il: " + formattedDeliveryDate);
+
+    Product product = order.getProduct();
+    String productInfo =
+        String.format(
+            "Contenente: %d %s - %s",
+            order.getQuantity(), product.getName(), product.getSupplier());
+    orderProductLabel.setText(productInfo);
+
+    Address address = order.getAccount().getAddress();
+    orderAddressLabel.setText("Diretto a: " + address.toString());
   }
 
   private void setDatePickerLowerBound() {
     LocalDate defaultDate = LocalDate.now().plusDays(1);
     shipmentDatePicker.setValue(defaultDate);
-    shipmentDatePicker.setDayCellFactory(
-        d ->
-            new DateCell() {
-              @Override
-              public void updateItem(final LocalDate item, final boolean empty) {
-                super.updateItem(item, empty);
-                setDisable(item.isBefore(defaultDate));
-                if (!item.isBefore(defaultDate)) {
+    shipmentDatePicker.setDayCellFactory(d -> createDayCell(defaultDate));
+  }
 
-                  if (item.isBefore(
-                      ordersHandlingControl.getOrder().getExpectedDeliveryDate().plusDays(1))) {
-                    setStyle(
-                        "-fx-background-color: -fx-secondary-color; -fx-text-fill:"
-                            + " -fx-primary-color;");
-                  } else {
-                    setStyle("-fx-background-color: red; -fx-text-fill:" + " white;");
-                  }
-                }
-              }
-            });
+  private DateCell createDayCell(final LocalDate defaultDate) {
+    return new DateCell() {
+      @Override
+      public void updateItem(final LocalDate item, final boolean empty) {
+        super.updateItem(item, empty);
+        setDisable(item.isBefore(defaultDate));
+        if (!item.isBefore(defaultDate)) {
+          setStyle(getDayCellStyle(item));
+        }
+      }
+    };
+  }
+
+  private String getDayCellStyle(final LocalDate item) {
+    if (item.isBefore(ordersHandlingControl.getOrder().getExpectedDeliveryDate().plusDays(1))) {
+      return "-fx-background-color: -fx-secondary-color; -fx-text-fill: -fx-primary-color;";
+    } else {
+      return "-fx-background-color: red; -fx-text-fill: white;";
+    }
   }
 
   private void setTableColumns() {
@@ -175,8 +177,7 @@ public class ShipmentPageController {
     transportTableColumn.setCellValueFactory(
         cellData ->
             new SimpleStringProperty(String.valueOf(cellData.getValue().getTransport().getId())));
-
-    this.setColumnSize();
+    ordersHandlingControl.setTableFunctionality(shipmentsTable);
   }
 
   /**

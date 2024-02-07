@@ -49,6 +49,25 @@ public class LoginPageController {
     loginControl.setDraggable(topPane);
     togglePswVisibilityButton.setGraphic(loginControl.getIcon("/images/loginPage/ClosedEye.png"));
     togglePswVisibilityButton.setOnAction(event -> togglePswVisibility());
+
+    passwordTextField
+        .getScene()
+        .setOnKeyPressed(
+            event -> {
+              if (event.getCode().toString().equals("ENTER")) {
+                loginButtonAction(new ActionEvent(passwordTextField, null));
+              }
+              if (event.getCode().toString().equals("T") && event.isControlDown()) {
+                togglePswVisibility();
+              }
+            });
+    togglePswVisibilityButton.setOnKeyPressed(
+        event -> {
+          if (event.getCode().toString().equals("ENTER")) {
+            togglePswVisibilityButton.fireEvent(new ActionEvent(passwordTextField, null));
+            event.consume();
+          }
+        });
   }
 
   // ? @zGenny: there's a reason for this method to be public and final?
@@ -58,7 +77,8 @@ public class LoginPageController {
    *
    * @param event the event that triggered the method
    */
-  public final void loginButtonAction(final ActionEvent event) {
+  @FXML
+  final void loginButtonAction(final ActionEvent event) {
     Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
     loginControl.login(
         stage,
@@ -86,13 +106,12 @@ public class LoginPageController {
     if (passwordTextField.isVisible()) {
       togglePswVisibilityButton.setGraphic(loginControl.getIcon("/images/loginPage/Eye.png"));
       plainPasswordTextField.setText(passwordTextField.getText());
-      passwordTextField.setVisible(false);
-      plainPasswordTextField.setVisible(true);
     } else {
       togglePswVisibilityButton.setGraphic(loginControl.getIcon("/images/loginPage/ClosedEye.png"));
       passwordTextField.setText(plainPasswordTextField.getText());
-      plainPasswordTextField.setVisible(false);
-      passwordTextField.setVisible(true);
     }
+
+    passwordTextField.setVisible(!passwordTextField.isVisible());
+    plainPasswordTextField.setVisible(!plainPasswordTextField.isVisible());
   }
 }

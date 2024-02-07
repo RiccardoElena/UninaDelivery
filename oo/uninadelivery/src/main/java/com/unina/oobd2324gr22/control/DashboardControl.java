@@ -41,14 +41,10 @@ public class DashboardControl extends NonLoginControl {
     stage.show();
   }
 
-  /**
-   * Go to the Orders page.
-   *
-   * @param stage the stage to set the scene on
-   */
-  public void goToGestioneOrdini(final Stage stage) {
+  /** Go to the Orders page. */
+  public void goToOrdersHandlingPage() {
     try {
-      ordersControl.setOrdersScene(stage, this.getLoggedOperator());
+      ordersControl.setOrdersScene(this.getStage(), this.getLoggedOperator());
     } catch (Exception e) {
       e.printStackTrace();
       this.showAlert(
@@ -58,6 +54,15 @@ public class DashboardControl extends NonLoginControl {
           "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
               + " l'applicazione.");
     } // TODO! @RiccardoElena we should change the message of the Alert ig, but in what?
+  }
+
+  /** Go to the Monthly Reports page. */
+  public void goToMonthlyReports() {
+    this.showAlert(
+        Alert.AlertType.INFORMATION,
+        "Attenzione!",
+        "Funzione non ancora disponibile!",
+        "Contattare l'assistenza per ulteriori informazioni!");
   }
 
   /** Go to the Edit page. */
