@@ -13,8 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
-// TODO @zGenny: remember to add all the static resources in the resources folder
-// OrderPage.fxml and several images are missing
+
 public class LoginControl extends BaseControl {
 
   /** Width of the window. */
@@ -32,24 +31,26 @@ public class LoginControl extends BaseControl {
   /**
    * Set Login scene on Stage.
    *
-   * @param primaryStage the stage to set the scene on
+   * @param stage the stage to set the scene on
    * @throws Exception if the scene cannot be set
    */
-  public void setScene(final Stage primaryStage) throws Exception {
-    this.setStage(primaryStage);
+  public void setScene(final Stage stage) throws Exception {
+    this.setStage(stage);
     System.err.println("wow2 " + this.getStage());
 
     FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/login.fxml"));
     Parent root = loader.load();
     LoginPageController pageController = loader.getController();
+    stage.setWidth(WIDTH);
+    stage.setHeight(HEIGHT);
     Scene scene = new Scene(root, WIDTH, HEIGHT);
     scene
         .getStylesheets()
         .add(LoginControl.class.getResource("/style/LoginPage.css").toExternalForm());
     pageController.init(this);
 
-    primaryStage.setScene(scene);
-    primaryStage.show();
+    stage.setScene(scene);
+    stage.show();
   }
 
   private void showErrorMessage(final String msg) {

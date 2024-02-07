@@ -94,40 +94,7 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
     updateEndDatePickerAccordingToStart();
   }
 
-  /**
-   * On exitButton click, it shows a confirmation alert. If the user confirms, it closes the
-   * application.
-   *
-   * @param event
-   */
-  @Override
-  @FXML
-  public final void exitButtonAction(final ActionEvent event) {
-    getControl().exit();
-  }
 
-  /**
-   * On minimizeButton click, it minimizes the application.
-   *
-   * @param event the event that triggered the method
-   */
-  @Override
-  @FXML
-  public final void minimizeButtonAction(final ActionEvent event) {
-    getControl().minimize();
-  }
-
-  /**
-   * On resizeButton click, it resizes the application.
-   *
-   * @param event
-   */
-  @Override
-  @FXML
-  public final void resizeButtonAction(final ActionEvent event) {
-    Stage stage = (Stage) resizeButton.getScene().getWindow();
-    stage.setMaximized(!stage.isMaximized());
-  }
 
   /**
    * On filterButton click, it filters the orders.
@@ -202,29 +169,4 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
     };
   }
 
-  /**
-   * Button to go back to the previous page.
-   *
-   * @param event the event that triggered the action
-   */
-  @Override
-  @FXML
-  void backButtonAction(final ActionEvent event) {
-    getControl().returnToOrdersPage();
-  }
-
-  /**
-   * Button to go back to the home page.
-   *
-   * @param event the event that triggered the action
-   */
-  @Override
-  @FXML
-  void homeButtonAction(final ActionEvent event) {
-    try {
-      getControl().returnToHomePage();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
 }

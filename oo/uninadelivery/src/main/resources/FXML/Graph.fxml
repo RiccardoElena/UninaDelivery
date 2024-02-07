@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
@@ -16,7 +17,7 @@
 
 <BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" stylesheets="@../style/Dashboard.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.unina.oobd2324gr22.boundary.GraphPageController">
    <top>
-      <AnchorPane fx:id="titleBar" prefHeight="35.0" prefWidth="975.0" style="-fx-background-color: #F7DBA7;" BorderPane.alignment="CENTER">
+      <AnchorPane fx:id="titleBar" prefHeight="35.0" prefWidth="975.0" style="-fx-background-color: #F7DBA7;" styleClass="light-background" BorderPane.alignment="CENTER">
          <children>
             <Label layoutX="39.0" layoutY="9.0" text="UninaDelivery - " textFill="#cc4400" />
             <Label layoutX="124.0" layoutY="9.0" text="Grafico" textFill="#cc4400">
@@ -77,15 +78,27 @@
       </AnchorPane>
    </top>
    <center>
-      <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: -fx-default-bg;" BorderPane.alignment="CENTER">
          <children>
-            <LineChart fx:id="chart" alternativeColumnFillVisible="true" layoutX="102.0" layoutY="181.0" prefHeight="400.0" prefWidth="865.0" AnchorPane.bottomAnchor="104.0" AnchorPane.leftAnchor="102.0" AnchorPane.rightAnchor="113.0" AnchorPane.topAnchor="181.0">
+            <LineChart fx:id="chart" alternativeColumnFillVisible="true" layoutX="102.0" layoutY="181.0" prefHeight="400.0" prefWidth="865.0" title="Ordini Giornalieri" AnchorPane.bottomAnchor="104.0" AnchorPane.leftAnchor="102.0" AnchorPane.rightAnchor="113.0" AnchorPane.topAnchor="181.0">
               <xAxis>
-                <CategoryAxis side="BOTTOM" />
+                <CategoryAxis label="Giorno" side="BOTTOM" tickLabelFill="#f7dba7">
+                     <cursor>
+                        <Cursor fx:constant="DEFAULT" />
+                     </cursor></CategoryAxis>
               </xAxis>
               <yAxis>
-                <NumberAxis side="LEFT" />
+                <NumberAxis label="N. Ordini" prefWidth="48.0" side="LEFT" tickLabelFill="#f7dba7" tickLabelGap="1.0">
+                     <cursor>
+                        <Cursor fx:constant="DEFAULT" />
+                     </cursor>
+                     <tickLabelFont>
+                        <Font size="11.0" />
+                     </tickLabelFont></NumberAxis>
               </yAxis>
+               <cursor>
+                  <Cursor fx:constant="CROSSHAIR" />
+               </cursor>
             </LineChart>
             <Label layoutX="67.0" layoutY="611.0" text="Miglior cliente:" AnchorPane.bottomAnchor="57.0" />
             <ComboBox fx:id="monthComboBox" layoutX="513.0" layoutY="132.0" prefWidth="150.0" AnchorPane.rightAnchor="417.0" />
@@ -93,23 +106,17 @@
             <Label layoutX="574.0" layoutY="105.0" text="MESE" AnchorPane.rightAnchor="476.0" />
             <Label layoutX="791.0" layoutY="105.0" text="ANNO" AnchorPane.rightAnchor="254.0" />
             <Label layoutX="160.0" layoutY="611.0" text="{cliente.nome}" AnchorPane.bottomAnchor="57.0" />
-            <Button fx:id="homeButton" ellipsisString="" layoutX="40.0" layoutY="34.0" mnemonicParsing="false" onAction="#homeButtonAction" prefHeight="38.0" prefWidth="43.0" style="-fx-background-color: none;" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="29.0">
+            <Button fx:id="homeButton" ellipsisString="" layoutX="5.0" layoutY="4.0" mnemonicParsing="false" onAction="#homeButtonAction" prefHeight="30.0" prefWidth="30.0" style="-fx-background-color: none;">
                <graphic>
-                  <ImageView fitHeight="55.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../images/nonLoginPage/Home.png" />
                      </image>
                   </ImageView>
                </graphic>
-            </Button>
-            <Button fx:id="backButton" ellipsisString="" layoutX="150.0" layoutY="34.0" mnemonicParsing="false" onAction="#backButtonAction" prefHeight="34.0" prefWidth="43.0" style="-fx-background-color: none;" AnchorPane.leftAnchor="85.0" AnchorPane.topAnchor="29.0">
-               <graphic>
-                  <ImageView fitHeight="55.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/nonLoginPage/BackArrow.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
+               <padding>
+                  <Insets bottom="-1.0" left="-1.0" right="-1.0" top="-1.0" />
+               </padding>
             </Button>
          </children>
       </AnchorPane>
