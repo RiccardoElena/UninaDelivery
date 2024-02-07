@@ -2,7 +2,7 @@
 @import url('components/TitleBar.css');
 
 /* CSS per evidenziare il nodo al passaggio del mouse */
-.chart-line-symbol.onHover {
+.chart-line-symbol:hover {
   -fx-background-color: #ff4949; /* Cambia colore */
   -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 5, 0, 0, 0); /* Aggiunge un effetto ombra per evidenziarlo ulteriormente */
   -fx-padding: 25px; /* Rende il nodo più grande */

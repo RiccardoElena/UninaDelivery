@@ -80,7 +80,7 @@
    <center>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: -fx-default-bg;" BorderPane.alignment="CENTER">
          <children>
-            <LineChart fx:id="chart" alternativeColumnFillVisible="true" layoutX="102.0" layoutY="181.0" prefHeight="400.0" prefWidth="865.0" title="Ordini Giornalieri" AnchorPane.bottomAnchor="104.0" AnchorPane.leftAnchor="102.0" AnchorPane.rightAnchor="113.0" AnchorPane.topAnchor="181.0">
+            <LineChart fx:id="chart" alternativeColumnFillVisible="true" layoutX="102.0" layoutY="181.0" legendVisible="false" prefHeight="400.0" prefWidth="865.0" title="Ordini Giornalieri" AnchorPane.bottomAnchor="104.0" AnchorPane.leftAnchor="102.0" AnchorPane.rightAnchor="113.0" AnchorPane.topAnchor="181.0">
               <xAxis>
                 <CategoryAxis label="Giorno" side="BOTTOM" tickLabelFill="#f7dba7">
                      <cursor>
