@@ -3,7 +3,6 @@ package com.unina.oobd2324gr22.control;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 public class NonLoginControl extends BaseControl {
@@ -97,36 +96,23 @@ public class NonLoginControl extends BaseControl {
     this.loggedOperator = op;
   }
 
-  /**
-   * Set navigation buttons base icon and hover effect.
-   *
-   * @param homeButton the home button
-   * @param backButton the back button
-   */
-  public void setNavigationButtons(final Button homeButton, final Button backButton) {
-    homeButton.setGraphic(getIcon("/images/nonLoginPage/Home.png"));
-    backButton.setGraphic(getIcon("/images/nonLoginPage/BackArrow.png"));
-    homeButton.setOnMouseEntered(
-        event -> homeButton.setGraphic(getIcon("/images/nonLoginPage/HomeHover.png")));
-    homeButton.setOnMouseExited(
-        event -> homeButton.setGraphic(getIcon("/images/nonLoginPage/Home.png")));
-    backButton.setOnMouseEntered(
-        event -> backButton.setGraphic(getIcon("/images/nonLoginPage/BackArrowHover.png")));
-    backButton.setOnMouseExited(
-        event -> backButton.setGraphic(getIcon("/images/nonLoginPage/BackArrow.png")));
+  /** Go to the Dashboard page. */
+  public void returnToHomePage() throws Exception {
+    DashboardControl dashboardControl = new DashboardControl();
+    try {
+      dashboardControl.setScene(this.getStage(), this.getLoggedOperator());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
-  /**
-   * Set navigation buttons base icon and hover effect.
-   *
-   * @param homeButton the home button
-   */
-  public void setNavigationButtons(final Button homeButton) {
-    homeButton.setGraphic(getIcon("/images/nonLoginPage/Home.png"));
-
-    homeButton.setOnMouseEntered(
-        event -> homeButton.setGraphic(getIcon("/images/nonLoginPage/HomeHover.png")));
-    homeButton.setOnMouseExited(
-        event -> homeButton.setGraphic(getIcon("/images/nonLoginPage/Home.png")));
+  /** Go to the Orders page. */
+  public void returnToOrdersPage() {
+    OrdersHandlingControl ordersHandlingControl = new OrdersHandlingControl();
+    try {
+      ordersHandlingControl.setOrdersScene(this.getStage(), this.getLoggedOperator());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }

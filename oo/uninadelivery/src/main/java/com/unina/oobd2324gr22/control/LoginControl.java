@@ -69,11 +69,10 @@ public class LoginControl extends BaseControl {
   /**
    * Verify if login data are correct. If so, it loads the next page. Otherwise, it shows an error.
    *
-   * @param stage the stage to set the scene on
    * @param email the email to check
    * @param password the password to check
    */
-  public void login(final Stage stage, final String email, final String password) {
+  public void login(final String email, final String password) {
     System.err.println(email + " " + password);
 
     if (email.isBlank() || password.isBlank()) {
@@ -95,7 +94,7 @@ public class LoginControl extends BaseControl {
 
     if (client != null) {
       try {
-        dashboardControl.setScene(stage, client);
+        dashboardControl.setScene(this.getStage(), client);
         return;
       } catch (Exception e) {
         e.printStackTrace();

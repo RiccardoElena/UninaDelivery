@@ -6,11 +6,8 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -87,34 +84,6 @@ public abstract class BaseControl {
   }
 
   /**
-   * Make the window draggable.
-   *
-   * @param titleBar the title bar to make draggable
-   */
-  public void setDraggable(final Node titleBar) {
-
-    final double[] xOffset = new double[1];
-    final double[] yOffset = new double[1];
-
-    // Evento pressione mouse sulla barra del titolo
-    titleBar.setOnMousePressed(
-        event -> {
-          xOffset[0] = event.getSceneX();
-          yOffset[0] = event.getSceneY();
-        });
-
-    // Evento trascinamento mouse sulla barra del titolo
-    titleBar.setOnMouseDragged(
-        event -> {
-          if (stage.isMaximized()) {
-            stage.setMaximized(false);
-          }
-          stage.setX(event.getScreenX() - xOffset[0]);
-          stage.setY(event.getScreenY() - yOffset[0]);
-        });
-  }
-
-  /**
    * Get the application stage.
    *
    * @return the application stage
@@ -129,22 +98,7 @@ public abstract class BaseControl {
    * @param currStage the application stage
    */
   public void setStage(final Stage currStage) {
-    System.err.println(getStage());
     this.stage = currStage;
-    System.err.println(getStage());
-    System.err.println("wow " + this.stage);
-  }
-
-  /**
-   * Get an icon.
-   *
-   * @param path the path of the icon
-   * @return the icon
-   */
-  public ImageView getIcon(final String path) {
-    ImageView icon = new ImageView(new Image(path));
-    icon.setFitWidth(ICON_WIDTH); // Set the width
-    icon.setFitHeight(ICON_HEIGHT);
-    return icon;
+    System.err.println("hellooo");
   }
 }

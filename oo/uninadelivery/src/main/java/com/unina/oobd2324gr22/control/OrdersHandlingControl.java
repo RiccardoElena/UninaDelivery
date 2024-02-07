@@ -12,18 +12,11 @@ import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import com.unina.oobd2324gr22.entity.DTO.Transport;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.function.Consumer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 public class OrdersHandlingControl extends NonLoginControl {
@@ -110,21 +103,6 @@ public class OrdersHandlingControl extends NonLoginControl {
         .add(LoginControl.class.getResource("/style/ShipmentPage.css").toExternalForm());
     stage.setScene(shipmentScene);
     stage.show();
-  }
-
-  /** Go to the Dashboard page. */
-  public void returnToHomePage() throws Exception {
-    DashboardControl dashboardControl = new DashboardControl();
-    dashboardControl.setScene(this.getStage(), this.getLoggedOperator());
-  }
-
-  /** Go to the Orders page. */
-  public void returnToOrdersPage() {
-    try {
-      this.setOrdersScene(this.getStage(), this.getLoggedOperator());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
   }
 
   /**
@@ -286,93 +264,5 @@ public class OrdersHandlingControl extends NonLoginControl {
                 deposit,
                 ICON_HEIGHT / (2 + 1)));
     return shipments;
-  }
-
-  /**
-   * Set the table functions.
-   *
-   * @param <T> the type of the table
-   * @param table the table to set the functions on
-   */
-  public <T> void setTableFunctionality(final TableView<T> table) {
-    this.setRowDeselection(table);
-    this.setColumnSize(table);
-  }
-
-  /**
-   * Set the table functions when action buttons are needed.
-   *
-   * @param <T> the type of the table
-   * @param table the table to set the functions on
-   * @param columnTitle the action column title
-   * @param buttonText the action button text
-   * @param action the action to execute
-   */
-  public <T> void setTableFunctionality(
-      final TableView<T> table,
-      final String columnTitle,
-      final String buttonText,
-      final Consumer<T> action) {
-    this.addButtonToTable(table, columnTitle, buttonText, action);
-    this.setTableFunctionality(table);
-  }
-
-  private <T> void setRowDeselection(final TableView<T> table) {
-    table.setRowFactory(
-        tableView -> {
-          final TableRow<T> row = new TableRow<>();
-          row.addEventFilter(
-              MouseEvent.MOUSE_PRESSED,
-              event -> {
-                final int index = row.getIndex();
-                if (index >= 0
-                    && index < table.getItems().size()
-                    && table.getSelectionModel().isSelected(index)) {
-                  table.getSelectionModel().clearSelection();
-                  event.consume();
-                }
-              });
-          return row;
-        });
-  }
-
-  private <T> void setColumnSize(final TableView<T> table) {
-    for (TableColumn<T, ?> column : table.getColumns()) {
-      column.prefWidthProperty().bind(table.widthProperty().divide(table.getColumns().size()));
-    }
-  }
-
-  private <T> void addButtonToTable(
-      final TableView<T> table,
-      final String columnTitle,
-      final String buttonText,
-      final Consumer<T> action) {
-
-    TableColumn<T, Void> actionColumn = new TableColumn<>(columnTitle);
-
-    actionColumn.setCellFactory(
-        param -> {
-          final TableCell<T, Void> cell =
-              new TableCell<>() {
-                private final Button btn = new Button(buttonText);
-
-                {
-                  btn.setOnAction(
-                      event -> {
-                        T item = getTableView().getItems().get(getIndex());
-                        action.accept(item);
-                      });
-                }
-
-                @Override
-                public void updateItem(final Void item, final boolean empty) {
-                  super.updateItem(item, empty);
-                  setGraphic(empty ? null : btn);
-                }
-              };
-          return cell;
-        });
-
-    table.getColumns().add(actionColumn);
   }
 }

@@ -8,12 +8,9 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
+import javafx.scene.input.KeyEvent;
 
-// FIXME: In refactoring a lot of methods have been moved to LoginControl.
-// After testing that everything works, remove the commented code.
-
-public class LoginPageController {
+public class LoginPageController extends BasePageController<LoginControl> {
 
   /** Text field to input the email for the login. */
   @FXML private TextField emailTextField;
@@ -24,14 +21,8 @@ public class LoginPageController {
   /** Button to login. */
   @FXML private MFXButton loginButton;
 
-  /** Button to exit the application. */
-  @FXML private MFXButton exitButton;
-
   /** Draggable bar of the application. */
   @FXML private Node topPane;
-
-  /** Login functionality control class. */
-  private LoginControl loginControl;
 
   /** Button for toggling password mask. */
   @FXML private Button togglePswVisibilityButton;
@@ -44,33 +35,34 @@ public class LoginPageController {
    *
    * @param control
    */
-  public final void init(final LoginControl control) {
-    this.loginControl = control;
-    loginControl.setDraggable(topPane);
-    togglePswVisibilityButton.setGraphic(loginControl.getIcon("/images/loginPage/ClosedEye.png"));
+  @Override
+  protected void initialize(final LoginControl control) {
+    setDraggableNode(topPane);
+    togglePswVisibilityButton.setGraphic(getIcon("/images/loginPage/ClosedEye.png"));
     togglePswVisibilityButton.setOnAction(event -> togglePswVisibility());
 
-    passwordTextField
-        .getScene()
-        .setOnKeyPressed(
-            event -> {
-              if (event.getCode().toString().equals("ENTER")) {
-                loginButtonAction(new ActionEvent(passwordTextField, null));
-              }
-              if (event.getCode().toString().equals("T") && event.isControlDown()) {
-                togglePswVisibility();
-              }
-            });
-    togglePswVisibilityButton.setOnKeyPressed(
-        event -> {
-          if (event.getCode().toString().equals("ENTER")) {
-            togglePswVisibilityButton.fireEvent(new ActionEvent(passwordTextField, null));
-            event.consume();
-          }
-        });
+    passwordTextField.getScene().setOnKeyPressed(this::handleKeyPressed);
+    togglePswVisibilityButton.setOnKeyPressed(this::handleToggleKeyPressed);
   }
 
-  // ? @zGenny: there's a reason for this method to be public and final?
+  private void handleKeyPressed(final KeyEvent event) {
+    String keyCode = event.getCode().toString();
+    if (keyCode.equals("ENTER")) {
+      loginButtonAction(new ActionEvent(passwordTextField, null));
+    }
+    if (keyCode.equals("T") && event.isControlDown()) {
+      togglePswVisibility();
+    }
+  }
+
+  private void handleToggleKeyPressed(final KeyEvent event) {
+    String keyCode = event.getCode().toString();
+    if (keyCode.equals("ENTER")) {
+      togglePswVisibilityButton.fireEvent(new ActionEvent(passwordTextField, null));
+      event.consume();
+    }
+  }
+
   /**
    * On loginButton click, retrieves login data and checks if they are correct. In such case, it
    * loads the next page.
@@ -79,39 +71,25 @@ public class LoginPageController {
    */
   @FXML
   final void loginButtonAction(final ActionEvent event) {
-    Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-    loginControl.login(
-        stage,
-        emailTextField.getText(),
+    String password =
         passwordTextField.isVisible()
             ? passwordTextField.getText()
-            : plainPasswordTextField.getText());
-  }
-
-  // FIXME: Renamed the button to match naming convention.
-  // If given name was important for JFX implementation, fix it there.
-  // ? @zGenny: there's a reason for this method to be public and final?
-  /**
-   * On exitButton click, it shows a confirmation alert. If the user confirms, it closes the
-   * application.
-   *
-   * @param event the event that triggered the method
-   */
-  @FXML
-  final void exitButtonAction(final ActionEvent event) {
-    loginControl.exit();
+            : plainPasswordTextField.getText();
+    getControl().login(emailTextField.getText(), password);
   }
 
   private void togglePswVisibility() {
-    if (passwordTextField.isVisible()) {
-      togglePswVisibilityButton.setGraphic(loginControl.getIcon("/images/loginPage/Eye.png"));
+    boolean passwordVisible = passwordTextField.isVisible();
+    togglePswVisibilityButton.setGraphic(
+        getIcon(passwordVisible ? "/images/loginPage/Eye.png" : "/images/loginPage/ClosedEye.png"));
+
+    if (passwordVisible) {
       plainPasswordTextField.setText(passwordTextField.getText());
     } else {
-      togglePswVisibilityButton.setGraphic(loginControl.getIcon("/images/loginPage/ClosedEye.png"));
       passwordTextField.setText(plainPasswordTextField.getText());
     }
 
-    passwordTextField.setVisible(!passwordTextField.isVisible());
-    plainPasswordTextField.setVisible(!plainPasswordTextField.isVisible());
+    passwordTextField.setVisible(!passwordVisible);
+    plainPasswordTextField.setVisible(passwordVisible);
   }
 }

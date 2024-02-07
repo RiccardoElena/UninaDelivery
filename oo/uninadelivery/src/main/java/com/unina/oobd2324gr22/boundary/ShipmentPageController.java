@@ -7,11 +7,9 @@ import com.unina.oobd2324gr22.entity.DTO.Product;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -20,30 +18,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
 
-public class ShipmentPageController {
-
-  /** Shipment selection functionality control class. */
-  private OrdersHandlingControl ordersHandlingControl;
-
-  /** Back button. */
-  @FXML private Button backButton;
+public class ShipmentPageController extends NonLoginPageController<OrdersHandlingControl> {
 
   /** Border pane. */
   @FXML private BorderPane borderPane;
-
-  /** Home button. */
-  @FXML private Button homeButton;
-
-  /** Button to exit the application. */
-  @FXML private Button exitButton;
-
-  /** Button to minimize the application. */
-  @FXML private Button minimizeButton;
-
-  /** Button to resize the application. */
-  @FXML private Button resizeButton;
 
   /** Button to open the orders page. */
   @FXML private AnchorPane titleBar;
@@ -92,27 +71,21 @@ public class ShipmentPageController {
    *
    * @param control the Orders selection functionality control class
    */
-  public final void init(final OrdersHandlingControl control) {
-    this.ordersHandlingControl = control;
+  @Override
+  public final void initialize(final OrdersHandlingControl control) {
+
+    setDraggableNode(titleBar);
     this.displayOrderData();
-    ordersHandlingControl.setDraggable(titleBar);
-    Platform.runLater(
-        () -> {
-          Stage stage = (Stage) borderPane.getScene().getWindow();
-          ordersHandlingControl.setResizable(stage);
-        });
 
     this.setTableColumns();
 
-    shipmentsTable.setItems(ordersHandlingControl.getTestShipments());
+    shipmentsTable.setItems(getControl().getTestShipments());
 
     this.setDatePickerLowerBound();
-
-    ordersHandlingControl.setNavigationButtons(homeButton, backButton);
   } // ! end initialize
 
   private void displayOrderData() {
-    Order order = ordersHandlingControl.getOrder();
+    Order order = getControl().getOrder();
     if (order == null) {
       return;
     }
@@ -155,7 +128,7 @@ public class ShipmentPageController {
   }
 
   private String getDayCellStyle(final LocalDate item) {
-    if (item.isBefore(ordersHandlingControl.getOrder().getExpectedDeliveryDate().plusDays(1))) {
+    if (item.isBefore(getControl().getOrder().getExpectedDeliveryDate().plusDays(1))) {
       return "-fx-background-color: -fx-secondary-color; -fx-text-fill: -fx-primary-color;";
     } else {
       return "-fx-background-color: red; -fx-text-fill: white;";
@@ -177,7 +150,7 @@ public class ShipmentPageController {
     transportTableColumn.setCellValueFactory(
         cellData ->
             new SimpleStringProperty(String.valueOf(cellData.getValue().getTransport().getId())));
-    ordersHandlingControl.setTableFunctionality(shipmentsTable);
+    setTableFunctionality(shipmentsTable);
   }
 
   /**
@@ -185,9 +158,10 @@ public class ShipmentPageController {
    *
    * @param event the event that triggered the action
    */
+  @Override
   @FXML
   void exitButtonAction(final ActionEvent event) {
-    ordersHandlingControl.exit();
+    getControl().exit();
   }
 
   /**
@@ -195,43 +169,9 @@ public class ShipmentPageController {
    *
    * @param event the event that triggered the action
    */
+  @Override
   @FXML
   void minimizeButtonAction(final ActionEvent event) {
-    ordersHandlingControl.minimize();
-  }
-
-  /**
-   * Button to resize the window.
-   *
-   * @param event the event that triggered the action
-   */
-  @FXML
-  void resizeButtonAction(final ActionEvent event) {
-    Stage stage = (Stage) resizeButton.getScene().getWindow();
-    stage.setMaximized(!stage.isMaximized());
-  }
-
-  /**
-   * Button to go back to the previous page.
-   *
-   * @param event the event that triggered the action
-   */
-  @FXML
-  void backButtonAction(final ActionEvent event) {
-    ordersHandlingControl.returnToOrdersPage();
-  }
-
-  /**
-   * Button to go back to the home page.
-   *
-   * @param event the event that triggered the action
-   */
-  @FXML
-  void homeButtonAction(final ActionEvent event) {
-    try {
-      ordersHandlingControl.returnToHomePage();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    getControl().minimize();
   }
 }

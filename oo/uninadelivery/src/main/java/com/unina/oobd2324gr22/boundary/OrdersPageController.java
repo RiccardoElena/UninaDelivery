@@ -3,7 +3,6 @@ package com.unina.oobd2324gr22.boundary;
 import com.unina.oobd2324gr22.control.OrdersHandlingControl;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import java.time.LocalDate;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -19,10 +18,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-public class OrdersPageController {
-
-  /** Orders selection functionality control class. */
-  private OrdersHandlingControl ordersHandlingControl;
+public class OrdersPageController extends NonLoginPageController<OrdersHandlingControl> {
 
   /** Custom title bar. */
   @FXML private AnchorPane titleBar;
@@ -89,37 +85,13 @@ public class OrdersPageController {
    *
    * @param control the Orders selection functionality control class
    */
-  public final void init(final OrdersHandlingControl control) {
+  @Override
+  public final void initialize(final OrdersHandlingControl control) {
+    setDraggableNode(titleBar);
 
-    this.setOrdersHandlingControl(control);
-
-    ordersHandlingControl.setDraggable(titleBar);
-
-    Platform.runLater(
-        () -> {
-          Stage stage = (Stage) borderPane.getScene().getWindow();
-          ordersHandlingControl.setResizable(stage);
-        });
-
-    this.setTableColumns();
-
-    ordersHandlingControl.setNavigationButtons(homeButton);
-
-    // FIXME: this line is using a test function with dummy data
-    // when DB connection is implemented, this line should be changed
-    ordersTable.setItems(ordersHandlingControl.getTestOrders());
-
+    setTableColumns();
+    ordersTable.setItems(getControl().getTestOrders());
     updateEndDatePickerAccordingToStart();
-  } // ! end initialize
-
-  /**
-   * Set Orders selection functionality control class.
-   *
-   * @param control the Orders selection functionality control class
-   */
-  @FXML
-  public void setOrdersHandlingControl(final OrdersHandlingControl control) {
-    this.ordersHandlingControl = control;
   }
 
   /**
@@ -128,9 +100,10 @@ public class OrdersPageController {
    *
    * @param event
    */
+  @Override
   @FXML
   public final void exitButtonAction(final ActionEvent event) {
-    ordersHandlingControl.exit();
+    getControl().exit();
   }
 
   /**
@@ -138,9 +111,10 @@ public class OrdersPageController {
    *
    * @param event the event that triggered the method
    */
+  @Override
   @FXML
   public final void minimizeButtonAction(final ActionEvent event) {
-    ordersHandlingControl.minimize();
+    getControl().minimize();
   }
 
   /**
@@ -148,6 +122,7 @@ public class OrdersPageController {
    *
    * @param event
    */
+  @Override
   @FXML
   public final void resizeButtonAction(final ActionEvent event) {
     Stage stage = (Stage) resizeButton.getScene().getWindow();
@@ -161,8 +136,9 @@ public class OrdersPageController {
    */
   @FXML
   public final void filterButtonAction(final ActionEvent event) {
-    ordersHandlingControl.filterOrders(
-        clientTextField.getText(), startDatePicker.getValue(), endDatePicker.getValue());
+    getControl()
+        .filterOrders(
+            clientTextField.getText(), startDatePicker.getValue(), endDatePicker.getValue());
   }
 
   private void updateEndDatePickerAccordingToStart() {
@@ -200,37 +176,30 @@ public class OrdersPageController {
     supplierColumn.setCellValueFactory(new PropertyValueFactory<>("Product"));
     emissionDateColumn.setCellValueFactory(new PropertyValueFactory<>("EmissionDate"));
     isExpressColumn.setCellValueFactory(new PropertyValueFactory<>("IsExpress"));
-    isExpressColumn.setCellFactory(
-        column ->
-            new TableCell<Order, Boolean>() {
-              @Override
-              public void updateItem(final Boolean item, final boolean empty) {
-                super.updateItem(item, empty);
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                  setText(null);
-                } else {
-                  setText(item ? "⚡" : "🐌"); // Emoji per true e false
-                }
-              }
-            });
+    isExpressColumn.setCellFactory(column -> createExpressCell());
     extraWarrantyColumn.setCellValueFactory(new PropertyValueFactory<>("ExtraWarranty"));
     quantityColumn.setCellValueFactory(new PropertyValueFactory<>("Quantity"));
-
-    // TODO! @zGenny: we can consider to add the getAccountEmail method to the
-    // Order class if this makes the code more readable
     clientColumn.setCellValueFactory(
         cellData -> new SimpleStringProperty(cellData.getValue().getAccount().getEmail()));
-    // Same here!
     productColumn.setCellValueFactory(
         cellData -> new SimpleStringProperty(cellData.getValue().getProduct().getName()));
     supplierColumn.setCellValueFactory(
         cellData -> new SimpleStringProperty(cellData.getValue().getProduct().getSupplier()));
+    setTableFunctionality(ordersTable, "Azioni", "Crea", getControl()::execAction);
+  }
 
-    // this.addButtonToTable();
-
-    ordersHandlingControl.setTableFunctionality(
-        ordersTable, "Azioni", "Crea", ordersHandlingControl::execAction);
+  private TableCell<Order, Boolean> createExpressCell() {
+    return new TableCell<>() {
+      @Override
+      public void updateItem(final Boolean item, final boolean empty) {
+        super.updateItem(item, empty);
+        if (item == null || empty) {
+          setText(null);
+        } else {
+          setText(item ? "⚡" : "🐌"); // Emoji for true and false
+        }
+      }
+    };
   }
 
   /**
@@ -238,9 +207,10 @@ public class OrdersPageController {
    *
    * @param event the event that triggered the action
    */
+  @Override
   @FXML
   void backButtonAction(final ActionEvent event) {
-    ordersHandlingControl.returnToOrdersPage();
+    getControl().returnToOrdersPage();
   }
 
   /**
@@ -248,10 +218,11 @@ public class OrdersPageController {
    *
    * @param event the event that triggered the action
    */
+  @Override
   @FXML
   void homeButtonAction(final ActionEvent event) {
     try {
-      ordersHandlingControl.returnToHomePage();
+      getControl().returnToHomePage();
     } catch (Exception e) {
       e.printStackTrace();
     }
