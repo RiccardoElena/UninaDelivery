@@ -56,53 +56,48 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
     Platform.runLater(
         () -> {
           Stage stage = getControl().getStage();
-
           Scene scene = stage.getScene();
           scene.setCursor(Cursor.SE_RESIZE);
-
-          scene.setOnMouseMoved(
-              event -> {
-                double x = event.getX();
-                double y = event.getY();
-                double width = stage.getWidth();
-                double height = stage.getHeight();
-
-                // Change cursor icon if we're near the edge of the stage
-                if (x > width - RESIZE_MARGIN || y > height - RESIZE_MARGIN || x < RESIZE_MARGIN) {
-                  System.err.println(x + " " + y + " " + width + " " + height);
-                  scene.setCursor(Cursor.SE_RESIZE);
-                } else {
-                  scene.setCursor(Cursor.DEFAULT);
-                }
-              });
-
-          scene.setOnMouseDragged(
-              event -> {
-                double x = event.getX();
-                double y = event.getY();
-                double screenWidth = event.getScreenX();
-                double newWidth = Math.max(x, MIN_WIDTH);
-                double newHeight = Math.max(y, MIN_HEIGHT);
-
-                // Only resize if the mouse is near the edge of the stage
-                if (x > stage.getWidth() - RESIZE_MARGIN) {
-                  stage.setWidth(newWidth);
-                }
-                if (y > stage.getHeight() - RESIZE_MARGIN) {
-                  stage.setHeight(newHeight);
-                }
-
-                // Resize from the left (width and x position)
-                if (x < RESIZE_MARGIN) {
-                  newWidth = stage.getX() + stage.getWidth() - screenWidth;
-                  newWidth = Math.max(newWidth, MIN_WIDTH);
-                  stage.setWidth(newWidth);
-                  if (newWidth > MIN_WIDTH) {
-                    stage.setX(screenWidth);
-                  }
-                }
-              });
+          scene.setOnMouseDragged(this::handleSceneResizing);
+          scene.setOnMouseMoved(this::handleCursorSwitch);
         });
+  }
+
+  private void handleSceneResizing(final MouseEvent event) {
+    Stage stage = getControl().getStage();
+    double x = event.getX();
+    double y = event.getY();
+    double screenWidth = event.getScreenX();
+    double newWidth = Math.max(x, MIN_WIDTH);
+    double newHeight = Math.max(y, MIN_HEIGHT);
+
+    if (x > stage.getWidth() - RESIZE_MARGIN) {
+      stage.setWidth(newWidth);
+    }
+    if (y > stage.getHeight() - RESIZE_MARGIN) {
+      stage.setHeight(newHeight);
+    }
+
+    if (x < RESIZE_MARGIN) {
+      newWidth = stage.getX() + stage.getWidth() - screenWidth;
+      newWidth = Math.max(newWidth, MIN_WIDTH);
+      stage.setWidth(newWidth);
+      if (newWidth > MIN_WIDTH) {
+        stage.setX(screenWidth);
+      }
+    }
+  }
+
+  private void handleCursorSwitch(final MouseEvent event) {
+    Stage stage = getControl().getStage();
+    Scene scene = stage.getScene();
+    double x = event.getX();
+    double y = event.getY();
+    double width = stage.getWidth();
+    double height = stage.getHeight();
+
+    boolean nearEdge = x > width - RESIZE_MARGIN || y > height - RESIZE_MARGIN || x < RESIZE_MARGIN;
+    scene.setCursor(nearEdge ? Cursor.SE_RESIZE : Cursor.DEFAULT);
   }
 
   /** Set navigation buttons base icon and hover effect. */
@@ -152,16 +147,6 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
   void resizeButtonAction(final ActionEvent event) {
     Stage stage = getControl().getStage();
     stage.setMaximized(!stage.isMaximized());
-  }
-
-  /**
-   * Button to go back to the previous page.
-   *
-   * @param event the event that triggered the action
-   */
-  @FXML
-  void backButtonAction(final ActionEvent event) {
-    getControl().returnToOrdersPage();
   }
 
   /**

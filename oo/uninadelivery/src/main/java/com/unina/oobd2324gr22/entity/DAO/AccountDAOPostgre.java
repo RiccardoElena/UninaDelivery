@@ -119,7 +119,7 @@ public class AccountDAOPostgre implements AccountDAO {
     try {
       st =
           con.prepareStatement(
-              "SELECT * FROM account NATURAL JOIN operator WHERE businessmail = ? AND"
+              "SELECT * FROM account NATURAL JOIN operator WHERE businessmail ILIKE ? AND"
                   + " password = ?");
       st.setString(1, bmail);
       st.setString(2, password);

@@ -8,14 +8,417 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" stylesheets="@../style/Dashboard.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.unina.oobd2324gr22.boundary.GraphPageController">
+<BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: -fx-default-bg;" stylesheets="@../style/Dashboard.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.unina.oobd2324gr22.boundary.GraphPageController">
+   <center>
+      <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="200.0" prefWidth="1050.0" BorderPane.alignment="CENTER">
+         <content>
+            <AnchorPane prefHeight="733.0" prefWidth="1050.0" style="-fx-background-color: -fx-default-bg;">
+               <children>
+                  <LineChart fx:id="chart" alternativeColumnFillVisible="true" layoutX="102.0" layoutY="162.0" legendVisible="false" prefHeight="419.0" prefWidth="819.0" title="Ordini Giornalieri" AnchorPane.leftAnchor="102.0" AnchorPane.rightAnchor="113.0" AnchorPane.topAnchor="162.0">
+                    <xAxis>
+                      <CategoryAxis label="Giorno" side="BOTTOM" tickLabelFill="#f7dba7">
+                           <cursor>
+                              <Cursor fx:constant="DEFAULT" />
+                           </cursor>
+                        </CategoryAxis>
+                    </xAxis>
+                    <yAxis>
+                      <NumberAxis label="N. Ordini" prefWidth="48.0" side="LEFT" tickLabelFill="#f7dba7" tickLabelGap="1.0">
+                           <cursor>
+                              <Cursor fx:constant="DEFAULT" />
+                           </cursor>
+                           <tickLabelFont>
+                              <Font size="11.0" />
+                           </tickLabelFont>
+                        </NumberAxis>
+                    </yAxis>
+                     <cursor>
+                        <Cursor fx:constant="CROSSHAIR" />
+                     </cursor>
+                  </LineChart>
+                  <ComboBox fx:id="monthComboBox" layoutX="354.0" layoutY="111.0" prefWidth="150.0" promptText="Anno" AnchorPane.leftAnchor="354.0" />
+                  <ComboBox fx:id="yearComboBox" layoutX="150.0" layoutY="111.0" prefWidth="150.0" promptText="Mese" AnchorPane.leftAnchor="150.0" />
+                  <Label layoutX="152.0" layoutY="45.0" prefHeight="60.0" prefWidth="392.0" text="Resoconto Mensile" AnchorPane.leftAnchor="152.0" AnchorPane.rightAnchor="490.0">
+                     <font>
+                        <Font name="System Bold" size="48.0" />
+                     </font>
+                  </Label>
+                  <VBox alignment="CENTER" layoutY="569.0" prefHeight="1521.0" prefWidth="1063.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.5">
+                     <children>
+                        <HBox alignment="CENTER" prefHeight="73.0" prefWidth="1080.0">
+                           <children>
+                              <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="Ordini Del Mese" textFill="#f5d9a6" HBox.hgrow="ALWAYS">
+                                 <font>
+                                    <Font name="System Bold" size="52.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER" prefHeight="73.0" prefWidth="1080.0">
+                           <children>
+                              <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="Ordine Con Più Prodotti" textFill="#f5d9a6" HBox.hgrow="ALWAYS">
+                                 <font>
+                                    <Font name="System Bold" size="48.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <VBox.margin>
+                              <Insets top="15.0" />
+                           </VBox.margin>
+                        </HBox>
+                        <HBox alignment="TOP_CENTER" prefHeight="142.0" prefWidth="1080.0">
+                           <children>
+                              <VBox alignment="CENTER" maxHeight="-Infinity" prefHeight="58.0" prefWidth="780.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" styleClass="light-background" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
+                                       <children>
+                                          <Label fx:id="orderIdLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderId} " HBox.hgrow="ALWAYS">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="orderExpectedDeliveryDateLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderCost}">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
+                                       <children>
+                                          <Label fx:id="orderProductLabel" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderProduct}">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="orderAddressLabel" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderAccount}">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                                 <HBox.margin>
+                                    <Insets left="150.0" right="150.0" />
+                                 </HBox.margin>
+                              </VBox>
+                           </children>
+                           <VBox.margin>
+                              <Insets bottom="15.0" />
+                           </VBox.margin>
+                        </HBox>
+                        <HBox alignment="CENTER" prefHeight="73.0" prefWidth="1080.0">
+                           <children>
+                              <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="Ordine Con Meno Prodotti" textFill="#f5d9a6" HBox.hgrow="ALWAYS">
+                                 <font>
+                                    <Font name="System Bold" size="48.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <VBox.margin>
+                              <Insets top="15.0" />
+                           </VBox.margin>
+                        </HBox>
+                        <HBox alignment="TOP_CENTER" prefHeight="142.0" prefWidth="1080.0">
+                           <children>
+                              <VBox alignment="CENTER" maxHeight="-Infinity" prefHeight="58.0" prefWidth="780.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" styleClass="light-background" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
+                                       <children>
+                                          <Label fx:id="orderIdLabel1" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestProductNumberOrderId} " HBox.hgrow="ALWAYS">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="orderExpectedDeliveryDateLabel1" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{owestProductNumberOrderCosto}">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
+                                       <children>
+                                          <Label fx:id="orderProductLabel1" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{owestProductNumberOrderProduct}">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="orderAddressLabel1" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{owestProductNumberOrderAccount}">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                                 <HBox.margin>
+                                    <Insets left="150.0" right="150.0" />
+                                 </HBox.margin>
+                              </VBox>
+                           </children>
+                           <VBox.margin>
+                              <Insets bottom="15.0" />
+                           </VBox.margin>
+                        </HBox>
+                        <HBox alignment="CENTER" prefHeight="73.0" prefWidth="1080.0">
+                           <children>
+                              <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="Ordine Più costoso" textFill="#f5d9a6" HBox.hgrow="ALWAYS">
+                                 <font>
+                                    <Font name="System Bold" size="48.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <VBox.margin>
+                              <Insets top="15.0" />
+                           </VBox.margin>
+                        </HBox>
+                        <HBox alignment="TOP_CENTER" prefHeight="142.0" prefWidth="1080.0">
+                           <children>
+                              <VBox alignment="CENTER" maxHeight="-Infinity" prefHeight="58.0" prefWidth="780.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" styleClass="light-background" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
+                                       <children>
+                                          <Label fx:id="orderIdLabel2" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestCostOrderId} " HBox.hgrow="ALWAYS">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="orderExpectedDeliveryDateLabel2" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1372.0" text="{highestCostOrderCost}">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
+                                       <children>
+                                          <Label fx:id="orderProductLabel2" alignment="CENTER" prefHeight="26.0" prefWidth="1144.0" text="{highestCostOrderProduct}">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="orderAddressLabel2" alignment="CENTER" prefHeight="26.0" prefWidth="1313.0" text="{highestCostOrderAccount}">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                                 <HBox.margin>
+                                    <Insets left="150.0" right="150.0" />
+                                 </HBox.margin>
+                              </VBox>
+                           </children>
+                           <VBox.margin>
+                              <Insets bottom="15.0" />
+                           </VBox.margin>
+                        </HBox>
+                        <HBox alignment="CENTER" prefHeight="73.0" prefWidth="1080.0">
+                           <children>
+                              <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="Ordine Meno Costoso" textFill="#f5d9a6" HBox.hgrow="ALWAYS">
+                                 <font>
+                                    <Font name="System Bold" size="48.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <VBox.margin>
+                              <Insets top="15.0" />
+                           </VBox.margin>
+                        </HBox>
+                        <HBox alignment="TOP_CENTER" prefHeight="142.0" prefWidth="1080.0">
+                           <children>
+                              <VBox alignment="CENTER" maxHeight="-Infinity" prefHeight="58.0" prefWidth="780.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" styleClass="light-background" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
+                                       <children>
+                                          <Label fx:id="orderIdLabel3" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderId} " HBox.hgrow="ALWAYS">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="orderExpectedDeliveryDateLabel3" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderCost}">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
+                                       <children>
+                                          <Label fx:id="orderProductLabel3" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderProduct}">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="orderAddressLabel3" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderAccount}">
+                                             <font>
+                                                <Font name="System Bold" size="17.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                                 <HBox.margin>
+                                    <Insets left="150.0" right="150.0" />
+                                 </HBox.margin>
+                              </VBox>
+                           </children>
+                           <VBox.margin>
+                              <Insets bottom="15.0" />
+                           </VBox.margin>
+                        </HBox>
+                        <HBox alignment="CENTER" prefHeight="73.0" prefWidth="1080.0">
+                           <children>
+                              <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="Clienti Del Mese" textFill="#f5d9a6" HBox.hgrow="ALWAYS">
+                                 <font>
+                                    <Font name="System Bold" size="52.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox prefHeight="468.0" prefWidth="1063.0">
+                           <children>
+                              <VBox alignment="CENTER" fillWidth="false" maxHeight="-Infinity" prefHeight="600.0" prefWidth="315.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" styleClass="light-background" HBox.hgrow="ALWAYS">
+                                 <HBox.margin>
+                                    <Insets left="150.0" right="60.0" />
+                                 </HBox.margin>
+                                 <children>
+                                    <Label fx:id="orderIdLabel31" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="Maggior Numero di Ordini">
+                                       <font>
+                                          <Font name="System Bold" size="24.0" />
+                                       </font>
+                                    </Label>
+                                    <Pane prefHeight="180.0" prefWidth="270.0" VBox.vgrow="NEVER">
+                                       <children>
+                                          <ImageView fitHeight="149.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" x="63.0" y="15.0">
+                                             <image>
+                                                <Image url="@../images/defaultUser.jpg" />
+                                             </image>
+                                          </ImageView>
+                                          <ImageView fitHeight="149.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" x="63.0" y="15.0">
+                                             <image>
+                                                <Image url="@../images/defaultUserMask.png" />
+                                             </image>
+                                          </ImageView>
+                                       </children>
+                                    </Pane>
+                                    <Label fx:id="orderIdLabel32" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestNumberNameSurname} ">
+                                       <font>
+                                          <Font name="System Bold" size="17.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets bottom="20.0" top="20.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                    <Label fx:id="orderIdLabel33" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestNumberEmail} ">
+                                       <font>
+                                          <Font name="System Bold" size="17.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets bottom="20.0" top="20.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                    <Label fx:id="orderIdLabel331" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{OrderNumber} ">
+                                       <font>
+                                          <Font name="System Bold" size="17.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets bottom="20.0" top="20.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                 </padding>
+                              </VBox>
+                              <VBox alignment="CENTER" fillWidth="false" maxHeight="-Infinity" prefHeight="600.0" prefWidth="315.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" styleClass="light-background" HBox.hgrow="ALWAYS">
+                                 <HBox.margin>
+                                    <Insets left="60.0" right="150.0" />
+                                 </HBox.margin>
+                                 <children>
+                                    <Label fx:id="orderIdLabel311" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="Spesa Maggiore">
+                                       <font>
+                                          <Font name="System Bold" size="24.0" />
+                                       </font>
+                                    </Label>
+                                    <Pane prefHeight="180.0" prefWidth="270.0" VBox.vgrow="NEVER">
+                                       <children>
+                                          <ImageView fitHeight="149.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" x="63.0" y="15.0">
+                                             <image>
+                                                <Image url="@../images/defaultUser.jpg" />
+                                             </image>
+                                          </ImageView>
+                                          <ImageView fitHeight="149.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" x="63.0" y="15.0">
+                                             <image>
+                                                <Image url="@../images/defaultUserMask.png" />
+                                             </image>
+                                          </ImageView>
+                                       </children>
+                                    </Pane>
+                                    <Label fx:id="orderIdLabel321" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestCostNameSurname} ">
+                                       <font>
+                                          <Font name="System Bold" size="17.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets bottom="20.0" top="20.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                    <Label fx:id="orderIdLabel332" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestCostEmail} ">
+                                       <font>
+                                          <Font name="System Bold" size="17.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets bottom="20.0" top="20.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                    <Label fx:id="orderIdLabel3311" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{MoneySpent} ">
+                                       <font>
+                                          <Font name="System Bold" size="17.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets bottom="20.0" top="20.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                 </padding>
+                              </VBox>
+                           </children>
+                           <VBox.margin>
+                              <Insets bottom="20.0" top="20.0" />
+                           </VBox.margin>
+                        </HBox>
+                        <HBox alignment="CENTER" prefHeight="73.0" prefWidth="1080.0" />
+                     </children>
+                     <padding>
+                        <Insets top="20.0" />
+                     </padding>
+                  </VBox>
+               </children>
+            </AnchorPane>
+         </content>
+         <BorderPane.margin>
+            <Insets bottom="-1.0" left="-1.0" right="-1.0" top="-1.0" />
+         </BorderPane.margin>
+         <padding>
+            <Insets left="-1.0" />
+         </padding>
+      </ScrollPane>
+   </center>
    <top>
       <AnchorPane fx:id="titleBar" prefHeight="35.0" prefWidth="975.0" style="-fx-background-color: #F7DBA7;" styleClass="light-background" BorderPane.alignment="CENTER">
          <children>
@@ -77,36 +480,10 @@
          </children>
       </AnchorPane>
    </top>
-   <center>
-      <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: -fx-default-bg;" BorderPane.alignment="CENTER">
+   <left>
+      <AnchorPane prefHeight="685.0" prefWidth="0.0" BorderPane.alignment="CENTER">
          <children>
-            <LineChart fx:id="chart" alternativeColumnFillVisible="true" layoutX="102.0" layoutY="181.0" legendVisible="false" prefHeight="400.0" prefWidth="865.0" title="Ordini Giornalieri" AnchorPane.bottomAnchor="104.0" AnchorPane.leftAnchor="102.0" AnchorPane.rightAnchor="113.0" AnchorPane.topAnchor="181.0">
-              <xAxis>
-                <CategoryAxis label="Giorno" side="BOTTOM" tickLabelFill="#f7dba7">
-                     <cursor>
-                        <Cursor fx:constant="DEFAULT" />
-                     </cursor></CategoryAxis>
-              </xAxis>
-              <yAxis>
-                <NumberAxis label="N. Ordini" prefWidth="48.0" side="LEFT" tickLabelFill="#f7dba7" tickLabelGap="1.0">
-                     <cursor>
-                        <Cursor fx:constant="DEFAULT" />
-                     </cursor>
-                     <tickLabelFont>
-                        <Font size="11.0" />
-                     </tickLabelFont></NumberAxis>
-              </yAxis>
-               <cursor>
-                  <Cursor fx:constant="CROSSHAIR" />
-               </cursor>
-            </LineChart>
-            <Label layoutX="67.0" layoutY="611.0" text="Miglior cliente:" AnchorPane.bottomAnchor="57.0" />
-            <ComboBox fx:id="monthComboBox" layoutX="513.0" layoutY="132.0" prefWidth="150.0" AnchorPane.rightAnchor="417.0" />
-            <ComboBox fx:id="yearComboBox" layoutX="731.0" layoutY="132.0" prefWidth="150.0" AnchorPane.rightAnchor="199.0" />
-            <Label layoutX="574.0" layoutY="105.0" text="MESE" AnchorPane.rightAnchor="476.0" />
-            <Label layoutX="791.0" layoutY="105.0" text="ANNO" AnchorPane.rightAnchor="254.0" />
-            <Label layoutX="160.0" layoutY="611.0" text="{cliente.nome}" AnchorPane.bottomAnchor="57.0" />
-            <Button fx:id="homeButton" ellipsisString="" layoutX="5.0" layoutY="4.0" mnemonicParsing="false" onAction="#homeButtonAction" prefHeight="30.0" prefWidth="30.0" style="-fx-background-color: none;">
+            <Button fx:id="homeButton" ellipsisString="" mnemonicParsing="false" onAction="#homeButtonAction" prefHeight="30.0" prefWidth="30.0" style="-fx-background-color: none;">
                <graphic>
                   <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -119,6 +496,9 @@
                </padding>
             </Button>
          </children>
+         <BorderPane.margin>
+            <Insets left="5.0" top="4.0" />
+         </BorderPane.margin>
       </AnchorPane>
-   </center>
+   </left>
 </BorderPane>

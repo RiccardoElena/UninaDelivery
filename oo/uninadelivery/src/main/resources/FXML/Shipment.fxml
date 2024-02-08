@@ -20,7 +20,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: -fx-default-bg;" stylesheets="@../style/ShipmentPage.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.unina.oobd2324gr22.boundary.ShipmentPageController">
+<BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: -fx-default-bg;" stylesheets="@../style/Shipment.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.unina.oobd2324gr22.boundary.ShipmentPageController">
    <top>
       <AnchorPane fx:id="titleBar" prefHeight="35.0" prefWidth="975.0" style="-fx-background-color: #F7DBA7;" styleClass="light-background" BorderPane.alignment="CENTER">
          <children>

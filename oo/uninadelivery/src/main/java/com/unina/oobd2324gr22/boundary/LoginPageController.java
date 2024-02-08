@@ -2,6 +2,7 @@ package com.unina.oobd2324gr22.boundary;
 
 import com.unina.oobd2324gr22.control.LoginControl;
 import io.github.palexdev.materialfx.controls.MFXButton;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -36,7 +37,8 @@ public class LoginPageController extends BasePageController<LoginControl> {
     togglePswVisibilityButton.setGraphic(getIcon("/images/loginPage/ClosedEye.png"));
     togglePswVisibilityButton.setOnAction(event -> togglePswVisibility());
 
-    passwordTextField.getScene().setOnKeyPressed(this::handleKeyPressed);
+    Platform.runLater(() -> passwordTextField.getScene().setOnKeyPressed(this::handleKeyPressed));
+
     togglePswVisibilityButton.setOnKeyPressed(this::handleToggleKeyPressed);
   }
 

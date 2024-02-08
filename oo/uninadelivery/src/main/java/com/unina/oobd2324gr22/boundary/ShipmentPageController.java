@@ -79,6 +79,16 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
     this.setDatePickerLowerBound();
   } // ! end initialize
 
+  /**
+   * Button to go back to the previous page.
+   *
+   * @param event the event that triggered the action
+   */
+  @FXML
+  void backButtonAction(final ActionEvent event) {
+    getControl().goToOrdersPage();
+  }
+
   private void displayOrderData() {
     Order order = getControl().getOrder();
     if (order == null) {

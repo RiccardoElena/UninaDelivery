@@ -1,11 +1,15 @@
 package com.unina.oobd2324gr22.control;
 
+import com.unina.oobd2324gr22.boundary.BasePageController;
 import java.util.Optional;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
@@ -22,8 +26,141 @@ public abstract class BaseControl {
   /** Height of the eye icons. */
   static final int ICON_HEIGHT = 30;
 
+  /** Width of the window. */
+  private double width;
+
+  /** Height of the window. */
+  private double height;
+
+  /** Name of the page. */
+  private String fileName;
+
   /** Application stage. */
   private Stage stage;
+
+  /** Hook method for page launch. */
+  protected abstract void addSceneSettings();
+
+  /**
+   * Template method for page launch.
+   *
+   * @param s the stage to set the scene on
+   * @throws Exception if the scene cannot be set
+   */
+  public void setScene(final Stage s) throws Exception {
+    this.setStage(s);
+    addSceneSettings();
+
+    launchScene();
+  }
+
+  private <T extends BasePageController<BaseControl>> void launchScene() throws Exception {
+    try {
+      FXMLLoader loader =
+          new FXMLLoader(getClass().getResource("/FXML/" + getFileName() + ".fxml"));
+      Parent root = loader.load();
+      T pageController = loader.getController();
+
+      setupStage();
+
+      pageController.init(this);
+
+      getStage().setScene(setupScene(root));
+      getStage().show();
+    } catch (IllegalStateException e) {
+      e.printStackTrace();
+      System.err.println(
+          "Errore nel caricamento della pagina. Assicurarsi di aver specificato il valore corretto"
+              + " per il campo fileName del controllore.");
+      System.err.println("fileName attuale: " + fileName);
+    }
+  }
+
+  private void setupStage() {
+    stage.setWidth(width);
+    stage.setHeight(height);
+  }
+
+  private Scene setupScene(final Parent root) {
+    Scene scene = new Scene(root, width, height);
+    try {
+      scene
+          .getStylesheets()
+          .add(LoginControl.class.getResource("/style/" + fileName + ".css").toExternalForm());
+    } catch (IllegalStateException e) {
+      e.printStackTrace();
+      System.err.println(
+          "Errore nel caricamento dello Stile. Assicurarsi di aver specificato il valore corretto"
+              + " per il campo fileName del controllore.");
+      System.err.println("fileName attuale: " + fileName);
+    }
+    return scene;
+  }
+
+  /**
+   * Get the FXML file path.
+   *
+   * @return the FXML file path
+   */
+  public String getFileName() {
+    return fileName;
+  }
+
+  /**
+   * Set the FXML file path.
+   *
+   * @param name the FXML file path
+   */
+  public void setFileName(final String name) {
+    this.fileName = name;
+  }
+
+  /**
+   * Get the width of the window.
+   *
+   * @return the width of the window
+   */
+  public double getWidth() {
+    return width;
+  }
+
+  /**
+   * Set the width of the window.
+   *
+   * @param w the width of the window
+   */
+  public void setWidth(final double w) {
+    this.width = w;
+  }
+
+  /**
+   * Get the height of the window.
+   *
+   * @return the height of the window
+   */
+  public double getHeight() {
+    return height;
+  }
+
+  /**
+   * Set the height of the window.
+   *
+   * @param h the height of the window
+   */
+  public void setHeight(final double h) {
+    this.height = h;
+  }
+
+  /**
+   * Set window sizes.
+   *
+   * @param h the height of the window
+   * @param w the width of the window
+   */
+  public void setSizes(final double w, final double h) {
+    setHeight(h);
+    setWidth(w);
+  }
 
   /**
    * Show an alert.
@@ -99,6 +236,5 @@ public abstract class BaseControl {
    */
   public void setStage(final Stage currStage) {
     this.stage = currStage;
-    System.err.println("hellooo");
   }
 }

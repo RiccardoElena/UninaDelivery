@@ -1,13 +1,29 @@
 @import url('Main.css');
 @import url('components/TitleBar.css');
 
-/* CSS per evidenziare il nodo al passaggio del mouse */
 .chart-line-symbol:hover {
-  -fx-background-color: -fx-primary-color; /* Cambia colore */
-  -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 5, 0, 0, 0); /* Aggiunge un effetto ombra per evidenziarlo ulteriormente */
-  -fx-padding: 40px; /* Rende il nodo più grande */
+  -fx-background-color: -fx-primary-color;
+  -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 5, 0, 0, 0);
+  -fx-padding: 40px;
+  -fx-cursor: crosshair;
 }
 
 .popup .label {
   -fx-text-fill: -fx-primary-color;
+  -fx-background-color: white; 
+  -fx-padding: 10; 
+}
+
+.scroll-pane {
+  -fx-background-color:-fx-default-bg;
+}
+
+.scroll-pane .viewport {
+  -fx-background-color:-fx-default-bg;
+  
+}
+
+.scroll-bar:vertical, .scroll-bar:horizontal {
+  -fx-opacity: 0;
+  -fx-width: 0;
 }

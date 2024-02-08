@@ -1,26 +1,20 @@
 package com.unina.oobd2324gr22.control;
 
-import com.unina.oobd2324gr22.boundary.LoginPageController;
 import com.unina.oobd2324gr22.entity.DAO.AccountDAO;
 import com.unina.oobd2324gr22.entity.DAO.AccountDAOPostgre;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 import com.unina.oobd2324gr22.utils.SHA256;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.stage.Stage;
-
 
 public class LoginControl extends BaseControl {
 
   /** Width of the window. */
-  protected static final int WIDTH = 600;
+  protected static final double WIDTH = 600;
 
   /** Height of the window. */
-  protected static final int HEIGHT = 400;
+  protected static final double HEIGHT = 400;
 
   /** Account Data Access Object. */
   private AccountDAO accountDAO = new AccountDAOPostgre();
@@ -28,29 +22,11 @@ public class LoginControl extends BaseControl {
   /** Orders selection functionality control class. */
   private DashboardControl dashboardControl = new DashboardControl();
 
-  /**
-   * Set Login scene on Stage.
-   *
-   * @param stage the stage to set the scene on
-   * @throws Exception if the scene cannot be set
-   */
-  public void setScene(final Stage stage) throws Exception {
-    this.setStage(stage);
-    System.err.println("wow2 " + this.getStage());
-
-    FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/login.fxml"));
-    Parent root = loader.load();
-    LoginPageController pageController = loader.getController();
-    stage.setWidth(WIDTH);
-    stage.setHeight(HEIGHT);
-    Scene scene = new Scene(root, WIDTH, HEIGHT);
-    scene
-        .getStylesheets()
-        .add(LoginControl.class.getResource("/style/LoginPage.css").toExternalForm());
-    pageController.init(this);
-
-    stage.setScene(scene);
-    stage.show();
+  /** Add page related scene settings. */
+  @Override
+  protected void addSceneSettings() {
+    setSizes(WIDTH, HEIGHT);
+    setFileName("login");
   }
 
   private void showErrorMessage(final String msg) {
@@ -64,7 +40,8 @@ public class LoginControl extends BaseControl {
 
   private boolean isOperatorEmail(final String email) {
     return Pattern.matches(
-        "^[A-Z]\\.([A-Za-z]+\\_[A-Za-z]+|[A-Za-z]+)[0-9]*@uninadelivery\\.operator\\.com$", email);
+        "^[a-zA-Z]\\.([a-zA-Z]+\\_[A-Za-z]+|[A-Za-z]+)[0-9]*@uninadelivery\\.operator\\.com$",
+        email);
   }
 
   /**

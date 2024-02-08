@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: -fx-default-bg;" stylesheets="@../style/LoginPage.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.unina.oobd2324gr22.boundary.LoginPageController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: -fx-default-bg;" stylesheets="@../style/Login.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.unina.oobd2324gr22.boundary.LoginPageController">
    <left>
       <AnchorPane prefHeight="400.0" prefWidth="220.0" BorderPane.alignment="CENTER">
          <children>
@@ -23,7 +23,7 @@
                   <Image url="@../images/UninaDelivery_logo.png" />
                </image>
             </ImageView>
-            <Label fx:id="copyright" layoutX="44.0" layoutY="339.0" text="All Rights Reserved © 2024">
+            <Label fx:id="copyright" layoutX="44.0" layoutY="339.0" style="-fx-font-style: italic;" text="All Rights Reserved © 2024">
                <font>
                   <Font name="System Italic" size="12.0" />
                </font></Label>
@@ -55,10 +55,13 @@
             </ImageView>
             <TextField fx:id="emailTextField" layoutX="80.0" layoutY="164.0" prefHeight="40.0" prefWidth="252.0" promptText="n.surname@uninadelivery.operator.com">
                <font>
-                  <Font size="10.0" />
+                  <Font size="14.0" />
                </font>
             </TextField>
-            <TextField fx:id="plainPasswordTextField" layoutX="80.0" layoutY="212.0" prefHeight="40.0" prefWidth="214.0" promptText="password" visible="false" />
+            <TextField fx:id="plainPasswordTextField" layoutX="80.0" layoutY="212.0" prefHeight="40.0" prefWidth="214.0" promptText="password" visible="false">
+               <font>
+                  <Font size="14.0" />
+               </font></TextField>
             <Button fx:id="togglePswVisibilityButton" layoutX="304.0" layoutY="224.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="23.0" style="-fx-background-color: none;">
                <graphic>
                   <ImageView fitHeight="28.0" fitWidth="34.0" pickOnBounds="true" preserveRatio="true">
@@ -89,7 +92,7 @@
             </ImageView>
             <PasswordField fx:id="passwordTextField" layoutX="80.0" layoutY="212.0" prefHeight="40.0" prefWidth="214.0" promptText="••••••••">
                <font>
-                  <Font size="10.0" />
+                  <Font size="14.0" />
                </font>
             </PasswordField>
          </children>

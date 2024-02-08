@@ -1,23 +1,39 @@
 package com.unina.oobd2324gr22.control;
 
 import com.unina.oobd2324gr22.entity.DTO.Operator;
-import javafx.scene.Cursor;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class NonLoginControl extends BaseControl {
+public abstract class NonLoginControl extends BaseControl {
 
   /** Size of the resize zone. */
   private static final int RESIZE_MARGIN = 5;
 
   /** Width of the window. */
-  protected static final int WIDTH = 1080;
+  protected static final double WIDTH = 1080;
 
   /** Height of the window. */
-  protected static final int HEIGHT = 720;
+  protected static final double HEIGHT = 720;
 
   /** Logged in operator. */
   private Operator loggedOperator;
+
+  /**
+   * Template method for page launch.
+   *
+   * @param s the stage to set the scene on
+   * @param op the operator that is logged in
+   * @throws Exception if the scene cannot be set
+   */
+  public void setScene(final Stage s, final Operator op) throws Exception {
+    setLoggedOperator(op);
+    super.setScene(s);
+  }
+
+  /** Add page related scene settings. */
+  @Override
+  protected void addSceneSettings() {
+    setSizes(Math.max(WIDTH, getStage().getWidth()), Math.max(HEIGHT, getStage().getHeight()));
+  }
 
   /** Minimize the window. */
   public void minimize() {
@@ -26,54 +42,6 @@ public class NonLoginControl extends BaseControl {
         e -> {
           getStage().setIconified(true);
           getStage().setOpacity(1.0);
-        });
-  }
-
-  /**
-   * Make the window resizable.
-   *
-   * @param primaryStage the stage to make resizable
-   */
-  public void setResizable(final Stage primaryStage) {
-    Scene scene = primaryStage.getScene();
-    scene.setCursor(Cursor.SE_RESIZE);
-    scene.setOnMouseMoved(
-        event -> {
-          double test2 = primaryStage.getHeight() - RESIZE_MARGIN;
-          double test1 = primaryStage.getWidth() - RESIZE_MARGIN;
-          // Change cursor icon if we're near the edge of the stage
-          if (event.getX() > primaryStage.getWidth() - RESIZE_MARGIN
-              || event.getY() > primaryStage.getHeight() - RESIZE_MARGIN
-              || event.getX() < RESIZE_MARGIN) {
-            System.err.println(event.getX() + " " + event.getY() + " " + test1 + " " + test2);
-            scene.setCursor(Cursor.SE_RESIZE);
-          } else {
-            scene.setCursor(Cursor.DEFAULT);
-          }
-        });
-    scene.setCursor(Cursor.SE_RESIZE);
-    scene.setOnMouseDragged(
-        event -> {
-          // Only resize if the mouse is near the edge of the stage
-          if (event.getX() > primaryStage.getWidth() - RESIZE_MARGIN) {
-            double newWidth = event.getX();
-            newWidth = Math.max(newWidth, WIDTH); // MIN_WIDTH is the minimum width
-            primaryStage.setWidth(newWidth);
-          }
-          if (event.getY() > primaryStage.getHeight() - RESIZE_MARGIN) {
-            double newHeight = event.getY();
-            newHeight = Math.max(newHeight, HEIGHT); // MIN_HEIGHT is the minimum height
-            primaryStage.setHeight(newHeight);
-          }
-          // Resize from the left (width and x position)
-          if (event.getX() < RESIZE_MARGIN) {
-            double newWidth = primaryStage.getX() + primaryStage.getWidth() - event.getScreenX();
-            newWidth = Math.max(newWidth, WIDTH);
-            primaryStage.setWidth(newWidth);
-            if (newWidth > WIDTH) {
-              primaryStage.setX(event.getScreenX());
-            }
-          }
         });
   }
 
@@ -101,16 +69,6 @@ public class NonLoginControl extends BaseControl {
     DashboardControl dashboardControl = new DashboardControl();
     try {
       dashboardControl.setScene(this.getStage(), this.getLoggedOperator());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  /** Go to the Orders page. */
-  public void returnToOrdersPage() {
-    OrdersHandlingControl ordersHandlingControl = new OrdersHandlingControl();
-    try {
-      ordersHandlingControl.setOrdersScene(this.getStage(), this.getLoggedOperator());
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -135,7 +135,7 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
         cellData -> new SimpleStringProperty(cellData.getValue().getProduct().getName()));
     supplierColumn.setCellValueFactory(
         cellData -> new SimpleStringProperty(cellData.getValue().getProduct().getSupplier()));
-    setTableFunctionality(ordersTable, "Azioni", "Crea", getControl()::execAction);
+    setTableFunctionality(ordersTable, "Azioni", "Crea", getControl()::goToShipmentPage);
   }
 
   private TableCell<Order, Boolean> createExpressCell() {

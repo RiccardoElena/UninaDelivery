@@ -1,14 +1,8 @@
 package com.unina.oobd2324gr22.control;
 
-import com.unina.oobd2324gr22.boundary.DashboardPageController;
-import com.unina.oobd2324gr22.entity.DTO.Operator;
 import java.util.Optional;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.stage.Stage;
 
 public class DashboardControl extends NonLoginControl {
 
@@ -18,38 +12,17 @@ public class DashboardControl extends NonLoginControl {
   /** Graph selection functionality control class. */
   private GraphControl graphControl = new GraphControl();
 
-  /**
-   * Set Orders scene on Stage.
-   *
-   * @param stage the stage to set the scene on
-   * @param op the logged in operator.
-   * @throws Exception if the scene cannot be set
-   */
-  public void setScene(final Stage stage, final Operator op) throws Exception {
-    this.setLoggedOperator(op);
-    this.setStage(stage);
-    System.out.println("Logged2operator: " + this.getLoggedOperator());
-    FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/dashboard.fxml"));
-    Parent root = loader.load();
-    DashboardPageController pageController = loader.getController();
-    pageController.init(this);
-    System.err.println(
-        Math.max(stage.getWidth(), WIDTH) + " " + Math.max(stage.getHeight(), HEIGHT));
-    stage.setWidth(Math.max(stage.getWidth(), WIDTH));
-    stage.setHeight(Math.max(stage.getHeight(), HEIGHT));
-    Scene scene =
-        new Scene(root, Math.max(stage.getWidth(), WIDTH), Math.max(stage.getHeight(), HEIGHT));
-    scene
-        .getStylesheets()
-        .add(LoginControl.class.getResource("/style/Dashboard.css").toExternalForm());
-    stage.setScene(scene);
-    stage.show();
+  /** Add page related scene settings. */
+  @Override
+  protected void addSceneSettings() {
+    super.addSceneSettings();
+    setFileName("Dashboard");
   }
 
   /** Go to the Orders page. */
   public void goToOrdersHandlingPage() {
     try {
-      ordersControl.setOrdersScene(this.getStage(), this.getLoggedOperator());
+      ordersControl.setScene(this.getStage(), this.getLoggedOperator());
     } catch (Exception e) {
       e.printStackTrace();
       this.showAlert(
@@ -64,7 +37,7 @@ public class DashboardControl extends NonLoginControl {
   /** Go to the Monthly Reports page. */
   public void goToMonthlyReports() {
     try {
-      graphControl.setGraphScene(this.getStage(), this.getLoggedOperator());
+      graphControl.setScene(this.getStage(), this.getLoggedOperator());
     } catch (Exception e) {
       System.out.println(e.getMessage());
       this.showAlert(

@@ -1,11 +1,8 @@
 package com.unina.oobd2324gr22.control;
 
-import com.unina.oobd2324gr22.boundary.OrdersPageController;
-import com.unina.oobd2324gr22.boundary.ShipmentPageController;
 import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
-import com.unina.oobd2324gr22.entity.DTO.Operator;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Product;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
@@ -14,39 +11,20 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 
 public class OrdersHandlingControl extends NonLoginControl {
 
   /** Order selected. */
   private Order selectedOrder;
 
-  /**
-   * Set Orders scene on Stage.
-   *
-   * @param currStage the stage to set the scene on
-   * @param op the operator logged in
-   * @throws Exception if the scene cannot be set
-   */
-  public void setOrdersScene(final Stage currStage, final Operator op) throws Exception {
-    this.setLoggedOperator(op);
-    this.setStage(currStage);
-    FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Orders.fxml"));
-    Parent root = loader.load();
-    OrdersPageController pageController = loader.getController();
-    pageController.init(this);
-    Scene ordersScene =
-        new Scene(
-            root, Math.max(currStage.getWidth(), WIDTH), Math.max(currStage.getHeight(), HEIGHT));
-    ordersScene
-        .getStylesheets()
-        .add(LoginControl.class.getResource("/style/OrdersPage.css").toExternalForm());
-    currStage.setScene(ordersScene);
-    currStage.show();
-    return;
+  /** Alternative page to load. */
+  private String currPage = "Orders";
+
+  /** Add page related scene settings. */
+  @Override
+  protected void addSceneSettings() {
+    super.addSceneSettings();
+    setFileName(currPage);
   }
 
   // FIXME: to be changed to real functionality
@@ -55,11 +33,23 @@ public class OrdersHandlingControl extends NonLoginControl {
    *
    * @param order the order to execute the action on
    */
-  public void execAction(final Order order) {
+  public void goToShipmentPage(final Order order) {
     System.out.println("Hai cliccato su " + order);
     this.selectedOrder = order;
     try {
-      this.setShipmentScene();
+      this.currPage = "Shipment";
+      setScene(getStage(), getLoggedOperator());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  /** Go to the Orders page. */
+  public void goToOrdersPage() {
+    this.selectedOrder = null;
+    try {
+      this.currPage = "Orders";
+      setScene(this.getStage(), this.getLoggedOperator());
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -83,26 +73,6 @@ public class OrdersHandlingControl extends NonLoginControl {
     if (endingDate != null) {
       System.out.println("Filtering by ending date: " + endingDate);
     }
-  }
-
-  /**
-   * Set Orders scene on Stage.
-   *
-   * @throws Exception if the scene cannot be set
-   */
-  public void setShipmentScene() throws Exception {
-    Stage stage = this.getStage();
-    FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Shipment.fxml"));
-    Parent root = loader.load();
-    ShipmentPageController pageController = loader.getController();
-    pageController.init(this);
-    Scene shipmentScene =
-        new Scene(root, Math.max(stage.getWidth(), WIDTH), Math.max(stage.getHeight(), HEIGHT));
-    shipmentScene
-        .getStylesheets()
-        .add(LoginControl.class.getResource("/style/ShipmentPage.css").toExternalForm());
-    stage.setScene(shipmentScene);
-    stage.show();
   }
 
   /**

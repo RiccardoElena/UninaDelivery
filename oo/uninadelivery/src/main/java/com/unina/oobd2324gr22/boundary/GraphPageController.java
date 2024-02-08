@@ -2,9 +2,9 @@ package com.unina.oobd2324gr22.boundary;
 
 import com.unina.oobd2324gr22.control.GraphControl;
 import java.util.ArrayList;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -13,6 +13,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Popup;
+import javafx.util.Duration;
 
 public class GraphPageController extends NonLoginPageController<GraphControl> {
 
@@ -64,7 +65,7 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
       XYChart.Data<String, Number> data =
           new XYChart.Data<>(String.valueOf((i + 1)), getAverage(ordersData));
       average.getData().add(data);
-      setNodeOpacity(data.getNode());
+      Platform.runLater(() -> data.getNode().setOpacity(0.0));
       setPopupOnDataHover(data, "Media");
     }
     return average;
@@ -81,24 +82,30 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
     return ordersLine;
   }
 
-  private void setNodeOpacity(final Node node) {
-    Platform.runLater(() -> node.setOpacity(0.0));
-  }
-
   private void setPopupOnDataHover(final XYChart.Data<String, Number> data, final String label) {
     Popup popup = new Popup();
-    // label.setStyle("-fx-background-color: white; -fx-padding: 10; ");
+    PauseTransition pause = new PauseTransition(Duration.seconds(1));
     popup.getContent().add(new Label("" + label + ": " + data.getYValue()));
     data.nodeProperty()
         .addListener(
             (observable, oldValue, newValue) -> {
-              newValue.getStyleClass().addAll("chart-line-symbol", "light-background");
+              newValue.getStyleClass().addAll("chart-line-symbol");
               newValue.setOnMouseEntered(
-                  event -> {
-                    popup.show(
-                        chart.getScene().getWindow(), event.getScreenX(), event.getScreenY());
+                  mouseEvent -> {
+                    pause.setOnFinished(
+                        event -> {
+                          popup.show(
+                              chart.getScene().getWindow(),
+                              mouseEvent.getScreenX(),
+                              mouseEvent.getScreenY());
+                        });
+                    pause.playFromStart();
                   });
-              newValue.setOnMouseExited(event -> popup.hide());
+              newValue.setOnMouseExited(
+                  event -> {
+                    popup.hide();
+                    pause.stop();
+                  });
             });
   }
 
