@@ -8,7 +8,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 
 public class DashboardPageController extends NonLoginPageController<DashboardControl> {
@@ -18,9 +17,6 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
 
   /** Custom title bar. */
   @FXML private BorderPane borderPane;
-
-  /** Button to open the orders page. */
-  @FXML private AnchorPane titleBar;
 
   /** Label containing the name of the logged account. */
   @FXML private Label nameLabel;
@@ -51,7 +47,6 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
   @Override
   public final void initialize(final DashboardControl control) {
     displayLoggedOperatorData();
-    setDraggableNode(titleBar);
     setProfilePicture();
   }
 

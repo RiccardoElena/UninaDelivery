@@ -3,7 +3,11 @@
 
 /* CSS per evidenziare il nodo al passaggio del mouse */
 .chart-line-symbol:hover {
-  -fx-background-color: #ff4949; /* Cambia colore */
+  -fx-background-color: -fx-primary-color; /* Cambia colore */
   -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 5, 0, 0, 0); /* Aggiunge un effetto ombra per evidenziarlo ulteriormente */
-  -fx-padding: 25px; /* Rende il nodo più grande */
+  -fx-padding: 40px; /* Rende il nodo più grande */
+}
+
+.popup .label {
+  -fx-text-fill: -fx-primary-color;
 }

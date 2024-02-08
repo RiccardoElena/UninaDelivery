@@ -14,14 +14,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
 
 public class OrdersPageController extends NonLoginPageController<OrdersHandlingControl> {
-
-  /** Custom title bar. */
-  @FXML private AnchorPane titleBar;
 
   // All this parameter are a mess, isn't a better way to encapsulate them
   // in a custom table class?
@@ -53,15 +48,6 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
   /** Column containing the supplier of the order. */
   @FXML private TableColumn<Order, String> supplierColumn;
 
-  /** Button to exit the application. */
-  @FXML private Button exitButton;
-
-  /** Button to resize the application. */
-  @FXML private Button resizeButton;
-
-  /** Button to minimize the application. */
-  @FXML private Button minimizeButton;
-
   /** DatePicker to select the start date of the orders. */
   @FXML private DatePicker startDatePicker;
 
@@ -87,14 +73,11 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
    */
   @Override
   public final void initialize(final OrdersHandlingControl control) {
-    setDraggableNode(titleBar);
 
     setTableColumns();
     ordersTable.setItems(getControl().getTestOrders());
     updateEndDatePickerAccordingToStart();
   }
-
-
 
   /**
    * On filterButton click, it filters the orders.
@@ -168,5 +151,4 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
       }
     };
   }
-
 }

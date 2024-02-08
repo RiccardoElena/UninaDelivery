@@ -20,8 +20,8 @@ public abstract class BasePageController<T extends BaseControl> {
   /** Height of the eye icons. */
   private static final int ICON_HEIGHT = 30;
 
-  /** Draggable bar of the application. */
-  private Node draggableNode;
+  /** Node of the title bar. */
+  @FXML private Node titleBar;
 
   /** Button to exit the application. */
   @FXML private Button exitButton;
@@ -41,9 +41,8 @@ public abstract class BasePageController<T extends BaseControl> {
   public void init(final T c) {
     setControl(c);
     initialize(c);
-    if (draggableNode != null) {
-      setDraggable();
-    }
+
+    setDraggable();
   }
 
   /**
@@ -64,30 +63,21 @@ public abstract class BasePageController<T extends BaseControl> {
     this.control = c;
   }
 
-  /**
-   * Set the title bar.
-   *
-   * @param titleBar the title bar to set
-   */
-  public void setDraggableNode(final Node titleBar) {
-    this.draggableNode = titleBar;
-  }
-
   /** Make the window draggable. */
-  private void setDraggable() {
+  protected void setDraggable() {
     Stage stage = control.getStage();
     final double[] xOffset = new double[1];
     final double[] yOffset = new double[1];
 
     // Evento pressione mouse sulla barra del titolo
-    draggableNode.setOnMousePressed(
+    titleBar.setOnMousePressed(
         event -> {
           xOffset[0] = event.getSceneX();
           yOffset[0] = event.getSceneY();
         });
 
     // Evento trascinamento mouse sulla barra del titolo
-    draggableNode.setOnMouseDragged(
+    titleBar.setOnMouseDragged(
         event -> {
           if (stage.isMaximized()) {
             stage.setMaximized(false);

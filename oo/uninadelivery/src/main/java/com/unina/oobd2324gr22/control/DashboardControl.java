@@ -63,18 +63,18 @@ public class DashboardControl extends NonLoginControl {
 
   /** Go to the Monthly Reports page. */
   public void goToMonthlyReports() {
-    try{
+    try {
       graphControl.setGraphScene(this.getStage(), this.getLoggedOperator());
     } catch (Exception e) {
       System.out.println(e.getMessage());
       this.showAlert(
-        Alert.AlertType.ERROR,
-        "Errore",
-        "Errore inaspettato.",
-        "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
-            + " l'applicazione.");
-      }
+          Alert.AlertType.ERROR,
+          "Errore",
+          "Errore inaspettato.",
+          "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
+              + " l'applicazione.");
     }
+  }
 
   /** Go to the Edit page. */
   public void edit() {

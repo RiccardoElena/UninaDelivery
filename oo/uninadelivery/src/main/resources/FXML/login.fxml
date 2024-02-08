@@ -96,7 +96,7 @@
       </AnchorPane>
    </right>
    <top>
-      <Pane fx:id="topPane" prefHeight="35.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+      <Pane fx:id="titleBar" prefHeight="35.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
             <MFXButton fx:id="exitButton" buttonType="RAISED" depthLevel="LEVEL1" layoutX="8.0" layoutY="6.0" onAction="#exitButtonAction" prefHeight="24.0" prefWidth="29.0" rippleColor="#f7dba7" text=" ">
                <graphic>

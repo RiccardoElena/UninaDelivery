@@ -16,16 +16,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 
 public class ShipmentPageController extends NonLoginPageController<OrdersHandlingControl> {
 
   /** Border pane. */
   @FXML private BorderPane borderPane;
-
-  /** Button to open the orders page. */
-  @FXML private AnchorPane titleBar;
 
   /** Order Id label. */
   @FXML private Label orderIdLabel;
@@ -74,7 +70,6 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
   @Override
   public final void initialize(final OrdersHandlingControl control) {
 
-    setDraggableNode(titleBar);
     this.displayOrderData();
 
     this.setTableColumns();

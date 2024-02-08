@@ -4,7 +4,6 @@ import com.unina.oobd2324gr22.control.LoginControl;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -21,9 +20,6 @@ public class LoginPageController extends BasePageController<LoginControl> {
   /** Button to login. */
   @FXML private MFXButton loginButton;
 
-  /** Draggable bar of the application. */
-  @FXML private Node topPane;
-
   /** Button for toggling password mask. */
   @FXML private Button togglePswVisibilityButton;
 
@@ -37,7 +33,6 @@ public class LoginPageController extends BasePageController<LoginControl> {
    */
   @Override
   protected void initialize(final LoginControl control) {
-    setDraggableNode(topPane);
     togglePswVisibilityButton.setGraphic(getIcon("/images/loginPage/ClosedEye.png"));
     togglePswVisibilityButton.setOnAction(event -> togglePswVisibility());
 
