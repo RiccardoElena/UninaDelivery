@@ -20,11 +20,11 @@
 
 <BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: -fx-default-bg;" stylesheets="@../style/Dashboard.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.unina.oobd2324gr22.boundary.GraphPageController">
    <center>
-      <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="200.0" prefWidth="1050.0" BorderPane.alignment="CENTER">
+      <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" prefHeight="200.0" prefWidth="1050.0" BorderPane.alignment="CENTER">
          <content>
             <AnchorPane prefHeight="733.0" prefWidth="1050.0" style="-fx-background-color: -fx-default-bg;">
                <children>
-                  <LineChart fx:id="chart" alternativeColumnFillVisible="true" layoutX="102.0" layoutY="162.0" legendVisible="false" prefHeight="419.0" prefWidth="819.0" title="Ordini Giornalieri" AnchorPane.leftAnchor="102.0" AnchorPane.rightAnchor="113.0" AnchorPane.topAnchor="162.0">
+                  <LineChart fx:id="chart" alternativeColumnFillVisible="true" layoutX="102.0" layoutY="162.0" prefHeight="419.0" prefWidth="819.0" title="Ordini Giornalieri" AnchorPane.leftAnchor="102.0" AnchorPane.rightAnchor="113.0" AnchorPane.topAnchor="162.0">
                     <xAxis>
                       <CategoryAxis label="Giorno" side="BOTTOM" tickLabelFill="#f7dba7" tickLabelsVisible="false" tickMarkVisible="false" fx:id="xAxis">
                            <cursor>
@@ -53,7 +53,7 @@
                         <Font name="System Bold" size="48.0" />
                      </font>
                   </Label>
-                  <VBox alignment="CENTER" layoutY="569.0" prefHeight="1521.0" prefWidth="1063.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.5">
+                  <VBox fx:id="monthlyReportData" alignment="CENTER" layoutY="569.0" prefHeight="1521.0" prefWidth="1063.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.5">
                      <children>
                         <HBox alignment="CENTER" prefHeight="73.0" prefWidth="1080.0">
                            <children>
@@ -82,12 +82,12 @@
                                  <children>
                                     <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
                                        <children>
-                                          <Label fx:id="orderIdLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderId} " HBox.hgrow="ALWAYS">
+                                          <Label fx:id="highestProductNumberOrderId" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderId} " HBox.hgrow="ALWAYS">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
                                           </Label>
-                                          <Label fx:id="orderExpectedDeliveryDateLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderCost}">
+                                          <Label fx:id="highestProductNumberOrderCost" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderCost}">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
@@ -96,12 +96,12 @@
                                     </HBox>
                                     <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
                                        <children>
-                                          <Label fx:id="orderProductLabel" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderProduct}">
+                                          <Label fx:id="highestProductNumberOrderProduct" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderProduct}">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
                                           </Label>
-                                          <Label fx:id="orderAddressLabel" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderAccount}">
+                                          <Label fx:id="highestProductNumberOrderAccount" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderAccount}">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
@@ -136,12 +136,12 @@
                                  <children>
                                     <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
                                        <children>
-                                          <Label fx:id="orderIdLabel1" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestProductNumberOrderId} " HBox.hgrow="ALWAYS">
+                                          <Label fx:id="lowestProductNumberOrderId" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestProductNumberOrderId} " HBox.hgrow="ALWAYS">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
                                           </Label>
-                                          <Label fx:id="orderExpectedDeliveryDateLabel1" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{owestProductNumberOrderCosto}">
+                                          <Label fx:id="lowestProductNumberOrderCost" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestProductNumberOrderCosto}">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
@@ -150,12 +150,12 @@
                                     </HBox>
                                     <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
                                        <children>
-                                          <Label fx:id="orderProductLabel1" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{owestProductNumberOrderProduct}">
+                                          <Label fx:id="lowestProductNumberOrderProduct" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{owestProductNumberOrderProduct}">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
                                           </Label>
-                                          <Label fx:id="orderAddressLabel1" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{owestProductNumberOrderAccount}">
+                                          <Label fx:id="lowestProductNumberOrderAccount" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{owestProductNumberOrderAccount}">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
@@ -190,12 +190,12 @@
                                  <children>
                                     <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
                                        <children>
-                                          <Label fx:id="orderIdLabel2" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestCostOrderId} " HBox.hgrow="ALWAYS">
+                                          <Label fx:id="highestCostOrderId" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestCostOrderId} " HBox.hgrow="ALWAYS">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
                                           </Label>
-                                          <Label fx:id="orderExpectedDeliveryDateLabel2" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1372.0" text="{highestCostOrderCost}">
+                                          <Label fx:id="highestCostOrderCost" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1372.0" text="{highestCostOrderCost}">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
@@ -204,12 +204,12 @@
                                     </HBox>
                                     <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
                                        <children>
-                                          <Label fx:id="orderProductLabel2" alignment="CENTER" prefHeight="26.0" prefWidth="1144.0" text="{highestCostOrderProduct}">
+                                          <Label fx:id="highestCostOrderProduct" alignment="CENTER" prefHeight="26.0" prefWidth="1144.0" text="{highestCostOrderProduct}">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
                                           </Label>
-                                          <Label fx:id="orderAddressLabel2" alignment="CENTER" prefHeight="26.0" prefWidth="1313.0" text="{highestCostOrderAccount}">
+                                          <Label fx:id="highestCostOrderIdAccount" alignment="CENTER" prefHeight="26.0" prefWidth="1313.0" text="{highestCostOrderAccount}">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
@@ -244,12 +244,12 @@
                                  <children>
                                     <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
                                        <children>
-                                          <Label fx:id="orderIdLabel3" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderId} " HBox.hgrow="ALWAYS">
+                                          <Label fx:id="lowestCostOrderId" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderId} " HBox.hgrow="ALWAYS">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
                                           </Label>
-                                          <Label fx:id="orderExpectedDeliveryDateLabel3" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderCost}">
+                                          <Label fx:id="lowestCostOrderCost" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderCost}">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
@@ -258,12 +258,12 @@
                                     </HBox>
                                     <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
                                        <children>
-                                          <Label fx:id="orderProductLabel3" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderProduct}">
+                                          <Label fx:id="lowestCostOrderProduct" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderProduct}">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
                                           </Label>
-                                          <Label fx:id="orderAddressLabel3" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderAccount}">
+                                          <Label fx:id="lowestCostOrderAccount" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderAccount}">
                                              <font>
                                                 <Font name="System Bold" size="17.0" />
                                              </font>
@@ -315,7 +315,7 @@
                                           </ImageView>
                                        </children>
                                     </Pane>
-                                    <Label fx:id="orderIdLabel32" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestNumberNameSurname} ">
+                                    <Label fx:id="highestNumberNameSurname" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestNumberNameSurname} ">
                                        <font>
                                           <Font name="System Bold" size="17.0" />
                                        </font>
@@ -323,7 +323,7 @@
                                           <Insets bottom="20.0" top="20.0" />
                                        </VBox.margin>
                                     </Label>
-                                    <Label fx:id="orderIdLabel33" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestNumberEmail} ">
+                                    <Label fx:id="highestNumberEmail" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestNumberEmail} ">
                                        <font>
                                           <Font name="System Bold" size="17.0" />
                                        </font>
@@ -331,7 +331,7 @@
                                           <Insets bottom="20.0" top="20.0" />
                                        </VBox.margin>
                                     </Label>
-                                    <Label fx:id="orderIdLabel331" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{OrderNumber} ">
+                                    <Label fx:id="orderNumber" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{OrderNumber} ">
                                        <font>
                                           <Font name="System Bold" size="17.0" />
                                        </font>
@@ -368,7 +368,7 @@
                                           </ImageView>
                                        </children>
                                     </Pane>
-                                    <Label fx:id="orderIdLabel321" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestCostNameSurname} ">
+                                    <Label fx:id="highestCostNameSurname" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestCostNameSurname} ">
                                        <font>
                                           <Font name="System Bold" size="17.0" />
                                        </font>
@@ -376,7 +376,7 @@
                                           <Insets bottom="20.0" top="20.0" />
                                        </VBox.margin>
                                     </Label>
-                                    <Label fx:id="orderIdLabel332" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestCostEmail} ">
+                                    <Label fx:id="highestCostEmail" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestCostEmail} ">
                                        <font>
                                           <Font name="System Bold" size="17.0" />
                                        </font>
@@ -384,7 +384,7 @@
                                           <Insets bottom="20.0" top="20.0" />
                                        </VBox.margin>
                                     </Label>
-                                    <Label fx:id="orderIdLabel3311" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{MoneySpent} ">
+                                    <Label fx:id="moneySpent" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{MoneySpent} ">
                                        <font>
                                           <Font name="System Bold" size="17.0" />
                                        </font>

@@ -49,6 +49,17 @@ public class DashboardControl extends NonLoginControl {
     }
   }
 
+  /**
+   * Get the number of today's expiring orders.
+   *
+   * @param n the number of expiring orders
+   * @return the number of expiring orders
+   */
+  public int getExpiringOrders(final int n) {
+    // TODO!: implement this method (n has only testing purpose)
+    return n;
+  }
+
   /** Go to the Edit page. */
   public void edit() {
     this.showAlert(

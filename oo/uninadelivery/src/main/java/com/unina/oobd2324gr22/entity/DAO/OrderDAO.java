@@ -64,6 +64,26 @@ public interface OrderDAO {
   Order getOrderWithSmallestQuantity(int month, int year) throws SQLException;
 
   /**
+   * RETRIEVE the most expensive order from the DB.
+   *
+   * @param month month to search for
+   * @param year year to search for
+   * @return order with the largest cost
+   * @throws SQLException possible DB related errors
+   */
+  Order getMostExpensiveOrder(int month, int year) throws SQLException;
+
+  /**
+   * RETRIEVE the less expensive order from the DB.
+   *
+   * @param month month to search for
+   * @param year year to search for
+   * @return order with the largest cost
+   * @throws SQLException possible DB related errors
+   */
+  Order getLessExpensiveOrder(int month, int year) throws SQLException;
+
+  /**
    * Retrive a list of the number of the orders for each day from the database of the month given.
    *
    * @param month month to search for

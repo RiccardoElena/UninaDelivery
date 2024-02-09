@@ -26,7 +26,7 @@ public class LoginControl extends BaseControl {
   @Override
   protected void addSceneSettings() {
     setSizes(WIDTH, HEIGHT);
-    setFileName("login");
+    setFileName("Login");
   }
 
   private void showLoginErrorMessage(final String msg) {

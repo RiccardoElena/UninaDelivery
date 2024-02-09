@@ -212,17 +212,13 @@ public class OrderDAOPostgre implements OrderDAO {
     try {
       st =
           con.prepareStatement(
-              "SELECT MAX(quantity) "
-                  + "FROM \"Order\" WHERE "
-                  + "EXTRACT(MONTH FROM emissiondate) = ? AND "
-                  + "EXTRACT(YEAR FROM emissiondate) = ? "
-                  + "LIMIT 1");
+              "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
+                  + " FROM emissiondate) = ? ORDER BY quantity DESC LIMIT 1");
       st.setInt(1, month);
       st.setInt(2, year);
       rs = st.executeQuery();
 
       while (rs.next()) {
-
         order = populateOrderFromResultSet(rs);
       }
     } catch (SQLException e) {
@@ -258,11 +254,8 @@ public class OrderDAOPostgre implements OrderDAO {
 
       st =
           con.prepareStatement(
-              "SELECT MIN(quantity) "
-                  + "FROM \"Order\" WHERE "
-                  + "EXTRACT(MONTH FROM emissiondate) = ? AND "
-                  + "EXTRACT(YEAR FROM emissiondate) = ? "
-                  + "LIMIT 1");
+              "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
+                  + " FROM emissiondate) = ? ORDER BY quantity ASC LIMIT 1");
       st.setInt(1, month);
       st.setInt(2, year);
       rs = st.executeQuery();
@@ -287,6 +280,106 @@ public class OrderDAOPostgre implements OrderDAO {
     }
 
     return order;
+  }
+
+  /**
+   * RETRIEVE the most expensive order from the DB.
+   *
+   * @param month month to search for
+   * @param year year to search for
+   * @return the most expensive order
+   */
+  @Override
+  public Order getMostExpensiveOrder(final int month, final int year) throws SQLException {
+    con = DBConnection.getConnectionBySchema("uninadelivery");
+    List<Order> orders = new ArrayList<>();
+    PreparedStatement st = null;
+    ResultSet rs = null;
+    try {
+      st =
+          con.prepareStatement(
+              "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
+                  + " FROM emissiondate) = ?");
+      st.setInt(1, month);
+      st.setInt(2, year);
+      rs = st.executeQuery();
+      while (rs.next()) {
+        orders.add(populateOrderFromResultSet(rs));
+      }
+
+      Order orderWithMaxPrice = null;
+      double maxPrice = 0;
+      for (Order order : orders) {
+        if (order.getPrice() > maxPrice) {
+          maxPrice = order.getPrice();
+          orderWithMaxPrice = order;
+        }
+      }
+      return orderWithMaxPrice;
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw e;
+    } finally {
+      if (rs != null) {
+        rs.close();
+      }
+      if (st != null) {
+        st.close();
+      }
+      if (con != null) {
+        con.close();
+      }
+    }
+  }
+
+  /**
+   * RETRIEVE the Less expensive order from the DB.
+   *
+   * @param month month to search for
+   * @param year year to search for
+   * @return the Less expensive order
+   */
+  @Override
+  public Order getLessExpensiveOrder(final int month, final int year) throws SQLException {
+    con = DBConnection.getConnectionBySchema("uninadelivery");
+    List<Order> orders = new ArrayList<>();
+    PreparedStatement st = null;
+    ResultSet rs = null;
+    try {
+      st =
+          con.prepareStatement(
+              "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
+                  + " FROM emissiondate) = ?");
+      st.setInt(1, month);
+      st.setInt(2, year);
+      rs = st.executeQuery();
+      while (rs.next()) {
+        orders.add(populateOrderFromResultSet(rs));
+      }
+
+      Order orderWithMaxPrice = null;
+      double minPrice = Double.MAX_VALUE;
+      for (Order order : orders) {
+        if (order.getPrice() < minPrice) {
+          minPrice = order.getPrice();
+          orderWithMaxPrice = order;
+        }
+      }
+      return orderWithMaxPrice;
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw e;
+    } finally {
+      if (rs != null) {
+        rs.close();
+      }
+      if (st != null) {
+        st.close();
+      }
+      if (con != null) {
+        con.close();
+      }
+    }
   }
 
   /**

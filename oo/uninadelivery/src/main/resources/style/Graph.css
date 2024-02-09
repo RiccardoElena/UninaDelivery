@@ -8,6 +8,10 @@
   -fx-cursor: crosshair;
 }
 
+.chart-legend {
+  -fx-background-color: -fx-default-bg;
+}
+
 .popup .label {
   -fx-text-fill: -fx-primary-color;
   -fx-background-color: white; 

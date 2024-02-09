@@ -58,6 +58,7 @@ public abstract class BaseControl {
     try {
       FXMLLoader loader =
           new FXMLLoader(getClass().getResource("/FXML/" + getFileName() + ".fxml"));
+      System.err.println("/FXML/" + getFileName() + ".fxml");
       Parent root = loader.load();
       T pageController = loader.getController();
 

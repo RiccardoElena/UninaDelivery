@@ -33,5 +33,9 @@
 }
 
 .combo-box .list-cell {
+  -fx-text-fill: -fx-secondary-color;
+}
+
+.combo-box .combo-box-popup .list-cell {
   -fx-text-fill: -fx-primary-color;
 }

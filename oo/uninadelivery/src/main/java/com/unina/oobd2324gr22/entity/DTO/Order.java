@@ -28,11 +28,20 @@ public class Order {
   /** Expected delivery date of the order. */
   private LocalDate expectedDeliveryDate;
 
+  /** Total price of the order. */
+  private double price;
+
   /** Express delivery days. */
   private static final int EXPRESSDELIVERY = 3;
 
   /** Standard delivery days. */
   private static final int STANDARDDELIVERY = 7;
+
+  /** Express delivery fee. */
+  private static final double EXPRESS_FEE = 0.2;
+
+  /** Warranty fee. */
+  private static final double WARRANTY_FEE = 0.1;
 
   /**
    * Constructor with parameters.
@@ -62,6 +71,7 @@ public class Order {
     this.account = client;
     this.quantity = qty;
     this.product = pct;
+    this.price = calculatePrice();
   }
 
   /**
@@ -206,6 +216,27 @@ public class Order {
    */
   public void setExpectedDeliveryDate(final LocalDate expecteddeliverydate) {
     this.expectedDeliveryDate = expecteddeliverydate;
+  }
+
+  /**
+   * Getter of the total price.
+   *
+   * @return total price
+   */
+  public double getPrice() {
+    return price;
+  }
+
+  /**
+   * Setter of the total price.
+   *
+   * @return total price
+   */
+  private double calculatePrice() {
+    double rowPrice = this.product.getPrice() * this.quantity;
+    double warrantyPrice = this.extraWarranty * WARRANTY_FEE * rowPrice;
+    double deliveryPrice = this.isExpress ? EXPRESS_FEE * rowPrice : 0;
+    return rowPrice + warrantyPrice + deliveryPrice;
   }
 
   /** toString method. */
