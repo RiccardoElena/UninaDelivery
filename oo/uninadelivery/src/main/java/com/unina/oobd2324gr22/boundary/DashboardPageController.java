@@ -19,13 +19,13 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
   @FXML private BorderPane borderPane;
 
   /** Label containing the name of the logged account. */
-  @FXML private Label nameLabel;
-
-  /** Label containing the surname of the logged account. */
-  @FXML private Label surnameLabel;
+  @FXML private Label nameSurnameLabel;
 
   /** Label containing the email of the logged account. */
   @FXML private Label emailLabel;
+
+  /** Label containing the ordersExpiring. */
+  @FXML private Label ordersExpiringLabel;
 
   /** Button to logout the logged account. */
   @FXML private MFXButton logoutButton;
@@ -48,6 +48,7 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
   public final void initialize(final DashboardControl control) {
     displayLoggedOperatorData();
     setProfilePicture();
+    displayExpiringOrders();
   }
 
   private void setProfilePicture() {
@@ -96,13 +97,22 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
     getControl().logout();
   }
 
-  // FIXME @zGenny label display is causing errors abouth string length. We should FIX
   private void displayLoggedOperatorData() {
     Operator loggedOperator = getControl().getLoggedOperator();
     if (loggedOperator != null) {
-      nameLabel.setText(loggedOperator.getName());
-      surnameLabel.setText(loggedOperator.getSurname());
-      emailLabel.setText(loggedOperator.getBusinessMail());
+      nameSurnameLabel.setText(loggedOperator.getName()+" "+loggedOperator.getSurname());
+    }
+  }
+
+  private void displayExpiringOrders() {
+    int expiringOrders = getControl().getExpiringOrders(2);
+    if (expiringOrders > 0) {
+      ordersExpiringLabel.setText("Attenzione!\nCi sono: "
+                                  + expiringOrders
+                                  + " ordini\n"
+                                  + "in scadenza oggi!");
+    } else {
+      ordersExpiringLabel.setText("");
     }
   }
 }

@@ -80,9 +80,9 @@
    <left>
       <VBox alignment="CENTER" prefHeight="685.0" prefWidth="300.0" spacing="25.0" style="-fx-background-color: #F7DBA7;" styleClass="light-background" BorderPane.alignment="CENTER">
          <children>
-            <VBox alignment="TOP_CENTER" prefHeight="477.0" prefWidth="300.0" spacing="16.0">
+            <VBox alignment="TOP_CENTER" prefHeight="757.0" prefWidth="300.0" spacing="16.0">
                <children>
-                  <AnchorPane prefHeight="189.0" prefWidth="300.0">
+                  <AnchorPane prefHeight="173.0" prefWidth="300.0">
                      <children>
                         <ImageView fx:id="proPic" fitHeight="150.0" fitWidth="200.0" layoutX="74.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -96,24 +96,20 @@
                         </ImageView>
                      </children>
                   </AnchorPane>
-                  <Label fx:id="nameLabel" style="-fx-font-weight: bold;" text="{name}" textFill="#cc4400">
+                  <Label fx:id="nameSurnameLabel" style="-fx-font-weight: bold;" text="{nameSurname}" textFill="#cc4400">
                      <font>
                         <Font size="20.0" />
                      </font>
                   </Label>
-                  <Label fx:id="surnameLabel" style="-fx-font-weight: bold;" text="{surname}" textFill="#cc4400">
-                     <font>
-                        <Font size="20.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="emailLabel" style="-fx-font-weight: bold;" text="{email}" textFill="#cc4400">
+                  <Pane prefHeight="134.0" prefWidth="300.0" />
+                  <Label fx:id="ordersExpiringLabel" alignment="CENTER" layoutX="127.0" layoutY="282.0" prefHeight="132.0" prefWidth="300.0" style="-fx-font-weight: bold;" text="{ordersExpiringLable}" textFill="#cc4400">
                      <font>
                         <Font size="20.0" />
                      </font>
                   </Label>
                </children>
             </VBox>
-            <Pane prefHeight="452.0" prefWidth="300.0" />
+            <Pane prefHeight="225.0" prefWidth="300.0" />
             <VBox alignment="BOTTOM_CENTER" prefHeight="370.0" prefWidth="300.0">
                <children>
                   <HBox alignment="BOTTOM_CENTER" prefHeight="85.0" prefWidth="300.0" spacing="40.0">

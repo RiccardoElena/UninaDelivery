@@ -56,6 +56,16 @@ public abstract class NonLoginControl extends BaseControl {
   }
 
   /**
+   * Get the number of today's expiring orders.
+   *
+   * @return the number of expiring orders
+   */
+  public int getExpiringOrders(int n) {
+    //TODO!: implement this method (n has only testing purpose)
+    return n;
+  }
+
+  /**
    * Set Logged in operator.
    *
    * @param op the logged in operator
