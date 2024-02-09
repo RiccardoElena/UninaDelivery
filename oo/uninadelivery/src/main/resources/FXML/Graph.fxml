@@ -26,14 +26,14 @@
                <children>
                   <LineChart fx:id="chart" alternativeColumnFillVisible="true" layoutX="102.0" layoutY="162.0" legendVisible="false" prefHeight="419.0" prefWidth="819.0" title="Ordini Giornalieri" AnchorPane.leftAnchor="102.0" AnchorPane.rightAnchor="113.0" AnchorPane.topAnchor="162.0">
                     <xAxis>
-                      <CategoryAxis label="Giorno" side="BOTTOM" tickLabelFill="#f7dba7">
+                      <CategoryAxis label="Giorno" side="BOTTOM" tickLabelFill="#f7dba7" tickLabelsVisible="false" tickMarkVisible="false" fx:id="xAxis">
                            <cursor>
                               <Cursor fx:constant="DEFAULT" />
                            </cursor>
                         </CategoryAxis>
                     </xAxis>
                     <yAxis>
-                      <NumberAxis label="N. Ordini" prefWidth="48.0" side="LEFT" tickLabelFill="#f7dba7" tickLabelGap="1.0">
+                      <NumberAxis fx:id="yAxis" label="N. Ordini" minorTickVisible="false" prefWidth="48.0" side="LEFT" tickLabelFill="#f7dba7" tickLabelGap="1.0" tickUnit="1.0" upperBound="1.0">
                            <cursor>
                               <Cursor fx:constant="DEFAULT" />
                            </cursor>
@@ -46,8 +46,8 @@
                         <Cursor fx:constant="CROSSHAIR" />
                      </cursor>
                   </LineChart>
-                  <ComboBox fx:id="monthComboBox" layoutX="354.0" layoutY="111.0" prefWidth="150.0" promptText="Anno" AnchorPane.leftAnchor="354.0" />
-                  <ComboBox fx:id="yearComboBox" layoutX="150.0" layoutY="111.0" prefWidth="150.0" promptText="Mese" AnchorPane.leftAnchor="150.0" />
+                  <ComboBox fx:id="yearComboBox" layoutX="354.0" layoutY="111.0" prefWidth="150.0" promptText="Anno" AnchorPane.leftAnchor="354.0" />
+                  <ComboBox fx:id="monthComboBox" layoutX="150.0" layoutY="111.0" prefWidth="150.0" promptText="Mese" AnchorPane.leftAnchor="150.0" />
                   <Label layoutX="152.0" layoutY="45.0" prefHeight="60.0" prefWidth="392.0" text="Resoconto Mensile" AnchorPane.leftAnchor="152.0" AnchorPane.rightAnchor="490.0">
                      <font>
                         <Font name="System Bold" size="48.0" />

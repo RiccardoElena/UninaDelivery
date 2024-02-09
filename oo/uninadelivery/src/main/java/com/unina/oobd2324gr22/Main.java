@@ -26,7 +26,7 @@ import java.util.List;
 public final class Main {
 
   /** Testing variable. */
-  private static final int YEAR = 2024;
+  private static final int YEAR = 2023;
 
   // Constructors
 
@@ -48,7 +48,7 @@ public final class Main {
     try {
       List<Integer> o = orderDAO.getOrdersPerDay(1, YEAR);
       for (int i : o) {
-        System.out.print(o.get(i) + "");
+        System.out.print("Data: " + i + " ");
       }
       Order order = orderDAO.getOrderById(1);
       System.out.println(order);

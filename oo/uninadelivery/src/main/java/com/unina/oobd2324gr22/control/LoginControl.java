@@ -29,7 +29,7 @@ public class LoginControl extends BaseControl {
     setFileName("login");
   }
 
-  private void showErrorMessage(final String msg) {
+  private void showLoginErrorMessage(final String msg) {
     this.showAlert(Alert.AlertType.ERROR, "Errore", "Errore di login", msg);
   }
 
@@ -54,17 +54,17 @@ public class LoginControl extends BaseControl {
     System.err.println(email + " " + password);
 
     if (email.isBlank() || password.isBlank()) {
-      showErrorMessage("Inserire email e password");
+      showLoginErrorMessage("Inserire email e password");
       return;
     }
 
     if (!isEmailValid(email)) {
-      showErrorMessage("Email non valida");
+      showLoginErrorMessage("Email non valida");
       return;
     }
 
     if (!isOperatorEmail(email)) {
-      showErrorMessage("Accesso consentito solo ad account operatori");
+      showLoginErrorMessage("Accesso consentito solo ad account operatori");
       return;
     }
 
@@ -76,13 +76,16 @@ public class LoginControl extends BaseControl {
         return;
       } catch (Exception e) {
         e.printStackTrace();
-        showErrorMessage(
-            "Si è verificato un errore interno, si prega di riprovare più tardi o contattare"
-                + " l'assistenza");
+        this.showAlert(
+            Alert.AlertType.ERROR,
+            "Errore",
+            "Errore inaspettato.",
+            "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
+                + " l'applicazione.");
       }
     }
 
-    showErrorMessage(
+    showLoginErrorMessage(
         "Email o password errati.\nUsare R.Elena@uninadelivery.operator.com e securepassword");
   }
 

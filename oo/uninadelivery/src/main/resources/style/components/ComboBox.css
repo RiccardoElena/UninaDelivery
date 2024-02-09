@@ -31,3 +31,7 @@
 .combo-box:focused .arrow-button:hover .arrow {
     -fx-background-color: -fx-secondary-color;
 }
+
+.combo-box .list-cell {
+  -fx-text-fill: -fx-primary-color;
+}
