@@ -2,6 +2,7 @@ package com.unina.oobd2324gr22.utils;
 
 import com.unina.oobd2324gr22.control.LoginControl;
 import javafx.application.Application;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -22,6 +23,9 @@ public class App extends Application {
   public final void start(final Stage primaryStage) throws Exception {
     primaryStage.initStyle(StageStyle.UNDECORATED);
     primaryStage.setTitle("UninaDelivery");
+    primaryStage.getIcons().add(new Image(App.class
+      .getResourceAsStream("/images/UninaDelivery_logo.png"))
+    );
 
     loginControl.setScene(primaryStage);
   }
