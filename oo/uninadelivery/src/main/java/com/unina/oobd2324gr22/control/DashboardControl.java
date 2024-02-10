@@ -1,10 +1,15 @@
 package com.unina.oobd2324gr22.control;
 
+import com.unina.oobd2324gr22.entity.DAO.OrderDAO;
+import com.unina.oobd2324gr22.entity.DAO.OrderDAOPostgre;
 import java.util.Optional;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 
 public class DashboardControl extends NonLoginControl {
+
+  /** Order Data Access Object. */
+  private OrderDAO ordersDAO = new OrderDAOPostgre();
 
   /** Order selection functionality control class. */
   private OrdersHandlingControl ordersControl = new OrdersHandlingControl();
@@ -25,13 +30,8 @@ public class DashboardControl extends NonLoginControl {
       ordersControl.setScene(this.getStage(), this.getLoggedOperator());
     } catch (Exception e) {
       e.printStackTrace();
-      this.showAlert(
-          Alert.AlertType.ERROR,
-          "Errore",
-          "Errore inaspettato.",
-          "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
-              + " l'applicazione.");
-    } // TODO! @RiccardoElena we should change the message of the Alert ig, but in what?
+      showInternalError();
+    }
   }
 
   /** Go to the Monthly Reports page. */
@@ -40,24 +40,17 @@ public class DashboardControl extends NonLoginControl {
       graphControl.setScene(this.getStage(), this.getLoggedOperator());
     } catch (Exception e) {
       System.out.println(e.getMessage());
-      this.showAlert(
-          Alert.AlertType.ERROR,
-          "Errore",
-          "Errore inaspettato.",
-          "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
-              + " l'applicazione.");
+      showInternalError();
     }
   }
 
   /**
    * Get the number of today's expiring orders.
    *
-   * @param n the number of expiring orders
    * @return the number of expiring orders
    */
-  public int getExpiringOrders(final int n) {
-    // TODO!: implement this method (n has only testing purpose)
-    return n;
+  public int getExpiringOrdersNumber() {
+    return ordersDAO.getExpiringOrdersNumber();
   }
 
   /** Go to the Edit page. */
@@ -83,13 +76,8 @@ public class DashboardControl extends NonLoginControl {
         loginControl.setScene(this.getStage());
       } catch (Exception e) {
         e.printStackTrace();
-        this.showAlert(
-            Alert.AlertType.ERROR,
-            "Errore",
-            "Errore inaspettato.",
-            "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
-                + " l'applicazione.");
-      } // TODO! @RiccardoElena we should change the message of the Alert ig, but in what?
+        showInternalError();
+      }
     }
   }
 }

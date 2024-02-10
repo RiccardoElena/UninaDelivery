@@ -591,6 +591,91 @@ public class OrderDAOPostgre implements OrderDAO {
   }
 
   /**
+   * RETRIEVE the number of expiring orders.
+   *
+   * @return number of expiring orders
+   */
+  @Override
+  public int getExpiringOrdersNumber() {
+    PreparedStatement psSelect = null;
+    ResultSet rs = null;
+    con = DBConnection.getConnectionBySchema("uninadelivery");
+    try {
+      psSelect =
+          con.prepareStatement(
+              "SELECT COUNT(*) FROM \"Order\" WHERE emissiondate + 6 <= CURRENT_DATE and"
+                  + " isCompleted = false OR isCompleted IS NULL");
+      rs = psSelect.executeQuery();
+      if (rs.next()) {
+        return rs.getInt(1);
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        if (rs != null) {
+          rs.close();
+        }
+        if (psSelect != null) {
+          psSelect.close();
+        }
+        if (con != null) {
+          con.close();
+        }
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    }
+    return 0;
+  }
+
+  /**
+   * Retrive all the roders made by an account in a given month.
+   *
+   * @param client account to search for
+   * @param year year to search for
+   * @param month month to search for
+   * @return list of orders matching the search criteria
+   */
+  @Override
+  public List<Order> getOrdersByAccountAndMonth(
+      final Account client, final int year, final int month) throws SQLException {
+    con = DBConnection.getConnectionBySchema("uninadelivery");
+    List<Order> orders = new LinkedList<Order>();
+    PreparedStatement psSelect = null;
+    ResultSet rs = null;
+    int nextField = 1;
+    try {
+      psSelect =
+          con.prepareStatement(
+              BASE_QUERY
+                  + "WHERE email = ? AND EXTRACT(YEAR FROM emissiondate) = ? AND EXTRACT(MONTH FROM"
+                  + " emissiondate) = ?");
+      psSelect.setString(nextField++, client.getEmail());
+      psSelect.setInt(nextField++, year);
+      psSelect.setInt(nextField++, month);
+      rs = psSelect.executeQuery();
+      while (rs.next()) {
+        orders.add(populateOrderFromResultSet(rs));
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw e;
+    } finally {
+      if (rs != null) {
+        rs.close();
+      }
+      if (psSelect != null) {
+        psSelect.close();
+      }
+      if (con != null) {
+        con.close();
+      }
+    }
+    return orders;
+  }
+
+  /**
    * UPDATE an order in the DB by his id.
    *
    * @param order order to Update

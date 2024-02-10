@@ -238,4 +238,13 @@ public abstract class BaseControl {
   public void setStage(final Stage currStage) {
     this.stage = currStage;
   }
+
+  public void showInternalError() {
+    showAlert(
+        Alert.AlertType.ERROR,
+        "Errore",
+        "Errore inaspettato.",
+        "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
+            + " l'applicazione.");
+  }
 }

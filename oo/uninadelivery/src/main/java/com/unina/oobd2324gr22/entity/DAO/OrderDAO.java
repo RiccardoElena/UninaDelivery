@@ -134,6 +134,25 @@ public interface OrderDAO {
       throws SQLException;
 
   /**
+   * Retrive the number of expiring orders from the database.
+   *
+   * @return number of expiring orders
+   * @throws SQLException possible DB related errors
+   */
+  int getExpiringOrdersNumber();
+
+  /**
+   * Retrive all the roders made by an account in a given month.
+   *
+   * @param client account to search for
+   * @param year year to search for
+   * @param month month to search for
+   * @return list of orders matching the search criteria
+   * @throws SQLException possible DB related errors
+   */
+  List<Order> getOrdersByAccountAndMonth(Account client, int year, int month) throws SQLException;
+
+  /**
    * Update an order given its id from the database.
    *
    * @param order order to Update

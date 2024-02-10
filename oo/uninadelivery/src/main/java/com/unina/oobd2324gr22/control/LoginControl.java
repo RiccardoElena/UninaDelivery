@@ -93,11 +93,7 @@ public class LoginControl extends BaseControl {
     try {
       return accountDAO.getOperatorByBmailAndPassword(email, SHA256.toSHA256(password));
     } catch (SQLException e) {
-      this.showAlert(
-          Alert.AlertType.ERROR,
-          "Errore",
-          "Errore Interno",
-          "Si è verificato un errrore interno, si prega di riprovare più tardi");
+      showInternalError();
       return null;
     }
   }

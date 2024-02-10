@@ -206,7 +206,7 @@
                               <String fx:value="bigButton" />
                            </styleClass>
                         </MFXButton>
-                        <Label fx:id="badgeExpiringLabel" prefHeight="25.0" prefWidth="25.0" styleClass="badge" text="x" StackPane.alignment="CENTER">
+                        <Label fx:id="badgeExpiringLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="35.0" prefWidth="35.0" styleClass="badge" text="99+" StackPane.alignment="CENTER">
                            <StackPane.margin>
                               <Insets bottom="55.0" left="300.0" />
                            </StackPane.margin>
@@ -216,9 +216,6 @@
                            <font>
                               <Font name="System Bold" size="15.0" />
                            </font>
-                           <padding>
-                              <Insets left="8.0" />
-                           </padding>
                         </Label>
                      </children>
                   </StackPane>

@@ -1,7 +1,9 @@
 package com.unina.oobd2324gr22.boundary;
 
 import com.unina.oobd2324gr22.control.GraphControl;
+import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Order;
+import com.unina.oobd2324gr22.utils.NumToStringFormatter;
 import java.time.Month;
 import java.time.Year;
 import java.time.format.DateTimeFormatter;
@@ -185,15 +187,20 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
     if (monthComboBox.getValue() == null || yearComboBox.getValue() == null) {
       return;
     }
-    setGraphData();
-    if (!displayOrderData(
+    try {
+      setGraphData();
+    } catch (Exception e) {
+      chart.getData().clear();
+      monthlyReportData.setVisible(false);
+      return;
+    }
+    System.err.println("hello");
+    displayOrderData(
         getControl()::getMostExpensiveOrderData,
         highestCostOrderId,
         highestCostOrderIdAccount,
         highestCostOrderProduct,
-        highestCostOrderCost)) {
-      return;
-    }
+        highestCostOrderCost);
     displayOrderData(
         getControl()::getHighestProductOrderData,
         highestProductNumberOrderId,
@@ -215,7 +222,7 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
     monthlyReportData.setVisible(true);
   }
 
-  private boolean displayOrderData(
+  private void displayOrderData(
       final BiFunction<Month, Year, Order> getOrderData,
       final Label orderIdLabel,
       final Label orderAccountLabel,
@@ -230,42 +237,35 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
               + order.getQuantity()
               + " "
               + order.getProduct().getName()
-              + "-"
+              + " di "
               + order.getProduct().getSupplier());
-      orderCostLabel.setText("Al costo di: " + trunkDecimal(order.getPrice(), 2) + "€");
-      return true;
+      orderCostLabel.setText(
+          "Al costo di: " + NumToStringFormatter.trunkDecimal(order.getPrice(), 2) + "€");
     }
-    return false;
   }
 
-  // TODO @RiccardoElena we should probably move this into a util class
-  private String trunkDecimal(final double number, final int decimalPlaces) {
-    int index = String.valueOf(number).indexOf(".");
-    String value = String.valueOf(number);
-    int offset = decimalPlaces == 0 ? 0 : decimalPlaces + 1;
-    if (index == -1) {
-
-      return String.valueOf(number);
+  private void displayMostOrderingAccountData() {
+    Account account =
+        getControl().getMostOrderingAccountData(monthComboBox.getValue(), yearComboBox.getValue());
+    if (account != null) {
+      highestNumberEmail.setText(account.getEmail());
+      highestNumberNameSurname.setText(account.getName() + " " + account.getSurname());
+      orderNumber.setText("N° Ordini: " + account.getOrders().size());
     }
-
-    if (value.substring(index + 1, Math.min(index + offset, value.length())).matches("0*")) {
-      offset = 0;
-    }
-    return value.substring(0, index + offset);
   }
 
   /** Set the graph data. */
   private void setGraphData() {
-    monthlyReportData.setVisible(true);
-    List<Integer> ordersData =
-        getControl().getGraphData(monthComboBox.getValue(), yearComboBox.getValue());
+    List<Integer> ordersData;
+
+    ordersData = getControl().getGraphData(monthComboBox.getValue(), yearComboBox.getValue());
 
     try {
 
       chart.getData().clear();
 
       XYChart.Series<String, Number> avarageLine = getAverageLine(ordersData);
-      avarageLine.setName("Media: " + trunkDecimal(getAverage(ordersData), 2));
+      avarageLine.setName("Media: " + NumToStringFormatter.trunkDecimal(getAverage(ordersData), 2));
       chart.getData().add(avarageLine);
 
       XYChart.Series<String, Number> ordersLine = getOrdersLine(ordersData);

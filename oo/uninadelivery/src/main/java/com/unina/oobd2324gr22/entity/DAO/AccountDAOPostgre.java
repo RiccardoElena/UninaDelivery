@@ -4,11 +4,13 @@ import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Area;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
+import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.utils.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 // TODO @zGenny @RiccardoElena nly signature has been written, no implementation
@@ -143,6 +145,89 @@ public class AccountDAOPostgre implements AccountDAO {
       }
     }
     return op;
+  }
+
+  /** PostgreSQL implementation of the getAccountByBmail method. */
+  @Override
+  public Account getMostOrderingAccount(final int year, final int month) throws SQLException {
+    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Account account = null;
+    PreparedStatement psSelect = null;
+    ResultSet rs = null;
+    try {
+      psSelect =
+          con.prepareStatement(
+              "SELECT A.* FROM account A NATURAL JOIN \"Order\" O WHERE"
+                  + " EXTRACT(YEAR FROM O.orderdate) = ? AND EXTRACT(MONTH FROM O.orderdate) = ?"
+                  + " GROUP BY A.email ORDER BY COUNT(O.orderid) DESC LIMIT 1");
+      psSelect.setInt(1, year);
+      psSelect.setInt(2, month);
+      rs = psSelect.executeQuery();
+      if (rs.next()) {
+        account = populateAccountFromResultSet(rs);
+      }
+      account.setOrders(new OrderDAOPostgre().getOrdersByAccountAndMonth(account, year, month));
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw e;
+    } finally {
+      if (rs != null) {
+        rs.close();
+      }
+      if (psSelect != null) {
+        psSelect.close();
+      }
+      if (con != null) {
+        con.close();
+      }
+    }
+    return account;
+  }
+
+  /** PostgreSQL implementation of the getMostSpendingAccount method. */
+  @Override
+  public Account getMostSpendingAccount(final int year, final int month) throws SQLException {
+    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Account account = null;
+    PreparedStatement psSelect = null;
+    ResultSet rs = null;
+    try {
+      psSelect =
+          con.prepareStatement(
+              "SELECT * FROM account WHERE email IN (SELECT email FROM \"Order\" WHERE"
+                  + " EXTRACT(YEAR FROM orderdate) = ? AND EXTRACT(MONTH FROM orderdate) = ?)");
+      psSelect.setInt(1, year);
+      psSelect.setInt(2, month);
+      rs = psSelect.executeQuery();
+      List<Account> accounts = new ArrayList<>();
+      while (rs.next()) {
+        accounts.add(populateAccountFromResultSet(rs));
+      }
+      double maxPrice = 0;
+      for (Account a : accounts) {
+        for (Order o : new OrderDAOPostgre().getOrdersByAccountAndMonth(a, year, month)) {
+          a.setAmountSpent(a.getAmountSpent() + o.getPrice());
+        }
+        if (a.getAmountSpent() > maxPrice) {
+          maxPrice = a.getAmountSpent();
+          account = a;
+        }
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw e;
+    } finally {
+      if (rs != null) {
+        rs.close();
+      }
+      if (psSelect != null) {
+        psSelect.close();
+      }
+      if (con != null) {
+        con.close();
+      }
+    }
+    return account;
   }
 
   /** PostgreSQL implementation of the updateAccount method. */

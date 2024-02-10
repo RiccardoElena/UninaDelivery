@@ -12,6 +12,12 @@ import javafx.scene.layout.BorderPane;
 
 public class DashboardPageController extends NonLoginPageController<DashboardControl> {
 
+  /** Size of the notification badge if exeeding orders are less then 100. */
+  private static final int NOTIFICATION_BADGE_SHRINKED_SIZES = 30;
+
+  /** Maximum number of orders to notify. */
+  private static final int MAX_NUM_ORDER_NOTIFIED = 99;
+
   /** Width and Height of the logged Operator Profile Pic. */
   private static final int PRO_PIC_SIZE = 100;
 
@@ -106,19 +112,21 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
   private void displayLoggedOperatorData() {
     Operator loggedOperator = getControl().getLoggedOperator();
     if (loggedOperator != null) {
-      nameSurnameLabel.setText(loggedOperator.getName()+" "+loggedOperator.getSurname());
+      nameSurnameLabel.setText(loggedOperator.getName() + " " + loggedOperator.getSurname());
     }
   }
 
   private void displayExpiringOrders() {
-    int expiringOrders = getControl().getExpiringOrders(7);
+    int expiringOrders = getControl().getExpiringOrdersNumber();
     if (expiringOrders > 0) {
-      ordersExpiringLabel.setText("Ci sono degli ordini\n"
-                                  + "in scadenza oggi!");
-      if (expiringOrders > 99) {
-        badgeExpiringLabel.setText("99+");
-      } else{
-      badgeExpiringLabel.setText(String.valueOf(expiringOrders));
+      ordersExpiringLabel.setText("Ci sono degli ordini\n" + "in scadenza oggi!");
+
+      if (expiringOrders > MAX_NUM_ORDER_NOTIFIED) {
+        badgeExpiringLabel.setText(MAX_NUM_ORDER_NOTIFIED + "+");
+      } else {
+        badgeExpiringLabel.setPrefWidth(NOTIFICATION_BADGE_SHRINKED_SIZES);
+        badgeExpiringLabel.setPrefHeight(NOTIFICATION_BADGE_SHRINKED_SIZES);
+        badgeExpiringLabel.setText(String.valueOf(expiringOrders));
       }
     } else {
       ordersExpiringLabel.setVisible(false);

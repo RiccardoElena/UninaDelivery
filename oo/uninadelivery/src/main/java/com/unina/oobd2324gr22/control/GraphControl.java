@@ -1,19 +1,25 @@
 package com.unina.oobd2324gr22.control;
 
+import com.unina.oobd2324gr22.entity.DAO.AccountDAO;
+import com.unina.oobd2324gr22.entity.DAO.AccountDAOPostgre;
 import com.unina.oobd2324gr22.entity.DAO.OrderDAO;
 import com.unina.oobd2324gr22.entity.DAO.OrderDAOPostgre;
+import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import java.sql.SQLException;
 import java.time.Month;
 import java.time.Year;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import javafx.scene.control.Alert;
 
 public class GraphControl extends NonLoginControl {
 
   /** Order DAO. */
   private OrderDAO orderDAO = new OrderDAOPostgre();
+
+  /** Account DAO. */
+  private AccountDAO accountDAO = new AccountDAOPostgre();
 
   /** Add page related scene settings. */
   @Override
@@ -28,19 +34,24 @@ public class GraphControl extends NonLoginControl {
    * @param month the month to get the data for
    * @param year the year to get the data for
    * @return the graph data
+   * @throws NoSuchElementException if no data is available
    */
   public List<Integer> getGraphData(final Month month, final Year year) {
     try {
-      return orderDAO.getOrdersPerDay(month.getValue(), year.getValue());
+      List<Integer> o = orderDAO.getOrdersPerDay(month.getValue(), year.getValue());
+      if (o.stream().allMatch(n -> n == 0)) {
+        showAlert(
+            Alert.AlertType.WARNING,
+            "Nessun dato disponibile",
+            "Non ci sono dati disponibili per il mese selezionato",
+            "Selezionare un altro mese o un altro anno.");
+        throw new NoSuchElementException();
+      }
+      return o;
     } catch (SQLException e) {
-      this.showAlert(
-          Alert.AlertType.ERROR,
-          "Errore",
-          "Errore inaspettato.",
-          "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
-              + " l'applicazione.");
+      showInternalError();
       e.printStackTrace();
-      return new ArrayList<Integer>();
+      return null;
     }
   }
 
@@ -56,12 +67,7 @@ public class GraphControl extends NonLoginControl {
     try {
       return orderDAO.getOrderWithLargestQuantity(month.getValue(), year.getValue());
     } catch (SQLException e) {
-      this.showAlert(
-          Alert.AlertType.ERROR,
-          "Errore",
-          "Errore inaspettato.",
-          "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
-              + " l'applicazione.");
+      showInternalError();
       e.printStackTrace();
       return null;
     }
@@ -79,12 +85,7 @@ public class GraphControl extends NonLoginControl {
     try {
       return orderDAO.getOrderWithSmallestQuantity(month.getValue(), year.getValue());
     } catch (SQLException e) {
-      this.showAlert(
-          Alert.AlertType.ERROR,
-          "Errore",
-          "Errore inaspettato.",
-          "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
-              + " l'applicazione.");
+      showInternalError();
       e.printStackTrace();
       return null;
     }
@@ -101,12 +102,7 @@ public class GraphControl extends NonLoginControl {
     try {
       return orderDAO.getMostExpensiveOrder(month.getValue(), year.getValue());
     } catch (SQLException e) {
-      this.showAlert(
-          Alert.AlertType.ERROR,
-          "Errore",
-          "Errore inaspettato.",
-          "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
-              + " l'applicazione.");
+      showInternalError();
       e.printStackTrace();
       return null;
     }
@@ -123,12 +119,41 @@ public class GraphControl extends NonLoginControl {
     try {
       return orderDAO.getLessExpensiveOrder(month.getValue(), year.getValue());
     } catch (SQLException e) {
-      this.showAlert(
-          Alert.AlertType.ERROR,
-          "Errore",
-          "Errore inaspettato.",
-          "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
-              + " l'applicazione.");
+      showInternalError();
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  /**
+   * Get the data for the account with the most orders for the given month and year.
+   *
+   * @param month the month to get the data for
+   * @param year the year to get the data for
+   * @return the account data
+   */
+  public Account getMostOrderingAccountData(final Month month, final Year year) {
+    try {
+      return accountDAO.getMostOrderingAccount(month.getValue(), year.getValue());
+    } catch (SQLException e) {
+      showInternalError();
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  /**
+   * Get the data for the account with the most spending for the given month and year.
+   *
+   * @param month the month to get the data for
+   * @param year the year to get the data for
+   * @return the account data
+   */
+  public Account getMostSpendingAccountData(final Month month, final Year year) {
+    try {
+      return accountDAO.getMostSpendingAccount(month.getValue(), year.getValue());
+    } catch (SQLException e) {
+      showInternalError();
       e.printStackTrace();
       return null;
     }

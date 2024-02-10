@@ -61,6 +61,26 @@ public interface AccountDAO {
   List<Account> getAccountByNameAndSurname(String name, String surname) throws SQLException;
 
   /**
+   * Retrieve the account with the most orders in a given month and year.
+   *
+   * @param year year to search
+   * @param month month to search
+   * @return the account with the most orders in the given month and year
+   * @throws SQLException possible DB related errors
+   */
+  Account getMostOrderingAccount(int year, int month) throws SQLException;
+
+  /**
+   * Retrieve the account with the most spending in a given month and year.
+   *
+   * @param year year to search
+   * @param month month to search
+   * @return the account with the most spending in the given month and year
+   * @throws SQLException possible DB related errors
+   */
+  Account getMostSpendingAccount(int year, int month) throws SQLException;
+
+  /**
    * Update an account.
    *
    * @param account Account to update

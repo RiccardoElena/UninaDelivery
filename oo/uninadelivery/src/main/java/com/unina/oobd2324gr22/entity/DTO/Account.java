@@ -1,6 +1,7 @@
 package com.unina.oobd2324gr22.entity.DTO;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * This class represents an account.
@@ -32,6 +33,12 @@ public class Account {
 
   /** Default constructor. */
   private Address address;
+
+  /** Default constructor. */
+  private List<Order> orders;
+
+  /** Default constructor. */
+  private double amountSpent;
 
   /**
    * Default constructor.
@@ -167,6 +174,34 @@ public class Account {
    */
   public void setAddress(final Address accAddress) {
     this.address = accAddress;
+  }
+
+  /**
+   * @return lista ordini account
+   */
+  public List<Order> getOrders() {
+    return orders;
+  }
+
+  /**
+   * @param accOrders lista ordini account
+   */
+  public void setOrders(final List<Order> accOrders) {
+    this.orders = accOrders;
+  }
+
+  /**
+   * @return amountSpent
+   */
+  public double getAmountSpent() {
+    return amountSpent;
+  }
+
+  /**
+   * @param accAmountSpent amountSpent
+   */
+  public void setAmountSpent(final double accAmountSpent) {
+    this.amountSpent = accAmountSpent;
   }
 
   /** To string method. */
