@@ -8,3 +8,9 @@
 .smallButton {
   -fx-font-size: 17px;
 }
+
+.badge {
+  -fx-background-color: red;
+  -fx-text-fill: white;
+  -fx-background-radius: 100;
+}

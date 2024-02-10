@@ -39,6 +39,12 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
   /** Profile Picture of the logged Operator. */
   @FXML private ImageView proPic;
 
+  /** Badge of expiring orders. */
+  @FXML private Label badgeExpiringLabel;
+
+  /** Warning image for expiring orders. */
+  @FXML private ImageView warningImage;
+
   /**
    * Initialize the page.
    *
@@ -105,14 +111,19 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
   }
 
   private void displayExpiringOrders() {
-    int expiringOrders = getControl().getExpiringOrders(2);
+    int expiringOrders = getControl().getExpiringOrders(7);
     if (expiringOrders > 0) {
-      ordersExpiringLabel.setText("Attenzione!\nCi sono: "
-                                  + expiringOrders
-                                  + " ordini\n"
+      ordersExpiringLabel.setText("Ci sono degli ordini\n"
                                   + "in scadenza oggi!");
+      if (expiringOrders > 99) {
+        badgeExpiringLabel.setText("99+");
+      } else{
+      badgeExpiringLabel.setText(String.valueOf(expiringOrders));
+      }
     } else {
-      ordersExpiringLabel.setText("");
+      ordersExpiringLabel.setVisible(false);
+      badgeExpiringLabel.setVisible(false);
+      warningImage.setVisible(false);
     }
   }
 }
