@@ -266,10 +266,11 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
    * @param imgView the image view
    */
   public void setRoundImageViewImagesAndPosition(final Image img, final ImageView imgView) {
+    System.err.println(img.getHeight() + " " + img.getWidth());
     double imgRatio = img.getWidth() / img.getHeight();
-    double imgActualWidth =
-        img.getHeight() <= MAX_IMG_HEIGHT ? img.getWidth() : MAX_IMG_HEIGHT * imgRatio;
+    double imgActualWidth = MAX_IMG_HEIGHT * imgRatio;
     double xoffset = (MAX_IMG_WIDTH - imgActualWidth) / 2;
+    System.err.println(imgActualWidth + " " + xoffset);
     imgView.setImage(img);
     imgView.setLayoutX(xoffset);
   }
