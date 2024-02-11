@@ -66,14 +66,14 @@ public final class DBConnection {
       }
     } catch (SQLException | ClassNotFoundException | IOException throwables) {
       String url =
-            "jdbc:postgresql://localhost:5432/" + "uninadelivery?currentSchema=" + schemaName;
+          "jdbc:postgresql://localhost:5432/" + "uninadelivery?currentSchema=" + schemaName;
       try {
         conn = DriverManager.getConnection(url, "zgenny", "passwordSicura");
       } catch (SQLException e) {
         e.printStackTrace();
       }
-      //System.out.println("Error in getConnectionBySchema");
-      //throwables.printStackTrace();
+      // System.out.println("Error in getConnectionBySchema");
+      // throwables.printStackTrace();
     }
 
     return conn;

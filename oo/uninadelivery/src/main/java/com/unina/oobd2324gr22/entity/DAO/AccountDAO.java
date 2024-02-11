@@ -3,6 +3,8 @@ package com.unina.oobd2324gr22.entity.DAO;
 import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 import java.sql.SQLException;
+import java.time.Month;
+import java.time.Year;
 import java.util.List;
 
 public interface AccountDAO {
@@ -68,7 +70,7 @@ public interface AccountDAO {
    * @return the account with the most orders in the given month and year
    * @throws SQLException possible DB related errors
    */
-  Account getMostOrderingAccount(int year, int month) throws SQLException;
+  Account getMostOrderingAccount(Year year, Month month) throws SQLException;
 
   /**
    * Retrieve the account with the most spending in a given month and year.
@@ -78,7 +80,7 @@ public interface AccountDAO {
    * @return the account with the most spending in the given month and year
    * @throws SQLException possible DB related errors
    */
-  Account getMostSpendingAccount(int year, int month) throws SQLException;
+  Account getMostSpendingAccount(Year year, Month month) throws SQLException;
 
   /**
    * Update an account.

@@ -12,6 +12,8 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
@@ -26,6 +28,12 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
 
   /** Min Height of the window. */
   private static final int MIN_HEIGHT = 720;
+
+  /** Maximum width of the profile picture. */
+  private static final double MAX_IMG_WIDTH = 300;
+
+  /** Maximum height of the profile picture. */
+  private static final double MAX_IMG_HEIGHT = 173;
 
   /** Button to minimize the application. */
   @FXML private Button minimizeButton;
@@ -249,5 +257,20 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
         });
 
     table.getColumns().add(actionColumn);
+  }
+
+  /**
+   * Set the image and the position for the round image view.
+   *
+   * @param img the image
+   * @param imgView the image view
+   */
+  public void setRoundImageViewImagesAndPosition(final Image img, final ImageView imgView) {
+    double imgRatio = img.getWidth() / img.getHeight();
+    double imgActualWidth =
+        img.getHeight() <= MAX_IMG_HEIGHT ? img.getWidth() : MAX_IMG_HEIGHT * imgRatio;
+    double xoffset = (MAX_IMG_WIDTH - imgActualWidth) / 2;
+    imgView.setImage(img);
+    imgView.setLayoutX(xoffset);
   }
 }

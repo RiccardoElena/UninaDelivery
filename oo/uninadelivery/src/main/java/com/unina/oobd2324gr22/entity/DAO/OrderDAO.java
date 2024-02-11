@@ -4,6 +4,8 @@ import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.Year;
 import java.util.List;
 
 /** This interface represents the Data Access Object for the Order class. */
@@ -51,7 +53,7 @@ public interface OrderDAO {
    * @return order with largerest quantity of products
    * @throws SQLException possible DB related errors
    */
-  Order getOrderWithLargestQuantity(int month, int year) throws SQLException;
+  Order getOrderWithLargestQuantity(Month month, Year year) throws SQLException;
 
   /**
    * Retrive the order with the smallest quantity of products from the database.
@@ -61,7 +63,7 @@ public interface OrderDAO {
    * @return order with smallest quantity of products
    * @throws SQLException possible DB related errors
    */
-  Order getOrderWithSmallestQuantity(int month, int year) throws SQLException;
+  Order getOrderWithSmallestQuantity(Month month, Year year) throws SQLException;
 
   /**
    * RETRIEVE the most expensive order from the DB.
@@ -71,7 +73,7 @@ public interface OrderDAO {
    * @return order with the largest cost
    * @throws SQLException possible DB related errors
    */
-  Order getMostExpensiveOrder(int month, int year) throws SQLException;
+  Order getMostExpensiveOrder(Month month, Year year) throws SQLException;
 
   /**
    * RETRIEVE the less expensive order from the DB.
@@ -81,7 +83,7 @@ public interface OrderDAO {
    * @return order with the largest cost
    * @throws SQLException possible DB related errors
    */
-  Order getLessExpensiveOrder(int month, int year) throws SQLException;
+  Order getLessExpensiveOrder(Month month, Year year) throws SQLException;
 
   /**
    * Retrive a list of the number of the orders for each day from the database of the month given.
@@ -91,7 +93,7 @@ public interface OrderDAO {
    * @return list of the number of the orders for each day of the month
    * @throws SQLException possible DB related errors
    */
-  List<Integer> getOrdersPerDay(int month, int year) throws SQLException;
+  List<Integer> getOrdersPerDay(Month month, Year year) throws SQLException;
 
   /**
    * Retrive the orders for a specific client from the database.
@@ -150,7 +152,8 @@ public interface OrderDAO {
    * @return list of orders matching the search criteria
    * @throws SQLException possible DB related errors
    */
-  List<Order> getOrdersByAccountAndMonth(Account client, int year, int month) throws SQLException;
+  List<Order> getOrdersByAccountAndMonth(Account client, Year year, Month month)
+      throws SQLException;
 
   /**
    * Update an order given its id from the database.

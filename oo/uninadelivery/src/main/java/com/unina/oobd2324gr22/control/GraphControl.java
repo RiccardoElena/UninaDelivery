@@ -38,7 +38,7 @@ public class GraphControl extends NonLoginControl {
    */
   public List<Integer> getGraphData(final Month month, final Year year) {
     try {
-      List<Integer> o = orderDAO.getOrdersPerDay(month.getValue(), year.getValue());
+      List<Integer> o = orderDAO.getOrdersPerDay(month, year);
       if (o.stream().allMatch(n -> n == 0)) {
         showAlert(
             Alert.AlertType.WARNING,
@@ -65,7 +65,7 @@ public class GraphControl extends NonLoginControl {
    */
   public Order getHighestProductOrderData(final Month month, final Year year) {
     try {
-      return orderDAO.getOrderWithLargestQuantity(month.getValue(), year.getValue());
+      return orderDAO.getOrderWithLargestQuantity(month, year);
     } catch (SQLException e) {
       showInternalError();
       e.printStackTrace();
@@ -83,7 +83,7 @@ public class GraphControl extends NonLoginControl {
    */
   public Order getLowestProductOrderData(final Month month, final Year year) {
     try {
-      return orderDAO.getOrderWithSmallestQuantity(month.getValue(), year.getValue());
+      return orderDAO.getOrderWithSmallestQuantity(month, year);
     } catch (SQLException e) {
       showInternalError();
       e.printStackTrace();
@@ -100,7 +100,7 @@ public class GraphControl extends NonLoginControl {
    */
   public Order getMostExpensiveOrderData(final Month month, final Year year) {
     try {
-      return orderDAO.getMostExpensiveOrder(month.getValue(), year.getValue());
+      return orderDAO.getMostExpensiveOrder(month, year);
     } catch (SQLException e) {
       showInternalError();
       e.printStackTrace();
@@ -117,7 +117,7 @@ public class GraphControl extends NonLoginControl {
    */
   public Order getLeastExpensiveOrderData(final Month month, final Year year) {
     try {
-      return orderDAO.getLessExpensiveOrder(month.getValue(), year.getValue());
+      return orderDAO.getLessExpensiveOrder(month, year);
     } catch (SQLException e) {
       showInternalError();
       e.printStackTrace();
@@ -134,7 +134,7 @@ public class GraphControl extends NonLoginControl {
    */
   public Account getMostOrderingAccountData(final Month month, final Year year) {
     try {
-      return accountDAO.getMostOrderingAccount(month.getValue(), year.getValue());
+      return accountDAO.getMostOrderingAccount(year, month);
     } catch (SQLException e) {
       showInternalError();
       e.printStackTrace();
@@ -151,7 +151,7 @@ public class GraphControl extends NonLoginControl {
    */
   public Account getMostSpendingAccountData(final Month month, final Year year) {
     try {
-      return accountDAO.getMostSpendingAccount(month.getValue(), year.getValue());
+      return accountDAO.getMostSpendingAccount(year, month);
     } catch (SQLException e) {
       showInternalError();
       e.printStackTrace();

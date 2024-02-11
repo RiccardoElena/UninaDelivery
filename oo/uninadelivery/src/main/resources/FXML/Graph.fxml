@@ -291,9 +291,9 @@
                         </HBox>
                         <HBox prefHeight="468.0" prefWidth="1063.0">
                            <children>
-                              <VBox alignment="CENTER" fillWidth="false" maxHeight="-Infinity" prefHeight="600.0" prefWidth="315.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" styleClass="light-background" HBox.hgrow="ALWAYS">
+                              <VBox alignment="CENTER" fillWidth="false" maxHeight="-Infinity" prefHeight="600.0" prefWidth="340.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" styleClass="light-background" HBox.hgrow="ALWAYS">
                                  <HBox.margin>
-                                    <Insets left="150.0" right="60.0" />
+                                    <Insets left="123.0" right="62.0" />
                                  </HBox.margin>
                                  <children>
                                     <Label fx:id="orderIdLabel31" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="Maggior Numero di Ordini">
@@ -301,14 +301,14 @@
                                           <Font name="System Bold" size="24.0" />
                                        </font>
                                     </Label>
-                                    <Pane prefHeight="180.0" prefWidth="270.0" VBox.vgrow="NEVER">
+                                    <Pane prefHeight="173.0" prefWidth="300.0" VBox.vgrow="NEVER">
                                        <children>
-                                          <ImageView fitHeight="149.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" x="63.0" y="15.0">
+                                          <ImageView fx:id="mostOrderingPropic" fitHeight="173.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@../images/defaultUser.jpg" />
                                              </image>
                                           </ImageView>
-                                          <ImageView fitHeight="149.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" x="63.0" y="15.0">
+                                          <ImageView fitHeight="173.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@../images/defaultUserMask.png" />
                                              </image>
@@ -344,9 +344,9 @@
                                     <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                                  </padding>
                               </VBox>
-                              <VBox alignment="CENTER" fillWidth="false" maxHeight="-Infinity" prefHeight="600.0" prefWidth="315.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" styleClass="light-background" HBox.hgrow="ALWAYS">
+                              <VBox alignment="CENTER" fillWidth="false" maxHeight="-Infinity" prefHeight="600.0" prefWidth="340.0" style="-fx-background-radius: 20; -fx-border-color: -fx-primary-color; -fx-border-width: 2px; -fx-border-radius: 18;" styleClass="light-background" HBox.hgrow="ALWAYS">
                                  <HBox.margin>
-                                    <Insets left="60.0" right="150.0" />
+                                    <Insets left="62.0" right="123.0" />
                                  </HBox.margin>
                                  <children>
                                     <Label fx:id="orderIdLabel311" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="Spesa Maggiore">
@@ -354,14 +354,14 @@
                                           <Font name="System Bold" size="24.0" />
                                        </font>
                                     </Label>
-                                    <Pane prefHeight="180.0" prefWidth="270.0" VBox.vgrow="NEVER">
+                                    <Pane prefHeight="173.0" prefWidth="300.0" VBox.vgrow="NEVER">
                                        <children>
-                                          <ImageView fitHeight="149.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" x="63.0" y="15.0">
+                                          <ImageView fx:id="mostSpendingPropic" fitHeight="173.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@../images/defaultUser.jpg" />
                                              </image>
                                           </ImageView>
-                                          <ImageView fitHeight="149.0" fitWidth="149.0" pickOnBounds="true" preserveRatio="true" x="63.0" y="15.0">
+                                          <ImageView fitHeight="173.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@../images/defaultUserMask.png" />
                                              </image>

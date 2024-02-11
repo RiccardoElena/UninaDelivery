@@ -1,7 +1,9 @@
 package com.unina.oobd2324gr22.entity.DTO;
 
+import com.unina.oobd2324gr22.utils.Base64ToImage;
 import java.time.LocalDate;
 import java.util.List;
+import javafx.scene.image.Image;
 
 /**
  * This class represents an account.
@@ -137,15 +139,33 @@ public class Account {
   /**
    * @return immagine profilo account
    */
-  public String getPropic() {
+  public String getPropicBase64() {
     return propic;
   }
 
   /**
    * @param accPropic immagine profilo account
    */
-  public void setPropic(final String accPropic) {
+  public void setPropicBase64(final String accPropic) {
     this.propic = accPropic;
+  }
+
+  /**
+   * @return immagine profilo account
+   */
+  public Image getPropic() {
+    Image img;
+    try {
+      System.err.println(email);
+      img = Base64ToImage.convert(propic);
+      if (img.getHeight() > img.getWidth()) {
+        throw new Exception("Image has wrong orientation!");
+      }
+    } catch (Exception e) {
+      System.err.println("buba");
+      img = new Image("/images/defaultUser.jpg");
+    }
+    return img;
   }
 
   /**

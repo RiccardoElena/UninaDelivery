@@ -9,6 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -204,7 +206,7 @@ public class OrderDAOPostgre implements OrderDAO {
    * @return order with biggest quantity of products
    */
   @Override
-  public Order getOrderWithLargestQuantity(final int month, final int year) throws SQLException {
+  public Order getOrderWithLargestQuantity(final Month month, final Year year) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     Order order = null;
     PreparedStatement st = null;
@@ -214,8 +216,8 @@ public class OrderDAOPostgre implements OrderDAO {
           con.prepareStatement(
               "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
                   + " FROM emissiondate) = ? ORDER BY quantity DESC LIMIT 1");
-      st.setInt(1, month);
-      st.setInt(2, year);
+      st.setInt(1, month.getValue());
+      st.setInt(2, year.getValue());
       rs = st.executeQuery();
 
       while (rs.next()) {
@@ -245,7 +247,8 @@ public class OrderDAOPostgre implements OrderDAO {
    * @return order with smallest quantity of products
    */
   @Override
-  public Order getOrderWithSmallestQuantity(final int month, final int year) throws SQLException {
+  public Order getOrderWithSmallestQuantity(final Month month, final Year year)
+      throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     Order order = null;
     PreparedStatement st = null;
@@ -256,8 +259,8 @@ public class OrderDAOPostgre implements OrderDAO {
           con.prepareStatement(
               "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
                   + " FROM emissiondate) = ? ORDER BY quantity ASC LIMIT 1");
-      st.setInt(1, month);
-      st.setInt(2, year);
+      st.setInt(1, month.getValue());
+      st.setInt(2, year.getValue());
       rs = st.executeQuery();
 
       while (rs.next()) {
@@ -290,7 +293,7 @@ public class OrderDAOPostgre implements OrderDAO {
    * @return the most expensive order
    */
   @Override
-  public Order getMostExpensiveOrder(final int month, final int year) throws SQLException {
+  public Order getMostExpensiveOrder(final Month month, final Year year) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new ArrayList<>();
     PreparedStatement st = null;
@@ -300,8 +303,8 @@ public class OrderDAOPostgre implements OrderDAO {
           con.prepareStatement(
               "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
                   + " FROM emissiondate) = ?");
-      st.setInt(1, month);
-      st.setInt(2, year);
+      st.setInt(1, month.getValue());
+      st.setInt(2, year.getValue());
       rs = st.executeQuery();
       while (rs.next()) {
         orders.add(populateOrderFromResultSet(rs));
@@ -340,7 +343,7 @@ public class OrderDAOPostgre implements OrderDAO {
    * @return the Less expensive order
    */
   @Override
-  public Order getLessExpensiveOrder(final int month, final int year) throws SQLException {
+  public Order getLessExpensiveOrder(final Month month, final Year year) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new ArrayList<>();
     PreparedStatement st = null;
@@ -350,8 +353,8 @@ public class OrderDAOPostgre implements OrderDAO {
           con.prepareStatement(
               "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
                   + " FROM emissiondate) = ?");
-      st.setInt(1, month);
-      st.setInt(2, year);
+      st.setInt(1, month.getValue());
+      st.setInt(2, year.getValue());
       rs = st.executeQuery();
       while (rs.next()) {
         orders.add(populateOrderFromResultSet(rs));
@@ -549,10 +552,10 @@ public class OrderDAOPostgre implements OrderDAO {
    * @return list of the number of the orders for each day of the month
    */
   @Override
-  public List<Integer> getOrdersPerDay(final int month, final int year) throws SQLException {
+  public List<Integer> getOrdersPerDay(final Month month, final Year year) throws SQLException {
 
     con = DBConnection.getConnectionBySchema("uninadelivery");
-    int dayInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
+    int dayInMonth = LocalDate.of(year.getValue(), month.getValue(), 1).lengthOfMonth();
 
     List<Integer> orders = new ArrayList<Integer>(Collections.nCopies(dayInMonth, 0));
 
@@ -567,8 +570,8 @@ public class OrderDAOPostgre implements OrderDAO {
                   + "EXTRACT(MONTH FROM emissiondate) = ? AND "
                   + "EXTRACT(YEAR FROM emissiondate) = ? "
                   + "GROUP BY EXTRACT(DAY FROM emissiondate)");
-      psSelect.setInt(nextField++, month);
-      psSelect.setInt(nextField++, year);
+      psSelect.setInt(nextField++, month.getValue());
+      psSelect.setInt(nextField++, year.getValue());
       rs = psSelect.executeQuery();
       while (rs.next()) {
         orders.set(rs.getInt(1) - 1, rs.getInt(2));
@@ -639,7 +642,7 @@ public class OrderDAOPostgre implements OrderDAO {
    */
   @Override
   public List<Order> getOrdersByAccountAndMonth(
-      final Account client, final int year, final int month) throws SQLException {
+      final Account client, final Year year, final Month month) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new LinkedList<Order>();
     PreparedStatement psSelect = null;
@@ -652,8 +655,8 @@ public class OrderDAOPostgre implements OrderDAO {
                   + "WHERE email = ? AND EXTRACT(YEAR FROM emissiondate) = ? AND EXTRACT(MONTH FROM"
                   + " emissiondate) = ?");
       psSelect.setString(nextField++, client.getEmail());
-      psSelect.setInt(nextField++, year);
-      psSelect.setInt(nextField++, month);
+      psSelect.setInt(nextField++, year.getValue());
+      psSelect.setInt(nextField++, month.getValue());
       rs = psSelect.executeQuery();
       while (rs.next()) {
         orders.add(populateOrderFromResultSet(rs));

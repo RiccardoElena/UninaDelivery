@@ -15,6 +15,8 @@ import com.unina.oobd2324gr22.utils.App;
 import com.unina.oobd2324gr22.utils.SHA256;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.Year;
 import java.util.List;
 
 // import com.unina.oobd2324gr22.entity.DAO.OrderDAO;
@@ -46,7 +48,7 @@ public final class Main {
     System.out.println("Bypass NON Attivo");
     OrderDAO orderDAO = new OrderDAOPostgre();
     try {
-      List<Integer> o = orderDAO.getOrdersPerDay(1, YEAR);
+      List<Integer> o = orderDAO.getOrdersPerDay(Month.JANUARY, Year.of(YEAR));
       for (int i : o) {
         System.out.print("Data: " + i + " ");
       }

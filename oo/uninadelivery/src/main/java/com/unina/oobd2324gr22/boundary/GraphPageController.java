@@ -20,6 +20,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
@@ -98,6 +99,12 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
   /** Label for the lowest number of product order product. */
   @FXML private Label lowestProductNumberOrderProduct;
 
+  /** ImageView of the most ordering account. */
+  @FXML private ImageView mostOrderingPropic;
+
+  /** ImageView of the most spending account. */
+  @FXML private ImageView mostSpendingPropic;
+
   /** BorderPane of the page. */
   @FXML private BorderPane borderPane;
 
@@ -133,7 +140,7 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
     scrollPane.addEventFilter(
         ScrollEvent.SCROLL,
         e -> {
-          if (monthComboBox.getValue() == null || yearComboBox.getValue() == null) {
+          if (!monthlyReportData.isVisible()) {
             e.consume();
           }
         });
@@ -220,6 +227,8 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
         lowestProductNumberOrderProduct,
         lowestProductNumberOrderCost);
     monthlyReportData.setVisible(true);
+    displayMostOrderingAccountData();
+    displayMostSpendingAccountData();
   }
 
   private void displayOrderData(
@@ -247,10 +256,24 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
   private void displayMostOrderingAccountData() {
     Account account =
         getControl().getMostOrderingAccountData(monthComboBox.getValue(), yearComboBox.getValue());
+
     if (account != null) {
+      setRoundImageViewImagesAndPosition(account.getPropic(), mostOrderingPropic);
       highestNumberEmail.setText(account.getEmail());
       highestNumberNameSurname.setText(account.getName() + " " + account.getSurname());
       orderNumber.setText("N° Ordini: " + account.getOrders().size());
+    }
+  }
+
+  private void displayMostSpendingAccountData() {
+    Account account =
+        getControl().getMostSpendingAccountData(monthComboBox.getValue(), yearComboBox.getValue());
+    if (account != null) {
+      setRoundImageViewImagesAndPosition(account.getPropic(), mostSpendingPropic);
+      highestCostEmail.setText(account.getEmail());
+      highestCostNameSurname.setText(account.getName() + " " + account.getSurname());
+      moneySpent.setText(
+          "Speso: " + NumToStringFormatter.trunkDecimal(account.getAmountSpent(), 2) + "€");
     }
   }
 

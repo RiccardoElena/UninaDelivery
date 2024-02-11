@@ -10,6 +10,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Month;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,8 +36,8 @@ public class AccountDAOPostgre implements AccountDAO {
         rs.getString("surname"),
         rs.getString("email"),
         rs.getDate("birthdate").toLocalDate(),
-        rs.getString("password"),
         rs.getString("propic"),
+        rs.getString("password"),
         createAddress(rs));
   }
 
@@ -149,7 +151,7 @@ public class AccountDAOPostgre implements AccountDAO {
 
   /** PostgreSQL implementation of the getAccountByBmail method. */
   @Override
-  public Account getMostOrderingAccount(final int year, final int month) throws SQLException {
+  public Account getMostOrderingAccount(final Year year, final Month month) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     Account account = null;
     PreparedStatement psSelect = null;
@@ -157,16 +159,17 @@ public class AccountDAOPostgre implements AccountDAO {
     try {
       psSelect =
           con.prepareStatement(
-              "SELECT A.* FROM account A NATURAL JOIN \"Order\" O WHERE"
-                  + " EXTRACT(YEAR FROM O.orderdate) = ? AND EXTRACT(MONTH FROM O.orderdate) = ?"
-                  + " GROUP BY A.email ORDER BY COUNT(O.orderid) DESC LIMIT 1");
-      psSelect.setInt(1, year);
-      psSelect.setInt(2, month);
+              "SELECT A.* FROM account A JOIN \"Order\" O ON A.email = O.email WHERE EXTRACT(YEAR"
+                  + " FROM O.emissiondate) = ? AND EXTRACT(MONTH FROM O.emissiondate) = ? GROUP BY"
+                  + " A.email ORDER BY COUNT(O.orderid) DESC LIMIT 1");
+      psSelect.setInt(1, year.getValue());
+      psSelect.setInt(2, month.getValue());
       rs = psSelect.executeQuery();
       if (rs.next()) {
         account = populateAccountFromResultSet(rs);
+        System.err.println(account.getEmail());
+        account.setOrders(new OrderDAOPostgre().getOrdersByAccountAndMonth(account, year, month));
       }
-      account.setOrders(new OrderDAOPostgre().getOrdersByAccountAndMonth(account, year, month));
     } catch (SQLException e) {
       e.printStackTrace();
       throw e;
@@ -186,7 +189,7 @@ public class AccountDAOPostgre implements AccountDAO {
 
   /** PostgreSQL implementation of the getMostSpendingAccount method. */
   @Override
-  public Account getMostSpendingAccount(final int year, final int month) throws SQLException {
+  public Account getMostSpendingAccount(final Year year, final Month month) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     Account account = null;
     PreparedStatement psSelect = null;
@@ -194,10 +197,10 @@ public class AccountDAOPostgre implements AccountDAO {
     try {
       psSelect =
           con.prepareStatement(
-              "SELECT * FROM account WHERE email IN (SELECT email FROM \"Order\" WHERE"
-                  + " EXTRACT(YEAR FROM orderdate) = ? AND EXTRACT(MONTH FROM orderdate) = ?)");
-      psSelect.setInt(1, year);
-      psSelect.setInt(2, month);
+              "SELECT * FROM account WHERE email IN (SELECT email FROM \"Order\" WHERE EXTRACT(YEAR"
+                  + " FROM emissiondate) = ? AND EXTRACT(MONTH FROM emissiondate) = ?)");
+      psSelect.setInt(1, year.getValue());
+      psSelect.setInt(2, month.getValue());
       rs = psSelect.executeQuery();
       List<Account> accounts = new ArrayList<>();
       while (rs.next()) {

@@ -6,7 +6,6 @@ import io.github.palexdev.materialfx.controls.MFXButton;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 
@@ -17,9 +16,6 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
 
   /** Maximum number of orders to notify. */
   private static final int MAX_NUM_ORDER_NOTIFIED = 99;
-
-  /** Width and Height of the logged Operator Profile Pic. */
-  private static final int PRO_PIC_SIZE = 100;
 
   /** Custom title bar. */
   @FXML private BorderPane borderPane;
@@ -59,14 +55,8 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
   @Override
   public final void initialize(final DashboardControl control) {
     displayLoggedOperatorData();
-    setProfilePicture();
+    setRoundImageViewImagesAndPosition(getControl().getLoggedOperator().getPropic(), proPic);
     displayExpiringOrders();
-  }
-
-  private void setProfilePicture() {
-    proPic = new ImageView(new Image("/images/defaultUser.jpg"));
-    proPic.setFitWidth(PRO_PIC_SIZE);
-    proPic.setFitHeight(PRO_PIC_SIZE);
   }
 
   /**
@@ -112,7 +102,7 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
   private void displayLoggedOperatorData() {
     Operator loggedOperator = getControl().getLoggedOperator();
     if (loggedOperator != null) {
-      nameSurnameLabel.setText(loggedOperator.getName() + " " + loggedOperator.getSurname());
+      nameSurnameLabel.setText("Bentornato " + loggedOperator.getName());
     }
   }
 

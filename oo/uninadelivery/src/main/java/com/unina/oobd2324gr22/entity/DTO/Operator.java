@@ -37,8 +37,8 @@ public final class Operator extends Account {
         account.getSurname(),
         account.getEmail(),
         account.getBirthdate(),
+        account.getPropicBase64(),
         account.getPassword(),
-        account.getPropic(),
         account.getAddress());
     this.businessMail = bMail;
   }
@@ -147,7 +147,7 @@ public final class Operator extends Account {
         + this.getBirthdate()
         + "',"
         + "\npropic='"
-        + this.getPropic()
+        + this.getPropicBase64()
         + "',"
         + "\npassword='"
         + this.getPassword()

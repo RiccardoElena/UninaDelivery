@@ -17,6 +17,9 @@ import java.util.List;
  */
 public class ShipmentDAOPostgre implements ShipmentDAO {
 
+  /** Connection to the database. */
+  Connection con;
+
   private Shipment populateShipmentFromResultSet(final ResultSet rs) throws SQLException {
     int shipmentId = rs.getInt("shipmentid");
     LocalDate shippingDate = rs.getDate("shippingdate").toLocalDate();

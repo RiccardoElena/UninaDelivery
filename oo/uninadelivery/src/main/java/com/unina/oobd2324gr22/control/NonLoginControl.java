@@ -5,9 +5,6 @@ import javafx.stage.Stage;
 
 public abstract class NonLoginControl extends BaseControl {
 
-  /** Size of the resize zone. */
-  private static final int RESIZE_MARGIN = 5;
-
   /** Width of the window. */
   protected static final double WIDTH = 1080;
 
