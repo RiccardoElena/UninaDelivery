@@ -137,6 +137,7 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
   @Override
   protected final void initialize(final GraphControl control) {
     monthlyReportData.setVisible(false);
+    scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
     scrollPane.addEventFilter(
         ScrollEvent.SCROLL,
         e -> {
@@ -229,6 +230,7 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
     monthlyReportData.setVisible(true);
     displayMostOrderingAccountData();
     displayMostSpendingAccountData();
+    scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
   }
 
   private void displayOrderData(

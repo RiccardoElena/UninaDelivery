@@ -501,4 +501,10 @@
          </BorderPane.margin>
       </AnchorPane>
    </left>
+   <right>
+      <AnchorPane prefHeight="685.0" prefWidth="13.0" BorderPane.alignment="CENTER" />
+   </right>
+   <bottom>
+      <AnchorPane prefHeight="14.0" prefWidth="1080.0" BorderPane.alignment="CENTER" />
+   </bottom>
 </BorderPane>
