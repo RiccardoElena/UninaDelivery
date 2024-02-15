@@ -3,6 +3,10 @@ package com.unina.oobd2324gr22.entity.DAO;
 import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.utils.DBConnection;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -129,7 +133,7 @@ public class OrderDAOPostgre implements OrderDAO {
    * @return list of unfinished orders
    */
   @Override
-  public List<Order> getUnfinishedOrders() throws SQLException {
+  public ObservableList<Order> getUnfinishedOrders() throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new LinkedList<Order>();
     Statement st = null;
@@ -156,8 +160,8 @@ public class OrderDAOPostgre implements OrderDAO {
         con.close();
       }
     }
-
-    return orders;
+    ObservableList<Order> observableList = FXCollections.observableArrayList(orders);
+    return observableList;
   }
 
   /**
@@ -166,7 +170,7 @@ public class OrderDAOPostgre implements OrderDAO {
    * @return lista di ordini
    */
   @Override
-  public List<Order> getOrders() throws SQLException {
+  public ObservableList<Order> getOrders() throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new LinkedList<Order>();
     Statement st = null;
@@ -195,7 +199,8 @@ public class OrderDAOPostgre implements OrderDAO {
       }
     }
 
-    return orders;
+    ObservableList<Order> observableList = FXCollections.observableArrayList(orders);
+    return observableList;
   }
 
   /**
@@ -388,18 +393,18 @@ public class OrderDAOPostgre implements OrderDAO {
   /**
    * RETRIEVE all orders from the DB made by the same account.
    *
-   * @param client accout to search for
+   * @param email accout to search for
    * @return list of orders matching the search criteria
    */
   @Override
-  public List<Order> getOrdersByAccount(final Account client) throws SQLException {
+  public ObservableList<Order> getOrdersByEmail(final String email) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new LinkedList<Order>();
     PreparedStatement psSelect = null;
     ResultSet rs = null;
     try {
       psSelect = con.prepareStatement(BASE_QUERY + "WHERE email = ?");
-      psSelect.setString(1, client.getEmail());
+      psSelect.setString(1, email);
       rs = psSelect.executeQuery();
       while (rs.next()) {
         orders.add(populateOrderFromResultSet(rs));
@@ -418,7 +423,8 @@ public class OrderDAOPostgre implements OrderDAO {
         con.close();
       }
     }
-    return orders;
+    ObservableList<Order> observableList = FXCollections.observableArrayList(orders);
+    return observableList;
   }
 
   /**
@@ -429,7 +435,7 @@ public class OrderDAOPostgre implements OrderDAO {
    * @return ciao
    */
   @Override
-  public List<Order> getOrdersByDate(final LocalDate start, final LocalDate end)
+  public ObservableList<Order> getOrdersByDate(final LocalDate start, final LocalDate end)
       throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new LinkedList<Order>();
@@ -457,7 +463,8 @@ public class OrderDAOPostgre implements OrderDAO {
         con.close();
       }
     }
-    return orders;
+    ObservableList<Order> observableList = FXCollections.observableArrayList(orders);
+    return observableList;
   }
 
   /**
@@ -467,7 +474,7 @@ public class OrderDAOPostgre implements OrderDAO {
    * @return ciao
    */
   @Override
-  public List<Order> getOrdersByDate(final LocalDate start) throws SQLException {
+  public ObservableList<Order> getOrdersByDate(final LocalDate start) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new LinkedList<Order>();
     PreparedStatement psSelect = null;
@@ -493,20 +500,21 @@ public class OrderDAOPostgre implements OrderDAO {
         con.close();
       }
     }
-    return orders;
+    ObservableList<Order> observableList = FXCollections.observableArrayList(orders);
+    return observableList;
   }
 
   /**
    * RETRIEVE orders from the DB made by a client between two dates.
    *
-   * @param client user to search for
+   * @param email user to search for
    * @param start start date
    * @param end end date
    * @return list of the orders matching the search criteria
    */
   @Override
-  public List<Order> getOrdersByAccountAndDate(
-      final Account client, final LocalDate start, final LocalDate end) throws SQLException {
+  public ObservableList<Order> getOrdersByEmailAndDate(
+      final String email, final LocalDate start, final LocalDate end) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new LinkedList<Order>();
     PreparedStatement psSelect = null;
@@ -516,7 +524,7 @@ public class OrderDAOPostgre implements OrderDAO {
       psSelect =
           con.prepareStatement(
               BASE_QUERY + "WHERE email = ? " + "AND emissiondate BETWEEN ? AND ?");
-      psSelect.setString(nextField++, client.getEmail());
+      psSelect.setString(nextField++, email);
       psSelect.setDate(nextField++, java.sql.Date.valueOf(start));
       psSelect.setDate(nextField++, java.sql.Date.valueOf(end));
       rs = psSelect.executeQuery();
@@ -537,7 +545,8 @@ public class OrderDAOPostgre implements OrderDAO {
         con.close();
       }
     }
-    return orders;
+    ObservableList<Order> observableList = FXCollections.observableArrayList(orders);
+    return observableList;
   }
 
   /**
@@ -641,7 +650,7 @@ public class OrderDAOPostgre implements OrderDAO {
    * @return list of orders matching the search criteria
    */
   @Override
-  public List<Order> getOrdersByAccountAndMonth(
+  public ObservableList<Order> getOrdersByAccountAndMonth(
       final Account client, final Year year, final Month month) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new LinkedList<Order>();
@@ -675,7 +684,8 @@ public class OrderDAOPostgre implements OrderDAO {
         con.close();
       }
     }
-    return orders;
+    ObservableList<Order> observableList = FXCollections.observableArrayList(orders);
+    return observableList;
   }
 
   /**

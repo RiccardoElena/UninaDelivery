@@ -1,5 +1,7 @@
 package com.unina.oobd2324gr22.control;
 
+import com.unina.oobd2324gr22.entity.DAO.OrderDAO;
+import com.unina.oobd2324gr22.entity.DAO.OrderDAOPostgre;
 import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
@@ -7,12 +9,19 @@ import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Product;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import com.unina.oobd2324gr22.entity.DTO.Transport;
+
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class OrdersHandlingControl extends NonLoginControl {
+
+  /** Order Data Access Object. */
+  private OrderDAO ordersDAO = new OrderDAOPostgre();
 
   /** Order selected. */
   private Order selectedOrder;
@@ -58,21 +67,29 @@ public class OrdersHandlingControl extends NonLoginControl {
   /**
    * Filter orders.
    *
-   * @param name the name to filter by
+   * @param email the name to filter by
    * @param startingDate the starting date to filter by
    * @param endingDate the ending date to filter by
+   *
+   * @return the filtered orders
    */
-  public void filterOrders(
-      final String name, final LocalDate startingDate, final LocalDate endingDate) {
-    if (name != null && !name.isEmpty()) {
-      System.out.println("Filtering by name: " + name);
+  public ObservableList<Order> filterOrders(
+      final String email, final LocalDate startingDate, final LocalDate endingDate) {
+    ObservableList<Order> filteredOrders = null;
+    try{
+    if (email != null  && startingDate == null && endingDate == null) {
+      filteredOrders = ordersDAO.getOrdersByEmail(email);
+    } else if ((email == null || email.isEmpty()) && startingDate != null && endingDate != null) {
+      filteredOrders = ordersDAO.getOrdersByDate(startingDate, endingDate);
+    } else if ((email == null || email.isEmpty()) && startingDate != null && endingDate == null) {
+      filteredOrders = ordersDAO.getOrdersByDate(startingDate);
+    } else if (email != null  && startingDate != null && endingDate != null) {
+      filteredOrders = ordersDAO.getOrdersByEmailAndDate(email, startingDate, endingDate);
     }
-    if (startingDate != null) {
-      System.out.println("Filtering by starting date: " + startingDate);
+  } catch (SQLException e) {
+      e.getMessage();
     }
-    if (endingDate != null) {
-      System.out.println("Filtering by ending date: " + endingDate);
-    }
+    return filteredOrders;
   }
 
   /**
@@ -84,13 +101,28 @@ public class OrdersHandlingControl extends NonLoginControl {
     return selectedOrder;
   }
 
+  /**
+   * Get the unfinished orders.
+   *
+   * @return list of unfinished orders
+   */
+  public ObservableList<Order> getUnfinishedOrders() {
+    ObservableList<Order> orders = null;
+    try {
+      orders = ordersDAO.getUnfinishedOrders();
+    } catch (SQLException e) {
+      System.out.println(e.getMessage());
+    }
+    return orders;
+  }
+
   // TODO! : Test pourpose only, remove this when the DB connection is implemented
   /**
    * Get test orders.
    *
    * @return a list of test orders
    */
-  public ObservableList<Order> getTestOrders() {
+  public ObservableList<Order> getTestOrdersXX() {
     final int outOfPlaceOrderId = 7;
     int orderId = 2;
     final int qty = 24;

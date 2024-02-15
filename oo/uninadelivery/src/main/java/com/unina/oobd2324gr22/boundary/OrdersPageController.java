@@ -4,6 +4,7 @@ import com.unina.oobd2324gr22.control.OrdersHandlingControl;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import java.time.LocalDate;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -75,7 +76,7 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
   public final void initialize(final OrdersHandlingControl control) {
 
     setTableColumns();
-    ordersTable.setItems(getControl().getTestOrders());
+    ordersTable.setItems(getControl().getUnfinishedOrders());
     updateEndDatePickerAccordingToStart();
   }
 
@@ -86,9 +87,15 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
    */
   @FXML
   public final void filterButtonAction(final ActionEvent event) {
-    getControl()
-        .filterOrders(
-            clientTextField.getText(), startDatePicker.getValue(), endDatePicker.getValue());
+    if (!clientTextField.getText().isEmpty() || startDatePicker.getValue() != null
+        || endDatePicker.getValue() != null) {
+          ObservableList<Order> filteredOrders = getControl().filterOrders(
+            clientTextField.getText(), startDatePicker.getValue(), endDatePicker.getValue()
+        );
+        ordersTable.setItems(filteredOrders);
+    } else {
+      ordersTable.setItems(getControl().getUnfinishedOrders());
+    }
   }
 
   private void updateEndDatePickerAccordingToStart() {
