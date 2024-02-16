@@ -13,7 +13,6 @@ import com.unina.oobd2324gr22.entity.DTO.Transport;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

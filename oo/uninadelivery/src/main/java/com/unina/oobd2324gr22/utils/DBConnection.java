@@ -61,7 +61,6 @@ public final class DBConnection {
         Class.forName("org.postgresql.Driver");
         String url =
             "jdbc:postgresql://localhost:5432/" + "uninadelivery?currentSchema=" + schemaName;
-        System.out.println("url" + url);
         conn = DriverManager.getConnection(url, "riccardoelena", pwd);
       }
     } catch (SQLException | ClassNotFoundException | IOException throwables) {

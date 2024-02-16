@@ -2,7 +2,11 @@ package com.unina.oobd2324gr22.boundary;
 
 import com.unina.oobd2324gr22.control.OrdersHandlingControl;
 import com.unina.oobd2324gr22.entity.DTO.Order;
+import com.unina.oobd2324gr22.utils.LoadingScreenUtil;
+
 import java.time.LocalDate;
+
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -10,12 +14,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 
 public class OrdersPageController extends NonLoginPageController<OrdersHandlingControl> {
 
@@ -67,6 +73,9 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
   /** BorderPane. */
   @FXML private BorderPane borderPane;
 
+  /** Loading indicator. */
+  @FXML private StackPane loadingPane;
+
   /**
    * Initialize the page.
    *
@@ -74,11 +83,16 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
    */
   @Override
   public final void initialize(final OrdersHandlingControl control) {
-
     setTableColumns();
-    ordersTable.setItems(getControl().getUnfinishedOrders());
     updateEndDatePickerAccordingToStart();
-  }
+
+    // Assumi che progressIndicator sia il tuo ProgressIndicator definito altrove
+    LoadingScreenUtil.loading(
+      loadingPane,
+        () -> control.getUnfinishedOrders(),
+        (orders) -> Platform.runLater(() -> ordersTable.setItems(orders))
+    );
+}
 
   /**
    * On filterButton click, it filters the orders.
@@ -87,16 +101,19 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
    */
   @FXML
   public final void filterButtonAction(final ActionEvent event) {
-    if (!clientTextField.getText().isEmpty() || startDatePicker.getValue() != null
-        || endDatePicker.getValue() != null) {
-          ObservableList<Order> filteredOrders = getControl().filterOrders(
-            clientTextField.getText(), startDatePicker.getValue(), endDatePicker.getValue()
-        );
-        ordersTable.setItems(filteredOrders);
-    } else {
-      ordersTable.setItems(getControl().getUnfinishedOrders());
-    }
-  }
+    // Mostra il loading indicator e esegui il filtraggio degli ordini in background
+    LoadingScreenUtil.loading(
+        loadingPane, // Assicurati che loadingPane sia correttamente inizializzato e punti al tuo indicatore nella UI
+        () -> { // Task da eseguire in background
+            if (!clientTextField.getText().isEmpty() || startDatePicker.getValue() != null || endDatePicker.getValue() != null) {
+                return getControl().filterOrders(clientTextField.getText(), startDatePicker.getValue(), endDatePicker.getValue());
+            } else {
+                return getControl().getUnfinishedOrders();
+            }
+        },
+        orders -> Platform.runLater(() -> ordersTable.setItems(orders)) // Azione da eseguire al completamento del task, sul thread dell'interfaccia utente
+    );
+}
 
   private void updateEndDatePickerAccordingToStart() {
     startDatePicker

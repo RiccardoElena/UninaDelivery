@@ -1,2 +1,6 @@
 @import url('Main.css');
 @import url('components/TitleBar.css');
+
+.progress-indicator {
+  -fx-progress-color: -fx-primary-color;
+  }
