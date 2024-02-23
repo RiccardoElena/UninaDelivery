@@ -2,13 +2,11 @@ package com.unina.oobd2324gr22.entity.DAO;
 
 import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Order;
-
-import javafx.collections.ObservableList;
-
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
+import java.util.HashMap;
 import java.util.List;
 
 /** This interface represents the Data Access Object for the Order class. */
@@ -29,7 +27,7 @@ public interface OrderDAO {
    * @return lista di ordini
    * @throws SQLException possible DB related errors
    */
-  ObservableList<Order> getOrders() throws SQLException;
+  List<Order> getOrders() throws SQLException;
 
   /**
    * Retrive an order by its id from the database.
@@ -46,7 +44,7 @@ public interface OrderDAO {
    * @return list of unfinished orders
    * @throws SQLException possible DB related errors
    */
-  ObservableList<Order> getUnfinishedOrders() throws SQLException;
+  List<Order> getUnfinishedOrders() throws SQLException;
 
   /**
    * Retrive the order with the largest quantity of products from the database.
@@ -99,13 +97,22 @@ public interface OrderDAO {
   List<Integer> getOrdersPerDay(Month month, Year year) throws SQLException;
 
   /**
+   * Retrive the orders by filters from the database.
+   *
+   * @param filters filters to apply
+   * @return list of orders matching the search criteria
+   * @throws SQLException possible DB related errors
+   */
+  List<Order> getOrdersByFilters(HashMap<String, Object> filters) throws SQLException;
+
+  /**
    * Retrive the orders for a specific client from the database.
    *
    * @param email account to search for
    * @return list of orders matching the search criteria
    * @throws SQLException possible DB related errors
    */
-  ObservableList<Order> getOrdersByEmail(String email) throws SQLException;
+  List<Order> getOrdersByEmail(String email) throws SQLException;
 
   /**
    * Retrive the orders by range date from the database.
@@ -115,7 +122,7 @@ public interface OrderDAO {
    * @return list of orders matching the search criteria
    * @throws SQLException possible DB related errors
    */
-  ObservableList<Order> getOrdersByDate(LocalDate dateStart, LocalDate dateEnd) throws SQLException;
+  List<Order> getOrdersByDates(LocalDate dateStart, LocalDate dateEnd) throws SQLException;
 
   /**
    * Retrive the orders by start date from the database.
@@ -124,7 +131,7 @@ public interface OrderDAO {
    * @return list of orders matching the search criteria
    * @throws SQLException possible DB related errors
    */
-  ObservableList<Order> getOrdersByDate(LocalDate dateStart) throws SQLException;
+  List<Order> getOrdersByDate(LocalDate dateStart) throws SQLException;
 
   /**
    * Retrive the orders in a range of date for a specific user from the database.
@@ -135,8 +142,7 @@ public interface OrderDAO {
    * @return list of the orders matching the search criteria
    * @throws SQLException possible DB related errors
    */
-  ObservableList<Order> getOrdersByEmailAndDate(String email,
-                                                  LocalDate dateStart, LocalDate dateEnd)
+  List<Order> getOrdersByEmailAndDate(String email, LocalDate dateStart, LocalDate dateEnd)
       throws SQLException;
 
   /**
@@ -156,7 +162,7 @@ public interface OrderDAO {
    * @return list of orders matching the search criteria
    * @throws SQLException possible DB related errors
    */
-  ObservableList<Order> getOrdersByAccountAndMonth(Account client, Year year, Month month)
+  List<Order> getOrdersByAccountAndMonth(Account client, Year year, Month month)
       throws SQLException;
 
   /**

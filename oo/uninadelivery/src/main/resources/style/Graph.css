@@ -56,3 +56,10 @@
     -fx-background-color: transparent;
     -fx-padding: 0;
 }
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-shape: "";
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}

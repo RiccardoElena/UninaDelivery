@@ -36,3 +36,45 @@
 .table-view .column-header .label {
   -fx-text-fill: -fx-secondary-color;
 }
+
+.table-view .placeholder .label {
+  -fx-text-fill: -fx-primary-color;
+}
+
+.scroll-bar:vertical {
+  -fx-background-color: transparent;
+  -fx-pref-width: 0; 
+}
+
+.scroll-bar:vertical .thumb {
+  -fx-background-color: -fx-secondary-color;
+  -fx-background-insets: 2, 2, 2;
+  -fx-background-radius: 10em;
+}
+
+.scroll-bar:vertical .thumb:hover {
+  -fx-background-color: -fx-primary-color;
+}
+
+.scroll-bar:vertical .thumb:pressed {
+  -fx-background-color: rgb(186, 90, 0);
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+    -fx-max-width: 0;
+    -fx-max-height: 0;
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-shape: "";
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}

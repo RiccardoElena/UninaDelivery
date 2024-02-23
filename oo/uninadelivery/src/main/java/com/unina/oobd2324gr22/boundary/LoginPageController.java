@@ -45,7 +45,7 @@ public class LoginPageController extends BasePageController<LoginControl> {
   private void handleKeyPressed(final KeyEvent event) {
     String keyCode = event.getCode().toString();
     if (keyCode.equals("ENTER")) {
-      loginButtonAction(new ActionEvent(passwordTextField, null));
+      loginButtonAction(new ActionEvent(loginButton, null));
     }
     if (keyCode.equals("T") && event.isControlDown()) {
       togglePswVisibility();

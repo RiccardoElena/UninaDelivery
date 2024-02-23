@@ -18,7 +18,7 @@ import java.util.List;
 public class ShipmentDAOPostgre implements ShipmentDAO {
 
   /** Connection to the database. */
-  Connection con;
+  private Connection con;
 
   private Shipment populateShipmentFromResultSet(final ResultSet rs) throws SQLException {
     int shipmentId = rs.getInt("shipmentid");
@@ -76,25 +76,19 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
   /** PostgreSQL implementation of the method getCompatibleShipments. {@inheritDoc} */
   @Override
   public List<Shipment> getCompatibleShipments(final Order order) throws SQLException {
-    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
+    con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Shipment> shipments = new ArrayList<>();
     PreparedStatement st = null;
     ResultSet rs = null;
     int nextField = 1;
     try {
       String query =
-          "SELECT *"
-              + "FROM shipment S LEFT JOIN (covers NATURAL JOIN transport) C "
-              + "ON S.transportid = C.transportid AND S.shippingdate = date "
-              + "WHERE S.directedto IS NULL AND "
-              + "(hasarrived = FALSE OR hasarrived IS NULL) AND "
-              + "C.occupiedspace + ? <= C.maxcapacity AND "
-              + "shippedfrom IN ( "
-              + "SELECT depositid "
-              + "FROM deposit NATURAL JOIN stores "
-              + "WHERE name=? AND supplier=? AND "
-              + "quantity >= ? AND isSameCity(zipcode, country, ?,?)) "
-              + "ORDER BY (directedto IS NULL) DESC, shippingdate ASC;";
+          "select * FROM shipment S where directedto IS NULL AND (hasArrived = FALSE OR hasArrived"
+              + " IS NULL) AND NOT EXISTS (SELECT 1 FROM covers natural join transport WHERE date ="
+              + " S.shippingdate AND transportid = S.transportid AND occupiedspace + ? >"
+              + " maxcapacity) AND shippedFrom IN (Select depositid FROM deposit natural join"
+              + " stores where name = ? AND supplier = ? and quantity >= ? and isSameCity(zipcode,"
+              + " country, ?, ?)) ORDER BY shippingdate ASC;";
       st = con.prepareStatement(query);
       st.setDouble(nextField++, order.getProduct().getPackageSizeLiters() * order.getQuantity());
       st.setString(nextField++, order.getProduct().getName());
@@ -111,15 +105,6 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
       e.printStackTrace();
       throw e;
     } finally {
-      closeResources(rs, st, con);
-    }
-
-    return shipments;
-  }
-
-  private void closeResources(
-      final ResultSet rs, final PreparedStatement st, final Connection con) {
-    try {
       if (rs != null) {
         rs.close();
       }
@@ -129,9 +114,8 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
       if (con != null) {
         con.close();
       }
-    } catch (SQLException e) {
-      e.printStackTrace();
     }
+    return shipments;
   }
 
   /** PostgreSQL implementation of the method updateShipment. {@inheritDoc} */

@@ -1,12 +1,14 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
+import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Transport;
 import com.unina.oobd2324gr22.utils.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,6 +150,17 @@ public class TransportDAOPostgre implements TransportDAO {
       }
     }
     return transports;
+  }
+
+  /**
+   * PostgreSQL implementation of the method getCompatibleTransports.<br>
+   * {@inheritDoc}
+   */
+  @Override
+  public final List<Transport> getCompatibleTransports(
+      final Order order, final Deposit deposit, final LocalDate date) throws SQLException {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'getCompatibleTransports'");
   }
 
   /**

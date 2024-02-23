@@ -1,8 +1,10 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
+import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Transport;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface TransportDAO {
@@ -59,6 +61,18 @@ public interface TransportDAO {
    * @throws SQLException possible DB related errors.
    */
   List<Transport> getAvailableTransports() throws SQLException;
+
+  /**
+   * Retrieve all transports compatible with a given order, date and deposit.
+   *
+   * @param order the order to get transports for.
+   * @param deposit the deposit to get transports from.
+   * @param date the date to get transports from.
+   * @return list of available transports of the deposit passed.
+   * @throws SQLException possible DB related errors.
+   */
+  List<Transport> getCompatibleTransports(Order order, Deposit deposit, LocalDate date)
+      throws SQLException;
 
   /**
    * Retrieve all available transports of a specific deposit from the database.

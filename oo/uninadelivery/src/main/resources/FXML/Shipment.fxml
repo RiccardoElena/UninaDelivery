@@ -202,17 +202,17 @@
                                     <Insets left="15.0" right="10.0" />
                                  </GridPane.margin>
                               </DatePicker>
-                              <ComboBox prefHeight="26.0" prefWidth="221.0" promptText="Deposito di Partenza" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
+                              <ComboBox fx:id="depositComboBox" prefHeight="26.0" prefWidth="221.0" promptText="Deposito di Partenza" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
                                  <GridPane.margin>
                                     <Insets left="15.0" right="10.0" />
                                  </GridPane.margin>
                               </ComboBox>
-                              <ComboBox prefHeight="26.0" prefWidth="221.0" promptText="Corriere" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                              <ComboBox fx:id="driverComboBox" prefHeight="26.0" prefWidth="221.0" promptText="Corriere" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                  <GridPane.margin>
                                     <Insets left="15.0" right="10.0" />
                                  </GridPane.margin>
                               </ComboBox>
-                              <ComboBox prefHeight="26.0" prefWidth="221.0" promptText="Mezzo di Transporto" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+                              <ComboBox fx:id="transportComboBox" prefHeight="26.0" prefWidth="221.0" promptText="Mezzo di Transporto" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                                  <GridPane.margin>
                                     <Insets left="15.0" right="10.0" />
                                  </GridPane.margin>

@@ -4,3 +4,8 @@
 .progress-indicator {
   -fx-progress-color: -fx-primary-color;
   }
+
+.start-date{
+  -fx-background-color: -fx-primary-color;
+  -fx-text-fill: -fx-secondary-color;
+}

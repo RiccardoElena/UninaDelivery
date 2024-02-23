@@ -2,14 +2,18 @@ package com.unina.oobd2324gr22.boundary;
 
 import com.unina.oobd2324gr22.control.OrdersHandlingControl;
 import com.unina.oobd2324gr22.entity.DTO.Address;
+import com.unina.oobd2324gr22.entity.DTO.Deposit;
+import com.unina.oobd2324gr22.entity.DTO.Driver;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Product;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
+import com.unina.oobd2324gr22.entity.DTO.Transport;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -62,6 +66,15 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
   /** Column containing the remaining space. */
   @FXML private TableColumn<Shipment, Float> remainingSpaceTableColumn;
 
+  /** Depoists Combo Box. */
+  @FXML private ComboBox<Deposit> depositComboBox;
+
+  /** Transport Combo Box. */
+  @FXML private ComboBox<Transport> transportComboBox;
+
+  /** Driver Combo Box. */
+  @FXML private ComboBox<Driver> driverComboBox;
+
   /**
    * Initialize the page.
    *
@@ -74,10 +87,22 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
 
     this.setTableColumns();
 
-    shipmentsTable.setItems(getControl().getTestShipments());
+    // TODO @zGenny: implement loading pane functionality here too and change placeholder text.
+    shipmentsTable.setItems(getControl().getShipments());
 
     this.setDatePickerLowerBound();
+
+    this.populateComboBoxes();
   } // ! end initialize
+
+  private void resetComboBoxes() {
+    depositComboBox.setValue(null);
+    depositComboBox.setDisable(true);
+    transportComboBox.setValue(null);
+    transportComboBox.setDisable(true);
+    driverComboBox.setValue(null);
+    driverComboBox.setDisable(true);
+  }
 
   /**
    * Button to go back to the previous page.
@@ -111,6 +136,38 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
 
     Address address = order.getAccount().getAddress();
     orderAddressLabel.setText("Diretto a: " + address.toString());
+  }
+
+  private void populateComboBoxes() {
+    shipmentDatePicker
+        .valueProperty()
+        .addListener(
+            (observable, oldValue, newValue) -> {
+              if (newValue != null) {
+                depositComboBox.setDisable(false);
+                depositComboBox.setItems(getControl().getDeposits(newValue));
+              } else {
+                resetComboBoxes();
+              }
+            });
+
+    depositComboBox
+        .valueProperty()
+        .addListener(
+            (observable, oldValue, newValue) -> {
+              if (newValue != null) {
+                transportComboBox.setDisable(false);
+                transportComboBox.setItems(
+                    getControl().getTransports(shipmentDatePicker.getValue(), newValue));
+
+                driverComboBox.setDisable(false);
+                driverComboBox.setItems(
+                    getControl().getDrivers(shipmentDatePicker.getValue(), newValue));
+              } else {
+                resetComboBoxes();
+                depositComboBox.setDisable(false);
+              }
+            });
   }
 
   private void setDatePickerLowerBound() {

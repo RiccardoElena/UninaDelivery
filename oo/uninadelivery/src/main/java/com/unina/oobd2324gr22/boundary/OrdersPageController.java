@@ -3,9 +3,8 @@ package com.unina.oobd2324gr22.boundary;
 import com.unina.oobd2324gr22.control.OrdersHandlingControl;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.utils.LoadingScreenUtil;
-
+import io.github.palexdev.mfxcore.controls.Label;
 import java.time.LocalDate;
-
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
@@ -14,12 +13,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 
@@ -85,14 +84,26 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
   public final void initialize(final OrdersHandlingControl control) {
     setTableColumns();
     updateEndDatePickerAccordingToStart();
+    Platform.runLater(() -> filterButton.getScene().setOnKeyPressed(this::handleKeyPressed));
 
     // Assumi che progressIndicator sia il tuo ProgressIndicator definito altrove
     LoadingScreenUtil.loading(
-      loadingPane,
-        () -> control.getUnfinishedOrders(),
-        (orders) -> Platform.runLater(() -> ordersTable.setItems(orders))
-    );
-}
+        loadingPane,
+        () -> displayUnfilteredOrders(),
+        orders -> Platform.runLater(() -> ordersTable.setItems(orders)));
+  }
+
+  private void handleKeyPressed(final KeyEvent event) {
+    String keyCode = event.getCode().toString();
+    if (keyCode.equals("ENTER")) {
+      Platform.runLater(() -> filterButton.fire());
+    }
+  }
+
+  private ObservableList<Order> displayUnfilteredOrders() {
+    ordersTable.setPlaceholder(new Label("Caricamento..."));
+    return getControl().getUnfinishedOrders();
+  }
 
   /**
    * On filterButton click, it filters the orders.
@@ -103,45 +114,65 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
   public final void filterButtonAction(final ActionEvent event) {
     // Mostra il loading indicator e esegui il filtraggio degli ordini in background
     LoadingScreenUtil.loading(
-        loadingPane, // Assicurati che loadingPane sia correttamente inizializzato e punti al tuo indicatore nella UI
+        loadingPane, // Assicurati che loadingPane sia correttamente inizializzato e punti al tuo
+        // indicatore nella UI
         () -> { // Task da eseguire in background
-            if (!clientTextField.getText().isEmpty() || startDatePicker.getValue() != null || endDatePicker.getValue() != null) {
-                return getControl().filterOrders(clientTextField.getText(), startDatePicker.getValue(), endDatePicker.getValue());
-            } else {
-                return getControl().getUnfinishedOrders();
-            }
+          ordersTable.setPlaceholder(new Label("Caricamento..."));
+          if (!clientTextField.getText().isEmpty()
+              || startDatePicker.getValue() != null
+              || endDatePicker.getValue() != null) {
+
+            return getControl()
+                .filterOrders(
+                    clientTextField.getText(),
+                    startDatePicker.getValue(),
+                    endDatePicker.getValue());
+
+          } else {
+            return displayUnfilteredOrders();
+          }
         },
-        orders -> Platform.runLater(() -> ordersTable.setItems(orders)) // Azione da eseguire al completamento del task, sul thread dell'interfaccia utente
-    );
-}
+        orders -> {
+          if (orders.isEmpty() || orders == null) {
+            ordersTable.getItems().clear();
+            ordersTable.setPlaceholder(new Label("Nessun ordine compatibile coi filtri inseriti"));
+            return;
+          }
+          Platform.runLater(() -> ordersTable.setItems(orders));
+        });
+  }
 
   private void updateEndDatePickerAccordingToStart() {
     startDatePicker
         .valueProperty()
         .addListener(
             (obs, oldDate, newDate) -> {
-              if (newDate == null) {
-                return;
-              }
-
-              if (endDatePicker.getValue() != null && newDate.isAfter(endDatePicker.getValue())) {
-                endDatePicker.setValue(null);
-              }
-
               endDatePicker.setDayCellFactory(
                   d ->
                       new DateCell() {
                         @Override
                         public void updateItem(final LocalDate item, final boolean empty) {
                           super.updateItem(item, empty);
-                          setDisable(item.isBefore(newDate));
-                          if (!item.isBefore(newDate) && !item.isAfter(newDate)) {
+                          if (newDate == null) {
+                            setDisable(false);
                             setStyle(
-                                "-fx-background-color: -fx-primary-color; -fx-text-fill:"
-                                    + " -fx-secondary-color;");
+                                "-fx-background-color: white; -fx-text-fill: -fx-color-primary;");
+                          } else {
+                            setDisable(item.isBefore(newDate));
+                            if (!item.isBefore(newDate) && !item.isAfter(newDate)) {
+                              setStyle(
+                                  "-fx-background-color: -fx-primary-color; -fx-text-fill:"
+                                      + " -fx-secondary-color;");
+                            }
                           }
                         }
                       });
+              if (newDate == null) {
+                return;
+              }
+              if (endDatePicker.getValue() != null && newDate.isAfter(endDatePicker.getValue())) {
+                endDatePicker.setValue(null);
+              }
             });
   }
 

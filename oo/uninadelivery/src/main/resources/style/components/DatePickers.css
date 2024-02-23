@@ -71,3 +71,21 @@
 .date-picker-popup .spinner .button .right-arrow {
 	-fx-background-color: -fx-secondary-color;
 }
+
+.date-picker .day-cell.today {
+  -fx-background-color: white;
+  -fx-text-fill: -fx-primary-color;
+  -fx-border-color: -fx-primary-color;
+  -fx-border-width: 1px;
+}
+
+.date-picker .day-cell {
+  -fx-border-color: transparent;
+}
+.date-picker .day-cell:hover,
+.date-picker .day-cell.today:hover {
+  -fx-background-color: -fx-secondary-color;
+  -fx-text-fill: -fx-primary-color;
+  -fx-border-color: -fx-primary-color;
+  -fx-border-width: 1px;
+}

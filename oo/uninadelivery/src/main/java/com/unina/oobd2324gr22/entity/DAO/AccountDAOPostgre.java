@@ -3,6 +3,8 @@ package com.unina.oobd2324gr22.entity.DAO;
 import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Area;
+import com.unina.oobd2324gr22.entity.DTO.Deposit;
+import com.unina.oobd2324gr22.entity.DTO.Driver;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.utils.DBConnection;
@@ -10,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
 import java.util.ArrayList;
@@ -231,6 +234,17 @@ public class AccountDAOPostgre implements AccountDAO {
       }
     }
     return account;
+  }
+
+  /**
+   * PostgreSQL implementation of the getCompatibleDrivers method.
+   *
+   * @inheritdoc
+   */
+  @Override
+  public List<Driver> getCompatibleDrivers(
+      final Order order, final Deposit deposit, final LocalDate date) throws SQLException {
+    throw new UnsupportedOperationException("Unimplemented method 'getCompatibleDrivers'");
   }
 
   /** PostgreSQL implementation of the updateAccount method. */

@@ -269,6 +269,7 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
     System.err.println(img.getHeight() + " " + img.getWidth());
     double imgRatio = img.getWidth() / img.getHeight();
     double imgActualWidth = MAX_IMG_HEIGHT * imgRatio;
+
     double xoffset = (MAX_IMG_WIDTH - imgActualWidth) / 2;
     System.err.println(imgActualWidth + " " + xoffset);
     imgView.setImage(img);
