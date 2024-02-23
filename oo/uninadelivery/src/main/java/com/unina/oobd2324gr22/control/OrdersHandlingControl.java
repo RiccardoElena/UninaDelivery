@@ -207,7 +207,7 @@ public class OrdersHandlingControl extends NonLoginControl {
     try {
       drivers =
           FXCollections.observableArrayList(
-              accountDAO.getCompatibleDrivers(selectedOrder, selectedDeposit, selectedDate));
+              accountDAO.getCompatibleDrivers(selectedDeposit, selectedDate));
     } catch (SQLException e) {
       System.out.println(e.getMessage());
     }

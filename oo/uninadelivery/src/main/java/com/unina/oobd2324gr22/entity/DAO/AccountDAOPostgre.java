@@ -29,9 +29,13 @@ public class AccountDAOPostgre implements AccountDAO {
     return new Operator(populateAccountFromResultSet(rs), rs.getString("businessmail"));
   }
 
-  // private Driver populateDriverFromResultSet(final ResultSet rs) throws SQLException {
-  //   return new Driver(populateAccountFromResultSet(rs), rs.getString("license"));
-  // }
+  private Driver populateDriverFromResultSet(final ResultSet rs) throws SQLException {
+    Deposit deposit = new DepositDAOPostgre().getDepositById(rs.getInt("depositid"));
+    Driver.DrivingLicenceType licence =
+        Driver.DrivingLicenceType.valueOf(rs.getString("drivinglicencetype"));
+    return new Driver(
+        populateAccountFromResultSet(rs), rs.getString("businessmail"), licence, deposit);
+  }
 
   private Account populateAccountFromResultSet(final ResultSet rs) throws SQLException {
     return new Account(
@@ -242,9 +246,40 @@ public class AccountDAOPostgre implements AccountDAO {
    * @inheritdoc
    */
   @Override
-  public List<Driver> getCompatibleDrivers(
-      final Order order, final Deposit deposit, final LocalDate date) throws SQLException {
-    throw new UnsupportedOperationException("Unimplemented method 'getCompatibleDrivers'");
+  public List<Driver> getCompatibleDrivers(final Deposit deposit, final LocalDate date)
+      throws SQLException {
+    con = DBConnection.getConnectionBySchema("uninadelivery");
+    List<Driver> drivers = new ArrayList<>();
+    PreparedStatement st = null;
+    ResultSet rs = null;
+    int nextField = 1;
+
+    try {
+      String query =
+          "select * from account natural join driver where businessmail NOT IN (select businessmail"
+              + " from drives where date = ?) and depositid = ?;";
+      st = con.prepareStatement(query);
+      st.setDate(nextField++, java.sql.Date.valueOf(date));
+      st.setInt(nextField++, deposit.getId());
+      rs = st.executeQuery();
+      while (rs.next()) {
+        drivers.add(populateDriverFromResultSet(rs));
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw e;
+    } finally {
+      if (rs != null) {
+        rs.close();
+      }
+      if (st != null) {
+        st.close();
+      }
+      if (con != null) {
+        con.close();
+      }
+    }
+    return drivers;
   }
 
   /** PostgreSQL implementation of the updateAccount method. */

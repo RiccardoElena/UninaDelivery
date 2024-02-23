@@ -159,8 +159,41 @@ public class TransportDAOPostgre implements TransportDAO {
   @Override
   public final List<Transport> getCompatibleTransports(
       final Order order, final Deposit deposit, final LocalDate date) throws SQLException {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getCompatibleTransports'");
+    con = DBConnection.getConnectionBySchema("uninadelivery");
+    List<Transport> transports = new ArrayList<>();
+    PreparedStatement psSelect = null;
+    ResultSet rs = null;
+    int nextField = 1;
+    try {
+      String query =
+          "select * from transport where depositid = ? AND isAvailable = TRUE AND transporttype ="
+              + " 'WheeledSmall' AND NOT EXISTS (select 1 from covers where covers.transportid ="
+              + " transport.transportid and date = ?) and maxcapacity >= ?";
+      psSelect = con.prepareStatement(query);
+      psSelect.setInt(nextField++, deposit.getId());
+      psSelect.setDate(nextField++, java.sql.Date.valueOf(date));
+      psSelect.setDouble(
+          nextField++, order.getProduct().getPackageSizeLiters() * order.getQuantity());
+      rs = psSelect.executeQuery();
+      while (rs.next()) {
+        transports.add(populateTransportFromResultSet(rs));
+      }
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw e;
+    } finally {
+      if (rs != null) {
+        rs.close();
+      }
+      if (psSelect != null) {
+        psSelect.close();
+      }
+      if (con != null) {
+        con.close();
+      }
+    }
+    return transports;
   }
 
   /**

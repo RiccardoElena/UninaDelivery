@@ -4,6 +4,13 @@ import java.time.LocalDate;
 
 public final class Driver extends Account {
 
+  public enum DrivingLicenceType {
+    /** Driving licence type BE. Used for max weight of 7000 kg. */
+    BE,
+    /** Driving licence type CE. Used for trucks and TIRs. */
+    CE
+  }
+
   // Attributes
 
   /** Business mail of the driver. */
@@ -144,6 +151,32 @@ public final class Driver extends Account {
     }
   }
 
+  /**
+   * Constructor of the driver.
+   *
+   * @param account personal data of the driver
+   * @param bmail business mail of the driver
+   * @param dLicence driving licence type of the driver
+   * @param wPlace workplace of the driver
+   */
+  public Driver(
+      final Account account,
+      final String bmail,
+      final DrivingLicenceType dLicence,
+      final Deposit wPlace) {
+    super(
+        account.getName(),
+        account.getSurname(),
+        account.getEmail(),
+        account.getBirthdate(),
+        account.getPropicBase64(),
+        account.getPassword(),
+        account.getAddress());
+    this.businessMail = bmail;
+    this.drivingLicence = dLicence;
+    this.workplace = wPlace;
+  }
+
   // Getters and Setters
 
   /**
@@ -204,36 +237,10 @@ public final class Driver extends Account {
 
   @Override
   public String toString() {
-    return "Driver{"
-        + "\nname = '"
-        + this.getName()
-        + "',"
-        + "\nsurname = '"
-        + this.getSurname()
-        + "',"
-        + "\nemail = '"
-        + this.getEmail()
-        + "',"
-        + "\nbirthdate = '"
-        + this.getBirthdate()
-        + "',"
-        + "\npropic = '"
-        + this.getPropicBase64()
-        + "',"
-        + "\npassword = '"
-        + this.getPassword()
-        + "',"
-        + "\naddress = "
-        + this.getAddress().toString().replace("\n", "\n\t")
-        + ","
-        + "\nbusinessMail = '"
-        + this.getBusinessMail()
-        + "',"
-        + "\ndrivingLicence = '"
-        + this.getDrivingLicence()
-        + "',"
-        + "\nworkplace = "
-        + this.getWorkplace().toString().replace("\n", "\n\t")
-        + "\n}";
+    return getSurname()
+        + " "
+        + getName()
+        + " - "
+        + businessMail.substring(0, businessMail.indexOf('@'));
   }
 }

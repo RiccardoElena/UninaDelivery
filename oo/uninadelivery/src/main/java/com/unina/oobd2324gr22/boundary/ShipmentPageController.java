@@ -17,10 +17,13 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.util.Callback;
 
 public class ShipmentPageController extends NonLoginPageController<OrdersHandlingControl> {
 
@@ -90,18 +93,22 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
     // TODO @zGenny: implement loading pane functionality here too and change placeholder text.
     shipmentsTable.setItems(getControl().getShipments());
 
-    this.setDatePickerLowerBound();
-
     this.populateComboBoxes();
+
+    this.handleComboBoxNullValue(depositComboBox);
+    this.handleComboBoxNullValue(transportComboBox);
+    this.handleComboBoxNullValue(driverComboBox);
+
+    this.setDatePickerLowerBound();
   } // ! end initialize
 
   private void resetComboBoxes() {
-    depositComboBox.setValue(null);
-    depositComboBox.setDisable(true);
-    transportComboBox.setValue(null);
-    transportComboBox.setDisable(true);
-    driverComboBox.setValue(null);
-    driverComboBox.setDisable(true);
+    ComboBox<?>[] comboBoxes = {depositComboBox, transportComboBox, driverComboBox};
+
+    for (ComboBox<?> comboBox : comboBoxes) {
+      comboBox.getSelectionModel().clearSelection();
+      comboBox.setDisable(true);
+    }
   }
 
   /**
@@ -139,6 +146,8 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
   }
 
   private void populateComboBoxes() {
+    resetComboBoxes();
+
     shipmentDatePicker
         .valueProperty()
         .addListener(
@@ -146,6 +155,7 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
               if (newValue != null) {
                 depositComboBox.setDisable(false);
                 depositComboBox.setItems(getControl().getDeposits(newValue));
+                depositComboBox.getItems().add(0, null);
               } else {
                 resetComboBoxes();
               }
@@ -159,10 +169,12 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
                 transportComboBox.setDisable(false);
                 transportComboBox.setItems(
                     getControl().getTransports(shipmentDatePicker.getValue(), newValue));
+                transportComboBox.getItems().add(0, null);
 
                 driverComboBox.setDisable(false);
                 driverComboBox.setItems(
                     getControl().getDrivers(shipmentDatePicker.getValue(), newValue));
+                driverComboBox.getItems().add(0, null);
               } else {
                 resetComboBoxes();
                 depositComboBox.setDisable(false);
@@ -170,10 +182,44 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
             });
   }
 
+  private <T> void handleComboBoxNullValue(final ComboBox<T> comboBox) {
+    comboBox.setCellFactory(
+        new Callback<ListView<T>, ListCell<T>>() {
+          @Override
+          public ListCell<T> call(final ListView<T> param) {
+            return new ListCell<T>() {
+              @Override
+              protected void updateItem(final T item, final boolean empty) {
+                super.updateItem(item, empty);
+
+                if (item == null || empty) {
+                  setGraphic(null);
+                } else {
+                  setText(item.toString());
+                }
+              }
+            };
+          }
+        });
+
+    // Imposta un button cell per gestire la visualizzazione dell'elemento selezionato
+    comboBox.setButtonCell(
+        new ListCell<T>() {
+          @Override
+          protected void updateItem(final T item, final boolean empty) {
+            super.updateItem(item, empty);
+
+            if (item == null || empty) {
+              setText(comboBox.getPromptText());
+            } else {
+              setText(item.toString());
+            }
+          }
+        });
+  }
+
   private void setDatePickerLowerBound() {
-    LocalDate defaultDate = LocalDate.now().plusDays(1);
-    shipmentDatePicker.setValue(defaultDate);
-    shipmentDatePicker.setDayCellFactory(d -> createDayCell(defaultDate));
+    shipmentDatePicker.setDayCellFactory(d -> createDayCell(LocalDate.now().plusDays(1)));
   }
 
   private DateCell createDayCell(final LocalDate defaultDate) {

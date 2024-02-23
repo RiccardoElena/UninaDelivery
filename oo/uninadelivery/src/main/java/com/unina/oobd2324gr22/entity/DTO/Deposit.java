@@ -248,21 +248,12 @@ public class Deposit {
   /** To string method. */
   @Override
   public String toString() {
-    return "Deposit{"
-        + "\n\tid = "
+    return "Deposito "
         + this.getId()
-        + "\n\toccupiedSpace = "
-        + this.getOccupiedSpace()
-        + ","
-        + "\n\tmaxCapacity = "
-        + this.getMaxCapacity()
-        + ","
-        + "\n\taddress = "
-        + this.getAddress().toString().replace("\n", "\n\t")
-        + ","
-        + "\n\tstoredProducts = "
-        + this.getStoredProducts().toString().replace("\n", "\n\t")
-        + "\n}";
+        + " - "
+        + this.getAddress().getCity()
+        + " "
+        + this.getAddress().getZipCode();
   }
 
   /** Equals method to comparing deposit's id. */

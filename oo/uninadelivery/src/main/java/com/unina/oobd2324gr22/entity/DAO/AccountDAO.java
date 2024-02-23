@@ -4,7 +4,6 @@ import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
 import com.unina.oobd2324gr22.entity.DTO.Driver;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
-import com.unina.oobd2324gr22.entity.DTO.Order;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.Month;
@@ -89,14 +88,12 @@ public interface AccountDAO {
   /**
    * Retrieve all the drivers compatible with given order, deposit and date.
    *
-   * @param order order to search for
    * @param deposit deposit to search for
    * @param date date to search for
    * @return list of drivers compatible with given order, deposit and date
    * @throws SQLException
    */
-  List<Driver> getCompatibleDrivers(Order order, Deposit deposit, LocalDate date)
-      throws SQLException;
+  List<Driver> getCompatibleDrivers(Deposit deposit, LocalDate date) throws SQLException;
 
   /**
    * Update an account.

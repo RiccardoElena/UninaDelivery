@@ -147,21 +147,6 @@ public class Transport {
   /** To string. */
   @Override
   public String toString() {
-    return "Transport{"
-        + "\n\tid = "
-        + id
-        + ","
-        + "\n\tmaxCapacity = "
-        + maxCapacity
-        + ","
-        + "\n\toccupiedSpace = "
-        + occupiedSpace
-        + ","
-        + "\n\tisAvailable = "
-        + isAvailable
-        + ","
-        + "\n\tdepositOwner = "
-        + depositOwner.toString().replace("\n", "\n\t")
-        + "\n}";
+    return "Veicolo " + this.id + " - (" + this.maxCapacity + "kg)";
   }
 }

@@ -39,3 +39,15 @@
 .combo-box .combo-box-popup .list-cell {
   -fx-text-fill: -fx-primary-color;
 }
+
+.combo-box .combo-box-popup .list-cell:filled:hover,
+.combo-box .combo-box-popup .list-cell:filled:selected,
+ .combo-box .combo-box-popup .list-cell:filled:focused:hover{
+  -fx-background-color: -fx-secondary-color;
+}
+
+.combo-box .combo-box-popup .list-cell:focused,
+.combo-box .combo-box-popup .list-cell:filled:focused {
+  -fx-border-color: -fx-primary-color;
+  -fx-background-color: white;
+}

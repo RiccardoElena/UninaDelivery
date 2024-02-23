@@ -112,16 +112,19 @@ public class DepositDAOPostgre implements DepositDAO {
               "SELECT * FROM deposit D WHERE isSameCity(D.zipcode, D.country, ?, ?) AND EXISTS"
                   + " (SELECT 1 FROM stores WHERE D.depositid = depositid AND name = ? AND supplier"
                   + " = ? AND quantity >= ?) AND EXISTS (SELECT 1 FROM transport WHERE D.depositid"
-                  + " = depositid AND transporttype = 'WheeledSmall' AND transportid NOT IN (SELECT"
-                  + " transportid FROM covers WHERE date = ?)) AND EXISTS (SELECT 1 FROM driver"
-                  + " WHERE D.depositid = depositid AND businessmail NOT IN (SELECT businessmail"
-                  + " FROM drives WHERE date = ?))");
+                  + " = depositid AND transporttype = 'WheeledSmall' AND isAvailable = TRUE AND"
+                  + " transportid NOT IN (SELECT transportid FROM covers WHERE date = ?) and"
+                  + " maxcapacity >= ?) AND EXISTS (SELECT 1 FROM driver WHERE D.depositid ="
+                  + " depositid AND businessmail NOT IN (SELECT businessmail FROM drives WHERE date"
+                  + " = ?))");
       psSelect.setString(nextField++, zipCode);
       psSelect.setString(nextField++, country);
       psSelect.setString(nextField++, order.getProduct().getName());
       psSelect.setString(nextField++, order.getProduct().getSupplier());
       psSelect.setInt(nextField++, order.getQuantity());
       psSelect.setDate(nextField++, java.sql.Date.valueOf(date));
+      psSelect.setDouble(
+          nextField++, order.getProduct().getPackageSizeLiters() * order.getQuantity());
       psSelect.setDate(nextField++, java.sql.Date.valueOf(date));
       rs = psSelect.executeQuery();
       while (rs.next()) {
