@@ -110,11 +110,11 @@ public class DepositDAOPostgre implements DepositDAO {
       psSelect =
           con.prepareStatement(
               "SELECT * FROM deposit D WHERE isSameCity(D.zipcode, D.country, ?, ?) AND EXISTS"
-                  + " (SELECT 1 FROM stores WHERE D.depositid = depositid AND name = ? AND supplier"
-                  + " = ? AND quantity >= ?) AND EXISTS (SELECT 1 FROM transport WHERE D.depositid"
-                  + " = depositid AND transporttype = 'WheeledSmall' AND isAvailable = TRUE AND"
-                  + " transportid NOT IN (SELECT transportid FROM covers WHERE date = ?) and"
-                  + " maxcapacity >= ?) AND EXISTS (SELECT 1 FROM driver WHERE D.depositid ="
+                  + " (SELECT 1 FROM stores WHERE D.depositid = stores.depositid AND name = ? AND"
+                  + " supplier = ? AND quantity >= ?) AND EXISTS (SELECT 1 FROM transport WHERE"
+                  + " D.depositid = depositid AND transporttype = 'WheeledSmall' AND isAvailable ="
+                  + " TRUE AND transportid NOT IN (SELECT transportid FROM covers WHERE date = ?)"
+                  + " and maxcapacity >= ?) AND EXISTS (SELECT 1 FROM driver WHERE D.depositid ="
                   + " depositid AND businessmail NOT IN (SELECT businessmail FROM drives WHERE date"
                   + " = ?))");
       psSelect.setString(nextField++, zipCode);

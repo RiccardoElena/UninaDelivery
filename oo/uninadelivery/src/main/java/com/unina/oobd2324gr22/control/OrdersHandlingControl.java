@@ -18,8 +18,11 @@ import com.unina.oobd2324gr22.entity.DTO.Transport;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.Optional;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 
 public class OrdersHandlingControl extends NonLoginControl {
 
@@ -212,5 +215,89 @@ public class OrdersHandlingControl extends NonLoginControl {
       System.out.println(e.getMessage());
     }
     return drivers;
+  }
+
+  /**
+   * Ships the selected order with an already existing shipment.
+   *
+   * @param selectedShipment the selected shipment
+   */
+  public void shipsSelectedOrder(final Shipment selectedShipment) {
+    try {
+      if (isShippingConfirmed(
+          "Premendo OK verrà aggiunto l'ordine selezionato alla spedizione "
+              + selectedShipment.getId()
+              + " in partenza il "
+              + selectedShipment.getShippingDate()
+              + ". Continuare?")) {
+        shipmentDAO.shipOrder(selectedOrder, selectedShipment);
+        showSuccessModal();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      showInternalError();
+    }
+  }
+
+  /**
+   * Ships the selected order with a new shipment.
+   *
+   * @param shippingDate the shipping date
+   * @param startDeposit the start deposit
+   * @param transport the transport
+   * @param driver the driver
+   */
+  public void shipsSelectedOrder(
+      final LocalDate shippingDate,
+      final Deposit startDeposit,
+      final Transport transport,
+      final Driver driver) {
+    Shipment newShipment = new Shipment(shippingDate, getLoggedOperator(), startDeposit, transport);
+    try {
+      if (isShippingConfirmed(
+          "Premendo OK verrà creata una nuova spedizione per il giorno "
+              + shippingDate
+              + " con i dati inseriti a cui verrà"
+              + " aggiunto l'ordine selezionato. Continuare?")) {
+        newShipment.setId(shipmentDAO.insertShipment(newShipment));
+        shipmentDAO.shipOrder(selectedOrder, newShipment);
+        shipmentDAO.assignDriver(newShipment, driver);
+        showSuccessModal();
+      }
+    } catch (SQLException e) {
+      try {
+        shipmentDAO.deleteShipment(newShipment);
+      } catch (SQLException e1) {
+        e1.printStackTrace();
+      }
+      showInternalError();
+    }
+  }
+
+  private boolean isShippingConfirmed(final String content) {
+    Optional<ButtonType> modalResponse =
+        showAlert(Alert.AlertType.CONFIRMATION, "Conferma", "Spedire Ordine?", content);
+    return modalResponse.isPresent() && modalResponse.get() == ButtonType.OK;
+  }
+
+  private void showSuccessModal() {
+    ButtonType orderButtonType = new ButtonType("Gestisci ordini");
+    ButtonType homeButtonType = new ButtonType("Torna alla home");
+    Optional<ButtonType> modalResponse =
+        showAlert(
+            Alert.AlertType.NONE,
+            "Successo",
+            "Operazione terminata con successo.",
+            "La spedizione è stata creata e l'ordine è stato aggiunto. Continuare a gestire"
+                + " gli ordini o tornare alla home?",
+            orderButtonType,
+            homeButtonType);
+    if (modalResponse.isPresent()) {
+      if (modalResponse.get() == orderButtonType) {
+        goToOrdersPage();
+      } else {
+        returnToHomePage();
+      }
+    }
   }
 }

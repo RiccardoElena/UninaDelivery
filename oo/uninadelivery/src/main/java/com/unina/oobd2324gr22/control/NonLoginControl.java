@@ -62,7 +62,7 @@ public abstract class NonLoginControl extends BaseControl {
   }
 
   /** Go to the Dashboard page. */
-  public void returnToHomePage() throws Exception {
+  public void returnToHomePage() {
     DashboardControl dashboardControl = new DashboardControl();
     try {
       dashboardControl.setScene(this.getStage(), this.getLoggedOperator());

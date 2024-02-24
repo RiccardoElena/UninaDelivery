@@ -8,12 +8,15 @@ import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Product;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import com.unina.oobd2324gr22.entity.DTO.Transport;
+import io.github.palexdev.materialfx.controls.MFXButton;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ComboBoxBase;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -78,6 +81,9 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
   /** Driver Combo Box. */
   @FXML private ComboBox<Driver> driverComboBox;
 
+  /** Submit Button. */
+  @FXML private MFXButton submitButton;
+
   /**
    * Initialize the page.
    *
@@ -100,7 +106,27 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
     this.handleComboBoxNullValue(driverComboBox);
 
     this.setDatePickerLowerBound();
+
+    this.setButtonEnablerListener(
+        shipmentsTable, shipmentDatePicker, depositComboBox, transportComboBox, driverComboBox);
+
+    this.setSubmitButtonAction();
   } // ! end initialize
+
+  private void setButtonEnablerListener(final Node... nodes) {
+    for (Node node : nodes) {
+      if (node instanceof TableView) {
+        ((TableView<?>) node)
+            .getSelectionModel()
+            .selectedItemProperty()
+            .addListener((observable, oldValue, newValue) -> this.enableSubmitButton());
+      } else {
+        ((ComboBoxBase<?>) node)
+            .valueProperty()
+            .addListener((observable, oldValue, newValue) -> this.enableSubmitButton());
+      }
+    }
+  }
 
   private void resetComboBoxes() {
     ComboBox<?>[] comboBoxes = {depositComboBox, transportComboBox, driverComboBox};
@@ -127,7 +153,7 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
       return;
     }
 
-    orderIdLabel.setText("Ordine N." + order.getOrderId());
+    orderIdLabel.setText("Ordine N." + order.getId());
 
     LocalDate expectedDeliveryDate = order.getExpectedDeliveryDate();
     String formattedDeliveryDate =
@@ -136,9 +162,12 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
 
     Product product = order.getProduct();
     String productInfo =
-        String.format(
-            "Contenente: %d %s - %s",
-            order.getQuantity(), product.getName(), product.getSupplier());
+        "Contenente: "
+            + order.getQuantity()
+            + " "
+            + product.getName()
+            + " - "
+            + product.getSupplier();
     orderProductLabel.setText(productInfo);
 
     Address address = order.getAccount().getAddress();
@@ -202,7 +231,6 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
           }
         });
 
-    // Imposta un button cell per gestire la visualizzazione dell'elemento selezionato
     comboBox.setButtonCell(
         new ListCell<T>() {
           @Override
@@ -261,25 +289,44 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
     setTableFunctionality(shipmentsTable);
   }
 
-  /**
-   * Button to close the window.
-   *
-   * @param event the event that triggered the action
-   */
-  @Override
-  @FXML
-  void exitButtonAction(final ActionEvent event) {
-    getControl().exit();
+  private void enableSubmitButton() {
+    if (shipmentDatePicker.getValue() != null ^ isShipmentSelected()) {
+      if (isFormFilled()) {
+        submitButton.setDisable(false);
+      }
+      if (isShipmentSelected()) {
+        submitButton.setDisable(false);
+      }
+    } else {
+      submitButton.setDisable(true);
+    }
   }
 
-  /**
-   * Button to minimize the window.
-   *
-   * @param event the event that triggered the action
-   */
-  @Override
-  @FXML
-  void minimizeButtonAction(final ActionEvent event) {
-    getControl().minimize();
+  private boolean isFormFilled() {
+    return shipmentDatePicker.getValue() != null
+        && depositComboBox.getValue() != null
+        && transportComboBox.getValue() != null
+        && driverComboBox.getValue() != null;
+  }
+
+  private boolean isShipmentSelected() {
+    return shipmentsTable.getSelectionModel().getSelectedItem() != null;
+  }
+
+  private void setSubmitButtonAction() {
+    submitButton.setDisable(true);
+    submitButton.setOnAction(
+        e -> {
+          if (isShipmentSelected()) {
+            getControl().shipsSelectedOrder(shipmentsTable.getSelectionModel().getSelectedItem());
+          } else {
+            getControl()
+                .shipsSelectedOrder(
+                    shipmentDatePicker.getValue(),
+                    depositComboBox.getValue(),
+                    transportComboBox.getValue(),
+                    driverComboBox.getValue());
+          }
+        });
   }
 }

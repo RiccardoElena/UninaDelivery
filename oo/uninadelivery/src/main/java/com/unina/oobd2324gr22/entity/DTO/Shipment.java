@@ -73,10 +73,9 @@ public class Shipment {
   public Shipment(
       final LocalDate shipDate,
       final Operator sOperator,
-      final Transport sTransport,
-      final Deposit startDeposit) {
+      final Deposit startDeposit,
+      final Transport sTransport) {
 
-    this.id = -1;
     this.shippingDate = shipDate;
     this.hasArrived = false;
     this.operator = sOperator;
@@ -125,6 +124,15 @@ public class Shipment {
    */
   public int getId() {
     return id;
+  }
+
+  /**
+   * Setter for the id of the shipment.
+   *
+   * @param sId the id of the shipment.
+   */
+  public void setId(final int sId) {
+    this.id = sId;
   }
 
   /**

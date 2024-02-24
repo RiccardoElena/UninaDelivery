@@ -138,7 +138,7 @@ public class OrderDAOPostgre implements OrderDAO {
     try {
 
       st = con.createStatement();
-      rs = st.executeQuery(BASE_QUERY + " WHERE isCompleted = false OR" + " isCompleted IS NULL");
+      rs = st.executeQuery(BASE_QUERY + " WHERE isCompleted IS NULL ORDER BY emissiondate ASC");
 
       while (rs.next()) {
         orders.add(populateOrderFromResultSet(rs));
@@ -400,7 +400,7 @@ public class OrderDAOPostgre implements OrderDAO {
     int nextField = 1;
     try {
       StringBuilder query = new StringBuilder(BASE_QUERY);
-      query.append("WHERE (isCompleted = false OR isCompleted IS NULL) ");
+      query.append("WHERE isCompleted IS NULL ");
       if (filters.size() > 0) {
         for (String key : filters.keySet()) {
           query.append("AND ");
@@ -671,7 +671,7 @@ public class OrderDAOPostgre implements OrderDAO {
       psSelect =
           con.prepareStatement(
               "SELECT COUNT(*) FROM \"Order\" WHERE emissiondate + 6 <= CURRENT_DATE and"
-                  + " isCompleted = false OR isCompleted IS NULL");
+                  + " isCompleted IS NULL");
       rs = psSelect.executeQuery();
       if (rs.next()) {
         return rs.getInt(1);
@@ -767,7 +767,7 @@ public class OrderDAOPostgre implements OrderDAO {
       psUpdate.setInt(nextField++, order.getQuantity());
       psUpdate.setString(nextField++, order.getProduct().getName());
       psUpdate.setString(nextField++, order.getProduct().getSupplier());
-      psUpdate.setInt(nextField++, order.getOrderId());
+      psUpdate.setInt(nextField++, order.getId());
       rowAffected = psUpdate.executeUpdate();
       psUpdate.close();
       con.close();

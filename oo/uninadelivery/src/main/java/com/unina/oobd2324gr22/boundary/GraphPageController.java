@@ -241,7 +241,7 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
       final Label orderCostLabel) {
     Order order = getOrderData.apply(monthComboBox.getValue(), yearComboBox.getValue());
     if (order != null) {
-      orderIdLabel.setText("Ordine N." + order.getOrderId());
+      orderIdLabel.setText("Ordine N." + order.getId());
       orderAccountLabel.setText("Effettuato da: " + order.getAccount().getEmail());
       orderProductLabel.setText(
           "Contenente: "

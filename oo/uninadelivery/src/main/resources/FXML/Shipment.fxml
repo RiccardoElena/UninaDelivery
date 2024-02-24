@@ -254,7 +254,7 @@
       </AnchorPane>
    </center>
    <bottom>
-      <MFXButton fx:id="filterButton" buttonType="RAISED" prefHeight="69.0" prefWidth="186.0" rippleColor="#f7dba7" rippleRadius="100.0" styleClass="bigButton" text="Spedisci" BorderPane.alignment="CENTER">
+      <MFXButton fx:id="submitButton" buttonType="RAISED" prefHeight="69.0" prefWidth="186.0" rippleColor="#f7dba7" rippleRadius="100.0" styleClass="bigButton" text="Spedisci" BorderPane.alignment="CENTER">
          <font>
             <Font size="28.0" />
          </font>

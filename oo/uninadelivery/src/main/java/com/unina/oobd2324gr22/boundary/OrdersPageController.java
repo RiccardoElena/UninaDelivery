@@ -177,7 +177,7 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
   }
 
   private void setTableColumns() {
-    orderNumberColumn.setCellValueFactory(new PropertyValueFactory<>("OrderId"));
+    orderNumberColumn.setCellValueFactory(new PropertyValueFactory<>("Id"));
     supplierColumn.setCellValueFactory(new PropertyValueFactory<>("Product"));
     emissionDateColumn.setCellValueFactory(new PropertyValueFactory<>("EmissionDate"));
     isExpressColumn.setCellValueFactory(new PropertyValueFactory<>("IsExpress"));

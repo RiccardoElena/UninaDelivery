@@ -1,5 +1,6 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
+import com.unina.oobd2324gr22.entity.DTO.Driver;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import com.unina.oobd2324gr22.utils.DBConnection;
@@ -38,8 +39,89 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
   /** PostgreSQL implementation of the method insertShipment. {@inheritDoc} */
   @Override
   public int insertShipment(final Shipment shipment) throws SQLException {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'insertShipment'");
+    con = DBConnection.getConnectionBySchema("uninadelivery");
+    PreparedStatement st = null;
+    int nextField = 1;
+    try {
+      String query =
+          "INSERT INTO shipment (shippingdate, transportid, shippedfrom,"
+              + " businessmail) VALUES (?, ?, ?, ?);";
+      st = con.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
+      st.setDate(nextField++, java.sql.Date.valueOf(shipment.getShippingDate()));
+      st.setInt(nextField++, shipment.getTransport().getId());
+      st.setInt(nextField++, shipment.getStartingDeposit().getId());
+      st.setString(nextField++, shipment.getOperator().getBusinessMail());
+      st.executeUpdate();
+      ResultSet rs = st.getGeneratedKeys();
+      if (rs.next()) {
+        int id = rs.getInt(1);
+        System.err.println("Shipment inserted with id: " + id);
+        return id;
+      }
+      return -1;
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw e;
+    } finally {
+      if (st != null) {
+        st.close();
+      }
+      if (con != null) {
+        con.close();
+      }
+    }
+  }
+
+  /** PostgreSQL implementation of the method shipOrder. {@inheritDoc} */
+  @Override
+  public int shipOrder(final Order order, final Shipment shipment) throws SQLException {
+    con = DBConnection.getConnectionBySchema("uninadelivery");
+    PreparedStatement st = null;
+    int nextField = 1;
+    try {
+      System.err.println(shipment.getId());
+      String query = "INSERT INTO ships VALUES (?, ?);";
+      st = con.prepareStatement(query);
+      st.setInt(nextField++, shipment.getId());
+      st.setInt(nextField++, order.getId());
+      return st.executeUpdate();
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw e;
+    } finally {
+      if (st != null) {
+        st.close();
+      }
+      if (con != null) {
+        con.close();
+      }
+    }
+  }
+
+  /** PostgreSQL implementation of the method assignDriver. {@inheritDoc} */
+  @Override
+  public int assignDriver(final Shipment shipment, final Driver driver) throws SQLException {
+    con = DBConnection.getConnectionBySchema("uninadelivery");
+    PreparedStatement st = null;
+    int nextField = 1;
+    try {
+      String query = "INSERT INTO drives (businessmail, transportid, date) " + "VALUES (?, ?, ?);";
+      st = con.prepareStatement(query);
+      st.setString(nextField++, driver.getBusinessMail());
+      st.setInt(nextField++, shipment.getTransport().getId());
+      st.setDate(nextField++, java.sql.Date.valueOf(shipment.getShippingDate()));
+      return st.executeUpdate();
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw e;
+    } finally {
+      if (st != null) {
+        st.close();
+      }
+      if (con != null) {
+        con.close();
+      }
+    }
   }
 
   /** PostgreSQL implementation of the method getUnfinishedShipments. {@inheritDoc} */
@@ -134,7 +216,23 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
   /** PostgreSQL implementation of the method deleteShipment. {@inheritDoc} */
   @Override
   public int deleteShipment(final Shipment shipment) throws SQLException {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'deleteShipment'");
+    con = DBConnection.getConnectionBySchema("uninadelivery");
+    PreparedStatement st = null;
+    try {
+      String query = "DELETE FROM shipment WHERE shipmentid = ?;";
+      st = con.prepareStatement(query);
+      st.setInt(1, shipment.getId());
+      return st.executeUpdate();
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw e;
+    } finally {
+      if (st != null) {
+        st.close();
+      }
+      if (con != null) {
+        con.close();
+      }
+    }
   }
 }

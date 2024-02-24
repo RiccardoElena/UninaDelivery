@@ -79,7 +79,7 @@ public class Order {
    *
    * @return order id
    */
-  public int getOrderId() {
+  public int getId() {
     return id;
   }
 
@@ -145,15 +145,6 @@ public class Order {
   public LocalDate getExpectedDeliveryDate() {
     return expectedDeliveryDate;
   }
-
-  // /**
-  //  * Setter of the order id.
-
-  //  * @param orderid order id
-  //  */
-  // public void setOrderId(final int orderid) {
-  //   this.id = orderid;
-  // }
 
   /**
    * Setter of the emission date.

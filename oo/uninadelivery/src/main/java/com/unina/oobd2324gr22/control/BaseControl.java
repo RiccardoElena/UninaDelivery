@@ -12,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.DialogPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -163,6 +164,23 @@ public abstract class BaseControl {
     setWidth(w);
   }
 
+  // /**
+  //  * Show an alert.
+  //  *
+  //  * @param alertType the type of the alert
+  //  * @param title the title of the alert
+  //  * @param header the header of the alert
+  //  * @param content the content of the alert
+  //  * @return the button pressed
+  //  */
+  // protected Optional<ButtonType> showAlert(
+  //     final Alert.AlertType alertType,
+  //     final String title,
+  //     final String header,
+  //     final String content) {
+  //   return showAlert(alertType, title, header, content);
+  // }
+
   /**
    * Show an alert.
    *
@@ -170,14 +188,16 @@ public abstract class BaseControl {
    * @param title the title of the alert
    * @param header the header of the alert
    * @param content the content of the alert
+   * @param buttons the buttons of the alert
    * @return the button pressed
    */
   protected Optional<ButtonType> showAlert(
       final Alert.AlertType alertType,
       final String title,
       final String header,
-      final String content) {
-    Alert alert = new Alert(alertType);
+      final String content,
+      final ButtonType... buttons) {
+    Alert alert = new Alert(alertType, content, buttons);
     alert
         .getDialogPane()
         .getStylesheets()
@@ -185,6 +205,11 @@ public abstract class BaseControl {
     alert.setTitle(title);
     alert.setHeaderText(header);
     alert.setContentText(content);
+
+    if (alertType == Alert.AlertType.NONE) {
+      DialogPane dialogPane = alert.getDialogPane();
+      dialogPane.getScene().getWindow().setOnCloseRequest(event -> event.consume());
+    }
     return alert.showAndWait();
   }
 
@@ -239,6 +264,7 @@ public abstract class BaseControl {
     this.stage = currStage;
   }
 
+  /** Display an internal error specific modal window. */
   public void showInternalError() {
     showAlert(
         Alert.AlertType.ERROR,
