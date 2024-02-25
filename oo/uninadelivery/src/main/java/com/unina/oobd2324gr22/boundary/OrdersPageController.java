@@ -90,7 +90,15 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
     LoadingScreenUtil.loading(
         loadingPane,
         () -> displayUnfilteredOrders(),
-        orders -> Platform.runLater(() -> ordersTable.setItems(orders)));
+        orders ->
+            Platform.runLater(
+                () -> {
+                  if (orders.isEmpty() || orders == null) {
+                    ordersTable.setPlaceholder(new Label("Non ci sono ordini da spedire!"));
+                    return;
+                  }
+                  ordersTable.setItems(orders);
+                }));
   }
 
   private void handleKeyPressed(final KeyEvent event) {

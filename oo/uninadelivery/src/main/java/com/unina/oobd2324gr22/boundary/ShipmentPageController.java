@@ -8,10 +8,13 @@ import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Product;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import com.unina.oobd2324gr22.entity.DTO.Transport;
+import com.unina.oobd2324gr22.utils.LoadingScreenUtil;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -26,6 +29,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
 
 public class ShipmentPageController extends NonLoginPageController<OrdersHandlingControl> {
@@ -84,6 +88,9 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
   /** Submit Button. */
   @FXML private MFXButton submitButton;
 
+  /** Loading Pane. */
+  @FXML private StackPane loadingPane;
+
   /**
    * Initialize the page.
    *
@@ -96,8 +103,12 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
 
     setTableColumns();
 
-    // TODO @zGenny: implement loading pane functionality here too and change placeholder text.
-    shipmentsTable.setItems(getControl().getShipments());
+    LoadingScreenUtil.loading(
+        loadingPane,
+        () -> displayUnfilteredShipments(),
+        shipments -> Platform.runLater(() -> shipmentsTable.setItems(shipments)));
+    // TODO @zGenny check if loading pane is correctly used here, if so delete the comment below
+    // shipmentsTable.setItems(getControl().getShipments());
 
     populateComboBoxes();
 
@@ -112,6 +123,11 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
 
     setSubmitButtonAction();
   } // ! end initialize
+
+  private ObservableList<Shipment> displayUnfilteredShipments() {
+    shipmentsTable.setPlaceholder(new Label("Caricamento..."));
+    return getControl().getShipments();
+  }
 
   private void setButtonEnablerListener(final Node... nodes) {
     for (Node node : nodes) {

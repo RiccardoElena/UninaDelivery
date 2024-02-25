@@ -141,7 +141,7 @@
             </Button>
             <DatePicker fx:id="startDatePicker" layoutX="381.0" layoutY="186.0" prefHeight="26.0" prefWidth="221.0" promptText="Data di Spedizione" style="-fx-background-color: none;" AnchorPane.leftAnchor="381.0" />
             <DatePicker fx:id="endDatePicker" layoutX="636.0" layoutY="186.0" prefHeight="26.0" prefWidth="221.0" promptText="Data di Spedizione" style="-fx-background-color: none;" />
-            <StackPane fx:id="loadingPane" layoutX="79.0" layoutY="237.0" prefHeight="414.0" prefWidth="932.0" visible="false" AnchorPane.bottomAnchor="34.0" AnchorPane.leftAnchor="79.0" AnchorPane.rightAnchor="69.0" AnchorPane.topAnchor="237.0">
+            <StackPane fx:id="loadingPane" layoutX="80.0" layoutY="263.0" prefHeight="388.0" prefWidth="932.0" visible="false" AnchorPane.bottomAnchor="34.0" AnchorPane.leftAnchor="79.0" AnchorPane.rightAnchor="69.0" AnchorPane.topAnchor="263.0">
                <children>
                   <ProgressIndicator fx:id="loadingIndicator" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="136.0" prefWidth="218.0" />
                </children>
