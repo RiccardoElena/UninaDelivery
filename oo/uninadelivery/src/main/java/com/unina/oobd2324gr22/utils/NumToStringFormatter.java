@@ -7,10 +7,11 @@ public final class NumToStringFormatter {
   }
 
   /**
-   * Trunk a number to a certain number of decimal places. If the number has no decimal part, it
-   * returns the number as it is. If the number has a decimal part, it returns the number with the
-   * specified number of decimal places. If the number has a decimal part with only zeros, it
-   * returns the number without the decimal part.
+   * Trunk a number to a certain number of decimal places.
+   *
+   * <p>If the number has no decimal part, it returns the number as it is. If the number has a
+   * decimal part, it returns the number with the specified number of decimal places. If the number
+   * has a decimal part with only zeros, it returns the number without the decimal part.
    *
    * @param number the number to trunk
    * @param decimalPlaces the number of decimal places

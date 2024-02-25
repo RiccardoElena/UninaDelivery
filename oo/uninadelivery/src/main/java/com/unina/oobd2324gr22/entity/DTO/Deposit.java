@@ -3,7 +3,6 @@ package com.unina.oobd2324gr22.entity.DTO;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO we should consider to make an abstract class from this
 public class Deposit {
 
   // Attributes
@@ -27,7 +26,6 @@ public class Deposit {
   private List<StoredProduct> storedProducts = new ArrayList<>();
 
   /** Inner util class needed to store quantity along with the product. */
-  // TODO we should consider to move this class in his own file in utils package
   protected final class StoredProduct {
 
     // Attributes
@@ -47,8 +45,8 @@ public class Deposit {
      * @param sQuantity quantity of the product stored
      */
     protected StoredProduct(final Product sProduct, final int sQuantity) {
-      this.product = sProduct;
-      this.quantity = sQuantity;
+      product = sProduct;
+      quantity = sQuantity;
     }
 
     // Getters and Setters
@@ -59,7 +57,7 @@ public class Deposit {
      * @return product stored
      */
     public Product getProduct() {
-      return this.product;
+      return product;
     }
 
     /**
@@ -68,7 +66,7 @@ public class Deposit {
      * @param sProduct product stored
      */
     public void setProduct(final Product sProduct) {
-      this.product = sProduct;
+      product = sProduct;
     }
 
     /**
@@ -77,7 +75,7 @@ public class Deposit {
      * @return quantity of the product stored
      */
     public int getQuantity() {
-      return this.quantity;
+      return quantity;
     }
 
     /**
@@ -90,7 +88,7 @@ public class Deposit {
         storedProducts.remove(this);
         return;
       }
-      this.quantity = sQuantity;
+      quantity = sQuantity;
     }
   }
 
@@ -106,10 +104,10 @@ public class Deposit {
    */
   public Deposit(
       final int dId, final float dOccupiedSpace, final float dMaxCapacity, final Address dAddress) {
-    this.id = dId;
-    this.occupiedSpace = dOccupiedSpace;
-    this.maxCapacity = dMaxCapacity;
-    this.address = dAddress;
+    id = dId;
+    occupiedSpace = dOccupiedSpace;
+    maxCapacity = dMaxCapacity;
+    address = dAddress;
   }
 
   // Getters and Setters
@@ -120,18 +118,8 @@ public class Deposit {
    * @return id
    */
   public int getId() {
-    return this.id;
+    return id;
   }
-
-  // /**
-  //  * Setter of the id.
-  //  *
-  //  * @param dId id
-  //  */
-
-  // private void setId(final int dId) {
-  //   this.id = dId;
-  // }
 
   /**
    * Getter of the occupied space.
@@ -139,7 +127,7 @@ public class Deposit {
    * @return occupied space
    */
   public float getOccupiedSpace() {
-    return this.occupiedSpace;
+    return occupiedSpace;
   }
 
   /**
@@ -148,7 +136,7 @@ public class Deposit {
    * @param dOccupiedSpace occupied space
    */
   public void setOccupiedSpace(final float dOccupiedSpace) {
-    this.occupiedSpace = dOccupiedSpace;
+    occupiedSpace = dOccupiedSpace;
   }
 
   /**
@@ -157,7 +145,7 @@ public class Deposit {
    * @return total space
    */
   public float getMaxCapacity() {
-    return this.maxCapacity;
+    return maxCapacity;
   }
 
   /**
@@ -166,7 +154,7 @@ public class Deposit {
    * @param dMaxCapacity total space
    */
   public void setMaxCapacity(final float dMaxCapacity) {
-    this.maxCapacity = dMaxCapacity;
+    maxCapacity = dMaxCapacity;
   }
 
   /**
@@ -175,7 +163,7 @@ public class Deposit {
    * @return address
    */
   public Address getAddress() {
-    return this.address;
+    return address;
   }
 
   /**
@@ -184,7 +172,7 @@ public class Deposit {
    * @param dAddress address
    */
   public void setAddress(final Address dAddress) {
-    this.address = dAddress;
+    address = dAddress;
   }
 
   /**
@@ -193,7 +181,7 @@ public class Deposit {
    * @return stored products
    */
   public List<StoredProduct> getStoredProducts() {
-    return this.storedProducts;
+    return storedProducts;
   }
 
   /**
@@ -208,14 +196,13 @@ public class Deposit {
     }
 
     StoredProduct sP = new StoredProduct(sProduct, sQuantity);
-    if (this.storedProducts.contains(sP)) {
+    if (storedProducts.contains(sP)) {
 
-      this.storedProducts
-          .get(this.storedProducts.indexOf(sP))
-          .setQuantity(
-              this.storedProducts.get(this.storedProducts.indexOf(sP)).getQuantity() + sQuantity);
+      storedProducts
+          .get(storedProducts.indexOf(sP))
+          .setQuantity(storedProducts.get(storedProducts.indexOf(sP)).getQuantity() + sQuantity);
     } else {
-      this.storedProducts.add(sP);
+      storedProducts.add(sP);
     }
   }
 
@@ -225,7 +212,7 @@ public class Deposit {
    * @return transports
    */
   public List<Transport> getTransports() {
-    return this.transports;
+    return transports;
   }
 
   /**
@@ -238,22 +225,17 @@ public class Deposit {
       throw new IllegalArgumentException("Transport cannot be null");
     }
 
-    if (this.transports.contains(transport)) {
+    if (transports.contains(transport)) {
       return;
     }
 
-    this.transports.add(transport);
+    transports.add(transport);
   }
 
   /** To string method. */
   @Override
   public String toString() {
-    return "Deposito "
-        + this.getId()
-        + " - "
-        + this.getAddress().getCity()
-        + " "
-        + this.getAddress().getZipCode();
+    return "Deposito " + getId() + " - " + getAddress().getCity() + " " + getAddress().getZipCode();
   }
 
   /** Equals method to comparing deposit's id. */
@@ -266,7 +248,10 @@ public class Deposit {
       return false;
     }
     Deposit deposit = (Deposit) dep;
-    return id == deposit.id;
+    return (id == deposit.id
+        && occupiedSpace == deposit.occupiedSpace
+        && maxCapacity == deposit.maxCapacity
+        && address.equals(deposit.address));
   }
 
   /** Hash code method. */

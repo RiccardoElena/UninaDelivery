@@ -2,6 +2,8 @@ package com.unina.oobd2324gr22.entity.DTO;
 
 public class Product {
 
+  // Attributes
+
   /** Default constructor. */
   private String category;
 
@@ -23,7 +25,11 @@ public class Product {
   /** Default constructor. */
   private float price;
 
+  // Constructors
+
   /**
+   * Constructor with parameters.
+   *
    * @param pCategory category
    * @param pName name
    * @param pSupplier supplier
@@ -40,14 +46,16 @@ public class Product {
       final double pPackageSizeLiters,
       final boolean pIsFragile,
       final float pPrice) {
-    this.category = pCategory;
-    this.name = pName;
-    this.supplier = pSupplier;
-    this.description = pDescription;
-    this.packageSizeLiters = pPackageSizeLiters;
-    this.isFragile = pIsFragile;
-    this.price = pPrice;
+    category = pCategory;
+    name = pName;
+    supplier = pSupplier;
+    description = pDescription;
+    packageSizeLiters = pPackageSizeLiters;
+    isFragile = pIsFragile;
+    price = pPrice;
   }
+
+  // Getters and Setters
 
   /**
    * @return category
@@ -60,7 +68,7 @@ public class Product {
    * @param pCategory category
    */
   public void setCategory(final String pCategory) {
-    this.category = pCategory;
+    category = pCategory;
   }
 
   /**
@@ -74,7 +82,7 @@ public class Product {
    * @param pName name
    */
   public void setName(final String pName) {
-    this.name = pName;
+    name = pName;
   }
 
   /**
@@ -88,7 +96,7 @@ public class Product {
    * @param pSupplier supplier
    */
   public void setSupplier(final String pSupplier) {
-    this.supplier = pSupplier;
+    supplier = pSupplier;
   }
 
   /**
@@ -102,7 +110,7 @@ public class Product {
    * @param pDescription description
    */
   public void setDescription(final String pDescription) {
-    this.description = pDescription;
+    description = pDescription;
   }
 
   /**
@@ -116,7 +124,7 @@ public class Product {
    * @param pPackageSizeLiters packageSizeLiters
    */
   public void setPackageSizeLiters(final double pPackageSizeLiters) {
-    this.packageSizeLiters = pPackageSizeLiters;
+    packageSizeLiters = pPackageSizeLiters;
   }
 
   /**
@@ -130,7 +138,7 @@ public class Product {
    * @param pIsFragile isFragile
    */
   public void setIsFragile(final boolean pIsFragile) {
-    this.isFragile = pIsFragile;
+    isFragile = pIsFragile;
   }
 
   /**
@@ -144,8 +152,10 @@ public class Product {
    * @param pPrice price
    */
   public void setPrice(final float pPrice) {
-    this.price = pPrice;
+    price = pPrice;
   }
+
+  // Methods
 
   /**
    * Get the string representation of the product.
@@ -156,25 +166,25 @@ public class Product {
   public String toString() {
     return "Product {"
         + "\ncategory = '"
-        + this.category
+        + category
         + "',"
         + "\nname = '"
-        + this.name
+        + name
         + "',"
         + "\nsupplier = '"
-        + this.supplier
+        + supplier
         + "',"
         + "\ndescription = '"
-        + this.description
+        + description
         + "',"
         + "\npackageSizeLiters = "
-        + this.packageSizeLiters
+        + packageSizeLiters
         + ","
         + "\nisFragile = "
-        + this.isFragile
+        + isFragile
         + ","
         + "\nprice = "
-        + this.price
+        + price
         + "\n}";
   }
 }

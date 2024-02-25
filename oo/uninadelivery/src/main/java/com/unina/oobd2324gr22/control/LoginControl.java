@@ -30,7 +30,7 @@ public class LoginControl extends BaseControl {
   }
 
   private void showLoginErrorMessage(final String msg) {
-    this.showAlert(Alert.AlertType.ERROR, "Errore", "Errore di login", msg);
+    showAlert(Alert.AlertType.ERROR, "Errore", "Errore di login", msg);
   }
 
   private boolean isEmailValid(final String email) {
@@ -51,7 +51,6 @@ public class LoginControl extends BaseControl {
    * @param password the password to check
    */
   public void login(final String email, final String password) {
-    System.err.println(email + " " + password);
 
     if (email.isBlank() || password.isBlank()) {
       showLoginErrorMessage("Inserire email e password");
@@ -72,11 +71,11 @@ public class LoginControl extends BaseControl {
 
     if (client != null) {
       try {
-        dashboardControl.setScene(this.getStage(), client);
+        dashboardControl.setScene(getStage(), client);
         return;
       } catch (Exception e) {
         e.printStackTrace();
-        this.showAlert(
+        showAlert(
             Alert.AlertType.ERROR,
             "Errore",
             "Errore inaspettato.",
@@ -93,7 +92,7 @@ public class LoginControl extends BaseControl {
     try {
       return accountDAO.getOperatorByBmailAndPassword(email, SHA256.toSHA256(password));
     } catch (SQLException e) {
-      showInternalError();
+      showInternalError(e);
       return null;
     }
   }

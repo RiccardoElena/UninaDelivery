@@ -8,15 +8,29 @@ public final class SHA256 {
   /** Mask to get the last byte of an integer. */
   private static final int LAST_BYTE_MASK = 0xff;
 
+  /** Private constructor. */
   private SHA256() {
     throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
   }
 
+  /**
+   * Returns a SHA-256 hash of the given string.
+   *
+   * @param input the string to hash
+   * @return the SHA-256 hash of the given string
+   * @throws NoSuchAlgorithmException if the algorithm is not available
+   */
   private static byte[] getSHA(final String input) throws NoSuchAlgorithmException {
     MessageDigest digest = MessageDigest.getInstance("SHA-256");
     return digest.digest(input.getBytes());
   }
 
+  /**
+   * Returns a hexadecimal representation of the given byte array.
+   *
+   * @param hash the byte array to convert
+   * @return a hexadecimal representation of the given byte array
+   */
   private static String toHexString(final byte[] hash) {
     StringBuilder hexString = new StringBuilder(2 * hash.length);
     for (byte b : hash) {

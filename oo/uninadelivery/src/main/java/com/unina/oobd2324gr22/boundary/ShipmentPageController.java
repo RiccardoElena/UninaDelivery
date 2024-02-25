@@ -92,25 +92,25 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
   @Override
   public final void initialize(final OrdersHandlingControl control) {
 
-    this.displayOrderData();
+    displayOrderData();
 
-    this.setTableColumns();
+    setTableColumns();
 
     // TODO @zGenny: implement loading pane functionality here too and change placeholder text.
     shipmentsTable.setItems(getControl().getShipments());
 
-    this.populateComboBoxes();
+    populateComboBoxes();
 
-    this.handleComboBoxNullValue(depositComboBox);
-    this.handleComboBoxNullValue(transportComboBox);
-    this.handleComboBoxNullValue(driverComboBox);
+    handleComboBoxNullValue(depositComboBox);
+    handleComboBoxNullValue(transportComboBox);
+    handleComboBoxNullValue(driverComboBox);
 
-    this.setDatePickerLowerBound();
+    setDatePickerLowerBound();
 
-    this.setButtonEnablerListener(
+    setButtonEnablerListener(
         shipmentsTable, shipmentDatePicker, depositComboBox, transportComboBox, driverComboBox);
 
-    this.setSubmitButtonAction();
+    setSubmitButtonAction();
   } // ! end initialize
 
   private void setButtonEnablerListener(final Node... nodes) {
@@ -119,11 +119,11 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
         ((TableView<?>) node)
             .getSelectionModel()
             .selectedItemProperty()
-            .addListener((observable, oldValue, newValue) -> this.enableSubmitButton());
+            .addListener((observable, oldValue, newValue) -> enableSubmitButton());
       } else {
         ((ComboBoxBase<?>) node)
             .valueProperty()
-            .addListener((observable, oldValue, newValue) -> this.enableSubmitButton());
+            .addListener((observable, oldValue, newValue) -> enableSubmitButton());
       }
     }
   }
@@ -276,7 +276,6 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
     shipmentDateTableColumn.setCellValueFactory(new PropertyValueFactory<>("ShippingDate"));
     remainingSpaceTableColumn.setCellValueFactory(new PropertyValueFactory<>("RemainingSpace"));
 
-    // TODO! @zGenny: we can consider to add the getAccountEmail method to the
     // Order class if this makes the code more readable
     startingDepositTableColumn.setCellValueFactory(
         cellData ->

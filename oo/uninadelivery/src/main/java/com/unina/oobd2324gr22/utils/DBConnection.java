@@ -1,16 +1,13 @@
 package com.unina.oobd2324gr22.utils;
 
 import java.io.BufferedReader;
-// import java.io.File;
 import java.io.FileNotFoundException;
-// import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-// import java.util.Collections;
 import java.util.Objects;
 
 /** Singleton class to manage the connection to the DB. */
@@ -54,7 +51,8 @@ public final class DBConnection {
       if (conn == null || conn.isClosed()) {
         InputStream is = DBConnection.class.getResourceAsStream("/pwddb.txt");
         if (is == null) {
-          throw new FileNotFoundException("File pwddb.txt non trovato");
+          throw new FileNotFoundException(
+              "File contenente la password per la connessione al database non trovato");
         }
         b = new BufferedReader(new InputStreamReader(is));
         pwd = b.readLine();
@@ -71,8 +69,6 @@ public final class DBConnection {
       } catch (SQLException e) {
         e.printStackTrace();
       }
-      // System.out.println("Error in getConnectionBySchema");
-      // throwables.printStackTrace();
     }
 
     return conn;

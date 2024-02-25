@@ -2,6 +2,7 @@ package com.unina.oobd2324gr22.control;
 
 import com.unina.oobd2324gr22.entity.DAO.OrderDAO;
 import com.unina.oobd2324gr22.entity.DAO.OrderDAOPostgre;
+import java.sql.SQLException;
 import java.util.Optional;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -27,20 +28,18 @@ public class DashboardControl extends NonLoginControl {
   /** Go to the Orders page. */
   public void goToOrdersHandlingPage() {
     try {
-      ordersControl.setScene(this.getStage(), this.getLoggedOperator());
+      ordersControl.setScene(getStage(), getLoggedOperator());
     } catch (Exception e) {
-      e.printStackTrace();
-      showInternalError();
+      showInternalError(e);
     }
   }
 
   /** Go to the Monthly Reports page. */
   public void goToMonthlyReports() {
     try {
-      graphControl.setScene(this.getStage(), this.getLoggedOperator());
+      graphControl.setScene(getStage(), getLoggedOperator());
     } catch (Exception e) {
-      System.out.println(e.getMessage());
-      showInternalError();
+      showInternalError(e);
     }
   }
 
@@ -50,12 +49,17 @@ public class DashboardControl extends NonLoginControl {
    * @return the number of expiring orders
    */
   public int getExpiringOrdersNumber() {
-    return ordersDAO.getExpiringOrdersNumber();
+    try {
+      return ordersDAO.getExpiringOrdersNumber();
+    } catch (SQLException e) {
+      showInternalError(e);
+    }
+    return 0;
   }
 
   /** Go to the Edit page. */
   public void edit() {
-    this.showAlert(
+    showAlert(
         Alert.AlertType.INFORMATION,
         "Attenzione!",
         "Funzione non ancora disponibile!",
@@ -73,10 +77,9 @@ public class DashboardControl extends NonLoginControl {
     if (result.isPresent() && result.get() == ButtonType.OK) {
       try {
         LoginControl loginControl = new LoginControl();
-        loginControl.setScene(this.getStage());
+        loginControl.setScene(getStage());
       } catch (Exception e) {
-        e.printStackTrace();
-        showInternalError();
+        showInternalError(e);
       }
     }
   }

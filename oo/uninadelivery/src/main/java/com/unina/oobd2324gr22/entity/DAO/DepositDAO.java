@@ -6,24 +6,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface DepositDAO {
-
-  /**
-   * Insert a new city deposit in the database.
-   *
-   * @param deposit deposit to insert
-   * @return the number of rows affected by the insert
-   * @throws SQLException possible DB related errors
-   */
-  int insertDeposit(Deposit deposit) throws SQLException;
-
-  /**
-   * Retrieve all the deposits from the database.
-   *
-   * @return list of deposits
-   * @throws SQLException possible DB related errors
-   */
-  List<Deposit> getDeposits() throws SQLException;
+public interface DepositDAO extends BasicDAO<Deposit> {
 
   /**
    * Retrieve a deposit by its id from the database.
@@ -72,22 +55,4 @@ public interface DepositDAO {
    * @throws SQLException
    */
   List<Deposit> getCompatibleDeposits(Order order, LocalDate date) throws SQLException;
-
-  /**
-   * Update a deposit in the database.
-   *
-   * @param deposit deposit to update
-   * @return the number of rows affected by the update
-   * @throws SQLException possible DB related errors
-   */
-  int updateDeposit(Deposit deposit) throws SQLException;
-
-  /**
-   * Delete a deposit from the database.
-   *
-   * @param deposit deposit to delete
-   * @return the number of rows affected by the delete
-   * @throws SQLException possible DB related errors
-   */
-  int deleteDeposit(Deposit deposit) throws SQLException;
 }

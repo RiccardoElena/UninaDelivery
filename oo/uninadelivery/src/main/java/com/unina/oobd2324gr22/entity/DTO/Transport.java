@@ -42,11 +42,11 @@ public class Transport {
     if (tDepositOwner == null) {
       throw new IllegalArgumentException("Deposit owner cannot be null");
     }
-    this.id = tId;
-    this.maxCapacity = tMaxCapacity < 0 ? DEFAULT_MAX_CAPACITY : tMaxCapacity;
-    // this.occupiedSpace = tOccupiedSpace < 0 ? 0 : tOccupiedSpace;
-    this.isAvailable = tIsAvailable;
-    this.depositOwner = tDepositOwner;
+    id = tId;
+    maxCapacity = tMaxCapacity < 0 ? DEFAULT_MAX_CAPACITY : tMaxCapacity;
+    // occupiedSpace = tOccupiedSpace < 0 ? 0 : tOccupiedSpace;
+    isAvailable = tIsAvailable;
+    depositOwner = tDepositOwner;
     tDepositOwner.addTransport(this);
   }
 
@@ -58,7 +58,7 @@ public class Transport {
    * @return id of the transport.
    */
   public int getId() {
-    return this.id;
+    return id;
   }
 
   /**
@@ -67,7 +67,7 @@ public class Transport {
    * @return max capacity of the transport.
    */
   public float getMaxCapacity() {
-    return this.maxCapacity;
+    return maxCapacity;
   }
 
   /**
@@ -76,7 +76,7 @@ public class Transport {
    * @return occupied space of the transport.
    */
   public float getOccupiedSpace() {
-    return this.occupiedSpace;
+    return occupiedSpace;
   }
 
   /**
@@ -85,7 +85,7 @@ public class Transport {
    * @return availability of the transport.
    */
   public boolean isAvailable() {
-    return this.isAvailable;
+    return isAvailable;
   }
 
   /**
@@ -94,19 +94,10 @@ public class Transport {
    * @return owner of the transport.
    */
   public Deposit getDepositOwner() {
-    return this.depositOwner;
+    return depositOwner;
   }
 
   // Setters
-
-  // /**
-  //  * Setter for the id of the transport.
-  //  *
-  //  * @param tId id of the transport.
-  //  */
-  // public void setId(final int tId) {
-  //   this.id = tId;
-  // }
 
   /**
    * Setter for the max capacity of the transport.
@@ -114,7 +105,7 @@ public class Transport {
    * @param tMaxCapacity max capacity of the transport.
    */
   public void setMaxCapacity(final float tMaxCapacity) {
-    this.maxCapacity = tMaxCapacity;
+    maxCapacity = tMaxCapacity;
   }
 
   /**
@@ -123,7 +114,7 @@ public class Transport {
    * @param tOccupiedSpace occupied space of the transport.
    */
   public void setOccupiedSpace(final float tOccupiedSpace) {
-    this.occupiedSpace = tOccupiedSpace;
+    occupiedSpace = tOccupiedSpace;
   }
 
   /**
@@ -132,7 +123,7 @@ public class Transport {
    * @param tAvailable availability of the transport.
    */
   public void setAvailable(final boolean tAvailable) {
-    this.isAvailable = tAvailable;
+    isAvailable = tAvailable;
   }
 
   /**
@@ -141,12 +132,14 @@ public class Transport {
    * @param tDepositOwner owner of the transport.
    */
   public void setDepositOwner(final Deposit tDepositOwner) {
-    this.depositOwner = tDepositOwner;
+    depositOwner = tDepositOwner;
   }
+
+  // Methods
 
   /** To string. */
   @Override
   public String toString() {
-    return "Veicolo " + this.id + " - (" + this.maxCapacity + "kg)";
+    return "Veicolo " + id + " - (" + maxCapacity + "kg)";
   }
 }

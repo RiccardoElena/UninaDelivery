@@ -30,9 +30,6 @@ import javafx.util.Duration;
 
 public class GraphPageController extends NonLoginPageController<GraphControl> {
 
-  /** Starting year. */
-  private static final int STARTING_YEAR = 2000;
-
   /** Label for the money spent by the most spending account. */
   @FXML private Label moneySpent;
 
@@ -181,10 +178,11 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
   }
 
   private void intializeYearComboBox() {
-    for (int i = Year.now().getValue(); i >= STARTING_YEAR; i--) {
+    int startingYear = getControl().getStartingYear().getValue();
+    for (int i = Year.now().getValue(); i >= startingYear; i--) {
       yearComboBox.getItems().add(Year.of(i));
     }
-    yearComboBox.setOnAction(e -> this.displayMonthlyReportData());
+    yearComboBox.setOnAction(e -> displayMonthlyReportData());
   }
 
   private String setInitialAsCapitalLetter(final String string) {
@@ -202,7 +200,6 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
       monthlyReportData.setVisible(false);
       return;
     }
-    System.err.println("hello");
     displayOrderData(
         getControl()::getMostExpensiveOrderData,
         highestCostOrderId,

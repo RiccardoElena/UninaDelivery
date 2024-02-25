@@ -8,6 +8,8 @@ import com.unina.oobd2324gr22.entity.DTO.Driver;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.utils.DBConnection;
+import com.unina.oobd2324gr22.utils.IterableInt;
+import com.unina.oobd2324gr22.utils.UnimplementedMethodException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,8 +20,10 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO @zGenny @RiccardoElena nly signature has been written, no implementation
-
+/**
+ * This class implements the AccounttDAO interface and provides the PostgreSQL implementation for
+ * the shipment data access operations.
+ */
 public class AccountDAOPostgre implements AccountDAO {
 
   /** Connection to the database. */
@@ -62,64 +66,85 @@ public class AccountDAOPostgre implements AccountDAO {
         rs.getString("street"));
   }
 
-  /** PostgreSQL implementation of the insertAccount method. */
+  /**
+   * PostgreSQL implementation of the insert method.
+   *
+   * <p>{@inheritDoc}
+   */
   @Override
-  public int insertAccount(final Account account) throws SQLException {
-    return 0;
+  public int insert(final Account account) throws SQLException {
+    throw new UnimplementedMethodException();
   }
 
-  /** PostgreSQL implementation of the getAccounts method. */
+  /**
+   * PostgreSQL implementation of the getAll method.
+   *
+   * <p>{@inheritDoc}
+   */
   @Override
-  public List<Account> getAccounts() throws SQLException {
-    return null;
+  public List<Account> getAll() throws SQLException {
+    throw new UnimplementedMethodException();
   }
 
-  /** PostgreSQL implementation of the getAccountByEmail method. */
+  /**
+   * PostgreSQL implementation of the getAccountByEmail method.
+   *
+   * <p>{@inheritDoc}
+   */
   @Override
   public Account getAccountByEmail(final String email) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     Account account = null;
     PreparedStatement psSelect = null;
     ResultSet rs = null;
-    try {
-      psSelect = con.prepareStatement("SELECT * FROM account WHERE email = ?");
-      psSelect.setString(1, email);
-      rs = psSelect.executeQuery();
-      while (rs.next()) {
-        account = populateAccountFromResultSet(rs);
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (psSelect != null) {
-        psSelect.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+
+    psSelect = con.prepareStatement("SELECT * FROM account WHERE email = ?");
+    psSelect.setString(1, email);
+    rs = psSelect.executeQuery();
+    while (rs.next()) {
+      account = populateAccountFromResultSet(rs);
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
     return account;
   }
 
-  /** PostgreSQL implementation of the getAccountByEmailAndPassword method. */
+  /**
+   * PostgreSQL implementation of the getAccountByEmailAndPassword method.
+   *
+   * <p>{@inheritDoc}
+   */
   @Override
   public Account getAccountByEmailAndPassword(final String email, final String password)
       throws SQLException {
-    throw new UnsupportedOperationException("Unimplemented method 'getAccountByEmailAndPassword'");
+    throw new UnimplementedMethodException();
   }
 
-  /** PostgreSQL implementation of the getAccountByNameAndSurname method. */
+  /**
+   * PostgreSQL implementation of the getAccountByNameAndSurname method.
+   *
+   * <p>{@inheritDoc}
+   */
   @Override
   public List<Account> getAccountByNameAndSurname(final String name, final String surname)
       throws SQLException {
-    return null;
+    throw new UnimplementedMethodException();
   }
 
-  /** PostgreSQL implementation of the getAccountByBmail method. */
+  /**
+   * PostgreSQL implementation of the getAccountByBmail method.
+   *
+   * <p>{@inheritDoc}
+   */
   @Override
   public final Operator getOperatorByBmailAndPassword(final String bmail, final String password)
       throws SQLException {
@@ -127,123 +152,120 @@ public class AccountDAOPostgre implements AccountDAO {
     Operator op = null;
     PreparedStatement st = null;
     ResultSet rs = null;
-    try {
-      st =
-          con.prepareStatement(
-              "SELECT * FROM account NATURAL JOIN operator WHERE businessmail ILIKE ? AND"
-                  + " password = ?");
-      st.setString(1, bmail);
-      st.setString(2, password);
-      rs = st.executeQuery();
-      if (rs.next()) {
-        op = populateOperatorFromResultSet(rs);
-      }
 
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (st != null) {
-        st.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+    st =
+        con.prepareStatement(
+            "SELECT * FROM account NATURAL JOIN operator WHERE businessmail ILIKE ? AND"
+                + " password = ?");
+    st.setString(1, bmail);
+    st.setString(2, password);
+    rs = st.executeQuery();
+    if (rs.next()) {
+      op = populateOperatorFromResultSet(rs);
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (st != null) {
+      st.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
     return op;
   }
 
-  /** PostgreSQL implementation of the getAccountByBmail method. */
+  /**
+   * PostgreSQL implementation of the getAccountByBmail method.
+   *
+   * <p>{@inheritDoc}
+   */
   @Override
   public Account getMostOrderingAccount(final Year year, final Month month) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     Account account = null;
     PreparedStatement psSelect = null;
     ResultSet rs = null;
-    try {
-      psSelect =
-          con.prepareStatement(
-              "SELECT A.* FROM account A JOIN \"Order\" O ON A.email = O.email WHERE EXTRACT(YEAR"
-                  + " FROM O.emissiondate) = ? AND EXTRACT(MONTH FROM O.emissiondate) = ? GROUP BY"
-                  + " A.email ORDER BY COUNT(O.orderid) DESC LIMIT 1");
-      psSelect.setInt(1, year.getValue());
-      psSelect.setInt(2, month.getValue());
-      rs = psSelect.executeQuery();
-      if (rs.next()) {
-        account = populateAccountFromResultSet(rs);
-        System.err.println(account.getEmail());
-        account.setOrders(new OrderDAOPostgre().getOrdersByAccountAndMonth(account, year, month));
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (psSelect != null) {
-        psSelect.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+
+    psSelect =
+        con.prepareStatement(
+            "SELECT A.* FROM account A JOIN \"Order\" O ON A.email = O.email WHERE EXTRACT(YEAR"
+                + " FROM O.emissiondate) = ? AND EXTRACT(MONTH FROM O.emissiondate) = ? GROUP BY"
+                + " A.email ORDER BY COUNT(O.orderid) DESC LIMIT 1");
+    psSelect.setInt(1, year.getValue());
+    psSelect.setInt(2, month.getValue());
+    rs = psSelect.executeQuery();
+    if (rs.next()) {
+      account = populateAccountFromResultSet(rs);
+      account.setOrders(new OrderDAOPostgre().getOrdersByAccountAndMonth(account, year, month));
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
     return account;
   }
 
-  /** PostgreSQL implementation of the getMostSpendingAccount method. */
+  /**
+   * PostgreSQL implementation of the getMostSpendingAccount method.
+   *
+   * <p>{@inheritDoc}
+   */
   @Override
   public Account getMostSpendingAccount(final Year year, final Month month) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     Account account = null;
     PreparedStatement psSelect = null;
     ResultSet rs = null;
-    try {
-      psSelect =
-          con.prepareStatement(
-              "SELECT * FROM account WHERE email IN (SELECT email FROM \"Order\" WHERE EXTRACT(YEAR"
-                  + " FROM emissiondate) = ? AND EXTRACT(MONTH FROM emissiondate) = ?)");
-      psSelect.setInt(1, year.getValue());
-      psSelect.setInt(2, month.getValue());
-      rs = psSelect.executeQuery();
-      List<Account> accounts = new ArrayList<>();
-      while (rs.next()) {
-        accounts.add(populateAccountFromResultSet(rs));
+
+    psSelect =
+        con.prepareStatement(
+            "SELECT * FROM account WHERE email IN (SELECT email FROM \"Order\" WHERE EXTRACT(YEAR"
+                + " FROM emissiondate) = ? AND EXTRACT(MONTH FROM emissiondate) = ?)");
+    psSelect.setInt(1, year.getValue());
+    psSelect.setInt(2, month.getValue());
+    rs = psSelect.executeQuery();
+    List<Account> accounts = new ArrayList<>();
+    while (rs.next()) {
+      accounts.add(populateAccountFromResultSet(rs));
+    }
+    double maxPrice = 0;
+    for (Account a : accounts) {
+      for (Order o : new OrderDAOPostgre().getOrdersByAccountAndMonth(a, year, month)) {
+        a.setAmountSpent(a.getAmountSpent() + o.getPrice());
       }
-      double maxPrice = 0;
-      for (Account a : accounts) {
-        for (Order o : new OrderDAOPostgre().getOrdersByAccountAndMonth(a, year, month)) {
-          a.setAmountSpent(a.getAmountSpent() + o.getPrice());
-        }
-        if (a.getAmountSpent() > maxPrice) {
-          maxPrice = a.getAmountSpent();
-          account = a;
-        }
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (psSelect != null) {
-        psSelect.close();
-      }
-      if (con != null) {
-        con.close();
+      if (a.getAmountSpent() > maxPrice) {
+        maxPrice = a.getAmountSpent();
+        account = a;
       }
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
     return account;
   }
 
   /**
    * PostgreSQL implementation of the getCompatibleDrivers method.
    *
-   * @inheritdoc
+   * <p>{@inheritDoc}
    */
   @Override
   public List<Driver> getCompatibleDrivers(final Deposit deposit, final LocalDate date)
@@ -252,51 +274,59 @@ public class AccountDAOPostgre implements AccountDAO {
     List<Driver> drivers = new ArrayList<>();
     PreparedStatement st = null;
     ResultSet rs = null;
-    int nextField = 1;
+    IterableInt fieldNumber = new IterableInt(1);
 
-    try {
-      String query =
-          "select * from account natural join driver where businessmail NOT IN (select businessmail"
-              + " from drives where date = ?) and depositid = ?;";
-      st = con.prepareStatement(query);
-      st.setDate(nextField++, java.sql.Date.valueOf(date));
-      st.setInt(nextField++, deposit.getId());
-      rs = st.executeQuery();
-      while (rs.next()) {
-        drivers.add(populateDriverFromResultSet(rs));
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (st != null) {
-        st.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+    String query =
+        "select * from account natural join driver where businessmail NOT IN (select businessmail"
+            + " from drives where date = ?) and depositid = ?;";
+    st = con.prepareStatement(query);
+    st.setDate(fieldNumber.next(), java.sql.Date.valueOf(date));
+    st.setInt(fieldNumber.next(), deposit.getId());
+    rs = st.executeQuery();
+    while (rs.next()) {
+      drivers.add(populateDriverFromResultSet(rs));
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (st != null) {
+      st.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
     return drivers;
   }
 
-  /** PostgreSQL implementation of the updateAccount method. */
+  /**
+   * PostgreSQL implementation of the update method.
+   *
+   * <p>{@inheritDoc}
+   */
   @Override
-  public int updateAccount(final Account account) throws SQLException {
-    return 0;
+  public int update(final Account account) throws SQLException {
+    throw new UnimplementedMethodException();
   }
 
-  /** PostgreSQL implementation of the updateAccountEmail method. */
+  /**
+   * PostgreSQL implementation of the updateAccountEmail method.
+   *
+   * <p>{@inheritDoc}
+   */
   @Override
   public int updateAccountEmail(final Account account, final String newEmail) throws SQLException {
-    return 0;
+    throw new UnimplementedMethodException();
   }
 
-  /** PostgreSQL implementation of the deleteAccount method. */
+  /**
+   * PostgreSQL implementation of the deleteAccount method.
+   *
+   * <p>{@inheritDoc}
+   */
   @Override
-  public int deleteAccount(final Account account) throws SQLException {
-    return 0;
+  public int delete(final Account account) throws SQLException {
+    throw new UnimplementedMethodException();
   }
 }

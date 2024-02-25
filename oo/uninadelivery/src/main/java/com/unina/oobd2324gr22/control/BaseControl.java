@@ -49,7 +49,7 @@ public abstract class BaseControl {
    * @throws Exception if the scene cannot be set
    */
   public void setScene(final Stage s) throws Exception {
-    this.setStage(s);
+    setStage(s);
     addSceneSettings();
 
     launchScene();
@@ -59,7 +59,6 @@ public abstract class BaseControl {
     try {
       FXMLLoader loader =
           new FXMLLoader(getClass().getResource("/FXML/" + getFileName() + ".fxml"));
-      System.err.println("/FXML/" + getFileName() + ".fxml");
       Parent root = loader.load();
       T pageController = loader.getController();
 
@@ -114,7 +113,7 @@ public abstract class BaseControl {
    * @param name the FXML file path
    */
   public void setFileName(final String name) {
-    this.fileName = name;
+    fileName = name;
   }
 
   /**
@@ -132,7 +131,7 @@ public abstract class BaseControl {
    * @param w the width of the window
    */
   public void setWidth(final double w) {
-    this.width = w;
+    width = w;
   }
 
   /**
@@ -150,7 +149,7 @@ public abstract class BaseControl {
    * @param h the height of the window
    */
   public void setHeight(final double h) {
-    this.height = h;
+    height = h;
   }
 
   /**
@@ -223,9 +222,7 @@ public abstract class BaseControl {
             "Conferma chiusura",
             "Sei sicuro di voler uscire dall'applicazione?");
     if (result.isPresent() && result.get() == ButtonType.OK) {
-      // Crea un effetto di fade out
-      System.err.println(this.stage);
-      System.err.println("wow3 " + this.getStage());
+      // Add fade out transition before closing the stage
       fadeOutTransition(0.0, e -> stage.close());
     }
   }
@@ -261,11 +258,17 @@ public abstract class BaseControl {
    * @param currStage the application stage
    */
   public void setStage(final Stage currStage) {
-    this.stage = currStage;
+    stage = currStage;
   }
 
-  /** Display an internal error specific modal window. */
-  public void showInternalError() {
+  /**
+   * Display an internal error specific modal window.
+   *
+   * @param e the exception to show
+   * @return null
+   */
+  public void showInternalError(final Exception e) {
+    e.printStackTrace();
     showAlert(
         Alert.AlertType.ERROR,
         "Errore",

@@ -4,6 +4,8 @@ import java.time.LocalDate;
 
 public class Order {
 
+  // Attributes
+
   /** Id of the order. */
   private int id;
 
@@ -43,6 +45,8 @@ public class Order {
   /** Warranty fee. */
   private static final double WARRANTY_FEE = 0.1;
 
+  // Constructors
+
   /**
    * Constructor with parameters.
    *
@@ -62,17 +66,18 @@ public class Order {
       final Account client,
       final int qty,
       final Product pct) {
-    this.id = orderid;
-    this.emissionDate = emissiondate;
-    this.expectedDeliveryDate =
-        emissiondate.plusDays(isexpress ? EXPRESSDELIVERY : STANDARDDELIVERY);
-    this.isExpress = isexpress;
-    this.extraWarranty = extrawarranty;
-    this.account = client;
-    this.quantity = qty;
-    this.product = pct;
-    this.price = calculatePrice();
+    id = orderid;
+    emissionDate = emissiondate;
+    expectedDeliveryDate = emissiondate.plusDays(isexpress ? EXPRESSDELIVERY : STANDARDDELIVERY);
+    isExpress = isexpress;
+    extraWarranty = extrawarranty;
+    account = client;
+    quantity = qty;
+    product = pct;
+    price = calculatePrice();
   }
+
+  // Getters and Setters
 
   /**
    * Getter of the order id.
@@ -152,7 +157,7 @@ public class Order {
    * @param emissiondate emission date
    */
   public void setEmissionDate(final LocalDate emissiondate) {
-    this.emissionDate = emissiondate;
+    emissionDate = emissiondate;
   }
 
   /**
@@ -161,7 +166,7 @@ public class Order {
    * @param isexpress express delivery
    */
   public void setIsExpress(final boolean isexpress) {
-    this.isExpress = isexpress;
+    isExpress = isexpress;
   }
 
   /**
@@ -170,7 +175,7 @@ public class Order {
    * @param extrawarranty extra warranty
    */
   public void setExtraWarranty(final int extrawarranty) {
-    this.extraWarranty = extrawarranty;
+    extraWarranty = extrawarranty;
   }
 
   /**
@@ -179,7 +184,7 @@ public class Order {
    * @param client client
    */
   public void setAccount(final Account client) {
-    this.account = client;
+    account = client;
   }
 
   /**
@@ -188,7 +193,7 @@ public class Order {
    * @param qty quantity
    */
   public void setQuantity(final int qty) {
-    this.quantity = qty;
+    quantity = qty;
   }
 
   /**
@@ -197,7 +202,7 @@ public class Order {
    * @param pct product
    */
   public void setProduct(final Product pct) {
-    this.product = pct;
+    product = pct;
   }
 
   /**
@@ -206,7 +211,7 @@ public class Order {
    * @param expecteddeliverydate expected delivery date
    */
   public void setExpectedDeliveryDate(final LocalDate expecteddeliverydate) {
-    this.expectedDeliveryDate = expecteddeliverydate;
+    expectedDeliveryDate = expecteddeliverydate;
   }
 
   /**
@@ -224,39 +229,41 @@ public class Order {
    * @return total price
    */
   private double calculatePrice() {
-    double rowPrice = this.product.getPrice() * this.quantity;
-    double warrantyPrice = this.extraWarranty * WARRANTY_FEE * rowPrice;
-    double deliveryPrice = this.isExpress ? EXPRESS_FEE * rowPrice : 0;
+    double rowPrice = product.getPrice() * quantity;
+    double warrantyPrice = extraWarranty * WARRANTY_FEE * rowPrice;
+    double deliveryPrice = isExpress ? EXPRESS_FEE * rowPrice : 0;
     return rowPrice + warrantyPrice + deliveryPrice;
   }
+
+  // Methods
 
   /** toString method. */
   @Override
   public String toString() {
     return "Order{"
         + "\nid ='"
-        + this.id
+        + id
         + "',"
         + "\nemissionDate = '"
-        + this.emissionDate
+        + emissionDate
         + "',"
         + "\nisExpress = "
-        + this.isExpress
+        + isExpress
         + ","
         + "\nextraWarranty = "
-        + this.extraWarranty
+        + extraWarranty
         + ","
         + "\naccount = "
-        + this.account.toString().replace("\n", "\n\t")
+        + account.toString().replace("\n", "\n\t")
         + "',"
         + "\nquantity = "
-        + this.quantity
+        + quantity
         + ","
         + "\nproduct = "
-        + this.product.toString().replace("\n", "\n\t")
+        + product.toString().replace("\n", "\n\t")
         + "',"
         + "\nexpectedDeliveryDate = '"
-        + this.expectedDeliveryDate
+        + expectedDeliveryDate
         + "'"
         + "\n}";
   }

@@ -9,8 +9,13 @@ public final class Operator extends Account {
   /** Business mail of the operator. */
   private String businessMail;
 
-  // Constructors - Builder pattern
+  // Constructors
 
+  /**
+   * Constructor of the operator using builder pattern.
+   *
+   * @param builder builder of the operator
+   */
   private Operator(final OperatorBuilder builder) {
     super(
         builder.builderAccName,
@@ -20,27 +25,7 @@ public final class Operator extends Account {
         builder.builderAccPropic,
         builder.builderAccPassword,
         builder.builderAccAddress);
-    this.businessMail = builder.builderBusinessMail;
-  }
-
-  // Constructor - Via account
-
-  /**
-   * Constructor with parameters.
-   *
-   * @param account account of the operator
-   * @param bMail business mail of the operator
-   */
-  public Operator(final Account account, final String bMail) {
-    super(
-        account.getName(),
-        account.getSurname(),
-        account.getEmail(),
-        account.getBirthdate(),
-        account.getPropicBase64(),
-        account.getPassword(),
-        account.getAddress());
-    this.businessMail = bMail;
+    businessMail = builder.builderBusinessMail;
   }
 
   public static class OperatorBuilder {
@@ -87,13 +72,13 @@ public final class Operator extends Account {
         final String accPassword,
         final Address accAddress,
         final String businessMail) {
-      this.builderAccName = accName;
-      this.builderAccSurname = accSurname;
-      this.buildarAccEmail = accEmail;
-      this.builderAccBdate = accBdate;
-      this.builderAccPassword = accPassword;
-      this.builderAccAddress = accAddress;
-      this.builderBusinessMail = businessMail;
+      builderAccName = accName;
+      builderAccSurname = accSurname;
+      buildarAccEmail = accEmail;
+      builderAccBdate = accBdate;
+      builderAccPassword = accPassword;
+      builderAccAddress = accAddress;
+      builderBusinessMail = businessMail;
     }
 
     /**
@@ -103,7 +88,7 @@ public final class Operator extends Account {
      * @return the builder
      */
     public final OperatorBuilder withAccPropic(final String accPropic) {
-      this.builderAccPropic = accPropic;
+      builderAccPropic = accPropic;
       return this;
     }
 
@@ -118,6 +103,24 @@ public final class Operator extends Account {
     }
   }
 
+  /**
+   * Constructor of the operator specializing superclass.
+   *
+   * @param account account of the operator
+   * @param bMail business mail of the operator
+   */
+  public Operator(final Account account, final String bMail) {
+    super(
+        account.getName(),
+        account.getSurname(),
+        account.getEmail(),
+        account.getBirthdate(),
+        account.getPropicBase64(),
+        account.getPassword(),
+        account.getAddress());
+    businessMail = bMail;
+  }
+
   // Getters and Setters
 
   /**
@@ -126,7 +129,7 @@ public final class Operator extends Account {
    * @return business mail
    */
   public String getBusinessMail() {
-    return this.businessMail;
+    return businessMail;
   }
 
   // Methods
@@ -135,28 +138,28 @@ public final class Operator extends Account {
   public String toString() {
     return "Operator{"
         + "\nname='"
-        + this.getName()
+        + getName()
         + "',"
         + "\nsurname='"
-        + this.getSurname()
+        + getSurname()
         + "',"
         + "\nemail='"
-        + this.getEmail()
+        + getEmail()
         + "',"
         + "\nbirthdate='"
-        + this.getBirthdate()
+        + getBirthdate()
         + "',"
         + "\npropic='"
-        + this.getPropicBase64()
+        + getPropicBase64()
         + "',"
         + "\npassword='"
-        + this.getPassword()
+        + getPassword()
         + "',"
         + "\naddress= "
-        + this.getAddress().toString().replace("\n", "\n\t")
+        + getAddress().toString().replace("\n", "\n\t")
         + ","
         + "\nbusinessmail='"
-        + this.getBusinessMail()
+        + getBusinessMail()
         + "',"
         + '}';
   }

@@ -7,6 +7,8 @@ import java.util.List;
 
 public class Shipment {
 
+  // Attributes
+
   /** The id of the shipment. */
   private int id;
 
@@ -31,6 +33,8 @@ public class Shipment {
   /** The space of the transport occupied by the orders. */
   private float occupiedSpace;
 
+  // Constructors
+
   /**
    * The constructor of the class.
    *
@@ -49,16 +53,16 @@ public class Shipment {
       final Transport sTransport,
       final Deposit startDeposit) {
 
-    this.id = sId;
-    this.shippingDate = shipDate;
-    this.hasArrived = sHasArrived;
-    this.operator = sOperator;
-    this.startingDeposit = startDeposit;
+    id = sId;
+    shippingDate = shipDate;
+    hasArrived = sHasArrived;
+    operator = sOperator;
+    startingDeposit = startDeposit;
     if (!sTransport.getDepositOwner().equals(startDeposit)) {
       throw new IllegalArgumentException(
           "The transport must be in the same deposit of the shipment");
     } else {
-      this.transport = sTransport;
+      transport = sTransport;
     }
   }
 
@@ -76,15 +80,15 @@ public class Shipment {
       final Deposit startDeposit,
       final Transport sTransport) {
 
-    this.shippingDate = shipDate;
-    this.hasArrived = false;
-    this.operator = sOperator;
-    this.startingDeposit = startDeposit;
+    shippingDate = shipDate;
+    hasArrived = false;
+    operator = sOperator;
+    startingDeposit = startDeposit;
     if (!sTransport.getDepositOwner().equals(startDeposit)) {
       throw new IllegalArgumentException(
           "The transport must be in the same deposit of the shipment");
     } else {
-      this.transport = sTransport;
+      transport = sTransport;
     }
   }
 
@@ -104,18 +108,20 @@ public class Shipment {
       final Deposit startDeposit,
       final float oSpace) {
 
-    this.id = sId;
-    this.shippingDate = shipDate;
-    this.hasArrived = false;
-    this.startingDeposit = startDeposit;
-    this.occupiedSpace = oSpace;
+    id = sId;
+    shippingDate = shipDate;
+    hasArrived = false;
+    startingDeposit = startDeposit;
+    occupiedSpace = oSpace;
     if (!sTransport.getDepositOwner().equals(startDeposit)) {
       throw new IllegalArgumentException(
           "The transport must be in the same deposit of the shipment");
     } else {
-      this.transport = sTransport;
+      transport = sTransport;
     }
   }
+
+  // Getters and Setters
 
   /**
    * Getter for the id of the shipment.
@@ -132,7 +138,7 @@ public class Shipment {
    * @param sId the id of the shipment.
    */
   public void setId(final int sId) {
-    this.id = sId;
+    id = sId;
   }
 
   /**
@@ -150,7 +156,7 @@ public class Shipment {
    * @param shipDate the shipping date of the shipment.
    */
   public void setShippingDate(final LocalDate shipDate) {
-    this.shippingDate = shipDate;
+    shippingDate = shipDate;
   }
 
   /**
@@ -168,7 +174,7 @@ public class Shipment {
    * @param sHasArrived true if the shipment has arrived, false otherwise.
    */
   public void setHasArrived(final boolean sHasArrived) {
-    this.hasArrived = sHasArrived;
+    hasArrived = sHasArrived;
   }
 
   /**
@@ -186,7 +192,7 @@ public class Shipment {
    * @param sOperator the operator of the shipment.
    */
   public void setOperator(final Operator sOperator) {
-    this.operator = sOperator;
+    operator = sOperator;
   }
 
   /**
@@ -204,7 +210,7 @@ public class Shipment {
    * @param sStartingDeposit the starting deposit of the shipment.
    */
   public void setStartingDeposit(final Deposit sStartingDeposit) {
-    this.startingDeposit = sStartingDeposit;
+    startingDeposit = sStartingDeposit;
   }
 
   /**
@@ -222,7 +228,7 @@ public class Shipment {
    * @param sTransport the veichle transporting the shipment.
    */
   public void setTransport(final Transport sTransport) {
-    this.transport = sTransport;
+    transport = sTransport;
   }
 
   /**
@@ -232,42 +238,6 @@ public class Shipment {
    */
   public List<Order> getOrders() {
     return orders;
-  }
-
-  /**
-   * Add an order to the orders shipped.
-   *
-   * @param order the order to add.
-   */
-  public void addOrder(final Order order) {
-    if (order == null) {
-      throw new IllegalArgumentException("The order cannot be null");
-    }
-
-    if (this.getOrders().contains(order)) {
-      return;
-    }
-
-    for (StoredProduct sp : this.getStartingDeposit().getStoredProducts()) {
-      // check if the product is present in the starting deposit and if
-      // there are enough products
-      if (sp.getProduct().equals(order.getProduct()) && sp.getQuantity() >= order.getQuantity()) {
-        // check if the product is destined to another area
-        // being this the only way to add orders is enough to check the first
-        // order because the others will have the same area
-        if (order
-            .getAccount()
-            .getAddress()
-            .getArea()
-            .equals(this.getOrders().get(1).getAccount().getAddress().getArea())) {
-          this.getOrders().add(order);
-          sp.setQuantity(sp.getQuantity() - order.getQuantity());
-          return;
-        } else {
-          throw new IllegalArgumentException("The order is destined to another area");
-        }
-      }
-    }
   }
 
   /**
@@ -285,7 +255,7 @@ public class Shipment {
    * @param oSpace the space occupied by the orders.
    */
   public void setOccupiedSpace(final float oSpace) {
-    this.occupiedSpace = oSpace;
+    occupiedSpace = oSpace;
   }
 
   /**
@@ -294,13 +264,51 @@ public class Shipment {
    * @return the remaining space in the transport.
    */
   public float getRemainingSpace() {
-    return this.getTransport().getMaxCapacity() - this.getOccupiedSpace();
+    return getTransport().getMaxCapacity() - getOccupiedSpace();
+  }
+
+  // Methods
+
+  /**
+   * Add an order to the orders shipped.
+   *
+   * @param order the order to add.
+   */
+  public void addOrder(final Order order) {
+    if (order == null) {
+      throw new IllegalArgumentException("The order cannot be null");
+    }
+
+    if (getOrders().contains(order)) {
+      return;
+    }
+
+    for (StoredProduct sp : getStartingDeposit().getStoredProducts()) {
+      // check if the product is present in the starting deposit and if
+      // there are enough products
+      if (sp.getProduct().equals(order.getProduct()) && sp.getQuantity() >= order.getQuantity()) {
+        // check if the product is destined to another area
+        // being this the only way to add orders is enough to check the first
+        // order because the others will have the same area
+        if (order
+            .getAccount()
+            .getAddress()
+            .getArea()
+            .equals(getOrders().get(1).getAccount().getAddress().getArea())) {
+          getOrders().add(order);
+          sp.setQuantity(sp.getQuantity() - order.getQuantity());
+          return;
+        } else {
+          throw new IllegalArgumentException("The order is destined to another area");
+        }
+      }
+    }
   }
 
   /** To strig method. */
   @Override
   public String toString() {
-    String op = this.getOperator() == null ? "null" : this.getOperator().toString();
+    String op = getOperator() == null ? "null" : getOperator().toString();
     return "Shipment{"
         + "\n\tid="
         + getId()

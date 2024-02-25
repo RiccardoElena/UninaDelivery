@@ -22,8 +22,13 @@ public final class Driver extends Account {
   /** Workplace of the driver. */
   private Deposit workplace;
 
-  // Constructors - Builder pattern
+  // Constructors
 
+  /**
+   * Constructor of the driver using builder pattern.
+   *
+   * @param builder builder of the driver
+   */
   private Driver(final DriverBuilder builder) {
     super(
         builder.builderAccName,
@@ -33,9 +38,9 @@ public final class Driver extends Account {
         builder.builderAccPropic,
         builder.builderAccPassword,
         builder.builderAccAddress);
-    this.businessMail = builder.builderBusinessMail;
-    this.drivingLicence = builder.builderDrivingLicence;
-    this.workplace = builder.builderWorkplace;
+    businessMail = builder.builderBusinessMail;
+    drivingLicence = builder.builderDrivingLicence;
+    workplace = builder.builderWorkplace;
   }
 
   public static class DriverBuilder {
@@ -88,13 +93,13 @@ public final class Driver extends Account {
         final String password,
         final Address address,
         final String businessMail) {
-      this.builderAccName = name;
-      this.builderAccSurname = surname;
-      this.buildarAccEmail = email;
-      this.builderAccBdate = bdate;
-      this.builderAccPassword = password;
-      this.builderAccAddress = address;
-      this.builderBusinessMail = businessMail;
+      builderAccName = name;
+      builderAccSurname = surname;
+      buildarAccEmail = email;
+      builderAccBdate = bdate;
+      builderAccPassword = password;
+      builderAccAddress = address;
+      builderBusinessMail = businessMail;
     }
 
     /**
@@ -104,7 +109,7 @@ public final class Driver extends Account {
      * @return the driver builder
      */
     public DriverBuilder withAccPropic(final String propic) {
-      this.builderAccPropic = propic;
+      builderAccPropic = propic;
       return this;
     }
 
@@ -115,7 +120,7 @@ public final class Driver extends Account {
      * @return the driver builder
      */
     public DriverBuilder withDrivingLicence(final DrivingLicenceType drivingLicence) {
-      this.builderDrivingLicence = drivingLicence;
+      builderDrivingLicence = drivingLicence;
       return this;
     }
 
@@ -126,13 +131,13 @@ public final class Driver extends Account {
      * @return the driver builder
      */
     public DriverBuilder withWorkplace(final Deposit workplace) {
-      this.builderWorkplace = workplace;
+      builderWorkplace = workplace;
       return this;
     }
 
     /**
      * Build method. It creates a new driver with given data if all the required fields are filled.
-     * To be filled manually are:
+     * The mandatory fields are:
      *
      * <ul>
      *   <li>Driving Licence
@@ -144,7 +149,7 @@ public final class Driver extends Account {
      * @return the driver
      */
     public Driver build() throws IllegalStateException {
-      if (this.builderDrivingLicence == null || this.builderWorkplace == null) {
+      if (builderDrivingLicence == null || builderWorkplace == null) {
         throw new IllegalStateException("Missing required fields");
       }
       return new Driver(this);
@@ -152,7 +157,7 @@ public final class Driver extends Account {
   }
 
   /**
-   * Constructor of the driver.
+   * Constructor of the driver by specialization of superclass.
    *
    * @param account personal data of the driver
    * @param bmail business mail of the driver
@@ -172,9 +177,9 @@ public final class Driver extends Account {
         account.getPropicBase64(),
         account.getPassword(),
         account.getAddress());
-    this.businessMail = bmail;
-    this.drivingLicence = dLicence;
-    this.workplace = wPlace;
+    businessMail = bmail;
+    drivingLicence = dLicence;
+    workplace = wPlace;
   }
 
   // Getters and Setters
@@ -185,7 +190,7 @@ public final class Driver extends Account {
    * @return business mail
    */
   public String getBusinessMail() {
-    return this.businessMail;
+    return businessMail;
   }
 
   /**
@@ -194,7 +199,7 @@ public final class Driver extends Account {
    * @param bMail business mail
    */
   public void setBusinessMail(final String bMail) {
-    this.businessMail = bMail;
+    businessMail = bMail;
   }
 
   /**
@@ -203,7 +208,7 @@ public final class Driver extends Account {
    * @return driving licence
    */
   public DrivingLicenceType getDrivingLicence() {
-    return this.drivingLicence;
+    return drivingLicence;
   }
 
   /**
@@ -212,7 +217,7 @@ public final class Driver extends Account {
    * @param dLicence driving licence
    */
   public void setDrivingLicence(final DrivingLicenceType dLicence) {
-    this.drivingLicence = dLicence;
+    drivingLicence = dLicence;
   }
 
   /**
@@ -221,7 +226,7 @@ public final class Driver extends Account {
    * @return workplace
    */
   public Deposit getWorkplace() {
-    return this.workplace;
+    return workplace;
   }
 
   /**
@@ -230,7 +235,7 @@ public final class Driver extends Account {
    * @param wPlace workplace
    */
   public void setWorkplace(final Deposit wPlace) {
-    this.workplace = wPlace;
+    workplace = wPlace;
   }
 
   // Methods

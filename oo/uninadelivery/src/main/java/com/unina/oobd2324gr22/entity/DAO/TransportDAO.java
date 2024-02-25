@@ -7,24 +7,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface TransportDAO {
-
-  /**
-   * Insert a new Transport in the database.
-   *
-   * @param transport Transport to insert.
-   * @return the number of rows affected by the insert.
-   * @throws SQLException possible DB related errors.
-   */
-  int insertTransport(Transport transport) throws SQLException;
-
-  /**
-   * Retrieve all the transports from the database.
-   *
-   * @return list of transports.
-   * @throws SQLException possible DB related errors.
-   */
-  List<Transport> getTransports() throws SQLException;
+public interface TransportDAO extends BasicDAO<Transport> {
 
   /**
    * Retrieve a transport by its id from the database.
@@ -82,22 +65,4 @@ public interface TransportDAO {
    * @throws SQLException possible DB related errors.
    */
   List<Transport> getAvailableTransportsByDeposit(Deposit deposit) throws SQLException;
-
-  /**
-   * Update a transport in the database.
-   *
-   * @param transport transport to update.
-   * @return the number of rows affected by the update.
-   * @throws SQLException possible DB related errors.
-   */
-  int updateTransport(Transport transport) throws SQLException;
-
-  /**
-   * Delete a transport from the database.
-   *
-   * @param transport transport to delete.
-   * @return the number of rows affected by the delete.
-   * @throws SQLException possible DB related errors.
-   */
-  int deleteTransport(Transport transport) throws SQLException;
 }

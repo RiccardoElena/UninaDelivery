@@ -3,6 +3,10 @@ package com.unina.oobd2324gr22.control;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 import javafx.stage.Stage;
 
+/**
+ * NonLoginControl is the abstract class that represents the control of all the functionalities but
+ * the login.
+ */
 public abstract class NonLoginControl extends BaseControl {
 
   /** Width of the window. */
@@ -58,14 +62,14 @@ public abstract class NonLoginControl extends BaseControl {
    * @param op the logged in operator
    */
   public void setLoggedOperator(final Operator op) {
-    this.loggedOperator = op;
+    loggedOperator = op;
   }
 
   /** Go to the Dashboard page. */
   public void returnToHomePage() {
     DashboardControl dashboardControl = new DashboardControl();
     try {
-      dashboardControl.setScene(this.getStage(), this.getLoggedOperator());
+      dashboardControl.setScene(getStage(), getLoggedOperator());
     } catch (Exception e) {
       e.printStackTrace();
     }

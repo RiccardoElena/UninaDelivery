@@ -32,8 +32,8 @@ public class Address extends Area {
       final String number,
       final String streetName) {
     super(zip, cityN, stateN, countryN, wz);
-    this.addressNumber = number;
-    this.street = streetName;
+    addressNumber = number;
+    street = streetName;
   }
 
   // Getters and Setters
@@ -44,7 +44,7 @@ public class Address extends Area {
    * @return address number
    */
   public String getAddressNumber() {
-    return this.addressNumber;
+    return addressNumber;
   }
 
   /**
@@ -53,7 +53,7 @@ public class Address extends Area {
    * @param number address number
    */
   public void setAddressNumber(final String number) {
-    this.addressNumber = number;
+    addressNumber = number;
   }
 
   /**
@@ -62,7 +62,7 @@ public class Address extends Area {
    * @return street name
    */
   public String getStreet() {
-    return this.street;
+    return street;
   }
 
   /**
@@ -71,7 +71,7 @@ public class Address extends Area {
    * @param streetName street name
    */
   public void setStreet(final String streetName) {
-    this.street = streetName;
+    street = streetName;
   }
 
   /**
@@ -80,9 +80,10 @@ public class Address extends Area {
    * @return area the address is in
    */
   public Area getArea() {
-    return new Area(
-        this.getZipCode(), this.getCity(), this.getState(), this.getCountry(), this.getWorldZone());
+    return new Area(getZipCode(), getCity(), getState(), getCountry(), getWorldZone());
   }
+
+  // Methods
 
   /**
    * Get the string representation of the address.
@@ -91,16 +92,46 @@ public class Address extends Area {
    */
   @Override
   public String toString() {
-    return this.getStreet()
+    return getStreet()
         + " "
-        + this.getAddressNumber()
+        + getAddressNumber()
         + ", "
-        + this.getZipCode()
+        + getZipCode()
         + " "
-        + this.getCity()
+        + getCity()
         + "("
-        + this.getState()
+        + getState()
         + "), "
-        + this.getCountry();
+        + getCountry();
+  }
+
+  /**
+   * Equals method to comparing address's attributes.
+   *
+   * @param obj object to compare
+   * @return true if the objects are equals, false otherwise
+   */
+  @Override
+  public boolean equals(final Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    Address address = (Address) obj;
+    return (addressNumber.equals(address.addressNumber)
+        && street.equals(address.street)
+        && super.equals(address));
+  }
+
+  /**
+   * Hash code method.
+   *
+   * @return hash code
+   */
+  @Override
+  public int hashCode() {
+    return super.hashCode();
   }
 }

@@ -3,6 +3,7 @@ package com.unina.oobd2324gr22.entity.DAO;
 import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.utils.DBConnection;
+import com.unina.oobd2324gr22.utils.IterableInt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,7 +18,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-/** Implementation of the OrderDAO interface for PostgreSQL DataBase. */
+/**
+ * This class implements the OrderDAO interface and provides the PostgreSQL implementation for the
+ * shipment data access operations.
+ */
 public class OrderDAOPostgre implements OrderDAO {
 
   /** Connection istance. */
@@ -26,73 +30,62 @@ public class OrderDAOPostgre implements OrderDAO {
   /** Base query for retrieving orders. */
   private static final String BASE_QUERY = "SELECT * FROM \"Order\" ";
 
-  /**
-   * Internal method to populate an order from a ResultSet.
-   *
-   * @param rs ResultSet to populate the order from
-   * @return order populated from the ResultSet
-   */
   private Order populateOrderFromResultSet(final ResultSet rs) throws SQLException {
     Order order = null;
-    try {
-      order =
-          new Order(
-              rs.getInt("orderid"),
-              rs.getDate("emissiondate").toLocalDate(),
-              rs.getBoolean("isexpress"),
-              rs.getInt("extrawarranty"),
-              new AccountDAOPostgre().getAccountByEmail(rs.getString("email")),
-              rs.getInt("quantity"),
-              new ProductDAOPostgre()
-                  .getProductByNameAndSupplier(rs.getString("name"), rs.getString("supplier")));
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
+
+    order =
+        new Order(
+            rs.getInt("orderid"),
+            rs.getDate("emissiondate").toLocalDate(),
+            rs.getBoolean("isexpress"),
+            rs.getInt("extrawarranty"),
+            new AccountDAOPostgre().getAccountByEmail(rs.getString("email")),
+            rs.getInt("quantity"),
+            new ProductDAOPostgre()
+                .getProductByNameAndSupplier(rs.getString("name"), rs.getString("supplier")));
 
     return order;
   }
 
   /**
-   * CREATE a new Order into the DB.
+   * PostgreSQL implementation of the insert method.
    *
-   * @param order Order to insert into the DB
-   * @return the number of rows affected by the insert
+   * <p>{@inheritDoc}
    */
   @Override
-  public int insertOrder(final Order order) throws SQLException {
+  public int insert(final Order order) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     int rowAffected;
-    try {
-      int nextField = 1;
-      PreparedStatement psInsert =
-          con.prepareStatement(
-              "INSERT INTO \"Order\" "
-                  + "(emissiondate, isexpress, extrawarranty, email, "
-                  + "quantity, name, supplier) VALUES "
-                  + "(?, ?, ?, ?, ?, ?, ?)");
-      psInsert.setDate(nextField++, java.sql.Date.valueOf(order.getEmissionDate()));
-      psInsert.setBoolean(nextField++, (order.getIsExpress() ? true : null));
-      psInsert.setInt(nextField++, order.getExtraWarranty());
-      psInsert.setString(nextField++, order.getAccount().getEmail());
-      psInsert.setInt(nextField++, order.getQuantity());
-      psInsert.setString(nextField++, order.getProduct().getName());
-      psInsert.setString(nextField++, order.getProduct().getSupplier());
-      rowAffected = psInsert.executeUpdate();
+    IterableInt fieldNumber = new IterableInt(1);
+    PreparedStatement psInsert =
+        con.prepareStatement(
+            "INSERT INTO \"Order\" "
+                + "(emissiondate, isexpress, extrawarranty, email, "
+                + "quantity, name, supplier) VALUES "
+                + "(?, ?, ?, ?, ?, ?, ?)");
+    psInsert.setDate(fieldNumber.next(), java.sql.Date.valueOf(order.getEmissionDate()));
+    psInsert.setBoolean(fieldNumber.next(), (order.getIsExpress() ? true : null));
+    psInsert.setInt(fieldNumber.next(), order.getExtraWarranty());
+    psInsert.setString(fieldNumber.next(), order.getAccount().getEmail());
+    psInsert.setInt(fieldNumber.next(), order.getQuantity());
+    psInsert.setString(fieldNumber.next(), order.getProduct().getName());
+    psInsert.setString(fieldNumber.next(), order.getProduct().getSupplier());
+    rowAffected = psInsert.executeUpdate();
+
+    if (psInsert != null) {
       psInsert.close();
-      con.close();
-    } catch (SQLException e) {
-      e.printStackTrace();
-      con.close();
-      throw e;
     }
+    if (con != null) {
+      con.close();
+    }
+
     return rowAffected;
   }
 
   /**
-   * RETRIEVE an Order from the DB by its id.
+   * PostgreSQL implementation of the getOrderById method.
    *
-   * @param id id
-   * @return order of the id passed
+   * <p>{@inheritDoc}
    */
   @Override
   public Order getOrderById(final int id) throws SQLException {
@@ -100,34 +93,31 @@ public class OrderDAOPostgre implements OrderDAO {
     Order order = null;
     PreparedStatement psSelect = null;
     ResultSet rs = null;
-    try {
-      psSelect = con.prepareStatement(BASE_QUERY + "WHERE orderid = ?");
-      psSelect.setInt(1, id);
-      rs = psSelect.executeQuery();
-      while (rs.next()) {
-        order = populateOrderFromResultSet(rs);
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (psSelect != null) {
-        psSelect.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+
+    psSelect = con.prepareStatement(BASE_QUERY + "WHERE orderid = ?");
+    psSelect.setInt(1, id);
+    rs = psSelect.executeQuery();
+    while (rs.next()) {
+      order = populateOrderFromResultSet(rs);
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
     return order;
   }
 
   /**
-   * RETRIEVE all the unfinished Orders from the DB.
+   * PostgreSQL implementation of the getUnfinishedOrders method.
    *
-   * @return list of unfinished orders
+   * <p>{@inheritDoc}
    */
   @Override
   public List<Order> getUnfinishedOrders() throws SQLException {
@@ -135,75 +125,64 @@ public class OrderDAOPostgre implements OrderDAO {
     List<Order> orders = new LinkedList<Order>();
     Statement st = null;
     ResultSet rs = null;
-    try {
 
-      st = con.createStatement();
-      rs = st.executeQuery(BASE_QUERY + " WHERE isCompleted IS NULL ORDER BY emissiondate ASC");
+    st = con.createStatement();
+    rs = st.executeQuery(BASE_QUERY + " WHERE isCompleted IS NULL ORDER BY emissiondate ASC");
 
-      while (rs.next()) {
-        orders.add(populateOrderFromResultSet(rs));
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (st != null) {
-        st.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+    while (rs.next()) {
+      orders.add(populateOrderFromResultSet(rs));
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (st != null) {
+      st.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
     return orders;
   }
 
   /**
-   * RETRIEVE all the Orders from the DB.
+   * PostgreSQL implementation of the getAll method.
    *
-   * @return lista di ordini
+   * <p>{@inheritDoc}
    */
   @Override
-  public List<Order> getOrders() throws SQLException {
+  public List<Order> getAll() throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new LinkedList<Order>();
     Statement st = null;
     ResultSet rs = null;
-    try {
 
-      st = con.createStatement();
-      rs = st.executeQuery(BASE_QUERY);
+    st = con.createStatement();
+    rs = st.executeQuery(BASE_QUERY);
 
-      while (rs.next()) {
+    while (rs.next()) {
 
-        orders.add(populateOrderFromResultSet(rs));
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (st != null) {
-        st.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+      orders.add(populateOrderFromResultSet(rs));
+    }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (st != null) {
+      st.close();
+    }
+    if (con != null) {
+      con.close();
     }
 
     return orders;
   }
 
   /**
-   * RETRIVE the order with the largest quantity of products.
+   * PostgreSQL implementation of the getOrdersByMonth method.
    *
-   * @param month month to search for
-   * @param year year to search for
-   * @return order with biggest quantity of products
+   * <p>{@inheritDoc}
    */
   @Override
   public Order getOrderWithLargestQuantity(final Month month, final Year year) throws SQLException {
@@ -211,40 +190,36 @@ public class OrderDAOPostgre implements OrderDAO {
     Order order = null;
     PreparedStatement st = null;
     ResultSet rs = null;
-    try {
-      st =
-          con.prepareStatement(
-              "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
-                  + " FROM emissiondate) = ? ORDER BY quantity DESC LIMIT 1");
-      st.setInt(1, month.getValue());
-      st.setInt(2, year.getValue());
-      rs = st.executeQuery();
 
-      while (rs.next()) {
-        order = populateOrderFromResultSet(rs);
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (st != null) {
-        st.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+    st =
+        con.prepareStatement(
+            "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
+                + " FROM emissiondate) = ? ORDER BY quantity DESC LIMIT 1");
+    st.setInt(1, month.getValue());
+    st.setInt(2, year.getValue());
+    rs = st.executeQuery();
+
+    while (rs.next()) {
+      order = populateOrderFromResultSet(rs);
+    }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (st != null) {
+      st.close();
+    }
+    if (con != null) {
+      con.close();
     }
 
     return order;
   }
 
   /**
-   * RETRIVE the order with the smallest quantity of products.
+   * PostgreSQL implementation of the getOrdersByMonth method.
    *
-   * @return order with smallest quantity of products
+   * <p>{@inheritDoc}
    */
   @Override
   public Order getOrderWithSmallestQuantity(final Month month, final Year year)
@@ -253,44 +228,37 @@ public class OrderDAOPostgre implements OrderDAO {
     Order order = null;
     PreparedStatement st = null;
     ResultSet rs = null;
-    try {
 
-      st =
-          con.prepareStatement(
-              "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
-                  + " FROM emissiondate) = ? ORDER BY quantity ASC LIMIT 1");
-      st.setInt(1, month.getValue());
-      st.setInt(2, year.getValue());
-      rs = st.executeQuery();
+    st =
+        con.prepareStatement(
+            "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
+                + " FROM emissiondate) = ? ORDER BY quantity ASC LIMIT 1");
+    st.setInt(1, month.getValue());
+    st.setInt(2, year.getValue());
+    rs = st.executeQuery();
 
-      while (rs.next()) {
+    while (rs.next()) {
 
-        order = populateOrderFromResultSet(rs);
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (st != null) {
-        st.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+      order = populateOrderFromResultSet(rs);
+    }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (st != null) {
+      st.close();
+    }
+    if (con != null) {
+      con.close();
     }
 
     return order;
   }
 
   /**
-   * RETRIEVE the most expensive order from the DB.
+   * PostgreSQL implementation of the getMostExpensiveOrder method.
    *
-   * @param month month to search for
-   * @param year year to search for
-   * @return the most expensive order
+   * <p>{@inheritDoc}
    */
   @Override
   public Order getMostExpensiveOrder(final Month month, final Year year) throws SQLException {
@@ -298,49 +266,44 @@ public class OrderDAOPostgre implements OrderDAO {
     List<Order> orders = new ArrayList<>();
     PreparedStatement st = null;
     ResultSet rs = null;
-    try {
-      st =
-          con.prepareStatement(
-              "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
-                  + " FROM emissiondate) = ?");
-      st.setInt(1, month.getValue());
-      st.setInt(2, year.getValue());
-      rs = st.executeQuery();
-      while (rs.next()) {
-        orders.add(populateOrderFromResultSet(rs));
-      }
 
-      Order orderWithMaxPrice = null;
-      double maxPrice = 0;
-      for (Order order : orders) {
-        if (order.getPrice() > maxPrice) {
-          maxPrice = order.getPrice();
-          orderWithMaxPrice = order;
-        }
-      }
-      return orderWithMaxPrice;
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (st != null) {
-        st.close();
-      }
-      if (con != null) {
-        con.close();
+    st =
+        con.prepareStatement(
+            "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
+                + " FROM emissiondate) = ?");
+    st.setInt(1, month.getValue());
+    st.setInt(2, year.getValue());
+    rs = st.executeQuery();
+    while (rs.next()) {
+      orders.add(populateOrderFromResultSet(rs));
+    }
+
+    Order orderWithMaxPrice = null;
+    double maxPrice = 0;
+    for (Order order : orders) {
+      if (order.getPrice() > maxPrice) {
+        maxPrice = order.getPrice();
+        orderWithMaxPrice = order;
       }
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (st != null) {
+      st.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
+    return orderWithMaxPrice;
   }
 
   /**
-   * RETRIEVE the Less expensive order from the DB.
+   * PostgreSQL implementation of the getLessExpensiveOrder method.
    *
-   * @param month month to search for
-   * @param year year to search for
-   * @return the Less expensive order
+   * <p>{@inheritDoc}
    */
   @Override
   public Order getLessExpensiveOrder(final Month month, final Year year) throws SQLException {
@@ -348,48 +311,43 @@ public class OrderDAOPostgre implements OrderDAO {
     List<Order> orders = new ArrayList<>();
     PreparedStatement st = null;
     ResultSet rs = null;
-    try {
-      st =
-          con.prepareStatement(
-              "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
-                  + " FROM emissiondate) = ?");
-      st.setInt(1, month.getValue());
-      st.setInt(2, year.getValue());
-      rs = st.executeQuery();
-      while (rs.next()) {
-        orders.add(populateOrderFromResultSet(rs));
-      }
 
-      Order orderWithMaxPrice = null;
-      double minPrice = Double.MAX_VALUE;
-      for (Order order : orders) {
-        if (order.getPrice() < minPrice) {
-          minPrice = order.getPrice();
-          orderWithMaxPrice = order;
-        }
-      }
-      return orderWithMaxPrice;
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (st != null) {
-        st.close();
-      }
-      if (con != null) {
-        con.close();
+    st =
+        con.prepareStatement(
+            "SELECT * FROM \"Order\" where EXTRACT(MONTH FROM emissiondate) = ? AND EXTRACT(YEAR"
+                + " FROM emissiondate) = ?");
+    st.setInt(1, month.getValue());
+    st.setInt(2, year.getValue());
+    rs = st.executeQuery();
+    while (rs.next()) {
+      orders.add(populateOrderFromResultSet(rs));
+    }
+
+    Order orderWithMaxPrice = null;
+    double minPrice = Double.MAX_VALUE;
+    for (Order order : orders) {
+      if (order.getPrice() < minPrice) {
+        minPrice = order.getPrice();
+        orderWithMaxPrice = order;
       }
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (st != null) {
+      st.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+    return orderWithMaxPrice;
   }
 
   /**
    * PostgreSQL implementation of the getOrdersByFilters method.
    *
-   * @inheritDoc
-   * @throws SQLException possible DB related errors
+   * <p>{@inheritDoc}
    */
   @Override
   public List<Order> getOrdersByFilters(final HashMap<String, Object> filters) throws SQLException {
@@ -397,62 +355,55 @@ public class OrderDAOPostgre implements OrderDAO {
     List<Order> orders = new LinkedList<Order>();
     PreparedStatement psSelect = null;
     ResultSet rs = null;
-    int nextField = 1;
-    try {
-      StringBuilder query = new StringBuilder(BASE_QUERY);
-      query.append("WHERE isCompleted IS NULL ");
-      if (filters.size() > 0) {
-        for (String key : filters.keySet()) {
-          query.append("AND ");
-          if (key.equals("email")) {
-            query.append("email ILIKE ? ");
-          } else if (key.equals("surname")) {
-            query.append("email IN (SELECT email FROM Account WHERE surname ILIKE ? ) ");
-          } else if (key.equals("startingDate")) {
-            query.append("emissiondate >= ? ");
-          } else if (key.equals("endingDate")) {
-            query.append("emissiondate <= ? ");
-          }
-        }
-      }
-      System.err.println(query.toString());
-      psSelect = con.prepareStatement(query.toString());
+    IterableInt fieldNumber = new IterableInt(1);
+
+    StringBuilder query = new StringBuilder(BASE_QUERY);
+    query.append("WHERE isCompleted IS NULL ");
+    if (filters.size() > 0) {
       for (String key : filters.keySet()) {
-        if (key.equals("email") || key.equals("surname")) {
-          psSelect.setString(nextField++, (String) filters.get(key) + "%");
-        } else if (key.equals("startingDate") || key.equals("endingDate")) {
-          psSelect.setDate(nextField++, java.sql.Date.valueOf((LocalDate) filters.get(key)));
+        query.append("AND ");
+        if (key.equals("email")) {
+          query.append("email ILIKE ? ");
+        } else if (key.equals("surname")) {
+          query.append("email IN (SELECT email FROM Account WHERE surname ILIKE ? ) ");
+        } else if (key.equals("startingDate")) {
+          query.append("emissiondate >= ? ");
+        } else if (key.equals("endingDate")) {
+          query.append("emissiondate <= ? ");
         }
       }
-      rs = psSelect.executeQuery();
+    }
+    psSelect = con.prepareStatement(query.toString());
+    for (String key : filters.keySet()) {
+      if (key.equals("email") || key.equals("surname")) {
+        psSelect.setString(fieldNumber.next(), (String) filters.get(key) + "%");
+      } else if (key.equals("startingDate") || key.equals("endingDate")) {
+        psSelect.setDate(fieldNumber.next(), java.sql.Date.valueOf((LocalDate) filters.get(key)));
+      }
+    }
+    rs = psSelect.executeQuery();
 
-      while (rs.next()) {
-        orders.add(populateOrderFromResultSet(rs));
-      }
+    while (rs.next()) {
+      orders.add(populateOrderFromResultSet(rs));
+    }
 
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (psSelect != null) {
-        psSelect.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
     }
 
     return orders;
   }
 
   /**
-   * RETRIEVE all orders from the DB made by the same account.
+   * PostgreSQL implementation of the getOrdersByEmail method.
    *
-   * @param email accout to search for
-   * @return list of orders matching the search criteria
+   * <p>{@inheritDoc}
    */
   @Override
   public List<Order> getOrdersByEmail(final String email) throws SQLException {
@@ -460,37 +411,31 @@ public class OrderDAOPostgre implements OrderDAO {
     List<Order> orders = new LinkedList<Order>();
     PreparedStatement psSelect = null;
     ResultSet rs = null;
-    try {
-      psSelect = con.prepareStatement(BASE_QUERY + "WHERE email = ?");
-      psSelect.setString(1, email);
-      rs = psSelect.executeQuery();
-      while (rs.next()) {
-        orders.add(populateOrderFromResultSet(rs));
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (psSelect != null) {
-        psSelect.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+
+    psSelect = con.prepareStatement(BASE_QUERY + "WHERE email = ?");
+    psSelect.setString(1, email);
+    rs = psSelect.executeQuery();
+    while (rs.next()) {
+      orders.add(populateOrderFromResultSet(rs));
+    }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
     }
 
     return orders;
   }
 
   /**
-   * RETRIEVE orders from the DB made between two dates.
+   * PostgreSQL implementation of the getOrdersByDates method.
    *
-   * @param start data inizio
-   * @param end data fine
-   * @return ciao
+   * <p>{@inheritDoc}
    */
   @Override
   public List<Order> getOrdersByDates(final LocalDate start, final LocalDate end)
@@ -499,36 +444,32 @@ public class OrderDAOPostgre implements OrderDAO {
     List<Order> orders = new LinkedList<Order>();
     PreparedStatement psSelect = null;
     ResultSet rs = null;
-    try {
-      psSelect = con.prepareStatement(BASE_QUERY + "WHERE emissiondate " + "BETWEEN ? AND ?");
-      psSelect.setDate(1, java.sql.Date.valueOf(start));
-      psSelect.setDate(2, java.sql.Date.valueOf(end));
-      rs = psSelect.executeQuery();
-      while (rs.next()) {
-        orders.add(populateOrderFromResultSet(rs));
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (psSelect != null) {
-        psSelect.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+
+    psSelect = con.prepareStatement(BASE_QUERY + "WHERE emissiondate " + "BETWEEN ? AND ?");
+    psSelect.setDate(1, java.sql.Date.valueOf(start));
+    psSelect.setDate(2, java.sql.Date.valueOf(end));
+    rs = psSelect.executeQuery();
+    while (rs.next()) {
+      orders.add(populateOrderFromResultSet(rs));
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
     return orders;
   }
 
   /**
-   * RETIRIEVE orders from the DB made from a date untill now.
+   * PostgreSQL implementation of the getOrdersByDate method.
    *
-   * @param start data inizio
-   * @return ciao
+   * <p>{@inheritDoc}
    */
   @Override
   public List<Order> getOrdersByDate(final LocalDate start) throws SQLException {
@@ -536,37 +477,31 @@ public class OrderDAOPostgre implements OrderDAO {
     List<Order> orders = new LinkedList<Order>();
     PreparedStatement psSelect = null;
     ResultSet rs = null;
-    try {
-      psSelect = con.prepareStatement(BASE_QUERY + "WHERE emissiondate " + ">= ?");
-      psSelect.setDate(1, java.sql.Date.valueOf(start));
-      rs = psSelect.executeQuery();
-      while (rs.next()) {
-        orders.add(populateOrderFromResultSet(rs));
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (psSelect != null) {
-        psSelect.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+
+    psSelect = con.prepareStatement(BASE_QUERY + "WHERE emissiondate " + ">= ?");
+    psSelect.setDate(1, java.sql.Date.valueOf(start));
+    rs = psSelect.executeQuery();
+    while (rs.next()) {
+      orders.add(populateOrderFromResultSet(rs));
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
     return orders;
   }
 
   /**
-   * RETRIEVE orders from the DB made by a client between two dates.
+   * PostgreSQL implementation of the getOrdersByEmailAndDate method.
    *
-   * @param email user to search for
-   * @param start start date
-   * @param end end date
-   * @return list of the orders matching the search criteria
+   * <p>{@inheritDoc}
    */
   @Override
   public List<Order> getOrdersByEmailAndDate(
@@ -575,45 +510,35 @@ public class OrderDAOPostgre implements OrderDAO {
     List<Order> orders = new LinkedList<Order>();
     PreparedStatement psSelect = null;
     ResultSet rs = null;
-    int nextField = 1;
-    try {
-      psSelect =
-          con.prepareStatement(
-              BASE_QUERY + "WHERE email = ? " + "AND emissiondate BETWEEN ? AND ?");
-      psSelect.setString(nextField++, email);
-      psSelect.setDate(nextField++, java.sql.Date.valueOf(start));
-      psSelect.setDate(nextField++, java.sql.Date.valueOf(end));
-      rs = psSelect.executeQuery();
-      while (rs.next()) {
-        orders.add(populateOrderFromResultSet(rs));
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (psSelect != null) {
-        psSelect.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+    IterableInt fieldNumber = new IterableInt(1);
+
+    psSelect =
+        con.prepareStatement(BASE_QUERY + "WHERE email = ? " + "AND emissiondate BETWEEN ? AND ?");
+    psSelect.setString(fieldNumber.next(), email);
+    psSelect.setDate(fieldNumber.next(), java.sql.Date.valueOf(start));
+    psSelect.setDate(fieldNumber.next(), java.sql.Date.valueOf(end));
+    rs = psSelect.executeQuery();
+    while (rs.next()) {
+      orders.add(populateOrderFromResultSet(rs));
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
     return orders;
   }
 
   /**
-   * RETRIEVE the number of orders for each day of the month.
+   * PostgreSQL implementation of the getOrdersPerDay method.
    *
-   * <p>The function initialize an ArrayList with the number of days of the month selected as 0.
-   * Then for every days that has orders it updates the value of the ArrayList at the index of the
-   * day with the number
-   *
-   * @param month month to search for
-   * @param year year to search for
-   * @return list of the number of the orders for each day of the month
+   * <p>{@inheritDoc}
    */
   @Override
   public List<Integer> getOrdersPerDay(final Month month, final Year year) throws SQLException {
@@ -625,84 +550,72 @@ public class OrderDAOPostgre implements OrderDAO {
 
     PreparedStatement psSelect = null;
     ResultSet rs = null;
-    int nextField = 1;
-    try {
-      psSelect =
-          con.prepareStatement(
-              "SELECT EXTRACT(DAY FROM emissiondate), "
-                  + "COUNT(*) FROM \"Order\" WHERE "
-                  + "EXTRACT(MONTH FROM emissiondate) = ? AND "
-                  + "EXTRACT(YEAR FROM emissiondate) = ? "
-                  + "GROUP BY EXTRACT(DAY FROM emissiondate)");
-      psSelect.setInt(nextField++, month.getValue());
-      psSelect.setInt(nextField++, year.getValue());
-      rs = psSelect.executeQuery();
-      while (rs.next()) {
-        orders.set(rs.getInt(1) - 1, rs.getInt(2));
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (psSelect != null) {
-        psSelect.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+    IterableInt fieldNumber = new IterableInt(1);
+
+    psSelect =
+        con.prepareStatement(
+            "SELECT EXTRACT(DAY FROM emissiondate), "
+                + "COUNT(*) FROM \"Order\" WHERE "
+                + "EXTRACT(MONTH FROM emissiondate) = ? AND "
+                + "EXTRACT(YEAR FROM emissiondate) = ? "
+                + "GROUP BY EXTRACT(DAY FROM emissiondate)");
+    psSelect.setInt(fieldNumber.next(), month.getValue());
+    psSelect.setInt(fieldNumber.next(), year.getValue());
+    rs = psSelect.executeQuery();
+    while (rs.next()) {
+      orders.set(rs.getInt(1) - 1, rs.getInt(2));
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
     return orders;
   }
 
   /**
-   * RETRIEVE the number of expiring orders.
+   * PostgreSQL implementation of the getExpiringOrdersNumber method.
    *
-   * @return number of expiring orders
+   * <p>{@inheritDoc}
    */
   @Override
-  public int getExpiringOrdersNumber() {
+  public int getExpiringOrdersNumber() throws SQLException {
     PreparedStatement psSelect = null;
     ResultSet rs = null;
     con = DBConnection.getConnectionBySchema("uninadelivery");
-    try {
-      psSelect =
-          con.prepareStatement(
-              "SELECT COUNT(*) FROM \"Order\" WHERE emissiondate + 6 <= CURRENT_DATE and"
-                  + " isCompleted IS NULL");
-      rs = psSelect.executeQuery();
-      if (rs.next()) {
-        return rs.getInt(1);
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-    } finally {
-      try {
-        if (rs != null) {
-          rs.close();
-        }
-        if (psSelect != null) {
-          psSelect.close();
-        }
-        if (con != null) {
-          con.close();
-        }
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
+
+    psSelect =
+        con.prepareStatement(
+            "SELECT COUNT(*) FROM \"Order\" WHERE emissiondate + 6 <= CURRENT_DATE and"
+                + " isCompleted IS NULL");
+    rs = psSelect.executeQuery();
+    if (rs.next()) {
+      return rs.getInt(1);
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
     return 0;
   }
 
   /**
-   * Retrive all the roders made by an account in a given month.
+   * PostgreSQL implementation of the getOrdersByAccountAndMonth method.
    *
-   * @param client account to search for
-   * @param year year to search for
-   * @param month month to search for
-   * @return list of orders matching the search criteria
+   * <p>{@inheritDoc}
    */
   @Override
   public List<Order> getOrdersByAccountAndMonth(
@@ -711,95 +624,115 @@ public class OrderDAOPostgre implements OrderDAO {
     List<Order> orders = new LinkedList<Order>();
     PreparedStatement psSelect = null;
     ResultSet rs = null;
-    int nextField = 1;
-    try {
-      psSelect =
-          con.prepareStatement(
-              BASE_QUERY
-                  + "WHERE email = ? AND EXTRACT(YEAR FROM emissiondate) = ? AND EXTRACT(MONTH FROM"
-                  + " emissiondate) = ?");
-      psSelect.setString(nextField++, client.getEmail());
-      psSelect.setInt(nextField++, year.getValue());
-      psSelect.setInt(nextField++, month.getValue());
-      rs = psSelect.executeQuery();
-      while (rs.next()) {
-        orders.add(populateOrderFromResultSet(rs));
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (psSelect != null) {
-        psSelect.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+    IterableInt fieldNumber = new IterableInt(1);
+
+    psSelect =
+        con.prepareStatement(
+            BASE_QUERY
+                + "WHERE email = ? AND EXTRACT(YEAR FROM emissiondate) = ? AND EXTRACT(MONTH FROM"
+                + " emissiondate) = ?");
+    psSelect.setString(fieldNumber.next(), client.getEmail());
+    psSelect.setInt(fieldNumber.next(), year.getValue());
+    psSelect.setInt(fieldNumber.next(), month.getValue());
+    rs = psSelect.executeQuery();
+    while (rs.next()) {
+      orders.add(populateOrderFromResultSet(rs));
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
     return orders;
   }
 
   /**
-   * UPDATE an order in the DB by his id.
+   * PostgreSQL implementation of the getOrdersByAccountAndYear method.
    *
-   * @param order order to Update
-   * @return number of rows affected by the update
+   * <p>{@inheritDoc}
    */
   @Override
-  public int updateOrderById(final Order order) throws SQLException {
+  public Year getStartingYear() throws SQLException {
+    con = DBConnection.getConnectionBySchema("uninadelivery");
+    PreparedStatement psSelect = null;
+    ResultSet rs = null;
+
+    psSelect = con.prepareStatement("SELECT EXTRACT(YEAR FROM MIN(emissiondate)) FROM \"Order\"");
+    rs = psSelect.executeQuery();
+    if (rs.next()) {
+      int year = rs.getInt(1);
+      return Year.of(year);
+    }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+
+    return null;
+  }
+
+  /**
+   * PostgreSQL implementation of the update method.
+   *
+   * <p>{@inheritDoc}
+   */
+  @Override
+  public int update(final Order order) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     int rowAffected;
-    try {
-      int nextField = 1;
-      PreparedStatement psUpdate =
-          con.prepareStatement(
-              "UPDATE \"Order\" SET "
-                  + "emissiondate = ?, isexpress = ?, "
-                  + "extrawarranty = ?, email = ?, quantity = ?, "
-                  + "name = ?, supplier = ? WHERE orderid = ?");
-      psUpdate.setDate(nextField++, java.sql.Date.valueOf(order.getEmissionDate()));
-      psUpdate.setBoolean(nextField++, (order.getIsExpress() ? true : null));
-      psUpdate.setInt(nextField++, order.getExtraWarranty());
-      psUpdate.setString(nextField++, order.getAccount().getEmail());
-      psUpdate.setInt(nextField++, order.getQuantity());
-      psUpdate.setString(nextField++, order.getProduct().getName());
-      psUpdate.setString(nextField++, order.getProduct().getSupplier());
-      psUpdate.setInt(nextField++, order.getId());
-      rowAffected = psUpdate.executeUpdate();
-      psUpdate.close();
-      con.close();
-    } catch (SQLException e) {
-      e.printStackTrace();
-      con.close();
-      throw e;
-    }
+
+    IterableInt fieldNumber = new IterableInt(1);
+    PreparedStatement psUpdate =
+        con.prepareStatement(
+            "UPDATE \"Order\" SET "
+                + "emissiondate = ?, isexpress = ?, "
+                + "extrawarranty = ?, email = ?, quantity = ?, "
+                + "name = ?, supplier = ? WHERE orderid = ?");
+    psUpdate.setDate(fieldNumber.next(), java.sql.Date.valueOf(order.getEmissionDate()));
+    psUpdate.setBoolean(fieldNumber.next(), (order.getIsExpress() ? true : null));
+    psUpdate.setInt(fieldNumber.next(), order.getExtraWarranty());
+    psUpdate.setString(fieldNumber.next(), order.getAccount().getEmail());
+    psUpdate.setInt(fieldNumber.next(), order.getQuantity());
+    psUpdate.setString(fieldNumber.next(), order.getProduct().getName());
+    psUpdate.setString(fieldNumber.next(), order.getProduct().getSupplier());
+    psUpdate.setInt(fieldNumber.next(), order.getId());
+    rowAffected = psUpdate.executeUpdate();
+    psUpdate.close();
+    con.close();
+
     return rowAffected;
   }
 
   /**
-   * DELETE an order from the DB by his id.
+   * PostgreSQL implementation of the delete method.
    *
-   * @param id orderID to delete
-   * @return number of rows affected by the delete
+   * <p>{@inheritDoc}
    */
   @Override
-  public int deleteOrderById(final int id) throws SQLException {
+  public int delete(final Order order) throws SQLException {
     con = DBConnection.getConnectionBySchema("uninadelivery");
     int rowAffected;
-    try {
-      PreparedStatement psDelete = con.prepareStatement("DELETE FROM \"Order\" WHERE orderid = ?");
-      psDelete.setInt(1, id);
-      rowAffected = psDelete.executeUpdate();
+
+    PreparedStatement psDelete = con.prepareStatement("DELETE FROM \"Order\" WHERE orderid = ?");
+    psDelete.setInt(1, order.getId());
+    rowAffected = psDelete.executeUpdate();
+
+    if (psDelete != null) {
       psDelete.close();
-      con.close();
-    } catch (SQLException e) {
-      e.printStackTrace();
-      con.close();
-      throw e;
     }
+    if (con != null) {
+      con.close();
+    }
+
     return rowAffected;
   }
 }

@@ -6,7 +6,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
+/**
+ * This class implements the ProductDAO interface and provides the PostgreSQL implementation for the
+ * shipment data access operations.
+ */
 public class ProductDAOPostgre implements ProductDAO {
 
   /** Connection to the database. */
@@ -24,8 +29,19 @@ public class ProductDAOPostgre implements ProductDAO {
   }
 
   /**
+   * PostgreSQL implementation of the method insert.
+   *
+   * <p>{@inheritDoc}
+   */
+  @Override
+  public int insert(final Product product) throws SQLException {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
    * PostgreSQL implementation of the method getProductByNameAndSupplier.<br>
-   * {@inheritDoc}
+   *
+   * <p>{@inheritDoc}
    */
   @Override
   public Product getProductByNameAndSupplier(final String name, final String supplier)
@@ -34,28 +50,55 @@ public class ProductDAOPostgre implements ProductDAO {
     Product product = null;
     PreparedStatement psSelect = null;
     ResultSet rs = null;
-    try {
-      psSelect = con.prepareStatement("SELECT * FROM product WHERE name = ? AND supplier = ?");
-      psSelect.setString(1, name);
-      psSelect.setString(2, supplier);
-      rs = psSelect.executeQuery();
-      while (rs.next()) {
-        product = populateProductFromResultSet(rs);
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      if (rs != null) {
-        rs.close();
-      }
-      if (psSelect != null) {
-        psSelect.close();
-      }
-      if (con != null) {
-        con.close();
-      }
+
+    psSelect = con.prepareStatement("SELECT * FROM product WHERE name = ? AND supplier = ?");
+    psSelect.setString(1, name);
+    psSelect.setString(2, supplier);
+    rs = psSelect.executeQuery();
+    while (rs.next()) {
+      product = populateProductFromResultSet(rs);
     }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
     return product;
+  }
+
+  /**
+   * PostgreSQL implementation of the method getAll.
+   *
+   * <p>{@inheritDoc}
+   */
+  @Override
+  public List<Product> getAll() throws SQLException {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * PostgreSQL implementation of the method update.
+   *
+   * <p>{@inheritDoc}
+   */
+  @Override
+  public int update(final Product product) throws SQLException {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * PostgreSQL implementation of the method delete.
+   *
+   * <p>{@inheritDoc}
+   */
+  @Override
+  public int delete(final Product product) throws SQLException {
+    throw new UnsupportedOperationException();
   }
 }

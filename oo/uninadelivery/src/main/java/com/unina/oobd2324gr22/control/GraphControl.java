@@ -49,8 +49,7 @@ public class GraphControl extends NonLoginControl {
       }
       return o;
     } catch (SQLException e) {
-      showInternalError();
-      e.printStackTrace();
+      showInternalError(e);
       return null;
     }
   }
@@ -67,8 +66,7 @@ public class GraphControl extends NonLoginControl {
     try {
       return orderDAO.getOrderWithLargestQuantity(month, year);
     } catch (SQLException e) {
-      showInternalError();
-      e.printStackTrace();
+      showInternalError(e);
       return null;
     }
   }
@@ -85,8 +83,7 @@ public class GraphControl extends NonLoginControl {
     try {
       return orderDAO.getOrderWithSmallestQuantity(month, year);
     } catch (SQLException e) {
-      showInternalError();
-      e.printStackTrace();
+      showInternalError(e);
       return null;
     }
   }
@@ -102,8 +99,7 @@ public class GraphControl extends NonLoginControl {
     try {
       return orderDAO.getMostExpensiveOrder(month, year);
     } catch (SQLException e) {
-      showInternalError();
-      e.printStackTrace();
+      showInternalError(e);
       return null;
     }
   }
@@ -119,8 +115,7 @@ public class GraphControl extends NonLoginControl {
     try {
       return orderDAO.getLessExpensiveOrder(month, year);
     } catch (SQLException e) {
-      showInternalError();
-      e.printStackTrace();
+      showInternalError(e);
       return null;
     }
   }
@@ -136,8 +131,7 @@ public class GraphControl extends NonLoginControl {
     try {
       return accountDAO.getMostOrderingAccount(year, month);
     } catch (SQLException e) {
-      showInternalError();
-      e.printStackTrace();
+      showInternalError(e);
       return null;
     }
   }
@@ -153,8 +147,21 @@ public class GraphControl extends NonLoginControl {
     try {
       return accountDAO.getMostSpendingAccount(year, month);
     } catch (SQLException e) {
-      showInternalError();
-      e.printStackTrace();
+      showInternalError(e);
+      return null;
+    }
+  }
+
+  /**
+   * Get the oldest year ther's an order for.
+   *
+   * @return the oldest year
+   */
+  public Year getStartingYear() {
+    try {
+      return orderDAO.getStartingYear();
+    } catch (SQLException e) {
+      showInternalError(e);
       return null;
     }
   }

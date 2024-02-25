@@ -6,16 +6,7 @@ import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import java.sql.SQLException;
 import java.util.List;
 
-public interface ShipmentDAO {
-
-  /**
-   * Insert a new shipment towards clients in the database.
-   *
-   * @param shipment shipment to insert
-   * @return the number of rows affected by the insert
-   * @throws SQLException possible DB related errors
-   */
-  int insertShipment(Shipment shipment) throws SQLException;
+public interface ShipmentDAO extends BasicDAO<Shipment> {
 
   /**
    * Insert an order in ships.
@@ -78,22 +69,4 @@ public interface ShipmentDAO {
    * @throws SQLException possible DB related errors
    */
   List<Shipment> getCompatibleShipments(Order order) throws SQLException;
-
-  /**
-   * Update a shipment towards clients in the database.
-   *
-   * @param shipment shipment to update
-   * @return the number of rows affected by the update
-   * @throws SQLException possible DB related errors
-   */
-  int updateShipment(Shipment shipment) throws SQLException;
-
-  /**
-   * Delete a shipment in the database.
-   *
-   * @param shipment shipment to delete
-   * @return the number of rows affected by the delete
-   * @throws SQLException possible DB related errors
-   */
-  int deleteShipment(Shipment shipment) throws SQLException;
 }

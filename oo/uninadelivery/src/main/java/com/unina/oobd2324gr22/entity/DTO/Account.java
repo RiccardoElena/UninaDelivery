@@ -15,32 +15,36 @@ import javafx.scene.image.Image;
  */
 public class Account {
 
-  /** Default constructor. */
+  // Attributes
+
+  /** Name of the account. */
   private String name;
 
-  /** Default constructor. */
+  /** Surname of the account. */
   private String surname;
 
-  /** Default constructor. */
+  /** Email of the account. */
   private String email;
 
-  /** Default constructor. */
+  /** Birthdate of the account. */
   private LocalDate birthdate;
 
-  /** Default constructor. */
+  /** Profile picture of the account. */
   private String propic;
 
-  /** Default constructor. */
+  /** Password of the account. */
   private String password;
 
-  /** Default constructor. */
+  /** Address of the account. */
   private Address address;
 
-  /** Default constructor. */
+  /** List of orders associated with the account. */
   private List<Order> orders;
 
-  /** Default constructor. */
+  /** Amount spent by the account in a certain month. */
   private double amountSpent;
+
+  // Constructors
 
   /**
    * Default constructor.
@@ -61,193 +65,185 @@ public class Account {
       final String accPropic,
       final String accPassword,
       final Address accAddress) {
-    this.name = accName;
-    this.surname = accSurname;
-    this.email = accEmail;
-    this.birthdate = accBdate;
-    this.propic = accPropic;
-    this.password = accPassword;
-    this.address = accAddress;
+    name = accName;
+    surname = accSurname;
+    email = accEmail;
+    birthdate = accBdate;
+    propic = accPropic;
+    password = accPassword;
+    address = accAddress;
   }
 
+  // Getters and Setters
+
   /**
-   * Name getter.
-   *
-   * @return ciao
+   * @return name of the account
    */
   public String getName() {
     return name;
   }
 
   /**
-   * Name setter.
-   *
-   * @param accName Nome account
+   * @param accName Account's name
    */
   public void setName(final String accName) {
-    this.name = accName;
+    name = accName;
   }
 
   /**
-   * Surname getter.
-   *
-   * @return cognome account
+   * @return surname of the account
    */
   public String getSurname() {
     return surname;
   }
 
   /**
-   * Surname Setter.
-   *
-   * @param accSurname cognome account
+   * @param accSurname Account's surname
    */
   public void setSurname(final String accSurname) {
-    this.surname = accSurname;
+    surname = accSurname;
   }
 
   /**
-   * Email getter.
-   *
-   * @return email account
+   * @return email of the account
    */
   public String getEmail() {
     return email;
   }
 
   /**
-   * @param accEmail email account
+   * @param accEmail Account's email
    */
   public void setEmail(final String accEmail) {
-    this.email = accEmail;
+    email = accEmail;
   }
 
   /**
-   * @return data di nascita account
+   * @return birthdate of the account
    */
   public LocalDate getBirthdate() {
     return birthdate;
   }
 
   /**
-   * @param accBDate data di nascita account
+   * @param accBDate Account's birthdate
    */
   public void setBirthdate(final LocalDate accBDate) {
-    this.birthdate = accBDate;
+    birthdate = accBDate;
   }
 
   /**
-   * @return immagine profilo account
+   * @return profile picture of the account
    */
   public String getPropicBase64() {
     return propic;
   }
 
   /**
-   * @param accPropic immagine profilo account
+   * @param accPropic Account's profile picture
    */
   public void setPropicBase64(final String accPropic) {
-    this.propic = accPropic;
+    propic = accPropic;
   }
 
   /**
-   * @return immagine profilo account
+   * @return Account's profile picture
    */
   public Image getPropic() {
     Image img;
     try {
-      System.err.println(email);
       img = Base64ToImage.convert(propic);
       if (img.getHeight() > img.getWidth()) {
         throw new Exception("Image has wrong orientation!");
       }
     } catch (Exception e) {
-      System.err.println("buba");
       img = new Image("/images/defaultUser.jpg");
     }
     return img;
   }
 
   /**
-   * @return password account
+   * @return password of the account
    */
   public String getPassword() {
     return password;
   }
 
   /**
-   * @param accPassword password account
+   * @param accPassword Account's password
    */
   public void setPassword(final String accPassword) {
-    this.password = accPassword;
+    password = accPassword;
   }
 
   /**
-   * @return indirizzo account
+   * @return address of the account
    */
   public Address getAddress() {
     return address;
   }
 
   /**
-   * @param accAddress indirizzo account
+   * @param accAddress Account's address
    */
   public void setAddress(final Address accAddress) {
-    this.address = accAddress;
+    address = accAddress;
   }
 
   /**
-   * @return lista ordini account
+   * @return list of orders made by the account
    */
   public List<Order> getOrders() {
     return orders;
   }
 
   /**
-   * @param accOrders lista ordini account
+   * @param accOrders Account's orders list
    */
   public void setOrders(final List<Order> accOrders) {
-    this.orders = accOrders;
+    orders = accOrders;
   }
 
   /**
-   * @return amountSpent
+   * @return amount spent by the account
    */
   public double getAmountSpent() {
     return amountSpent;
   }
 
   /**
-   * @param accAmountSpent amountSpent
+   * @param accAmountSpent Account's amount spent
    */
   public void setAmountSpent(final double accAmountSpent) {
-    this.amountSpent = accAmountSpent;
+    amountSpent = accAmountSpent;
   }
+
+  // Methods
 
   /** To string method. */
   @Override
   public String toString() {
     return "Account{"
         + "\nname = '"
-        + this.name
+        + name
         + "',"
         + "\nsurname = '"
-        + this.surname
+        + surname
         + "',"
         + "\nemail = '"
-        + this.email
+        + email
         + "',"
         + "\nbirthdate = '"
-        + this.birthdate
+        + birthdate
         + "',"
         + "\npropic = '"
-        + this.propic
+        + propic
         + "',"
         + "\npassword = '"
-        + this.password
+        + password
         + "',"
         + "\naddress = "
-        + this.address.toString().replace("\n", "\n\t")
+        + address.toString().replace("\n", "\n\t")
         + "\n}";
   }
 }

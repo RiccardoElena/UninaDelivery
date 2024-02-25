@@ -10,24 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /** This interface represents the Data Access Object for the Order class. */
-public interface OrderDAO {
-
-  /**
-   * Insert an order into the DB from the database.
-   *
-   * @param order Order to insert into the DB
-   * @return the number of rows affected by the insert
-   * @throws SQLException possible DB related errors
-   */
-  int insertOrder(Order order) throws SQLException;
-
-  /**
-   * Retrive all the orders from the database.
-   *
-   * @return lista di ordini
-   * @throws SQLException possible DB related errors
-   */
-  List<Order> getOrders() throws SQLException;
+public interface OrderDAO extends BasicDAO<Order> {
 
   /**
    * Retrive an order by its id from the database.
@@ -91,7 +74,8 @@ public interface OrderDAO {
    *
    * @param month month to search for
    * @param year year to search for
-   * @return list of the number of the orders for each day of the month
+   * @return list of the number of the orders for each day of the month. The list has the length of
+   *     the month and the i-th element is the number of orders for the i-th day of the month
    * @throws SQLException possible DB related errors
    */
   List<Integer> getOrdersPerDay(Month month, Year year) throws SQLException;
@@ -151,7 +135,7 @@ public interface OrderDAO {
    * @return number of expiring orders
    * @throws SQLException possible DB related errors
    */
-  int getExpiringOrdersNumber();
+  int getExpiringOrdersNumber() throws SQLException;
 
   /**
    * Retrive all the roders made by an account in a given month.
@@ -166,20 +150,10 @@ public interface OrderDAO {
       throws SQLException;
 
   /**
-   * Update an order given its id from the database.
+   * Retrive the smalest year there is an order in the database.
    *
-   * @param order order to Update
-   * @return number of rows affected by the update
+   * @return the smallest year there is an order in the database
    * @throws SQLException possible DB related errors
    */
-  int updateOrderById(Order order) throws SQLException;
-
-  /**
-   * Delete an order given its id from the database.
-   *
-   * @param id orderID to delete
-   * @return number of rows affected by the delete
-   * @throws SQLException possible DB related errors
-   */
-  int deleteOrderById(int id) throws SQLException;
+  Year getStartingYear() throws SQLException;
 }

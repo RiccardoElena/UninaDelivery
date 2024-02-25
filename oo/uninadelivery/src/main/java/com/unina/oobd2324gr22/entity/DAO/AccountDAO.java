@@ -10,24 +10,7 @@ import java.time.Month;
 import java.time.Year;
 import java.util.List;
 
-public interface AccountDAO {
-
-  /**
-   * Create an account into the DB.
-   *
-   * @param account Account to insert into the DB
-   * @return the number of rows affected by the insert
-   * @throws SQLException possible DB related errors
-   */
-  int insertAccount(Account account) throws SQLException;
-
-  /**
-   * Retrieve all the accounts.
-   *
-   * @return list of accounts
-   * @throws SQLException possible DB related errors
-   */
-  List<Account> getAccounts() throws SQLException;
+public interface AccountDAO extends BasicDAO<Account> {
 
   /**
    * Retrieve an account by its email.
@@ -96,15 +79,6 @@ public interface AccountDAO {
   List<Driver> getCompatibleDrivers(Deposit deposit, LocalDate date) throws SQLException;
 
   /**
-   * Update an account.
-   *
-   * @param account Account to update
-   * @return the number of rows affected by the update
-   * @throws SQLException possible DB related errors
-   */
-  int updateAccount(Account account) throws SQLException;
-
-  /**
    * Update an account's email.
    *
    * <p>Being the email the primary key of the account table, it has to be updated with a specific
@@ -116,13 +90,4 @@ public interface AccountDAO {
    * @throws SQLException possible DB related errors
    */
   int updateAccountEmail(Account account, String newEmail) throws SQLException;
-
-  /**
-   * Delete an account.
-   *
-   * @param account Account to delete
-   * @return the number of rows affected by the delete
-   * @throws SQLException possible DB related errors
-   */
-  int deleteAccount(Account account) throws SQLException;
 }

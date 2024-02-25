@@ -60,7 +60,7 @@ public abstract class BasePageController<T extends BaseControl> {
    * @param c the control to set
    */
   public void setControl(final T c) {
-    this.control = c;
+    control = c;
   }
 
   /** Make the window draggable. */

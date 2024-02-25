@@ -17,6 +17,7 @@ public final class Base64ToImage {
   /** Third byte of the JPEG magic number. */
   private static final byte JPEG_MAGIC_NUMBER_BYTE_3 = (byte) 0xFF;
 
+  /** Private Constructor. */
   private Base64ToImage() {
     throw new IllegalStateException("Utility class");
   }
@@ -34,6 +35,12 @@ public final class Base64ToImage {
     return new Image("data:image/jpeg;base64," + base64);
   }
 
+  /**
+   * Check if the base64 string represents a JPEG image.
+   *
+   * @param base64
+   * @return true if the base64 string represents a JPEG image, false otherwise
+   */
   private static boolean isJpeg(final String base64) {
     try {
       byte[] decodedBytes = Base64.getDecoder().decode(base64);

@@ -1,34 +1,9 @@
 package com.unina.oobd2324gr22;
 
-import com.unina.oobd2324gr22.entity.DAO.AccountDAOPostgre;
-import com.unina.oobd2324gr22.entity.DAO.DepositDAO;
-import com.unina.oobd2324gr22.entity.DAO.DepositDAOPostgre;
-import com.unina.oobd2324gr22.entity.DAO.OrderDAO;
-import com.unina.oobd2324gr22.entity.DAO.OrderDAOPostgre;
-import com.unina.oobd2324gr22.entity.DAO.ShipmentDAO;
-import com.unina.oobd2324gr22.entity.DAO.ShipmentDAOPostgre;
-import com.unina.oobd2324gr22.entity.DTO.Deposit;
-import com.unina.oobd2324gr22.entity.DTO.Operator;
-import com.unina.oobd2324gr22.entity.DTO.Order;
-import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import com.unina.oobd2324gr22.utils.App;
-import com.unina.oobd2324gr22.utils.SHA256;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.Year;
-import java.util.List;
-
-// import com.unina.oobd2324gr22.entity.DAO.OrderDAO;
-// import com.unina.oobd2324gr22.entity.DAO.OrderDAOPostgre;
-// import java.sql.SQLException;
-// import java.util.List;
 
 /** Hello world! */
 public final class Main {
-
-  /** Testing variable. */
-  private static final int YEAR = 2023;
 
   // Constructors
 
@@ -44,37 +19,7 @@ public final class Main {
    * @param args Command line arguments.
    */
   public static void main(final String[] args) {
-    System.out.println("Hello World!");
-    System.out.println("Bypass NON Attivo");
-    OrderDAO orderDAO = new OrderDAOPostgre();
-    try {
-      List<Integer> o = orderDAO.getOrdersPerDay(Month.JANUARY, Year.of(YEAR));
-      for (int i : o) {
-        System.out.print("Data: " + i + " ");
-      }
-      Order order = orderDAO.getOrderById(1);
-      System.out.println(order);
-      ShipmentDAO shipmentDAO = new ShipmentDAOPostgre();
-      List<Shipment> s = shipmentDAO.getCompatibleShipments(order);
-      for (Shipment shipment : s) {
-        System.out.println(shipment);
-      }
-      DepositDAO depositDAO = new DepositDAOPostgre();
-      List<Deposit> deposit = depositDAO.getCompatibleDeposits(order, LocalDate.now());
-      for (Deposit d : deposit) {
-        System.out.println(d);
-      }
-      Operator op =
-          new AccountDAOPostgre()
-              .getOperatorByBmailAndPassword(
-                  "R.Elena@uninadelivery.operator.com", SHA256.toSHA256("securepassword"));
-      System.out.println(op);
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
-    System.out.println(
-        "Bypass NON Attivo, per testare l'app lanciare App.launchApp(args) scommentando l'utlima"
-            + " linea del main()");
+    System.err.println("This is a utility class and cannot be instantiated");
     App.launchApp(args);
   }
 }

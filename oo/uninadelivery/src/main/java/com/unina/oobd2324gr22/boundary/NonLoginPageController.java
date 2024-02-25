@@ -178,8 +178,8 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
    * @param table the table to set the functions on
    */
   public <U> void setTableFunctionality(final TableView<U> table) {
-    this.setRowDeselection(table);
-    this.setColumnSize(table);
+    setRowDeselection(table);
+    setColumnSize(table);
   }
 
   /**
@@ -196,8 +196,8 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
       final String columnTitle,
       final String buttonText,
       final Consumer<U> action) {
-    this.addButtonToTable(table, columnTitle, buttonText, action);
-    this.setTableFunctionality(table);
+    addButtonToTable(table, columnTitle, buttonText, action);
+    setTableFunctionality(table);
   }
 
   private <U> void setRowDeselection(final TableView<U> table) {
@@ -266,12 +266,10 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
    * @param imgView the image view
    */
   public void setRoundImageViewImagesAndPosition(final Image img, final ImageView imgView) {
-    System.err.println(img.getHeight() + " " + img.getWidth());
     double imgRatio = img.getWidth() / img.getHeight();
     double imgActualWidth = MAX_IMG_HEIGHT * imgRatio;
 
     double xoffset = (MAX_IMG_WIDTH - imgActualWidth) / 2;
-    System.err.println(imgActualWidth + " " + xoffset);
     imgView.setImage(img);
     imgView.setLayoutX(xoffset);
   }

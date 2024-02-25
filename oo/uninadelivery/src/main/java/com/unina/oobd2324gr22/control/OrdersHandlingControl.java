@@ -19,11 +19,20 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 
+/**
+ * This class provides the control logic for Shipping functionality.
+ *
+ * <p>It handles the interaction between the user interface and the data access layer.
+ *
+ * <p>It's responsible for displaying the correct view and handling the user's input for the Orders
+ * Page and Shipment Page.
+ */
 public class OrdersHandlingControl extends NonLoginControl {
 
   /** Order Data Access Object. */
@@ -54,31 +63,29 @@ public class OrdersHandlingControl extends NonLoginControl {
     setFileName(currPage);
   }
 
-  // FIXME: to be changed to real functionality
   /**
-   * Execute an action on an order.
+   * Go to the Shipment Page relative to an order.
    *
-   * @param order the order to execute the action on
+   * @param order seleted order
    */
   public void goToShipmentPage(final Order order) {
-    System.out.println("Hai cliccato su " + order);
-    this.selectedOrder = order;
+    selectedOrder = order;
     try {
-      this.currPage = "Shipment";
+      currPage = "Shipment";
       setScene(getStage(), getLoggedOperator());
     } catch (Exception e) {
-      e.printStackTrace();
+      showInternalError(e);
     }
   }
 
   /** Go to the Orders page. */
   public void goToOrdersPage() {
-    this.selectedOrder = null;
+    selectedOrder = null;
     try {
-      this.currPage = "Orders";
-      setScene(this.getStage(), this.getLoggedOperator());
+      currPage = "Orders";
+      setScene(getStage(), getLoggedOperator());
     } catch (Exception e) {
-      e.printStackTrace();
+      showInternalError(e);
     }
   }
 
@@ -92,30 +99,35 @@ public class OrdersHandlingControl extends NonLoginControl {
    */
   public ObservableList<Order> filterOrders(
       final String account, final LocalDate startingDate, final LocalDate endingDate) {
-
     HashMap<String, Object> filters = new HashMap<>();
 
-    if (account != null
-        && !account.isEmpty()
-        && account.matches("^[a-zA-Z0-9]+[a-zA-Z0-9.]*[a-zA-Z0-9]+@[a-zA-Z.]+\\.[a-zA-Z]{2,}$")) {
+    if (isValidEmail(account)) {
       filters.put("email", account);
-    } else if (account != null && !account.isEmpty()) {
+    } else if (!account.isEmpty()) {
       filters.put("surname", account);
     }
+
     if (startingDate != null) {
       filters.put("startingDate", startingDate);
     }
+
     if (endingDate != null) {
       filters.put("endingDate", endingDate);
     }
 
     try {
       return FXCollections.observableArrayList(ordersDAO.getOrdersByFilters(filters));
-
     } catch (SQLException e) {
-      showInternalError();
+      showInternalError(e);
       return null;
     }
+  }
+
+  private boolean isValidEmail(final String email) {
+    return email != null
+        && !email.isEmpty()
+        && Pattern.matches(
+            "^([a-zA-Z0-9]+\\.[a-zA-Z0-9]+|[a-zA-Z0-9]+)@[a-zA-Z.]+\\.[a-zA-Z]{2,}$", email);
   }
 
   /**
@@ -137,7 +149,7 @@ public class OrdersHandlingControl extends NonLoginControl {
     try {
       orders = FXCollections.observableArrayList(ordersDAO.getUnfinishedOrders());
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      showInternalError(e);
     }
     return orders;
   }
@@ -150,11 +162,10 @@ public class OrdersHandlingControl extends NonLoginControl {
   public ObservableList<Shipment> getShipments() {
     ObservableList<Shipment> shipments = null;
     try {
-
       shipments =
           FXCollections.observableArrayList(shipmentDAO.getCompatibleShipments(selectedOrder));
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      showInternalError(e);
     }
     return shipments;
   }
@@ -172,7 +183,7 @@ public class OrdersHandlingControl extends NonLoginControl {
           FXCollections.observableArrayList(
               depositsDAO.getCompatibleDeposits(selectedOrder, selectedDate));
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      showInternalError(e);
     }
     return deposits;
   }
@@ -192,7 +203,7 @@ public class OrdersHandlingControl extends NonLoginControl {
           FXCollections.observableArrayList(
               transportDAO.getCompatibleTransports(selectedOrder, selectedDeposit, selectedDate));
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      showInternalError(e);
     }
     return transports;
   }
@@ -212,7 +223,7 @@ public class OrdersHandlingControl extends NonLoginControl {
           FXCollections.observableArrayList(
               accountDAO.getCompatibleDrivers(selectedDeposit, selectedDate));
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      showInternalError(e);
     }
     return drivers;
   }
@@ -224,18 +235,12 @@ public class OrdersHandlingControl extends NonLoginControl {
    */
   public void shipsSelectedOrder(final Shipment selectedShipment) {
     try {
-      if (isShippingConfirmed(
-          "Premendo OK verrà aggiunto l'ordine selezionato alla spedizione "
-              + selectedShipment.getId()
-              + " in partenza il "
-              + selectedShipment.getShippingDate()
-              + ". Continuare?")) {
+      if (isShippingConfirmed(createConfirmationMessage(selectedShipment))) {
         shipmentDAO.shipOrder(selectedOrder, selectedShipment);
         showSuccessModal();
       }
     } catch (Exception e) {
-      e.printStackTrace();
-      showInternalError();
+      showInternalError(e);
     }
   }
 
@@ -252,52 +257,105 @@ public class OrdersHandlingControl extends NonLoginControl {
       final Deposit startDeposit,
       final Transport transport,
       final Driver driver) {
-    Shipment newShipment = new Shipment(shippingDate, getLoggedOperator(), startDeposit, transport);
+    Shipment newShipment = createShipment(shippingDate, startDeposit, transport);
     try {
-      if (isShippingConfirmed(
-          "Premendo OK verrà creata una nuova spedizione per il giorno "
-              + shippingDate
-              + " con i dati inseriti a cui verrà"
-              + " aggiunto l'ordine selezionato. Continuare?")) {
-        newShipment.setId(shipmentDAO.insertShipment(newShipment));
-        shipmentDAO.shipOrder(selectedOrder, newShipment);
-        shipmentDAO.assignDriver(newShipment, driver);
+      if (isShippingConfirmed(createConfirmationMessage(shippingDate))) {
+        insertShipment(newShipment);
+        shipOrder(selectedOrder, newShipment);
+        assignDriver(newShipment, driver);
         showSuccessModal();
       }
     } catch (SQLException e) {
-      try {
-        shipmentDAO.deleteShipment(newShipment);
-      } catch (SQLException e1) {
-        e1.printStackTrace();
-      }
-      showInternalError();
+      handleShippingError(newShipment, e);
     }
   }
 
-  private boolean isShippingConfirmed(final String content) {
+  private Shipment createShipment(
+      final LocalDate shippingDate, final Deposit startDeposit, final Transport transport) {
+    return new Shipment(shippingDate, getLoggedOperator(), startDeposit, transport);
+  }
+
+  private void insertShipment(final Shipment shipment) throws SQLException {
+    shipment.setId(shipmentDAO.insert(shipment));
+  }
+
+  private void shipOrder(final Order order, final Shipment shipment) throws SQLException {
+    shipmentDAO.shipOrder(order, shipment);
+  }
+
+  private void assignDriver(final Shipment shipment, final Driver driver) throws SQLException {
+    shipmentDAO.assignDriver(shipment, driver);
+  }
+
+  private String createConfirmationMessage(final LocalDate shippingDate) {
+    return "Premendo OK verrà creata una nuova spedizione per il giorno "
+        + shippingDate
+        + " con i dati inseriti a cui verrà"
+        + " aggiunto l'ordine selezionato. Continuare?";
+  }
+
+  private String createConfirmationMessage(final Shipment selectedShipment) {
+    return "Premendo OK verrà aggiunto l'ordine selezionato alla spedizione "
+        + selectedShipment.getId()
+        + " in partenza il "
+        + selectedShipment.getShippingDate()
+        + ". Continuare?";
+  }
+
+  private String createConfirmationMessage(final Object data) {
+    if (data instanceof LocalDate) {
+      return createConfirmationMessage((LocalDate) data);
+    }
+
+    if (data instanceof Shipment) {
+      return createConfirmationMessage((Shipment) data);
+    }
+    throw new IllegalArgumentException(
+        "Invalid data type. Cannot create confirmation message. Data must be of type LocalDate or"
+            + " Shipment.");
+  }
+
+  private void handleShippingError(final Shipment newShipment, final SQLException e) {
+    try {
+      shipmentDAO.delete(newShipment);
+    } catch (SQLException e1) {
+      showInternalError(e1);
+    }
+    e.printStackTrace();
+    showInternalError(e);
+  }
+
+  private boolean isShippingConfirmed(final Object data) {
     Optional<ButtonType> modalResponse =
-        showAlert(Alert.AlertType.CONFIRMATION, "Conferma", "Spedire Ordine?", content);
+        showAlert(
+            Alert.AlertType.CONFIRMATION,
+            "Conferma",
+            "Spedire Ordine?",
+            createConfirmationMessage(data));
     return modalResponse.isPresent() && modalResponse.get() == ButtonType.OK;
   }
 
   private void showSuccessModal() {
     ButtonType orderButtonType = new ButtonType("Gestisci ordini");
     ButtonType homeButtonType = new ButtonType("Torna alla home");
+
     Optional<ButtonType> modalResponse =
         showAlert(
             Alert.AlertType.NONE,
             "Successo",
             "Operazione terminata con successo.",
-            "La spedizione è stata creata e l'ordine è stato aggiunto. Continuare a gestire"
-                + " gli ordini o tornare alla home?",
+            "La spedizione è stata creata e l'ordine è stato aggiunto. Continuare a gestire gli"
+                + " ordini o tornare alla home?",
             orderButtonType,
             homeButtonType);
-    if (modalResponse.isPresent()) {
-      if (modalResponse.get() == orderButtonType) {
-        goToOrdersPage();
-      } else {
-        returnToHomePage();
-      }
-    }
+
+    modalResponse.ifPresent(
+        response -> {
+          if (response == orderButtonType) {
+            goToOrdersPage();
+          } else {
+            returnToHomePage();
+          }
+        });
   }
 }
