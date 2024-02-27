@@ -87,7 +87,7 @@
    <center>
       <AnchorPane prefHeight="690.0" prefWidth="1080.0" style="-fx-background-color: -fx-default-bg;" BorderPane.alignment="CENTER">
          <children>
-            <StackPane layoutX="11.0" layoutY="244.0" prefHeight="343.0" prefWidth="540.0">
+            <StackPane fx:id="loadingPane" layoutX="11.0" layoutY="244.0" prefHeight="343.0" prefWidth="540.0">
                <children>
                   <ProgressIndicator fx:id="loadingIndicator" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="136.0" prefWidth="218.0" />
                </children>

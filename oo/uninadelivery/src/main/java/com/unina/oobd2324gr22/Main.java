@@ -1,6 +1,6 @@
 package com.unina.oobd2324gr22;
 
-import com.unina.oobd2324gr22.utils.App;
+import com.unina.oobd2324gr22.control.App;
 
 /** Hello world! */
 public final class Main {
@@ -19,7 +19,6 @@ public final class Main {
    * @param args Command line arguments.
    */
   public static void main(final String[] args) {
-    System.err.println("This is a utility class and cannot be instantiated");
     App.launchApp(args);
   }
 }

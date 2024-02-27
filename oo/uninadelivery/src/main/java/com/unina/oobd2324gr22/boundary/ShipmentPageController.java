@@ -1,11 +1,9 @@
 package com.unina.oobd2324gr22.boundary;
 
 import com.unina.oobd2324gr22.control.OrdersHandlingControl;
-import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
 import com.unina.oobd2324gr22.entity.DTO.Driver;
 import com.unina.oobd2324gr22.entity.DTO.Order;
-import com.unina.oobd2324gr22.entity.DTO.Product;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import com.unina.oobd2324gr22.entity.DTO.Transport;
 import com.unina.oobd2324gr22.utils.LoadingScreenUtil;
@@ -28,14 +26,10 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
 
 public class ShipmentPageController extends NonLoginPageController<OrdersHandlingControl> {
-
-  /** Border pane. */
-  @FXML private BorderPane borderPane;
 
   /** Order Id label. */
   @FXML private Label orderIdLabel;
@@ -105,10 +99,17 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
 
     LoadingScreenUtil.loading(
         loadingPane,
-        () -> displayUnfilteredShipments(),
-        shipments -> Platform.runLater(() -> shipmentsTable.setItems(shipments)));
-    // TODO @zGenny check if loading pane is correctly used here, if so delete the comment below
-    // shipmentsTable.setItems(getControl().getShipments());
+        () -> displayCompatibleShipments(),
+        shipments ->
+            Platform.runLater(
+                () -> {
+                  if (shipments.isEmpty() || shipments == null) {
+                    shipmentsTable.setPlaceholder(
+                        new Label("Non ci sono spedizioni compatibili con questo ordine!"));
+                    return;
+                  }
+                  shipmentsTable.setItems(shipments);
+                }));
 
     populateComboBoxes();
 
@@ -122,9 +123,9 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
         shipmentsTable, shipmentDatePicker, depositComboBox, transportComboBox, driverComboBox);
 
     setSubmitButtonAction();
-  } // ! end initialize
+  }
 
-  private ObservableList<Shipment> displayUnfilteredShipments() {
+  private ObservableList<Shipment> displayCompatibleShipments() {
     shipmentsTable.setPlaceholder(new Label("Caricamento..."));
     return getControl().getShipments();
   }
@@ -176,18 +177,16 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
         expectedDeliveryDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     orderExpectedDeliveryDateLabel.setText("Da consegnare entro il: " + formattedDeliveryDate);
 
-    Product product = order.getProduct();
     String productInfo =
         "Contenente: "
             + order.getQuantity()
             + " "
-            + product.getName()
+            + order.getProduct().getName()
             + " - "
-            + product.getSupplier();
+            + order.getProduct().getSupplier();
     orderProductLabel.setText(productInfo);
 
-    Address address = order.getAccount().getAddress();
-    orderAddressLabel.setText("Diretto a: " + address.toString());
+    orderAddressLabel.setText("Diretto a: " + order.getAccount().getAddress().toString());
   }
 
   private void populateComboBoxes() {

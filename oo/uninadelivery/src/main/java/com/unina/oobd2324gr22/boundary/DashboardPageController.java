@@ -1,7 +1,6 @@
 package com.unina.oobd2324gr22.boundary;
 
 import com.unina.oobd2324gr22.control.DashboardControl;
-import com.unina.oobd2324gr22.entity.DTO.Operator;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -66,7 +65,7 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
    */
   @FXML
   void ordersHandlingButtonAction(final ActionEvent event) {
-    getControl().goToOrdersHandlingPage();
+    getControl().goToOrdersPage();
   }
 
   /**
@@ -76,7 +75,7 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
    */
   @FXML
   void monthlyReportsButtonOnAction(final ActionEvent event) {
-    getControl().goToMonthlyReports();
+    getControl().goToMonthlyReportsPage();
   }
 
   /**
@@ -86,7 +85,7 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
    */
   @FXML
   void editButtonAction(final ActionEvent event) {
-    getControl().edit();
+    getControl().editOperatorProfile();
   }
 
   /**
@@ -100,9 +99,8 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
   }
 
   private void displayLoggedOperatorData() {
-    Operator loggedOperator = getControl().getLoggedOperator();
-    if (loggedOperator != null) {
-      nameSurnameLabel.setText("Bentornato " + loggedOperator.getName());
+    if (getControl().getLoggedOperator() != null) {
+      nameSurnameLabel.setText("Bentornato " + getControl().getLoggedOperator().getName());
     }
   }
 

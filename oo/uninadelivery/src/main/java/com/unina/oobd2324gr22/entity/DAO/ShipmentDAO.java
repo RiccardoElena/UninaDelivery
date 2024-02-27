@@ -29,14 +29,6 @@ public interface ShipmentDAO extends BasicDAO<Shipment> {
   int assignDriver(Shipment shipment, Driver driver) throws SQLException;
 
   /**
-   * Retrieve all the unfinished the from the database.
-   *
-   * @return list of shipments
-   * @throws SQLException possible DB related errors
-   */
-  List<Shipment> getUnfinishedShipments() throws SQLException;
-
-  /**
    * Retrieve an unfinished by its id from the database.
    *
    * @param id id of the shipment to get
@@ -44,22 +36,6 @@ public interface ShipmentDAO extends BasicDAO<Shipment> {
    * @throws SQLException possible DB related errors
    */
   Shipment getShipmentById(int id) throws SQLException;
-
-  /**
-   * Retrieve all the unfinished the towards clients from the database.
-   *
-   * @return list of shipments towards clients
-   * @throws SQLException possible DB related errors
-   */
-  List<Shipment> getUnfinishedShipmentsToClient() throws SQLException;
-
-  /**
-   * Retrieve all unfinished shipments towards clients by its destination area from the database.
-   *
-   * @param area area of the shipments to get
-   * @return list of shipments towards clients of the area passed
-   */
-  List<Shipment> getUnfinishedShipmentsToClientByArea(String area) throws SQLException;
 
   /**
    * Retrieve all the shipments a certain order can be assigned to.

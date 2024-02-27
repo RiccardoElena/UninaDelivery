@@ -2,6 +2,7 @@ package com.unina.oobd2324gr22.entity.DTO;
 
 import com.unina.oobd2324gr22.utils.Base64ToImage;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.image.Image;
 
@@ -39,7 +40,7 @@ public class Account {
   private Address address;
 
   /** List of orders associated with the account. */
-  private List<Order> orders;
+  private List<Order> orders = new ArrayList<>();
 
   /** Amount spent by the account in a certain month. */
   private double amountSpent;

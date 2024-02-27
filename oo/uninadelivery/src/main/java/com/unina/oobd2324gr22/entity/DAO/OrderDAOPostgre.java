@@ -24,9 +24,6 @@ import java.util.List;
  */
 public class OrderDAOPostgre implements OrderDAO {
 
-  /** Connection istance. */
-  private Connection con;
-
   /** Base query for retrieving orders. */
   private static final String BASE_QUERY = "SELECT * FROM \"Order\" ";
 
@@ -54,7 +51,7 @@ public class OrderDAOPostgre implements OrderDAO {
    */
   @Override
   public int insert(final Order order) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     int rowAffected;
     IterableInt fieldNumber = new IterableInt(1);
     PreparedStatement psInsert =
@@ -89,7 +86,7 @@ public class OrderDAOPostgre implements OrderDAO {
    */
   @Override
   public Order getOrderById(final int id) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     Order order = null;
     PreparedStatement psSelect = null;
     ResultSet rs = null;
@@ -121,7 +118,7 @@ public class OrderDAOPostgre implements OrderDAO {
    */
   @Override
   public List<Order> getUnfinishedOrders() throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new LinkedList<Order>();
     Statement st = null;
     ResultSet rs = null;
@@ -153,7 +150,7 @@ public class OrderDAOPostgre implements OrderDAO {
    */
   @Override
   public List<Order> getAll() throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new LinkedList<Order>();
     Statement st = null;
     ResultSet rs = null;
@@ -186,7 +183,7 @@ public class OrderDAOPostgre implements OrderDAO {
    */
   @Override
   public Order getOrderWithLargestQuantity(final Month month, final Year year) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     Order order = null;
     PreparedStatement st = null;
     ResultSet rs = null;
@@ -224,7 +221,7 @@ public class OrderDAOPostgre implements OrderDAO {
   @Override
   public Order getOrderWithSmallestQuantity(final Month month, final Year year)
       throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     Order order = null;
     PreparedStatement st = null;
     ResultSet rs = null;
@@ -262,7 +259,7 @@ public class OrderDAOPostgre implements OrderDAO {
    */
   @Override
   public Order getMostExpensiveOrder(final Month month, final Year year) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new ArrayList<>();
     PreparedStatement st = null;
     ResultSet rs = null;
@@ -307,7 +304,7 @@ public class OrderDAOPostgre implements OrderDAO {
    */
   @Override
   public Order getLessExpensiveOrder(final Month month, final Year year) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new ArrayList<>();
     PreparedStatement st = null;
     ResultSet rs = null;
@@ -351,7 +348,7 @@ public class OrderDAOPostgre implements OrderDAO {
    */
   @Override
   public List<Order> getOrdersByFilters(final HashMap<String, Object> filters) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new LinkedList<Order>();
     PreparedStatement psSelect = null;
     ResultSet rs = null;
@@ -401,141 +398,6 @@ public class OrderDAOPostgre implements OrderDAO {
   }
 
   /**
-   * PostgreSQL implementation of the getOrdersByEmail method.
-   *
-   * <p>{@inheritDoc}
-   */
-  @Override
-  public List<Order> getOrdersByEmail(final String email) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
-    List<Order> orders = new LinkedList<Order>();
-    PreparedStatement psSelect = null;
-    ResultSet rs = null;
-
-    psSelect = con.prepareStatement(BASE_QUERY + "WHERE email = ?");
-    psSelect.setString(1, email);
-    rs = psSelect.executeQuery();
-    while (rs.next()) {
-      orders.add(populateOrderFromResultSet(rs));
-    }
-
-    if (rs != null) {
-      rs.close();
-    }
-    if (psSelect != null) {
-      psSelect.close();
-    }
-    if (con != null) {
-      con.close();
-    }
-
-    return orders;
-  }
-
-  /**
-   * PostgreSQL implementation of the getOrdersByDates method.
-   *
-   * <p>{@inheritDoc}
-   */
-  @Override
-  public List<Order> getOrdersByDates(final LocalDate start, final LocalDate end)
-      throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
-    List<Order> orders = new LinkedList<Order>();
-    PreparedStatement psSelect = null;
-    ResultSet rs = null;
-
-    psSelect = con.prepareStatement(BASE_QUERY + "WHERE emissiondate " + "BETWEEN ? AND ?");
-    psSelect.setDate(1, java.sql.Date.valueOf(start));
-    psSelect.setDate(2, java.sql.Date.valueOf(end));
-    rs = psSelect.executeQuery();
-    while (rs.next()) {
-      orders.add(populateOrderFromResultSet(rs));
-    }
-
-    if (rs != null) {
-      rs.close();
-    }
-    if (psSelect != null) {
-      psSelect.close();
-    }
-    if (con != null) {
-      con.close();
-    }
-
-    return orders;
-  }
-
-  /**
-   * PostgreSQL implementation of the getOrdersByDate method.
-   *
-   * <p>{@inheritDoc}
-   */
-  @Override
-  public List<Order> getOrdersByDate(final LocalDate start) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
-    List<Order> orders = new LinkedList<Order>();
-    PreparedStatement psSelect = null;
-    ResultSet rs = null;
-
-    psSelect = con.prepareStatement(BASE_QUERY + "WHERE emissiondate " + ">= ?");
-    psSelect.setDate(1, java.sql.Date.valueOf(start));
-    rs = psSelect.executeQuery();
-    while (rs.next()) {
-      orders.add(populateOrderFromResultSet(rs));
-    }
-
-    if (rs != null) {
-      rs.close();
-    }
-    if (psSelect != null) {
-      psSelect.close();
-    }
-    if (con != null) {
-      con.close();
-    }
-
-    return orders;
-  }
-
-  /**
-   * PostgreSQL implementation of the getOrdersByEmailAndDate method.
-   *
-   * <p>{@inheritDoc}
-   */
-  @Override
-  public List<Order> getOrdersByEmailAndDate(
-      final String email, final LocalDate start, final LocalDate end) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
-    List<Order> orders = new LinkedList<Order>();
-    PreparedStatement psSelect = null;
-    ResultSet rs = null;
-    IterableInt fieldNumber = new IterableInt(1);
-
-    psSelect =
-        con.prepareStatement(BASE_QUERY + "WHERE email = ? " + "AND emissiondate BETWEEN ? AND ?");
-    psSelect.setString(fieldNumber.next(), email);
-    psSelect.setDate(fieldNumber.next(), java.sql.Date.valueOf(start));
-    psSelect.setDate(fieldNumber.next(), java.sql.Date.valueOf(end));
-    rs = psSelect.executeQuery();
-    while (rs.next()) {
-      orders.add(populateOrderFromResultSet(rs));
-    }
-
-    if (rs != null) {
-      rs.close();
-    }
-    if (psSelect != null) {
-      psSelect.close();
-    }
-    if (con != null) {
-      con.close();
-    }
-
-    return orders;
-  }
-
-  /**
    * PostgreSQL implementation of the getOrdersPerDay method.
    *
    * <p>{@inheritDoc}
@@ -543,7 +405,7 @@ public class OrderDAOPostgre implements OrderDAO {
   @Override
   public List<Integer> getOrdersPerDay(final Month month, final Year year) throws SQLException {
 
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     int dayInMonth = LocalDate.of(year.getValue(), month.getValue(), 1).lengthOfMonth();
 
     List<Integer> orders = new ArrayList<Integer>(Collections.nCopies(dayInMonth, 0));
@@ -588,7 +450,7 @@ public class OrderDAOPostgre implements OrderDAO {
   public int getExpiringOrdersNumber() throws SQLException {
     PreparedStatement psSelect = null;
     ResultSet rs = null;
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
 
     psSelect =
         con.prepareStatement(
@@ -620,7 +482,7 @@ public class OrderDAOPostgre implements OrderDAO {
   @Override
   public List<Order> getOrdersByAccountAndMonth(
       final Account client, final Year year, final Month month) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Order> orders = new LinkedList<Order>();
     PreparedStatement psSelect = null;
     ResultSet rs = null;
@@ -659,7 +521,7 @@ public class OrderDAOPostgre implements OrderDAO {
    */
   @Override
   public Year getStartingYear() throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     PreparedStatement psSelect = null;
     ResultSet rs = null;
 
@@ -687,7 +549,7 @@ public class OrderDAOPostgre implements OrderDAO {
    */
   @Override
   public int update(final Order order) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     int rowAffected;
 
     IterableInt fieldNumber = new IterableInt(1);
@@ -719,7 +581,7 @@ public class OrderDAOPostgre implements OrderDAO {
    */
   @Override
   public int delete(final Order order) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     int rowAffected;
 
     PreparedStatement psDelete = con.prepareStatement("DELETE FROM \"Order\" WHERE orderid = ?");

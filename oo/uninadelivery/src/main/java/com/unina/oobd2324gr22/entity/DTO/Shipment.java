@@ -283,25 +283,28 @@ public class Shipment {
       return;
     }
 
+    StoredProduct matchingProduct = findMatchingProduct(order);
+    validateOrderArea(order);
+
+    getOrders().add(order);
+    matchingProduct.setQuantity(matchingProduct.getQuantity() - order.getQuantity());
+  }
+
+  private StoredProduct findMatchingProduct(final Order order) {
     for (StoredProduct sp : getStartingDeposit().getStoredProducts()) {
-      // check if the product is present in the starting deposit and if
-      // there are enough products
       if (sp.getProduct().equals(order.getProduct()) && sp.getQuantity() >= order.getQuantity()) {
-        // check if the product is destined to another area
-        // being this the only way to add orders is enough to check the first
-        // order because the others will have the same area
-        if (order
-            .getAccount()
-            .getAddress()
-            .getArea()
-            .equals(getOrders().get(1).getAccount().getAddress().getArea())) {
-          getOrders().add(order);
-          sp.setQuantity(sp.getQuantity() - order.getQuantity());
-          return;
-        } else {
-          throw new IllegalArgumentException("The order is destined to another area");
-        }
+        return sp;
       }
+    }
+    throw new IllegalArgumentException("No matching product found in the starting deposit");
+  }
+
+  private void validateOrderArea(final Order order) {
+    Address orderAddress = order.getAccount().getAddress();
+    Address firstOrderAddress = getOrders().get(0).getAccount().getAddress();
+
+    if (!orderAddress.getArea().equals(firstOrderAddress.getArea())) {
+      throw new IllegalArgumentException("The order is destined to another area");
     }
   }
 

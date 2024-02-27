@@ -1,7 +1,6 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
-import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Transport;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -28,41 +27,14 @@ public interface TransportDAO extends BasicDAO<Transport> {
   List<Transport> getTransportsByDeposit(Deposit deposit) throws SQLException;
 
   /**
-   * Retrieve all the transports of a specifc type owned by a deposit from the database.
-   *
-   * @param deposit the deposit to get transports from.
-   * @param type the type of the transport to get.
-   * @return list of transports of the deposit passed.
-   * @throws SQLException possible DB related errors.
-   */
-  List<Transport> getTransportsByDeposit(Deposit deposit, String type) throws SQLException;
-
-  /**
-   * Retrieve all available transports from the database.
-   *
-   * @return list of available transports.
-   * @throws SQLException possible DB related errors.
-   */
-  List<Transport> getAvailableTransports() throws SQLException;
-
-  /**
    * Retrieve all transports compatible with a given order, date and deposit.
    *
-   * @param order the order to get transports for.
+   * @param spaceOccupied the order to get transports for.
    * @param deposit the deposit to get transports from.
    * @param date the date to get transports from.
    * @return list of available transports of the deposit passed.
    * @throws SQLException possible DB related errors.
    */
-  List<Transport> getCompatibleTransports(Order order, Deposit deposit, LocalDate date)
+  List<Transport> getCompatibleTransports(double spaceOccupied, Deposit deposit, LocalDate date)
       throws SQLException;
-
-  /**
-   * Retrieve all available transports of a specific deposit from the database.
-   *
-   * @param deposit the deposit to get transports from.
-   * @return list of available transports of the deposit passed.
-   * @throws SQLException possible DB related errors.
-   */
-  List<Transport> getAvailableTransportsByDeposit(Deposit deposit) throws SQLException;
 }

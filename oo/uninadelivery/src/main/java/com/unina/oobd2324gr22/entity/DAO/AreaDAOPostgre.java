@@ -1,5 +1,6 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
+import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Area;
 import com.unina.oobd2324gr22.utils.DBConnection;
 import com.unina.oobd2324gr22.utils.UnimplementedMethodException;
@@ -15,16 +16,38 @@ import java.util.List;
  */
 public class AreaDAOPostgre implements AreaDAO {
 
-  /** Connection to the database. */
-  private Connection con;
-
   private Area populateAreaFromResultSet(final ResultSet rs) throws SQLException {
     return new Area(
         rs.getString("zipcode"),
         rs.getString("city"),
         rs.getString("state"),
         rs.getString("country"),
-        rs.getString("worldzone"));
+        Area.WorldZone.valueOf(rs.getString("worldzone")));
+  }
+
+  /**
+   * Create an Address object from the data given.
+   *
+   * @param addressNo address number
+   * @param street street of the address
+   * @param zipCode zipCode of the address
+   * @param country country of the address
+   * @return the Address object created
+   * @throws SQLException
+   */
+  @Override
+  public Address extractAddress(
+      final String addressNo, final String street, final String zipCode, final String country)
+      throws SQLException {
+    Area a = new AreaDAOPostgre().getAreaByZipCodeAndCountry(zipCode, country);
+    return new Address(
+        a.getZipCode(),
+        a.getCity(),
+        a.getState(),
+        a.getCountry(),
+        a.getWorldZone(),
+        addressNo,
+        street);
   }
 
   /**
@@ -55,7 +78,7 @@ public class AreaDAOPostgre implements AreaDAO {
   @Override
   public Area getAreaByZipCodeAndCountry(final String zipCode, final String country)
       throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     Area area = null;
     PreparedStatement psSelect = null;
     ResultSet rs = null;

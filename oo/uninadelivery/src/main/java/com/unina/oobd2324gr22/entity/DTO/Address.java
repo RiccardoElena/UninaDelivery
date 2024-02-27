@@ -28,7 +28,7 @@ public class Address extends Area {
       final String cityN,
       final String stateN,
       final String countryN,
-      final String wz,
+      final WorldZone wz,
       final String number,
       final String streetName) {
     super(zip, cityN, stateN, countryN, wz);

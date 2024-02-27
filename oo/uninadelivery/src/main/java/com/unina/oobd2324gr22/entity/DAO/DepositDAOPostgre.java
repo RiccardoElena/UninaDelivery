@@ -1,7 +1,5 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
-import com.unina.oobd2324gr22.entity.DTO.Address;
-import com.unina.oobd2324gr22.entity.DTO.Area;
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.utils.DBConnection;
@@ -21,29 +19,17 @@ import java.util.List;
  */
 public class DepositDAOPostgre implements DepositDAO {
 
-  /** Connection to the database. */
-  private Connection con;
-
   private Deposit populateDepositFromResultSet(final ResultSet rs) throws SQLException {
+    AreaDAO areaDAO = new AreaDAOPostgre();
     return new Deposit(
         rs.getInt("depositid"),
         rs.getInt("occupiedspace"),
         rs.getInt("maxcapacity"),
-        createAddress(rs));
-  }
-
-  private Address createAddress(final ResultSet rs) throws SQLException {
-    Area a =
-        new AreaDAOPostgre()
-            .getAreaByZipCodeAndCountry(rs.getString("zipcode"), rs.getString("country"));
-    return new Address(
-        a.getZipCode(),
-        a.getCity(),
-        a.getState(),
-        a.getCountry(),
-        a.getWorldZone(),
-        rs.getString("addressno"),
-        rs.getString("street"));
+        areaDAO.extractAddress(
+            rs.getString("addressno"),
+            rs.getString("street"),
+            rs.getString("zipcode"),
+            rs.getString("country")));
   }
 
   /**
@@ -73,7 +59,7 @@ public class DepositDAOPostgre implements DepositDAO {
    */
   @Override
   public final Deposit getDepositById(final int id) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     Deposit deposit = null;
     PreparedStatement psSelect = null;
     ResultSet rs = null;
@@ -106,7 +92,7 @@ public class DepositDAOPostgre implements DepositDAO {
   @Override
   public final List<Deposit> getCompatibleDeposits(final Order order, final LocalDate date)
       throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Deposit> deposits = new ArrayList<>();
     PreparedStatement psSelect = null;
     ResultSet rs = null;
@@ -152,33 +138,12 @@ public class DepositDAOPostgre implements DepositDAO {
   }
 
   /**
-   * PostgreSQL implementation of the method getDepositsByType.
-   *
-   * <p>{@inheritDoc}
-   */
-  @Override
-  public final List<Deposit> getDepositsByType(final String type) throws SQLException {
-    throw new UnimplementedMethodException();
-  }
-
-  /**
    * PostgreSQL implementation of the method getDepositsByArea.
    *
    * <p>{@inheritDoc}
    */
   @Override
   public final List<Deposit> getDepositsByArea(final String area) throws SQLException {
-    throw new UnimplementedMethodException();
-  }
-
-  /**
-   * PostgreSQL implementation of the method getDepositsByAreaAndType.
-   *
-   * <p>{@inheritDoc}
-   */
-  @Override
-  public final List<Deposit> getDepositsByAreaAndType(final String area, final String type)
-      throws SQLException {
     throw new UnimplementedMethodException();
   }
 

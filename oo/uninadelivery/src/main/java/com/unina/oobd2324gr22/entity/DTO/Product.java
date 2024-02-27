@@ -187,4 +187,38 @@ public class Product {
         + price
         + "\n}";
   }
+
+  /**
+   * Check if two products are equal.
+   *
+   * @param obj object to compare
+   * @return true if the products are equal, false otherwise
+   */
+  @Override
+  public boolean equals(final Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    Product product = (Product) obj;
+    return Double.compare(product.packageSizeLiters, packageSizeLiters) == 0
+        && isFragile == product.isFragile
+        && Float.compare(product.price, price) == 0
+        && category.equals(product.category)
+        && name.equals(product.name)
+        && supplier.equals(product.supplier)
+        && description.equals(product.description);
+  }
+
+  /**
+   * Get the hash code of the product.
+   *
+   * @return hash code of the product
+   */
+  @Override
+  public int hashCode() {
+    return super.hashCode();
+  }
 }

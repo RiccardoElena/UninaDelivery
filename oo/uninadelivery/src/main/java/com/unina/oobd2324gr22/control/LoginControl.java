@@ -75,17 +75,11 @@ public class LoginControl extends BaseControl {
         return;
       } catch (Exception e) {
         e.printStackTrace();
-        showAlert(
-            Alert.AlertType.ERROR,
-            "Errore",
-            "Errore inaspettato.",
-            "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
-                + " l'applicazione.");
+        showInternalError(e);
       }
     }
 
-    showLoginErrorMessage(
-        "Email o password errati.\nUsare R.Elena@uninadelivery.operator.com e securepassword");
+    showLoginErrorMessage("Email o password errati.");
   }
 
   private Operator checkLogin(final String email, final String password) {

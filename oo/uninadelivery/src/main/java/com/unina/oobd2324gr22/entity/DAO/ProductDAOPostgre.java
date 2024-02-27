@@ -14,9 +14,6 @@ import java.util.List;
  */
 public class ProductDAOPostgre implements ProductDAO {
 
-  /** Connection to the database. */
-  private Connection con;
-
   private Product populateProductFromResultSet(final ResultSet rs) throws SQLException {
     return new Product(
         rs.getString("category"),
@@ -46,7 +43,7 @@ public class ProductDAOPostgre implements ProductDAO {
   @Override
   public Product getProductByNameAndSupplier(final String name, final String supplier)
       throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     Product product = null;
     PreparedStatement psSelect = null;
     ResultSet rs = null;

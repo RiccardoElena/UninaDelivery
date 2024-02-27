@@ -2,27 +2,27 @@ package com.unina.oobd2324gr22.entity.DTO;
 
 public class Transport {
 
+  // Constants
+
+  /** Default max capacity of the transport. */
+  private static final float DEFAULT_MAX_CAPACITY = 100000;
+
   // Attributes
 
   /** Id of the transport. */
   private int id;
 
   /** Max capacity of the transport. */
-  private float maxCapacity;
+  private float maxCapacity = DEFAULT_MAX_CAPACITY;
 
   /** Occupied space of the transport. */
-  private float occupiedSpace;
+  private float occupiedSpace = 0;
 
   /** Availability of the transport. */
   private boolean isAvailable;
 
   /** Owner of the transport. */
   private Deposit depositOwner;
-
-  // Constants
-
-  /** Default max capacity of the transport. */
-  private static final float DEFAULT_MAX_CAPACITY = 100000;
 
   // Constructors
 
@@ -43,8 +43,24 @@ public class Transport {
       throw new IllegalArgumentException("Deposit owner cannot be null");
     }
     id = tId;
-    maxCapacity = tMaxCapacity < 0 ? DEFAULT_MAX_CAPACITY : tMaxCapacity;
-    // occupiedSpace = tOccupiedSpace < 0 ? 0 : tOccupiedSpace;
+    setMaxCapacity(tMaxCapacity);
+    isAvailable = tIsAvailable;
+    depositOwner = tDepositOwner;
+    tDepositOwner.addTransport(this);
+  }
+
+  /**
+   * Constructor for the transport.
+   *
+   * @param tId id of the transport.
+   * @param tIsAvailable availability of the transport.
+   * @param tDepositOwner owner of the transport.
+   */
+  public Transport(final int tId, final boolean tIsAvailable, final Deposit tDepositOwner) {
+    if (tDepositOwner == null) {
+      throw new IllegalArgumentException("Deposit owner cannot be null");
+    }
+    id = tId;
     isAvailable = tIsAvailable;
     depositOwner = tDepositOwner;
     tDepositOwner.addTransport(this);
@@ -105,7 +121,12 @@ public class Transport {
    * @param tMaxCapacity max capacity of the transport.
    */
   public void setMaxCapacity(final float tMaxCapacity) {
-    maxCapacity = tMaxCapacity;
+    if (tMaxCapacity < 0) {
+      throw new IllegalArgumentException(
+          "Max capacity has to be positive. Don't specify it if you want to use the default value");
+    } else {
+      maxCapacity = tMaxCapacity;
+    }
   }
 
   /**

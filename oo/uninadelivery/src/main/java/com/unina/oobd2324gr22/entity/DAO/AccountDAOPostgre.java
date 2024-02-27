@@ -1,8 +1,6 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
 import com.unina.oobd2324gr22.entity.DTO.Account;
-import com.unina.oobd2324gr22.entity.DTO.Address;
-import com.unina.oobd2324gr22.entity.DTO.Area;
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
 import com.unina.oobd2324gr22.entity.DTO.Driver;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
@@ -26,9 +24,6 @@ import java.util.List;
  */
 public class AccountDAOPostgre implements AccountDAO {
 
-  /** Connection to the database. */
-  private Connection con;
-
   private Operator populateOperatorFromResultSet(final ResultSet rs) throws SQLException {
     return new Operator(populateAccountFromResultSet(rs), rs.getString("businessmail"));
   }
@@ -42,6 +37,7 @@ public class AccountDAOPostgre implements AccountDAO {
   }
 
   private Account populateAccountFromResultSet(final ResultSet rs) throws SQLException {
+    AreaDAO areaDAO = new AreaDAOPostgre();
     return new Account(
         rs.getString("name"),
         rs.getString("surname"),
@@ -49,21 +45,11 @@ public class AccountDAOPostgre implements AccountDAO {
         rs.getDate("birthdate").toLocalDate(),
         rs.getString("propic"),
         rs.getString("password"),
-        createAddress(rs));
-  }
-
-  private Address createAddress(final ResultSet rs) throws SQLException {
-    Area a =
-        new AreaDAOPostgre()
-            .getAreaByZipCodeAndCountry(rs.getString("zipcode"), rs.getString("country"));
-    return new Address(
-        a.getZipCode(),
-        a.getCity(),
-        a.getState(),
-        a.getCountry(),
-        a.getWorldZone(),
-        rs.getString("addressno"),
-        rs.getString("street"));
+        areaDAO.extractAddress(
+            rs.getString("addressno"),
+            rs.getString("street"),
+            rs.getString("zipcode"),
+            rs.getString("country")));
   }
 
   /**
@@ -93,7 +79,7 @@ public class AccountDAOPostgre implements AccountDAO {
    */
   @Override
   public Account getAccountByEmail(final String email) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     Account account = null;
     PreparedStatement psSelect = null;
     ResultSet rs = null;
@@ -148,7 +134,7 @@ public class AccountDAOPostgre implements AccountDAO {
   @Override
   public final Operator getOperatorByBmailAndPassword(final String bmail, final String password)
       throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     Operator op = null;
     PreparedStatement st = null;
     ResultSet rs = null;
@@ -184,7 +170,7 @@ public class AccountDAOPostgre implements AccountDAO {
    */
   @Override
   public Account getMostOrderingAccount(final Year year, final Month month) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     Account account = null;
     PreparedStatement psSelect = null;
     ResultSet rs = null;
@@ -222,7 +208,7 @@ public class AccountDAOPostgre implements AccountDAO {
    */
   @Override
   public Account getMostSpendingAccount(final Year year, final Month month) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     Account account = null;
     PreparedStatement psSelect = null;
     ResultSet rs = null;
@@ -270,7 +256,7 @@ public class AccountDAOPostgre implements AccountDAO {
   @Override
   public List<Driver> getCompatibleDrivers(final Deposit deposit, final LocalDate date)
       throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Driver> drivers = new ArrayList<>();
     PreparedStatement st = null;
     ResultSet rs = null;

@@ -3,7 +3,6 @@ package com.unina.oobd2324gr22.entity.DAO;
 import com.unina.oobd2324gr22.entity.DTO.Account;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
 import java.util.HashMap;
@@ -90,46 +89,6 @@ public interface OrderDAO extends BasicDAO<Order> {
   List<Order> getOrdersByFilters(HashMap<String, Object> filters) throws SQLException;
 
   /**
-   * Retrive the orders for a specific client from the database.
-   *
-   * @param email account to search for
-   * @return list of orders matching the search criteria
-   * @throws SQLException possible DB related errors
-   */
-  List<Order> getOrdersByEmail(String email) throws SQLException;
-
-  /**
-   * Retrive the orders by range date from the database.
-   *
-   * @param dateStart start date
-   * @param dateEnd end date
-   * @return list of orders matching the search criteria
-   * @throws SQLException possible DB related errors
-   */
-  List<Order> getOrdersByDates(LocalDate dateStart, LocalDate dateEnd) throws SQLException;
-
-  /**
-   * Retrive the orders by start date from the database.
-   *
-   * @param dateStart data inizio
-   * @return list of orders matching the search criteria
-   * @throws SQLException possible DB related errors
-   */
-  List<Order> getOrdersByDate(LocalDate dateStart) throws SQLException;
-
-  /**
-   * Retrive the orders in a range of date for a specific user from the database.
-   *
-   * @param email email to search for
-   * @param dateStart start date
-   * @param dateEnd end date
-   * @return list of the orders matching the search criteria
-   * @throws SQLException possible DB related errors
-   */
-  List<Order> getOrdersByEmailAndDate(String email, LocalDate dateStart, LocalDate dateEnd)
-      throws SQLException;
-
-  /**
    * Retrive the number of expiring orders from the database.
    *
    * @return number of expiring orders
@@ -138,7 +97,7 @@ public interface OrderDAO extends BasicDAO<Order> {
   int getExpiringOrdersNumber() throws SQLException;
 
   /**
-   * Retrive all the roders made by an account in a given month.
+   * Retrive all the orders made by an account in a given month.
    *
    * @param client account to search for
    * @param year year to search for

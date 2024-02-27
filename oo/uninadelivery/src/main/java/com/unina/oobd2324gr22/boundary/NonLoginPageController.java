@@ -109,7 +109,7 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
   }
 
   /** Set navigation buttons base icon and hover effect. */
-  protected void setNavigationButtons() {
+  private void setNavigationButtons() {
     if (homeButton != null) {
       setButtonIconAndHoverEffect(
           homeButton, "/images/nonLoginPage/Home.png", "/images/nonLoginPage/HomeHover.png");

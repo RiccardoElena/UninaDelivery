@@ -18,15 +18,6 @@ public interface DepositDAO extends BasicDAO<Deposit> {
   Deposit getDepositById(int id) throws SQLException;
 
   /**
-   * Retrieve all the deposits of a specific type from the database.
-   *
-   * @param type type of the deposits to get
-   * @return list of deposits of the type passed
-   * @throws SQLException possible DB related errors
-   */
-  List<Deposit> getDepositsByType(String type) throws SQLException;
-
-  /**
    * Retrieve all the deposits of a specific area from the database.
    *
    * @param area area of the deposits to get
@@ -34,16 +25,6 @@ public interface DepositDAO extends BasicDAO<Deposit> {
    * @throws SQLException possible DB related errors
    */
   List<Deposit> getDepositsByArea(String area) throws SQLException;
-
-  /**
-   * Retrieve all the deposits of a specific area and type from the database.
-   *
-   * @param area area of the deposits to get
-   * @param type type of the deposits to get
-   * @return list of deposits of the area and type passed
-   * @throws SQLException possible DB related errors
-   */
-  List<Deposit> getDepositsByAreaAndType(String area, String type) throws SQLException;
 
   /**
    * Retrieve all the deposit elegible for a shipment towards clients for a specific order in a

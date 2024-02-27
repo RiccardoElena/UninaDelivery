@@ -2,6 +2,37 @@ package com.unina.oobd2324gr22.entity.DTO;
 
 public class Area {
 
+  public enum WorldZone {
+    /** North America. */
+    NA,
+    /** Western Europe. */
+    EUW,
+    /** Nordic and East Europe. */
+    EUNE,
+    /** Latin America. */
+    LATAM,
+    /** Middle East. */
+    MIDEAST,
+    /** Cina, Korea and Japan. */
+    CKJ,
+    /** South East Asia. */
+    SEA,
+    /** India. */
+    IND,
+    /** Russia. */
+    RUS,
+    /** -stan countries. */
+    STAN,
+    /** Oceania. */
+    OC,
+    /** North Africa. */
+    AFN,
+    /** Central Africa. */
+    AFC,
+    /** South Africa. */
+    AFS
+  }
+
   // Attributes
 
   /** Zip code of the area. */
@@ -17,7 +48,7 @@ public class Area {
   private String country;
 
   /** WorldZone of the area. */
-  private String worldZone;
+  private WorldZone worldZone;
 
   // Constructors
 
@@ -38,7 +69,7 @@ public class Area {
       final String cityN,
       final String stateN,
       final String countryN,
-      final String wz) {
+      final WorldZone wz) {
     zipCode = zip;
     city = cityN;
     state = stateN;
@@ -125,7 +156,7 @@ public class Area {
    *
    * @return world zone
    */
-  public String getWorldZone() {
+  public WorldZone getWorldZone() {
     return worldZone;
   }
 
@@ -134,7 +165,7 @@ public class Area {
    *
    * @param wz world zone
    */
-  public void setWorldZone(final String wz) {
+  public void setWorldZone(final WorldZone wz) {
     worldZone = wz;
   }
 

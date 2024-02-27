@@ -26,7 +26,7 @@ public class DashboardControl extends NonLoginControl {
   }
 
   /** Go to the Orders page. */
-  public void goToOrdersHandlingPage() {
+  public void goToOrdersPage() {
     try {
       ordersControl.setScene(getStage(), getLoggedOperator());
     } catch (Exception e) {
@@ -35,7 +35,7 @@ public class DashboardControl extends NonLoginControl {
   }
 
   /** Go to the Monthly Reports page. */
-  public void goToMonthlyReports() {
+  public void goToMonthlyReportsPage() {
     try {
       graphControl.setScene(getStage(), getLoggedOperator());
     } catch (Exception e) {
@@ -58,7 +58,7 @@ public class DashboardControl extends NonLoginControl {
   }
 
   /** Go to the Edit page. */
-  public void edit() {
+  public void editOperatorProfile() {
     showAlert(
         Alert.AlertType.INFORMATION,
         "Attenzione!",

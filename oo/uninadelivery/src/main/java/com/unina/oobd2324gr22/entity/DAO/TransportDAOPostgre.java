@@ -1,7 +1,6 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
-import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Transport;
 import com.unina.oobd2324gr22.utils.DBConnection;
 import com.unina.oobd2324gr22.utils.IterableInt;
@@ -19,9 +18,6 @@ import java.util.List;
  * the shipment data access operations.
  */
 public class TransportDAOPostgre implements TransportDAO {
-
-  /** Connection to the database. */
-  private Connection con;
 
   private Transport populateTransportFromResultSet(final ResultSet rs) throws SQLException {
     DepositDAO depositDAO = new DepositDAOPostgre();
@@ -60,7 +56,7 @@ public class TransportDAOPostgre implements TransportDAO {
    */
   @Override
   public final Transport getTransportById(final int id) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     Transport transport = null;
     PreparedStatement psSelect = null;
     ResultSet rs = null;
@@ -92,7 +88,7 @@ public class TransportDAOPostgre implements TransportDAO {
    */
   @Override
   public final List<Transport> getTransportsByDeposit(final Deposit deposit) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Transport> transports = new ArrayList<>();
     PreparedStatement psSelect = null;
     ResultSet rs = null;
@@ -118,49 +114,14 @@ public class TransportDAOPostgre implements TransportDAO {
   }
 
   /**
-   * PostgreSQL implementation of the method getTransportsByDeposit.
-   *
-   * <p>{@inheritDoc}
-   */
-  @Override
-  public final List<Transport> getTransportsByDeposit(final Deposit deposit, final String type)
-      throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
-    List<Transport> transports = new ArrayList<>();
-    PreparedStatement psSelect = null;
-    ResultSet rs = null;
-
-    psSelect =
-        con.prepareStatement("SELECT * FROM transport WHERE depositid = ? AND transporttype = ?");
-    psSelect.setInt(1, deposit.getId());
-    psSelect.setString(2, type);
-    rs = psSelect.executeQuery();
-    while (rs.next()) {
-      transports.add(populateTransportFromResultSet(rs));
-    }
-
-    if (rs != null) {
-      rs.close();
-    }
-    if (psSelect != null) {
-      psSelect.close();
-    }
-    if (con != null) {
-      con.close();
-    }
-
-    return transports;
-  }
-
-  /**
    * PostgreSQL implementation of the method getCompatibleTransports.
    *
    * <p>{@inheritDoc}
    */
   @Override
   public final List<Transport> getCompatibleTransports(
-      final Order order, final Deposit deposit, final LocalDate date) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+      final double spaceOccupied, final Deposit deposit, final LocalDate date) throws SQLException {
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Transport> transports = new ArrayList<>();
     PreparedStatement psSelect = null;
     ResultSet rs = null;
@@ -173,8 +134,7 @@ public class TransportDAOPostgre implements TransportDAO {
     psSelect = con.prepareStatement(query);
     psSelect.setInt(fieldNumber.next(), deposit.getId());
     psSelect.setDate(fieldNumber.next(), java.sql.Date.valueOf(date));
-    psSelect.setDouble(
-        fieldNumber.next(), order.getProduct().getPackageSizeLiters() * order.getQuantity());
+    psSelect.setDouble(fieldNumber.next(), spaceOccupied);
     rs = psSelect.executeQuery();
     while (rs.next()) {
       transports.add(populateTransportFromResultSet(rs));
@@ -191,27 +151,6 @@ public class TransportDAOPostgre implements TransportDAO {
     }
 
     return transports;
-  }
-
-  /**
-   * PostgreSQL implementation of the method getAvailableTransports.
-   *
-   * <p>{@inheritDoc}
-   */
-  @Override
-  public final List<Transport> getAvailableTransports() throws SQLException {
-    throw new UnimplementedMethodException();
-  }
-
-  /**
-   * PostgreSQL implementation of the method getAvailableTransportsByDeposit.
-   *
-   * <p>{@inheritDoc}
-   */
-  @Override
-  public final List<Transport> getAvailableTransportsByDeposit(final Deposit deposit)
-      throws SQLException {
-    throw new UnimplementedMethodException();
   }
 
   /**

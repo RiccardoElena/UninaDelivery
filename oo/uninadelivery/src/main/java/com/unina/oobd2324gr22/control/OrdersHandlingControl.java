@@ -92,19 +92,19 @@ public class OrdersHandlingControl extends NonLoginControl {
   /**
    * Filter orders.
    *
-   * @param account the name to filter by
+   * @param accountData the name to filter by
    * @param startingDate the starting date to filter by
    * @param endingDate the ending date to filter by
    * @return the filtered orders
    */
   public ObservableList<Order> filterOrders(
-      final String account, final LocalDate startingDate, final LocalDate endingDate) {
+      final String accountData, final LocalDate startingDate, final LocalDate endingDate) {
     HashMap<String, Object> filters = new HashMap<>();
 
-    if (isValidEmail(account)) {
-      filters.put("email", account);
-    } else if (!account.isEmpty()) {
-      filters.put("surname", account);
+    if (isValidEmail(accountData)) {
+      filters.put("email", accountData);
+    } else if (!accountData.isEmpty()) {
+      filters.put("surname", accountData);
     }
 
     if (startingDate != null) {
@@ -197,15 +197,17 @@ public class OrdersHandlingControl extends NonLoginControl {
    */
   public ObservableList<Transport> getTransports(
       final LocalDate selectedDate, final Deposit selectedDeposit) {
-    ObservableList<Transport> transports = null;
     try {
-      transports =
-          FXCollections.observableArrayList(
-              transportDAO.getCompatibleTransports(selectedOrder, selectedDeposit, selectedDate));
+      double packageSizeLiters = selectedOrder.getProduct().getPackageSizeLiters();
+      int quantity = selectedOrder.getQuantity();
+      double totalVolume = packageSizeLiters * quantity;
+
+      return FXCollections.observableArrayList(
+          transportDAO.getCompatibleTransports(totalVolume, selectedDeposit, selectedDate));
     } catch (SQLException e) {
       showInternalError(e);
+      return null;
     }
-    return transports;
   }
 
   /**

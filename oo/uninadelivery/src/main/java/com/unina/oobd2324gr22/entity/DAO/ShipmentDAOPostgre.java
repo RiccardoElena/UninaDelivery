@@ -20,9 +20,6 @@ import java.util.List;
  */
 public class ShipmentDAOPostgre implements ShipmentDAO {
 
-  /** Connection to the database. */
-  private Connection con;
-
   private Shipment populateShipmentFromResultSet(final ResultSet rs) throws SQLException {
     int shipmentId = rs.getInt("shipmentid");
     LocalDate shippingDate = rs.getDate("shippingdate").toLocalDate();
@@ -45,7 +42,7 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
    */
   @Override
   public int insert(final Shipment shipment) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     PreparedStatement st = null;
     IterableInt fieldNumber = new IterableInt(1);
 
@@ -81,7 +78,7 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
    */
   @Override
   public int shipOrder(final Order order, final Shipment shipment) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     PreparedStatement st = null;
     IterableInt fieldNumber = new IterableInt(1);
 
@@ -106,7 +103,7 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
    */
   @Override
   public int assignDriver(final Shipment shipment, final Driver driver) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     PreparedStatement st = null;
     IterableInt fieldNumber = new IterableInt(1);
 
@@ -136,16 +133,6 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
   }
 
   /**
-   * PostgreSQL implementation of the method getUnfinishedShipments.
-   *
-   * <p>{@inheritDoc}
-   */
-  @Override
-  public List<Shipment> getUnfinishedShipments() throws SQLException {
-    throw new UnimplementedMethodException();
-  }
-
-  /**
    * PostgreSQL implementation of the method getShipmentById.
    *
    * <p>{@inheritDoc}
@@ -156,34 +143,13 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
   }
 
   /**
-   * PostgreSQL implementation of the method getUnfinishedShipmentsToClient.
-   *
-   * <p>{@inheritDoc}
-   */
-  @Override
-  public List<Shipment> getUnfinishedShipmentsToClient() throws SQLException {
-    throw new UnimplementedMethodException();
-  }
-
-  /**
-   * PostgreSQL implementation of the method getUnfinishedShipmentsToClientByArea.
-   *
-   * <p>{@inheritDoc}
-   */
-  @Override
-  public List<Shipment> getUnfinishedShipmentsToClientByArea(final String area)
-      throws SQLException {
-    throw new UnimplementedMethodException();
-  }
-
-  /**
    * PostgreSQL implementation of the method getCompatibleShipments.
    *
    * <p>{@inheritDoc}
    */
   @Override
   public List<Shipment> getCompatibleShipments(final Order order) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     List<Shipment> shipments = new ArrayList<>();
     PreparedStatement st = null;
     ResultSet rs = null;
@@ -194,6 +160,7 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
             + "FROM shipment S LEFT JOIN (covers NATURAL JOIN transport) C "
             + "ON S.transportid = C.transportid AND S.shippingdate = date "
             + "WHERE S.directedto IS NULL AND "
+            + "S.shippingdate >= CURRENT_DATE AND "
             + "(hasarrived = FALSE OR hasarrived IS NULL) AND "
             + "C.occupiedspace + ? <= C.maxcapacity AND "
             + "shippedfrom IN ( "
@@ -246,7 +213,7 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
    */
   @Override
   public int delete(final Shipment shipment) throws SQLException {
-    con = DBConnection.getConnectionBySchema("uninadelivery");
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
     PreparedStatement st = null;
 
     String query = "DELETE FROM shipment WHERE shipmentid = ?;";

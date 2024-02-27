@@ -48,7 +48,7 @@ public abstract class BaseControl {
    * @param s the stage to set the scene on
    * @throws Exception if the scene cannot be set
    */
-  public void setScene(final Stage s) throws Exception {
+  protected void setScene(final Stage s) throws Exception {
     setStage(s);
     addSceneSettings();
 
@@ -163,23 +163,6 @@ public abstract class BaseControl {
     setWidth(w);
   }
 
-  // /**
-  //  * Show an alert.
-  //  *
-  //  * @param alertType the type of the alert
-  //  * @param title the title of the alert
-  //  * @param header the header of the alert
-  //  * @param content the content of the alert
-  //  * @return the button pressed
-  //  */
-  // protected Optional<ButtonType> showAlert(
-  //     final Alert.AlertType alertType,
-  //     final String title,
-  //     final String header,
-  //     final String content) {
-  //   return showAlert(alertType, title, header, content);
-  // }
-
   /**
    * Show an alert.
    *
@@ -265,9 +248,8 @@ public abstract class BaseControl {
    * Display an internal error specific modal window.
    *
    * @param e the exception to show
-   * @return null
    */
-  public void showInternalError(final Exception e) {
+  protected void showInternalError(final Exception e) {
     e.printStackTrace();
     showAlert(
         Alert.AlertType.ERROR,

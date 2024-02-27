@@ -22,7 +22,6 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
@@ -101,9 +100,6 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
 
   /** ImageView of the most spending account. */
   @FXML private ImageView mostSpendingPropic;
-
-  /** BorderPane of the page. */
-  @FXML private BorderPane borderPane;
 
   /** Asse X. */
   @FXML private CategoryAxis xAxis;

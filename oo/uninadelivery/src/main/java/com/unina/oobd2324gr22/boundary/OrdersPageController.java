@@ -19,7 +19,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 
 public class OrdersPageController extends NonLoginPageController<OrdersHandlingControl> {
@@ -63,14 +62,8 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
   /** Button to filter the orders. */
   @FXML private Button filterButton;
 
-  /** Button to go back to the home page. */
-  @FXML private Button homeButton;
-
   /** TextField to filter the orders by client. */
   @FXML private TextField clientTextField;
-
-  /** BorderPane. */
-  @FXML private BorderPane borderPane;
 
   /** Loading indicator. */
   @FXML private StackPane loadingPane;
@@ -198,7 +191,7 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
         cellData -> new SimpleStringProperty(cellData.getValue().getProduct().getName()));
     supplierColumn.setCellValueFactory(
         cellData -> new SimpleStringProperty(cellData.getValue().getProduct().getSupplier()));
-    setTableFunctionality(ordersTable, "Azioni", "Crea", getControl()::goToShipmentPage);
+    setTableFunctionality(ordersTable, "Azioni", "Spedisci", getControl()::goToShipmentPage);
   }
 
   private TableCell<Order, Boolean> createExpressCell() {

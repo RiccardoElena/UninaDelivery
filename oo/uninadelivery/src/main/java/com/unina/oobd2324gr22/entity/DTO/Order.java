@@ -68,7 +68,7 @@ public class Order {
       final Product pct) {
     id = orderid;
     emissionDate = emissiondate;
-    expectedDeliveryDate = emissiondate.plusDays(isexpress ? EXPRESSDELIVERY : STANDARDDELIVERY);
+    setExpectedDeliveryDate(emissiondate);
     isExpress = isexpress;
     extraWarranty = extrawarranty;
     account = client;
@@ -158,6 +158,7 @@ public class Order {
    */
   public void setEmissionDate(final LocalDate emissiondate) {
     emissionDate = emissiondate;
+    setExpectedDeliveryDate(emissiondate);
   }
 
   /**
@@ -208,10 +209,10 @@ public class Order {
   /**
    * Setter of the expected delivery date.
    *
-   * @param expecteddeliverydate expected delivery date
+   * @param emDate expected delivery date
    */
-  public void setExpectedDeliveryDate(final LocalDate expecteddeliverydate) {
-    expectedDeliveryDate = expecteddeliverydate;
+  private void setExpectedDeliveryDate(final LocalDate emDate) {
+    expectedDeliveryDate = emDate.plusDays(isExpress ? EXPRESSDELIVERY : STANDARDDELIVERY);
   }
 
   /**

@@ -25,7 +25,7 @@ public abstract class NonLoginControl extends BaseControl {
    * @param op the operator that is logged in
    * @throws Exception if the scene cannot be set
    */
-  public void setScene(final Stage s, final Operator op) throws Exception {
+  protected void setScene(final Stage s, final Operator op) throws Exception {
     setLoggedOperator(op);
     super.setScene(s);
   }
