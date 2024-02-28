@@ -36,7 +36,8 @@ public class GraphControl extends NonLoginControl {
    * @return the graph data
    * @throws NoSuchElementException if no data is available
    */
-  public List<Integer> getGraphData(final Month month, final Year year) {
+  public List<Integer> getGraphData(final Month month, final Year year)
+      throws NoSuchElementException {
     try {
       List<Integer> o = orderDAO.getOrdersPerDay(month, year);
       if (o.stream().allMatch(n -> n == 0)) {

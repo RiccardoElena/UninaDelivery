@@ -9,6 +9,7 @@ import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.NoSuchElementException;
 import java.util.function.BiFunction;
 import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
@@ -194,6 +195,7 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
     } catch (Exception e) {
       chart.getData().clear();
       monthlyReportData.setVisible(false);
+      scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
       return;
     }
     displayOrderData(
@@ -273,28 +275,21 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
   }
 
   /** Set the graph data. */
-  private void setGraphData() {
+  private void setGraphData() throws NoSuchElementException {
     List<Integer> ordersData;
-
     ordersData = getControl().getGraphData(monthComboBox.getValue(), yearComboBox.getValue());
 
-    try {
+    chart.getData().clear();
 
-      chart.getData().clear();
+    XYChart.Series<String, Number> avarageLine = getAverageLine(ordersData);
+    avarageLine.setName("Media: " + NumToStringFormatter.trunkDecimal(getAverage(ordersData), 2));
+    chart.getData().add(avarageLine);
 
-      XYChart.Series<String, Number> avarageLine = getAverageLine(ordersData);
-      avarageLine.setName("Media: " + NumToStringFormatter.trunkDecimal(getAverage(ordersData), 2));
-      chart.getData().add(avarageLine);
+    XYChart.Series<String, Number> ordersLine = getOrdersLine(ordersData);
+    ordersLine.setName("N° Ordini per Giorno");
+    chart.getData().add(ordersLine);
 
-      XYChart.Series<String, Number> ordersLine = getOrdersLine(ordersData);
-      ordersLine.setName("N° Ordini per Giorno");
-      chart.getData().add(ordersLine);
-
-      removeLineSymbol(avarageLine);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    removeLineSymbol(avarageLine);
   }
 
   private XYChart.Series<String, Number> getAverageLine(final List<Integer> ordersData) {
