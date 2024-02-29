@@ -133,6 +133,8 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
   /** ScrollPane of the page. */
   @FXML private ScrollPane scrollPane;
 
+  private static final int PERCENTAGE_DIVISOR = 100;
+
   /**
    * Initialize the page.
    *
@@ -155,7 +157,7 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
 
   private void resetPieChart() {
     ObservableList<PieChart.Data> pieChartData =
-        FXCollections.observableArrayList(new PieChart.Data("NoData", 100));
+        FXCollections.observableArrayList(new PieChart.Data("NoData", PERCENTAGE_DIVISOR));
     categoryPieChart.setData(pieChartData);
     categoryPieChart.setLabelsVisible(false);
     categoryPieChart.setLegendVisible(false);
@@ -276,8 +278,11 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
         getControl().getPieChartData(monthComboBox.getValue(), yearComboBox.getValue());
 
     categoryPieChart.getData().clear();
+
+    float total = pieChartData.values().stream().mapToInt(Integer::intValue).sum();
     for (String category : pieChartData.keySet()) {
-      categoryPieChart.getData().add(new PieChart.Data(category, pieChartData.get(category)));
+      float percentage = ((float) pieChartData.get(category) / total) * PERCENTAGE_DIVISOR;
+      categoryPieChart.getData().add(new PieChart.Data(category, percentage));
     }
     categoryPieChart.setLabelsVisible(true);
     categoryPieChart.setLegendVisible(true);
