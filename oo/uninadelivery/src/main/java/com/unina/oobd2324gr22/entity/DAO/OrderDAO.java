@@ -115,4 +115,15 @@ public interface OrderDAO extends BasicDAO<Order> {
    * @throws SQLException possible DB related errors
    */
   Year getStartingYear() throws SQLException;
+
+  /**
+   * Retrive the quantity orders by category sent by month and year.
+   *
+   * @param month the month to search for
+   * @param year the year to search for
+   * @return the quantity orders by category
+   * @throws SQLException possible DB related errors
+   */
+  HashMap<String, Integer> getQuantityOrdersByCategory(Month month, Year year) throws SQLException;
+
 }

@@ -597,4 +597,43 @@ public class OrderDAOPostgre implements OrderDAO {
 
     return rowAffected;
   }
+
+  /**
+   * PostgreSQL implementation of the getMostSpendingAccount method.
+   *
+   * <p>{@inheritDoc}
+   */
+  @Override
+  public HashMap<String, Integer> getQuantityOrdersByCategory(final Month month, final Year year)
+      throws SQLException {
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
+    HashMap<String, Integer> quantityOrdersByCategory = new HashMap<>();
+    PreparedStatement psSelect = null;
+    ResultSet rs = null;
+    int value;
+    psSelect =
+        con.prepareStatement(
+            "SELECT category, COUNT(*) FROM \"Order\" NATURAL JOIN Product WHERE EXTRACT(MONTH"
+                + " FROM emissiondate) = ? AND EXTRACT(YEAR FROM emissiondate) = ? GROUP BY"
+                + " category");
+    psSelect.setInt(1, month.getValue());
+    psSelect.setInt(2, year.getValue());
+    rs = psSelect.executeQuery();
+    while (rs.next()) {
+      value = rs.getInt(rs.getString(1)) + rs.getInt(2);
+      quantityOrdersByCategory.put(rs.getString(1), value);
+    }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
+    return quantityOrdersByCategory;
+  }
 }

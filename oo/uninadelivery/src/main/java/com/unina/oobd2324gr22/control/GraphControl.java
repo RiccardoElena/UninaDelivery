@@ -9,6 +9,7 @@ import com.unina.oobd2324gr22.entity.DTO.Order;
 import java.sql.SQLException;
 import java.time.Month;
 import java.time.Year;
+import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import javafx.scene.control.Alert;
@@ -151,6 +152,42 @@ public class GraphControl extends NonLoginControl {
       showInternalError(e);
       return null;
     }
+  }
+
+  /** The maximum percentage. */
+  private static final int MAX_PERCENTAGE = 100;
+
+  /**
+   * Get the quantity orders by category sent by month and year.
+   *
+   * @param month the month to get the data for
+   * @param year the year to get the data for
+   * @return the quantity orders by category
+   */
+  public HashMap<String, Integer> getQuantityOrdersByCategoryData(final Month month,
+                                                                  final Year year) {
+    HashMap<String, Integer> rawData;
+    int allTheProduct;
+    try {
+      rawData = orderDAO.getQuantityOrdersByCategory(month, year);
+      allTheProduct = getAllTheProducts(rawData);
+      for (String category : rawData.keySet()) {
+        double percentage = (rawData.get(category) / (double) allTheProduct) * MAX_PERCENTAGE;
+        rawData.put(category, (int) Math.round(percentage));
+      }
+      return rawData;
+    } catch (SQLException e) {
+      showInternalError(e);
+      return null;
+    }
+  }
+
+  private int getAllTheProducts(final HashMap<String, Integer> rawData) {
+    int total = 0;
+    for (String category : rawData.keySet()){
+      total += rawData.get(category);
+    }
+    return total;
   }
 
   /**

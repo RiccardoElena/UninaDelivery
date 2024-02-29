@@ -7,6 +7,7 @@ import com.unina.oobd2324gr22.utils.NumToStringFormatter;
 import java.time.Month;
 import java.time.Year;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
@@ -16,6 +17,7 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -108,6 +110,9 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
   /** Asse Y. */
   @FXML private NumberAxis yAxis;
 
+  /** PieChart of the page. */
+  @FXML private PieChart pieChart;
+
   /** LineChart of the page. */
   @FXML private LineChart<String, Number> chart;
 
@@ -192,6 +197,7 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
     }
     try {
       setGraphData();
+      setPieData();
     } catch (Exception e) {
       chart.getData().clear();
       monthlyReportData.setVisible(false);
@@ -290,6 +296,19 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
     chart.getData().add(ordersLine);
 
     removeLineSymbol(avarageLine);
+  }
+
+  /** Set the pie data. */
+  private void setPieData() {
+    HashMap<String, Integer> quantityOrdersByCategoryData =
+        getControl().getQuantityOrdersByCategoryData(
+          monthComboBox.getValue(), yearComboBox.getValue());
+    pieChart.getData().clear();
+    for (String category : quantityOrdersByCategoryData.keySet()) {
+      PieChart.Data slice =
+          new PieChart.Data(category, quantityOrdersByCategoryData.get(category));
+      pieChart.getData().add(slice);
+    }
   }
 
   private XYChart.Series<String, Number> getAverageLine(final List<Integer> ordersData) {
