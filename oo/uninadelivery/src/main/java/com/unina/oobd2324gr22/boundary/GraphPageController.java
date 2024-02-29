@@ -13,6 +13,8 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.function.BiFunction;
 import javafx.animation.PauseTransition;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
@@ -122,6 +124,9 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
   /** ComboBox to select the year. */
   @FXML private ComboBox<Year> yearComboBox;
 
+  /** PieChart of the order grouped by category. */
+  @FXML private PieChart categoryPieChart;
+
   /** VBox containing the monthly report data. */
   @FXML private VBox monthlyReportData;
 
@@ -144,7 +149,16 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
             e.consume();
           }
         });
+    resetPieChart();
     initializeComboBoxes();
+  }
+
+  private void resetPieChart() {
+    ObservableList<PieChart.Data> pieChartData =
+        FXCollections.observableArrayList(new PieChart.Data("NoData", 100));
+    categoryPieChart.setData(pieChartData);
+    categoryPieChart.setLabelsVisible(false);
+    categoryPieChart.setLegendVisible(false);
   }
 
   private void initializeComboBoxes() {
@@ -196,10 +210,11 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
       return;
     }
     try {
-      setGraphData();
-      setPieData();
+      setLineChartData();
+      setPieChartData();
     } catch (Exception e) {
       chart.getData().clear();
+      resetPieChart();
       monthlyReportData.setVisible(false);
       scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
       return;
@@ -242,7 +257,7 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
       final Label orderCostLabel) {
     Order order = getOrderData.apply(monthComboBox.getValue(), yearComboBox.getValue());
     if (order != null) {
-      orderIdLabel.setText("Ordine N." + order.getId());
+      orderIdLabel.setText("Codice ordine:" + order.getId());
       orderAccountLabel.setText("Effettuato da: " + order.getAccount().getEmail());
       orderProductLabel.setText(
           "Contenente: "
@@ -254,6 +269,18 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
       orderCostLabel.setText(
           "Al costo di: " + NumToStringFormatter.trunkDecimal(order.getPrice(), 2) + "€");
     }
+  }
+
+  private void setPieChartData() throws NoSuchElementException {
+    HashMap<String, Integer> pieChartData =
+        getControl().getPieChartData(monthComboBox.getValue(), yearComboBox.getValue());
+
+    categoryPieChart.getData().clear();
+    for (String category : pieChartData.keySet()) {
+      categoryPieChart.getData().add(new PieChart.Data(category, pieChartData.get(category)));
+    }
+    categoryPieChart.setLabelsVisible(true);
+    categoryPieChart.setLegendVisible(true);
   }
 
   private void displayMostOrderingAccountData() {
@@ -281,9 +308,9 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
   }
 
   /** Set the graph data. */
-  private void setGraphData() throws NoSuchElementException {
-    List<Integer> ordersData;
-    ordersData = getControl().getGraphData(monthComboBox.getValue(), yearComboBox.getValue());
+  private void setLineChartData() throws NoSuchElementException {
+    List<Integer> ordersData =
+        getControl().getLineChartData(monthComboBox.getValue(), yearComboBox.getValue());
 
     chart.getData().clear();
 
@@ -296,19 +323,6 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
     chart.getData().add(ordersLine);
 
     removeLineSymbol(avarageLine);
-  }
-
-  /** Set the pie data. */
-  private void setPieData() {
-    HashMap<String, Integer> quantityOrdersByCategoryData =
-        getControl().getQuantityOrdersByCategoryData(
-          monthComboBox.getValue(), yearComboBox.getValue());
-    pieChart.getData().clear();
-    for (String category : quantityOrdersByCategoryData.keySet()) {
-      PieChart.Data slice =
-          new PieChart.Data(category, quantityOrdersByCategoryData.get(category));
-      pieChart.getData().add(slice);
-    }
   }
 
   private XYChart.Series<String, Number> getAverageLine(final List<Integer> ordersData) {

@@ -170,7 +170,7 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
       return;
     }
 
-    orderIdLabel.setText("Ordine N." + order.getId());
+    orderIdLabel.setText("Codice ordine:" + order.getId());
 
     LocalDate expectedDeliveryDate = order.getExpectedDeliveryDate();
     String formattedDeliveryDate =

@@ -12,6 +12,11 @@
   -fx-background-color: -fx-default-bg;
 }
 
+.chart-pie-label{
+  -fx-background-color: -fx-default-bg;
+  -fx-fill: -fx-secondary-color;
+}
+
 .popup .label {
   -fx-text-fill: -fx-primary-color;
   -fx-background-color: white; 

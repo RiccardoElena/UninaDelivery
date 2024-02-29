@@ -21,6 +21,9 @@ public class Transport {
   /** Availability of the transport. */
   private boolean isAvailable;
 
+  /** Licence Plate. */
+  private String licencePlate;
+
   /** Owner of the transport. */
   private Deposit depositOwner;
 
@@ -32,12 +35,14 @@ public class Transport {
    * @param tId id of the transport.
    * @param tMaxCapacity max capacity of the transport.
    * @param tIsAvailable availability of the transport.
+   * @param tLicencePlate licence plate of the transport.
    * @param tDepositOwner owner of the transport.
    */
   public Transport(
       final int tId,
       final float tMaxCapacity,
       final boolean tIsAvailable,
+      final String tLicencePlate,
       final Deposit tDepositOwner) {
     if (tDepositOwner == null) {
       throw new IllegalArgumentException("Deposit owner cannot be null");
@@ -46,6 +51,7 @@ public class Transport {
     setMaxCapacity(tMaxCapacity);
     isAvailable = tIsAvailable;
     depositOwner = tDepositOwner;
+    licencePlate = tLicencePlate;
     tDepositOwner.addTransport(this);
   }
 
@@ -54,15 +60,21 @@ public class Transport {
    *
    * @param tId id of the transport.
    * @param tIsAvailable availability of the transport.
+   * @param tLicencePlate licence plate of the transport.
    * @param tDepositOwner owner of the transport.
    */
-  public Transport(final int tId, final boolean tIsAvailable, final Deposit tDepositOwner) {
+  public Transport(
+      final int tId,
+      final boolean tIsAvailable,
+      final String tLicencePlate,
+      final Deposit tDepositOwner) {
     if (tDepositOwner == null) {
       throw new IllegalArgumentException("Deposit owner cannot be null");
     }
     id = tId;
     isAvailable = tIsAvailable;
     depositOwner = tDepositOwner;
+    licencePlate = tLicencePlate;
     tDepositOwner.addTransport(this);
   }
 
@@ -113,6 +125,15 @@ public class Transport {
     return depositOwner;
   }
 
+  /**
+   * Getter for the licence plate of the transport.
+   *
+   * @return licence plate of the transport.
+   */
+  public String getLicencePlate() {
+    return licencePlate;
+  }
+
   // Setters
 
   /**
@@ -156,11 +177,20 @@ public class Transport {
     depositOwner = tDepositOwner;
   }
 
+  /**
+   * Setter for the licence plate of the transport.
+   *
+   * @param tLicencePlate licence plate of the transport.
+   */
+  public void setLicencePlate(final String tLicencePlate) {
+    licencePlate = tLicencePlate;
+  }
+
   // Methods
 
   /** To string. */
   @Override
   public String toString() {
-    return "Veicolo " + id + " - (" + maxCapacity + "kg)";
+    return "Veicolo targato: " + getLicencePlate() + " - (" + getMaxCapacity() + "kg)";
   }
 }

@@ -37,7 +37,7 @@ public class GraphControl extends NonLoginControl {
    * @return the graph data
    * @throws NoSuchElementException if no data is available
    */
-  public List<Integer> getGraphData(final Month month, final Year year)
+  public List<Integer> getLineChartData(final Month month, final Year year)
       throws NoSuchElementException {
     try {
       List<Integer> o = orderDAO.getOrdersPerDay(month, year);
@@ -50,6 +50,22 @@ public class GraphControl extends NonLoginControl {
         throw new NoSuchElementException();
       }
       return o;
+    } catch (SQLException e) {
+      showInternalError(e);
+      return null;
+    }
+  }
+
+  /**
+   * Get the pie chart data for the given month and year.
+   *
+   * @param month the month to get the data for
+   * @param year the year to get the data for
+   * @return the pie chart data
+   */
+  public HashMap<String, Integer> getPieChartData(final Month month, final Year year) {
+    try {
+      return orderDAO.getQuantityOfCategoriesByMonth(month, year);
     } catch (SQLException e) {
       showInternalError(e);
       return null;

@@ -69,6 +69,18 @@ public interface OrderDAO extends BasicDAO<Order> {
   Order getLessExpensiveOrder(Month month, Year year) throws SQLException;
 
   /**
+   * Retrive the number of products sold by category in the month given.
+   *
+   * @param month month to search for
+   * @param year year to search for
+   * @return map of the number of products sold by category. The key is the category name and the
+   *     value is the number of products sold
+   * @throws SQLException possible DB related errors
+   */
+  HashMap<String, Integer> getQuantityOfCategoriesByMonth(Month month, Year year)
+      throws SQLException;
+
+  /**
    * Retrive a list of the number of the orders for each day from the database of the month given.
    *
    * @param month month to search for

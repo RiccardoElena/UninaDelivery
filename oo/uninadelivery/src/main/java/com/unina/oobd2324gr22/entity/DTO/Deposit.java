@@ -235,7 +235,7 @@ public class Deposit {
   /** To string method. */
   @Override
   public String toString() {
-    return "Deposito " + getId() + " - " + getAddress().getCity() + " " + getAddress().getZipCode();
+    return "Deposito di " + getAddress().getCity() + ", CAP: " + getAddress().getZipCode();
   }
 
   /** Equals method to comparing deposit's id. */

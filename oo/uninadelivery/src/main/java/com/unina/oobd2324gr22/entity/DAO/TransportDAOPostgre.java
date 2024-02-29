@@ -24,9 +24,10 @@ public class TransportDAOPostgre implements TransportDAO {
     int transportId = rs.getInt("transportid");
     int maxCapacity = rs.getInt("maxcapacity");
     boolean isAvailable = rs.getBoolean("isavailable");
+    String licencePlate = rs.getString("licenceplate");
     Deposit deposit = depositDAO.getDepositById(rs.getInt("depositid"));
 
-    return new Transport(transportId, maxCapacity, isAvailable, deposit);
+    return new Transport(transportId, maxCapacity, isAvailable, licencePlate, deposit);
   }
 
   /**

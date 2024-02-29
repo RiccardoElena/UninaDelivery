@@ -398,6 +398,45 @@ public class OrderDAOPostgre implements OrderDAO {
   }
 
   /**
+   * PostgreSQL implementation of the getQuantityOfCategoriesByMonth method.
+   *
+   * <p>{@inheritDoc}
+   */
+  @Override
+  public HashMap<String, Integer> getQuantityOfCategoriesByMonth(final Month month, final Year year)
+      throws SQLException {
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
+    HashMap<String, Integer> categories = new HashMap<String, Integer>();
+    PreparedStatement psSelect = null;
+    ResultSet rs = null;
+    IterableInt fieldNumber = new IterableInt(1);
+
+    psSelect =
+        con.prepareStatement(
+            "SELECT category, sum(quantity) FROM \"Order\" NATURAL JOIN product WHERE EXTRACT(MONTH"
+                + " FROM emissiondate) = ? AND EXTRACT(YEAR FROM emissiondate) = ? GROUP BY"
+                + " category");
+    psSelect.setInt(fieldNumber.next(), month.getValue());
+    psSelect.setInt(fieldNumber.next(), year.getValue());
+    rs = psSelect.executeQuery();
+    while (rs.next()) {
+      categories.put(rs.getString(1), rs.getInt(2));
+    }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
+    return categories;
+  }
+
+  /**
    * PostgreSQL implementation of the getOrdersPerDay method.
    *
    * <p>{@inheritDoc}

@@ -181,7 +181,7 @@
                      <children>
                         <TableView fx:id="shipmentsTable" prefHeight="434.0" prefWidth="560.0" HBox.hgrow="ALWAYS">
                           <columns>
-                            <TableColumn fx:id="shipmentIdTableColumn" prefWidth="75.0" text="ID" />
+                            <TableColumn fx:id="shipmentIdTableColumn" prefWidth="75.0" text="Codice" />
                             <TableColumn fx:id="shipmentDateTableColumn" prefWidth="109.66665649414062" text="Data Spedizione" />
                               <TableColumn fx:id="startingDepositTableColumn" prefWidth="126.0" text="Deposito Partenza" />
                               <TableColumn fx:id="transportTableColumn" minWidth="7.0" prefWidth="85.0" text="Trasporto" />

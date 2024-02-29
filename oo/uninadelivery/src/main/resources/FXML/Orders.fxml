@@ -85,7 +85,7 @@
          <children>
             <TableView fx:id="ordersTable" layoutX="80.0" layoutY="236.0" prefHeight="415.0" prefWidth="930.0" AnchorPane.bottomAnchor="34.0" AnchorPane.leftAnchor="80.0" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="236.0">
               <columns>
-                <TableColumn fx:id="orderNumberColumn" editable="false" prefWidth="75.0" styleClass="tableColumn" text="N.Ordine" />
+                <TableColumn fx:id="orderNumberColumn" editable="false" prefWidth="75.0" styleClass="tableColumn" text="Codice" />
                 <TableColumn fx:id="productColumn" editable="false" prefWidth="107.0" styleClass="tableColumn" text="Prodotto" />
                   <TableColumn fx:id="quantityColumn" editable="false" prefWidth="62.0" styleClass="tableColumn" text="Quantità" />
                   <TableColumn fx:id="supplierColumn" editable="false" prefWidth="88.0" styleClass="tableColumn" text="Venditore" />
