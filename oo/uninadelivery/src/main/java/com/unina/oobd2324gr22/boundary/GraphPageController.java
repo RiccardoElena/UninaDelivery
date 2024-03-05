@@ -133,6 +133,7 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
   /** ScrollPane of the page. */
   @FXML private ScrollPane scrollPane;
 
+  /** Divisor for the percentage. */
   private static final int PERCENTAGE_DIVISOR = 100;
 
   /**
@@ -248,7 +249,7 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
     monthlyReportData.setVisible(true);
     displayMostOrderingAccountData();
     displayMostSpendingAccountData();
-    scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+    scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
   }
 
   private void displayOrderData(

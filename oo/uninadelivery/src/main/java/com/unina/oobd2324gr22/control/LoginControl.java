@@ -3,12 +3,13 @@ package com.unina.oobd2324gr22.control;
 import com.unina.oobd2324gr22.entity.DAO.AccountDAO;
 import com.unina.oobd2324gr22.entity.DAO.AccountDAOPostgre;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
+import com.unina.oobd2324gr22.utils.LoggedOperator;
 import com.unina.oobd2324gr22.utils.SHA256;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 import javafx.scene.control.Alert;
 
-public class LoginControl extends BaseControl {
+public final class LoginControl extends BaseControl {
 
   /** Width of the window. */
   protected static final double WIDTH = 600;
@@ -19,8 +20,22 @@ public class LoginControl extends BaseControl {
   /** Account Data Access Object. */
   private AccountDAO accountDAO = new AccountDAOPostgre();
 
-  /** Orders selection functionality control class. */
-  private DashboardControl dashboardControl = new DashboardControl();
+  /** Singleton instance. */
+  private static LoginControl istance;
+
+  private LoginControl() {}
+
+  /**
+   * Get the singleton instance.
+   *
+   * @return the singleton instance
+   */
+  public static LoginControl getInstance() {
+    if (istance == null) {
+      istance = new LoginControl();
+    }
+    return istance;
+  }
 
   /** Add page related scene settings. */
   @Override
@@ -67,11 +82,12 @@ public class LoginControl extends BaseControl {
       return;
     }
 
-    Operator client = checkLogin(email, password);
+    LoggedOperator client = LoggedOperator.getInstance(checkLogin(email, password));
 
     if (client != null) {
+      DashboardControl dashboardControl = DashboardControl.getInstance();
       try {
-        dashboardControl.setScene(getStage(), client);
+        dashboardControl.setScene(getStage());
         return;
       } catch (Exception e) {
         e.printStackTrace();

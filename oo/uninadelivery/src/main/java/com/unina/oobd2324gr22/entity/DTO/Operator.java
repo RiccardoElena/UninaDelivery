@@ -2,7 +2,7 @@ package com.unina.oobd2324gr22.entity.DTO;
 
 import java.time.LocalDate;
 
-public final class Operator extends Account {
+public class Operator extends Account {
 
   // Attributes
 
@@ -132,8 +132,29 @@ public final class Operator extends Account {
     return businessMail;
   }
 
+  /**
+   * Getter of the Account.
+   *
+   * @return account
+   */
+  public Account getAccount() {
+    return new Account(
+        getName(),
+        getSurname(),
+        getEmail(),
+        getBirthdate(),
+        getPropicBase64(),
+        getPassword(),
+        getAddress());
+  }
+
   // Methods
 
+  /**
+   * Override of the toString method.
+   *
+   * @return string representation of the operator
+   */
   @Override
   public String toString() {
     return "Operator{"

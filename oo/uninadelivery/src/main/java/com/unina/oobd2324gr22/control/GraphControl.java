@@ -14,13 +14,30 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import javafx.scene.control.Alert;
 
-public class GraphControl extends NonLoginControl {
+public final class GraphControl extends NonLoginControl {
 
   /** Order DAO. */
   private OrderDAO orderDAO = new OrderDAOPostgre();
 
   /** Account DAO. */
   private AccountDAO accountDAO = new AccountDAOPostgre();
+
+  /** Singleton instance. */
+  private static GraphControl istance;
+
+  private GraphControl() {}
+
+  /**
+   * Get the singleton instance.
+   *
+   * @return the singleton instance
+   */
+  public static GraphControl getInstance() {
+    if (istance == null) {
+      istance = new GraphControl();
+    }
+    return istance;
+  }
 
   /** Add page related scene settings. */
   @Override
@@ -180,8 +197,8 @@ public class GraphControl extends NonLoginControl {
    * @param year the year to get the data for
    * @return the quantity orders by category
    */
-  public HashMap<String, Integer> getQuantityOrdersByCategoryData(final Month month,
-                                                                  final Year year) {
+  public HashMap<String, Integer> getQuantityOrdersByCategoryData(
+      final Month month, final Year year) {
     HashMap<String, Integer> rawData;
     int allTheProduct;
     try {
@@ -200,7 +217,7 @@ public class GraphControl extends NonLoginControl {
 
   private int getAllTheProducts(final HashMap<String, Integer> rawData) {
     int total = 0;
-    for (String category : rawData.keySet()){
+    for (String category : rawData.keySet()) {
       total += rawData.get(category);
     }
     return total;

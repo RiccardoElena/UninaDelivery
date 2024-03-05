@@ -18,11 +18,9 @@ public final class App extends Application {
   /** Height of the window. */
   static final int HEIGHT = 400;
 
-  /** Login functionality control class. */
-  private LoginControl loginControl = new LoginControl();
-
   @Override
   public void start(final Stage primaryStage) throws Exception {
+    LoginControl loginControl = LoginControl.getInstance();
     primaryStage.initStyle(StageStyle.UNDECORATED);
     primaryStage.setTitle("UninaDelivery");
     primaryStage

@@ -2,21 +2,33 @@ package com.unina.oobd2324gr22.control;
 
 import com.unina.oobd2324gr22.entity.DAO.OrderDAO;
 import com.unina.oobd2324gr22.entity.DAO.OrderDAOPostgre;
+import com.unina.oobd2324gr22.utils.LoggedOperator;
 import java.sql.SQLException;
 import java.util.Optional;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 
-public class DashboardControl extends NonLoginControl {
+public final class DashboardControl extends NonLoginControl {
 
   /** Order Data Access Object. */
   private OrderDAO ordersDAO = new OrderDAOPostgre();
 
-  /** Order selection functionality control class. */
-  private OrdersHandlingControl ordersControl = new OrdersHandlingControl();
+  /** Singleton instance. */
+  private static DashboardControl istance;
 
-  /** Graph selection functionality control class. */
-  private GraphControl graphControl = new GraphControl();
+  private DashboardControl() {}
+
+  /**
+   * Get the singleton instance.
+   *
+   * @return the singleton instance
+   */
+  public static DashboardControl getInstance() {
+    if (istance == null) {
+      istance = new DashboardControl();
+    }
+    return istance;
+  }
 
   /** Add page related scene settings. */
   @Override
@@ -27,8 +39,9 @@ public class DashboardControl extends NonLoginControl {
 
   /** Go to the Orders page. */
   public void goToOrdersPage() {
+    OrdersHandlingControl ordersControl = OrdersHandlingControl.getInstance();
     try {
-      ordersControl.setScene(getStage(), getLoggedOperator());
+      ordersControl.setScene(getStage());
     } catch (Exception e) {
       showInternalError(e);
     }
@@ -36,8 +49,9 @@ public class DashboardControl extends NonLoginControl {
 
   /** Go to the Monthly Reports page. */
   public void goToMonthlyReportsPage() {
+    GraphControl graphControl = GraphControl.getInstance();
     try {
-      graphControl.setScene(getStage(), getLoggedOperator());
+      graphControl.setScene(getStage());
     } catch (Exception e) {
       showInternalError(e);
     }
@@ -72,11 +86,12 @@ public class DashboardControl extends NonLoginControl {
         showAlert(
             Alert.AlertType.CONFIRMATION,
             "Conferma",
-            getLoggedOperator().getName() + " vuoi disconnetterti?",
+            LoggedOperator.getInstance().getName() + " vuoi disconnetterti?",
             "Premendo OK verrai disconnesso e tornerai alla schermata di login. Continuare?");
     if (result.isPresent() && result.get() == ButtonType.OK) {
       try {
-        LoginControl loginControl = new LoginControl();
+        LoginControl loginControl = LoginControl.getInstance();
+        LoggedOperator.getInstance().logout();
         loginControl.setScene(getStage());
       } catch (Exception e) {
         showInternalError(e);

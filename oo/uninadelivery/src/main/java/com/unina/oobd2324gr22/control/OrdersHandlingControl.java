@@ -15,6 +15,7 @@ import com.unina.oobd2324gr22.entity.DTO.Driver;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import com.unina.oobd2324gr22.entity.DTO.Transport;
+import com.unina.oobd2324gr22.utils.LoggedOperator;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -33,7 +34,7 @@ import javafx.scene.control.ButtonType;
  * <p>It's responsible for displaying the correct view and handling the user's input for the Orders
  * Page and Shipment Page.
  */
-public class OrdersHandlingControl extends NonLoginControl {
+public final class OrdersHandlingControl extends NonLoginControl {
 
   /** Order Data Access Object. */
   private OrderDAO ordersDAO = new OrderDAOPostgre();
@@ -56,6 +57,23 @@ public class OrdersHandlingControl extends NonLoginControl {
   /** Alternative page to load. */
   private String currPage = "Orders";
 
+  /** Singleton instance. */
+  private static OrdersHandlingControl istance;
+
+  private OrdersHandlingControl() {}
+
+  /**
+   * Get the singleton instance.
+   *
+   * @return the singleton instance
+   */
+  public static OrdersHandlingControl getInstance() {
+    if (istance == null) {
+      istance = new OrdersHandlingControl();
+    }
+    return istance;
+  }
+
   /** Add page related scene settings. */
   @Override
   protected void addSceneSettings() {
@@ -72,7 +90,7 @@ public class OrdersHandlingControl extends NonLoginControl {
     selectedOrder = order;
     try {
       currPage = "Shipment";
-      setScene(getStage(), getLoggedOperator());
+      setScene(getStage());
     } catch (Exception e) {
       showInternalError(e);
     }
@@ -83,7 +101,7 @@ public class OrdersHandlingControl extends NonLoginControl {
     selectedOrder = null;
     try {
       currPage = "Orders";
-      setScene(getStage(), getLoggedOperator());
+      setScene(getStage());
     } catch (Exception e) {
       showInternalError(e);
     }
@@ -274,7 +292,7 @@ public class OrdersHandlingControl extends NonLoginControl {
 
   private Shipment createShipment(
       final LocalDate shippingDate, final Deposit startDeposit, final Transport transport) {
-    return new Shipment(shippingDate, getLoggedOperator(), startDeposit, transport);
+    return new Shipment(shippingDate, LoggedOperator.getInstance(), startDeposit, transport);
   }
 
   private void insertShipment(final Shipment shipment) throws SQLException {
