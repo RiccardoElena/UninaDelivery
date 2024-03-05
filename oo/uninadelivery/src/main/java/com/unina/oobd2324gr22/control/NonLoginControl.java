@@ -18,7 +18,8 @@ public abstract class NonLoginControl extends BaseControl {
   /** Add page related scene settings. */
   @Override
   protected void addSceneSettings() {
-    setSizes(Math.max(WIDTH, getStage().getWidth()), Math.max(HEIGHT, getStage().getHeight()));
+    setSizes(
+        Math.max(WIDTH, App.getStage().getWidth()), Math.max(HEIGHT, App.getStage().getHeight()));
   }
 
   /** Minimize the window. */
@@ -26,8 +27,8 @@ public abstract class NonLoginControl extends BaseControl {
     fadeOutTransition(
         0.0,
         e -> {
-          getStage().setIconified(true);
-          getStage().setOpacity(1.0);
+          App.getStage().setIconified(true);
+          App.getStage().setOpacity(1.0);
         });
   }
 
@@ -35,7 +36,7 @@ public abstract class NonLoginControl extends BaseControl {
   public void returnToHomePage() {
     DashboardControl dashboardControl = DashboardControl.getInstance();
     try {
-      dashboardControl.setScene(getStage());
+      dashboardControl.setScene();
     } catch (Exception e) {
       e.printStackTrace();
     }

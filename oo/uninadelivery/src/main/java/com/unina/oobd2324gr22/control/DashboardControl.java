@@ -41,7 +41,7 @@ public final class DashboardControl extends NonLoginControl {
   public void goToOrdersPage() {
     OrdersHandlingControl ordersControl = OrdersHandlingControl.getInstance();
     try {
-      ordersControl.setScene(getStage());
+      ordersControl.setScene();
     } catch (Exception e) {
       showInternalError(e);
     }
@@ -51,7 +51,7 @@ public final class DashboardControl extends NonLoginControl {
   public void goToMonthlyReportsPage() {
     GraphControl graphControl = GraphControl.getInstance();
     try {
-      graphControl.setScene(getStage());
+      graphControl.setScene();
     } catch (Exception e) {
       showInternalError(e);
     }
@@ -92,7 +92,7 @@ public final class DashboardControl extends NonLoginControl {
       try {
         LoginControl loginControl = LoginControl.getInstance();
         LoggedOperator.getInstance().logout();
-        loginControl.setScene(getStage());
+        loginControl.setScene();
       } catch (Exception e) {
         showInternalError(e);
       }

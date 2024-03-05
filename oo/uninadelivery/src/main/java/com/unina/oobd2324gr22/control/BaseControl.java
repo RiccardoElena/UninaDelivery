@@ -13,7 +13,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public abstract class BaseControl {
@@ -36,20 +35,15 @@ public abstract class BaseControl {
   /** Name of the page. */
   private String fileName;
 
-  /** Application stage. */
-  private Stage stage;
-
   /** Hook method for page launch. */
   protected abstract void addSceneSettings();
 
   /**
    * Template method for page launch.
    *
-   * @param s the stage to set the scene on
    * @throws Exception if the scene cannot be set
    */
-  protected void setScene(final Stage s) throws Exception {
-    setStage(s);
+  protected void setScene() throws Exception {
     addSceneSettings();
 
     launchScene();
@@ -66,8 +60,8 @@ public abstract class BaseControl {
 
       pageController.init(this);
 
-      getStage().setScene(setupScene(root));
-      getStage().show();
+      App.getStage().setScene(setupScene(root));
+      App.getStage().show();
     } catch (IllegalStateException e) {
       e.printStackTrace();
       System.err.println(
@@ -78,8 +72,7 @@ public abstract class BaseControl {
   }
 
   private void setupStage() {
-    stage.setWidth(width);
-    stage.setHeight(height);
+    App.setStageSizes(width, height);
   }
 
   private Scene setupScene(final Parent root) {
@@ -206,7 +199,7 @@ public abstract class BaseControl {
             "Sei sicuro di voler uscire dall'applicazione?");
     if (result.isPresent() && result.get() == ButtonType.OK) {
       // Add fade out transition before closing the stage
-      fadeOutTransition(0.0, e -> stage.close());
+      fadeOutTransition(0.0, e -> App.getStage().close());
     }
   }
 
@@ -218,30 +211,12 @@ public abstract class BaseControl {
    */
   protected void fadeOutTransition(final double toValue, final EventHandler<ActionEvent> onFinish) {
     final Duration duration = Duration.seconds(FADE_OUT_DURATION);
-    final KeyValue kv = new KeyValue(stage.opacityProperty(), toValue);
+    final KeyValue kv = new KeyValue(App.getStage().opacityProperty(), toValue);
     final KeyFrame kf = new KeyFrame(duration, kv);
     final Timeline timeline = new Timeline(kf);
     timeline.setOnFinished(onFinish);
 
     timeline.play();
-  }
-
-  /**
-   * Get the application stage.
-   *
-   * @return the application stage
-   */
-  public Stage getStage() {
-    return stage;
-  }
-
-  /**
-   * Set the application stage.
-   *
-   * @param currStage the application stage
-   */
-  public void setStage(final Stage currStage) {
-    stage = currStage;
   }
 
   /**

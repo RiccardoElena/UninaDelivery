@@ -87,7 +87,7 @@ public final class LoginControl extends BaseControl {
     if (client != null) {
       DashboardControl dashboardControl = DashboardControl.getInstance();
       try {
-        dashboardControl.setScene(getStage());
+        dashboardControl.setScene();
         return;
       } catch (Exception e) {
         e.printStackTrace();

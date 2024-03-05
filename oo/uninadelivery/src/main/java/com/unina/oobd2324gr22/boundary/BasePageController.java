@@ -1,5 +1,6 @@
 package com.unina.oobd2324gr22.boundary;
 
+import com.unina.oobd2324gr22.control.App;
 import com.unina.oobd2324gr22.control.BaseControl;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -65,7 +66,7 @@ public abstract class BasePageController<T extends BaseControl> {
 
   /** Make the window draggable. */
   protected void setDraggable() {
-    Stage stage = control.getStage();
+    Stage stage = App.getStage();
     final double[] xOffset = new double[1];
     final double[] yOffset = new double[1];
 

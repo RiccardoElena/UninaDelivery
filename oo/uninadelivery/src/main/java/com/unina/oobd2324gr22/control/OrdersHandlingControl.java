@@ -90,7 +90,7 @@ public final class OrdersHandlingControl extends NonLoginControl {
     selectedOrder = order;
     try {
       currPage = "Shipment";
-      setScene(getStage());
+      setScene();
     } catch (Exception e) {
       showInternalError(e);
     }
@@ -101,7 +101,7 @@ public final class OrdersHandlingControl extends NonLoginControl {
     selectedOrder = null;
     try {
       currPage = "Orders";
-      setScene(getStage());
+      setScene();
     } catch (Exception e) {
       showInternalError(e);
     }

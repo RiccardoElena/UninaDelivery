@@ -18,16 +18,20 @@ public final class App extends Application {
   /** Height of the window. */
   static final int HEIGHT = 400;
 
+  /** App stage. */
+  private static Stage stage;
+
   @Override
   public void start(final Stage primaryStage) throws Exception {
     LoginControl loginControl = LoginControl.getInstance();
+    stage = primaryStage;
     primaryStage.initStyle(StageStyle.UNDECORATED);
     primaryStage.setTitle("UninaDelivery");
     primaryStage
         .getIcons()
         .add(new Image(App.class.getResourceAsStream("/images/UninaDelivery_logo.png")));
 
-    loginControl.setScene(primaryStage);
+    loginControl.setScene();
   }
 
   /**
@@ -37,5 +41,25 @@ public final class App extends Application {
    */
   public static void launchApp(final String[] args) {
     launch(args);
+  }
+
+  /**
+   * Get the stage.
+   *
+   * @return the stage
+   */
+  public static Stage getStage() {
+    return stage;
+  }
+
+  /**
+   * Set stage Width and Height.
+   *
+   * @param width the width
+   * @param height the height
+   */
+  public static void setStageSizes(final double width, final double height) {
+    stage.setWidth(width);
+    stage.setHeight(height);
   }
 }

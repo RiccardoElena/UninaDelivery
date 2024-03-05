@@ -1,5 +1,6 @@
 package com.unina.oobd2324gr22.boundary;
 
+import com.unina.oobd2324gr22.control.App;
 import com.unina.oobd2324gr22.control.NonLoginControl;
 import java.util.function.Consumer;
 import javafx.application.Platform;
@@ -63,7 +64,7 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
   protected void setResizable() {
     Platform.runLater(
         () -> {
-          Stage stage = getControl().getStage();
+          Stage stage = App.getStage();
           Scene scene = stage.getScene();
           scene.setCursor(Cursor.SE_RESIZE);
           scene.setOnMouseDragged(this::handleSceneResizing);
@@ -72,7 +73,7 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
   }
 
   private void handleSceneResizing(final MouseEvent event) {
-    Stage stage = getControl().getStage();
+    Stage stage = App.getStage();
     double x = event.getX();
     double y = event.getY();
     double screenWidth = event.getScreenX();
@@ -97,7 +98,7 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
   }
 
   private void handleCursorSwitch(final MouseEvent event) {
-    Stage stage = getControl().getStage();
+    Stage stage = App.getStage();
     Scene scene = stage.getScene();
     double x = event.getX();
     double y = event.getY();
@@ -153,7 +154,7 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
    */
   @FXML
   void resizeButtonAction(final ActionEvent event) {
-    Stage stage = getControl().getStage();
+    Stage stage = App.getStage();
     stage.setMaximized(!stage.isMaximized());
   }
 
