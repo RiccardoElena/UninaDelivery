@@ -15,7 +15,6 @@ import com.unina.oobd2324gr22.entity.DTO.Driver;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import com.unina.oobd2324gr22.entity.DTO.Transport;
-import com.unina.oobd2324gr22.utils.LoggedOperator;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -51,16 +50,12 @@ public final class OrdersHandlingControl extends NonLoginControl {
   /** Driver Data Access Object. */
   private AccountDAO accountDAO = new AccountDAOPostgre();
 
-  /** Order selected. */
-  private Order selectedOrder;
-
-  /** Alternative page to load. */
-  private String currPage = "Orders";
-
   /** Singleton instance. */
   private static OrdersHandlingControl istance;
 
-  private OrdersHandlingControl() {}
+  private OrdersHandlingControl(final String name) {
+    super(name);
+  }
 
   /**
    * Get the singleton instance.
@@ -69,17 +64,12 @@ public final class OrdersHandlingControl extends NonLoginControl {
    */
   public static OrdersHandlingControl getInstance() {
     if (istance == null) {
-      istance = new OrdersHandlingControl();
+      istance = new OrdersHandlingControl("Orders");
     }
     return istance;
   }
 
-  /** Add page related scene settings. */
-  @Override
-  protected void addSceneSettings() {
-    super.addSceneSettings();
-    setFileName(currPage);
-  }
+  // Page Navigation Methods
 
   /**
    * Go to the Shipment Page relative to an order.
@@ -87,10 +77,9 @@ public final class OrdersHandlingControl extends NonLoginControl {
    * @param order seleted order
    */
   public void goToShipmentPage(final Order order) {
-    selectedOrder = order;
+    Session.selectOrder(order);
     try {
-      currPage = "Shipment";
-      setScene();
+      setScene("Shipment");
     } catch (Exception e) {
       showInternalError(e);
     }
@@ -98,14 +87,15 @@ public final class OrdersHandlingControl extends NonLoginControl {
 
   /** Go to the Orders page. */
   public void goToOrdersPage() {
-    selectedOrder = null;
+    Session.unselectOrder();
     try {
-      currPage = "Orders";
-      setScene();
+      setScene("Orders");
     } catch (Exception e) {
       showInternalError(e);
     }
   }
+
+  // Data Handling Methods
 
   /**
    * Filter orders.
@@ -154,7 +144,7 @@ public final class OrdersHandlingControl extends NonLoginControl {
    * @return the selected order
    */
   public Order getOrder() {
-    return selectedOrder;
+    return Session.getSelectedOrder();
   }
 
   /**
@@ -181,7 +171,8 @@ public final class OrdersHandlingControl extends NonLoginControl {
     ObservableList<Shipment> shipments = null;
     try {
       shipments =
-          FXCollections.observableArrayList(shipmentDAO.getCompatibleShipments(selectedOrder));
+          FXCollections.observableArrayList(
+              shipmentDAO.getCompatibleShipments(Session.getSelectedOrder()));
     } catch (SQLException e) {
       showInternalError(e);
     }
@@ -199,7 +190,7 @@ public final class OrdersHandlingControl extends NonLoginControl {
     try {
       deposits =
           FXCollections.observableArrayList(
-              depositsDAO.getCompatibleDeposits(selectedOrder, selectedDate));
+              depositsDAO.getCompatibleDeposits(Session.getSelectedOrder(), selectedDate));
     } catch (SQLException e) {
       showInternalError(e);
     }
@@ -216,9 +207,9 @@ public final class OrdersHandlingControl extends NonLoginControl {
   public ObservableList<Transport> getTransports(
       final LocalDate selectedDate, final Deposit selectedDeposit) {
     try {
-      double packageSizeLiters = selectedOrder.getProduct().getPackageSizeLiters();
-      int quantity = selectedOrder.getQuantity();
-      double totalVolume = packageSizeLiters * quantity;
+      Order selectedOrder = Session.getSelectedOrder();
+      double totalVolume =
+          selectedOrder.getProduct().getPackageSizeLiters() * selectedOrder.getQuantity();
 
       return FXCollections.observableArrayList(
           transportDAO.getCompatibleTransports(totalVolume, selectedDeposit, selectedDate));
@@ -256,7 +247,7 @@ public final class OrdersHandlingControl extends NonLoginControl {
   public void shipsSelectedOrder(final Shipment selectedShipment) {
     try {
       if (isShippingConfirmed(createConfirmationMessage(selectedShipment))) {
-        shipmentDAO.shipOrder(selectedOrder, selectedShipment);
+        shipmentDAO.shipOrder(Session.getSelectedOrder(), selectedShipment);
         showSuccessModal();
       }
     } catch (Exception e) {
@@ -281,7 +272,7 @@ public final class OrdersHandlingControl extends NonLoginControl {
     try {
       if (isShippingConfirmed(createConfirmationMessage(shippingDate))) {
         insertShipment(newShipment);
-        shipOrder(selectedOrder, newShipment);
+        shipOrder(Session.getSelectedOrder(), newShipment);
         assignDriver(newShipment, driver);
         showSuccessModal();
       }
@@ -292,7 +283,7 @@ public final class OrdersHandlingControl extends NonLoginControl {
 
   private Shipment createShipment(
       final LocalDate shippingDate, final Deposit startDeposit, final Transport transport) {
-    return new Shipment(shippingDate, LoggedOperator.getInstance(), startDeposit, transport);
+    return new Shipment(shippingDate, Session.getLoggedOperator(), startDeposit, transport);
   }
 
   private void insertShipment(final Shipment shipment) throws SQLException {
@@ -306,6 +297,8 @@ public final class OrdersHandlingControl extends NonLoginControl {
   private void assignDriver(final Shipment shipment, final Driver driver) throws SQLException {
     shipmentDAO.assignDriver(shipment, driver);
   }
+
+  // Modal Handling Methods
 
   private String createConfirmationMessage(final LocalDate shippingDate) {
     return "Premendo OK verrà creata una nuova spedizione per il giorno "

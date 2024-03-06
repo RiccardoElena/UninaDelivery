@@ -3,7 +3,6 @@ package com.unina.oobd2324gr22.control;
 import com.unina.oobd2324gr22.entity.DAO.AccountDAO;
 import com.unina.oobd2324gr22.entity.DAO.AccountDAOPostgre;
 import com.unina.oobd2324gr22.entity.DTO.Operator;
-import com.unina.oobd2324gr22.utils.LoggedOperator;
 import com.unina.oobd2324gr22.utils.SHA256;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
@@ -23,7 +22,9 @@ public final class LoginControl extends BaseControl {
   /** Singleton instance. */
   private static LoginControl istance;
 
-  private LoginControl() {}
+  private LoginControl(final String defaultFileName) {
+    super(defaultFileName);
+  }
 
   /**
    * Get the singleton instance.
@@ -32,16 +33,9 @@ public final class LoginControl extends BaseControl {
    */
   public static LoginControl getInstance() {
     if (istance == null) {
-      istance = new LoginControl();
+      istance = new LoginControl("Login");
     }
     return istance;
-  }
-
-  /** Add page related scene settings. */
-  @Override
-  protected void addSceneSettings() {
-    setSizes(WIDTH, HEIGHT);
-    setFileName("Login");
   }
 
   private void showLoginErrorMessage(final String msg) {
@@ -82,9 +76,9 @@ public final class LoginControl extends BaseControl {
       return;
     }
 
-    LoggedOperator client = LoggedOperator.getInstance(checkLogin(email, password));
+    Session.loginOperator(checkLogin(email, password));
 
-    if (client != null) {
+    if (Session.getLoggedOperator() != null) {
       DashboardControl dashboardControl = DashboardControl.getInstance();
       try {
         dashboardControl.setScene();

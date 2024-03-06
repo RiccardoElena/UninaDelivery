@@ -25,7 +25,9 @@ public final class GraphControl extends NonLoginControl {
   /** Singleton instance. */
   private static GraphControl istance;
 
-  private GraphControl() {}
+  private GraphControl(final String name) {
+    super(name);
+  }
 
   /**
    * Get the singleton instance.
@@ -34,16 +36,9 @@ public final class GraphControl extends NonLoginControl {
    */
   public static GraphControl getInstance() {
     if (istance == null) {
-      istance = new GraphControl();
+      istance = new GraphControl("Graph");
     }
     return istance;
-  }
-
-  /** Add page related scene settings. */
-  @Override
-  protected void addSceneSettings() {
-    super.addSceneSettings();
-    setFileName("Graph");
   }
 
   /**

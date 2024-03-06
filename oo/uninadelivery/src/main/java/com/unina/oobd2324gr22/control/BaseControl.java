@@ -1,6 +1,7 @@
 package com.unina.oobd2324gr22.control;
 
 import com.unina.oobd2324gr22.boundary.BasePageController;
+import com.unina.oobd2324gr22.utils.StaticResourceLoadingException;
 import java.util.Optional;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -26,87 +27,56 @@ public abstract class BaseControl {
   /** Height of the eye icons. */
   static final int ICON_HEIGHT = 30;
 
-  /** Width of the window. */
-  private double width;
+  /** Name of the page related FXML and CSS files. */
+  protected String fileName;
 
-  /** Height of the window. */
-  private double height;
-
-  /** Name of the page. */
-  private String fileName;
-
-  /** Hook method for page launch. */
-  protected abstract void addSceneSettings();
+  protected BaseControl(final String defaultFileName) {
+    fileName = defaultFileName;
+  }
 
   /**
-   * Template method for page launch.
+   * Set the given Scene.
+   *
+   * @param scene the scene to set
+   */
+  protected void setScene(final String newFileName) throws Exception {
+    fileName = newFileName;
+    setScene();
+  }
+
+  /**
+   * Set the default scene.
    *
    * @throws Exception if the scene cannot be set
    */
   protected void setScene() throws Exception {
-    addSceneSettings();
-
-    launchScene();
-  }
-
-  private <T extends BasePageController<BaseControl>> void launchScene() throws Exception {
     try {
-      FXMLLoader loader =
-          new FXMLLoader(getClass().getResource("/FXML/" + getFileName() + ".fxml"));
-      Parent root = loader.load();
-      T pageController = loader.getController();
+      FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/" + fileName + ".fxml"));
 
-      setupStage();
+      Scene scene = setupScene(loader.load());
+      loadController(loader);
 
-      pageController.init(this);
-
-      App.getStage().setScene(setupScene(root));
-      App.getStage().show();
+      App.switchScene(getWidth(), getHeight(), scene);
     } catch (IllegalStateException e) {
-      e.printStackTrace();
-      System.err.println(
-          "Errore nel caricamento della pagina. Assicurarsi di aver specificato il valore corretto"
-              + " per il campo fileName del controllore.");
+      showInternalError(e);
       System.err.println("fileName attuale: " + fileName);
     }
   }
 
-  private void setupStage() {
-    App.setStageSizes(width, height);
+  private <T extends BasePageController<BaseControl>> void loadController(final FXMLLoader loader) {
+    T pageController = loader.getController();
+
+    pageController.init(this);
   }
 
-  private Scene setupScene(final Parent root) {
-    Scene scene = new Scene(root, width, height);
-    try {
-      scene
-          .getStylesheets()
-          .add(LoginControl.class.getResource("/style/" + fileName + ".css").toExternalForm());
-    } catch (IllegalStateException e) {
-      e.printStackTrace();
-      System.err.println(
-          "Errore nel caricamento dello Stile. Assicurarsi di aver specificato il valore corretto"
-              + " per il campo fileName del controllore.");
-      System.err.println("fileName attuale: " + fileName);
-    }
+  private Scene setupScene(final Parent root) throws StaticResourceLoadingException {
+    Scene scene = new Scene(root, getWidth(), getHeight());
+
+    scene
+        .getStylesheets()
+        .add(BaseControl.class.getResource("/style/" + fileName + ".css").toExternalForm());
+
     return scene;
-  }
-
-  /**
-   * Get the FXML file path.
-   *
-   * @return the FXML file path
-   */
-  public String getFileName() {
-    return fileName;
-  }
-
-  /**
-   * Set the FXML file path.
-   *
-   * @param name the FXML file path
-   */
-  public void setFileName(final String name) {
-    fileName = name;
   }
 
   /**
@@ -115,16 +85,9 @@ public abstract class BaseControl {
    * @return the width of the window
    */
   public double getWidth() {
-    return width;
-  }
-
-  /**
-   * Set the width of the window.
-   *
-   * @param w the width of the window
-   */
-  public void setWidth(final double w) {
-    width = w;
+    return this instanceof LoginControl
+        ? LoginControl.WIDTH
+        : Math.max(NonLoginControl.WIDTH, App.getStage().getWidth());
   }
 
   /**
@@ -133,27 +96,9 @@ public abstract class BaseControl {
    * @return the height of the window
    */
   public double getHeight() {
-    return height;
-  }
-
-  /**
-   * Set the height of the window.
-   *
-   * @param h the height of the window
-   */
-  public void setHeight(final double h) {
-    height = h;
-  }
-
-  /**
-   * Set window sizes.
-   *
-   * @param h the height of the window
-   * @param w the width of the window
-   */
-  public void setSizes(final double w, final double h) {
-    setHeight(h);
-    setWidth(w);
+    return this instanceof LoginControl
+        ? LoginControl.HEIGHT
+        : Math.max(NonLoginControl.HEIGHT, App.getStage().getHeight());
   }
 
   /**

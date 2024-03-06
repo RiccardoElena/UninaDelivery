@@ -1,7 +1,5 @@
 package com.unina.oobd2324gr22.control;
 
-import com.unina.oobd2324gr22.entity.DTO.Operator;
-import com.unina.oobd2324gr22.utils.LoggedOperator;
 
 /**
  * NonLoginControl is the abstract class that represents the control of all the functionalities but
@@ -15,11 +13,8 @@ public abstract class NonLoginControl extends BaseControl {
   /** Height of the window. */
   protected static final double HEIGHT = 720;
 
-  /** Add page related scene settings. */
-  @Override
-  protected void addSceneSettings() {
-    setSizes(
-        Math.max(WIDTH, App.getStage().getWidth()), Math.max(HEIGHT, App.getStage().getHeight()));
+  protected NonLoginControl(final String defaultFileName) {
+    super(defaultFileName);
   }
 
   /** Minimize the window. */
@@ -40,14 +35,5 @@ public abstract class NonLoginControl extends BaseControl {
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
-
-  /**
-   * Get the logged operator.
-   *
-   * @return the logged operator
-   */
-  public Operator getLoggedOperator() {
-    return LoggedOperator.getInstance();
   }
 }

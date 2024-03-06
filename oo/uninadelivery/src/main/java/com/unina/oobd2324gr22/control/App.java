@@ -1,6 +1,7 @@
 package com.unina.oobd2324gr22.control;
 
 import javafx.application.Application;
+import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -61,5 +62,18 @@ public final class App extends Application {
   public static void setStageSizes(final double width, final double height) {
     stage.setWidth(width);
     stage.setHeight(height);
+  }
+
+  /**
+   * Switch to the next scene with given size.
+   *
+   * @param width the width
+   * @param height the height
+   * @param scene the scene
+   */
+  public static void switchScene(final double width, final double height, final Scene scene) {
+    setStageSizes(width, height);
+    stage.setScene(scene);
+    stage.show();
   }
 }

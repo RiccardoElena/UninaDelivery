@@ -2,7 +2,7 @@ package com.unina.oobd2324gr22.control;
 
 import com.unina.oobd2324gr22.entity.DAO.OrderDAO;
 import com.unina.oobd2324gr22.entity.DAO.OrderDAOPostgre;
-import com.unina.oobd2324gr22.utils.LoggedOperator;
+import com.unina.oobd2324gr22.entity.DTO.Operator;
 import java.sql.SQLException;
 import java.util.Optional;
 import javafx.scene.control.Alert;
@@ -16,7 +16,9 @@ public final class DashboardControl extends NonLoginControl {
   /** Singleton instance. */
   private static DashboardControl istance;
 
-  private DashboardControl() {}
+  private DashboardControl(final String name) {
+    super(name);
+  }
 
   /**
    * Get the singleton instance.
@@ -25,16 +27,9 @@ public final class DashboardControl extends NonLoginControl {
    */
   public static DashboardControl getInstance() {
     if (istance == null) {
-      istance = new DashboardControl();
+      istance = new DashboardControl("Dashboard");
     }
     return istance;
-  }
-
-  /** Add page related scene settings. */
-  @Override
-  protected void addSceneSettings() {
-    super.addSceneSettings();
-    setFileName("Dashboard");
   }
 
   /** Go to the Orders page. */
@@ -86,16 +81,25 @@ public final class DashboardControl extends NonLoginControl {
         showAlert(
             Alert.AlertType.CONFIRMATION,
             "Conferma",
-            LoggedOperator.getInstance().getName() + " vuoi disconnetterti?",
+            Session.getLoggedOperator().getName() + " vuoi disconnetterti?",
             "Premendo OK verrai disconnesso e tornerai alla schermata di login. Continuare?");
     if (result.isPresent() && result.get() == ButtonType.OK) {
       try {
         LoginControl loginControl = LoginControl.getInstance();
-        LoggedOperator.getInstance().logout();
+        Session.logoutOperator();
         loginControl.setScene();
       } catch (Exception e) {
         showInternalError(e);
       }
     }
+  }
+
+  /**
+   * Get the logged operator.
+   *
+   * @return the logged operator
+   */
+  public Operator getLoggedOperator() {
+    return Session.getLoggedOperator();
   }
 }
