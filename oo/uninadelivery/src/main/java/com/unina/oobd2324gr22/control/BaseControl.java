@@ -2,6 +2,7 @@ package com.unina.oobd2324gr22.control;
 
 import com.unina.oobd2324gr22.boundary.BasePageController;
 import com.unina.oobd2324gr22.utils.StaticResourceLoadingException;
+import java.io.IOException;
 import java.util.Optional;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -9,7 +10,6 @@ import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -28,19 +28,19 @@ public abstract class BaseControl {
   static final int ICON_HEIGHT = 30;
 
   /** Name of the page related FXML and CSS files. */
-  protected String fileName;
+  private String pageName;
 
-  protected BaseControl(final String defaultFileName) {
-    fileName = defaultFileName;
+  protected BaseControl(final String defaultPageName) {
+    pageName = defaultPageName;
   }
 
   /**
    * Set the given Scene.
    *
-   * @param scene the scene to set
+   * @param newPageName the scene to set
    */
-  protected void setScene(final String newFileName) throws Exception {
-    fileName = newFileName;
+  protected void setScene(final String newPageName) throws Exception {
+    pageName = newPageName;
     setScene();
   }
 
@@ -51,15 +51,13 @@ public abstract class BaseControl {
    */
   protected void setScene() throws Exception {
     try {
-      FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/" + fileName + ".fxml"));
 
-      Scene scene = setupScene(loader.load());
-      loadController(loader);
+      Scene scene = setupScene();
 
       App.switchScene(getWidth(), getHeight(), scene);
     } catch (IllegalStateException e) {
       showInternalError(e);
-      System.err.println("fileName attuale: " + fileName);
+      System.err.println("fileName attuale: " + pageName);
     }
   }
 
@@ -69,12 +67,18 @@ public abstract class BaseControl {
     pageController.init(this);
   }
 
-  private Scene setupScene(final Parent root) throws StaticResourceLoadingException {
-    Scene scene = new Scene(root, getWidth(), getHeight());
-
+  private Scene setupScene() throws StaticResourceLoadingException {
+    FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/" + pageName + ".fxml"));
+    Scene scene;
+    try {
+      scene = new Scene(loader.load(), getWidth(), getHeight());
+    } catch (IOException e) {
+      throw new StaticResourceLoadingException();
+    }
+    loadController(loader);
     scene
         .getStylesheets()
-        .add(BaseControl.class.getResource("/style/" + fileName + ".css").toExternalForm());
+        .add(BaseControl.class.getResource("/style/" + pageName + ".css").toExternalForm());
 
     return scene;
   }

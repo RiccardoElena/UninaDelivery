@@ -53,8 +53,8 @@ public final class OrdersHandlingControl extends NonLoginControl {
   /** Singleton instance. */
   private static OrdersHandlingControl istance;
 
-  private OrdersHandlingControl(final String name) {
-    super(name);
+  private OrdersHandlingControl(final String defaultPageName) {
+    super(defaultPageName);
   }
 
   /**

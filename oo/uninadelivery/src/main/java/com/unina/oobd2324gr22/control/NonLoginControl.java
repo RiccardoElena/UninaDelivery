@@ -1,6 +1,5 @@
 package com.unina.oobd2324gr22.control;
 
-
 /**
  * NonLoginControl is the abstract class that represents the control of all the functionalities but
  * the login.
@@ -13,8 +12,8 @@ public abstract class NonLoginControl extends BaseControl {
   /** Height of the window. */
   protected static final double HEIGHT = 720;
 
-  protected NonLoginControl(final String defaultFileName) {
-    super(defaultFileName);
+  protected NonLoginControl(final String defaultPageName) {
+    super(defaultPageName);
   }
 
   /** Minimize the window. */

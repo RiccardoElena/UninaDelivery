@@ -22,8 +22,8 @@ public final class LoginControl extends BaseControl {
   /** Singleton instance. */
   private static LoginControl istance;
 
-  private LoginControl(final String defaultFileName) {
-    super(defaultFileName);
+  private LoginControl(final String defaultPageName) {
+    super(defaultPageName);
   }
 
   /**

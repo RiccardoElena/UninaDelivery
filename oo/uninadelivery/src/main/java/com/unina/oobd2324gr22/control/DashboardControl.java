@@ -16,8 +16,8 @@ public final class DashboardControl extends NonLoginControl {
   /** Singleton instance. */
   private static DashboardControl istance;
 
-  private DashboardControl(final String name) {
-    super(name);
+  private DashboardControl(final String defaultPageName) {
+    super(defaultPageName);
   }
 
   /**

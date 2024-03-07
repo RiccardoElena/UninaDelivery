@@ -25,8 +25,8 @@ public final class GraphControl extends NonLoginControl {
   /** Singleton instance. */
   private static GraphControl istance;
 
-  private GraphControl(final String name) {
-    super(name);
+  private GraphControl(final String defaultPageName) {
+    super(defaultPageName);
   }
 
   /**
