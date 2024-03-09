@@ -178,7 +178,7 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
    * @param <U> the type of the table
    * @param table the table to set the functions on
    */
-  public <U> void setTableFunctionality(final TableView<U> table) {
+  protected <U> void setTableFunctionality(final TableView<U> table) {
     setRowDeselection(table);
     setColumnSize(table);
   }
@@ -192,7 +192,7 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
    * @param buttonText the action button text
    * @param action the action to execute
    */
-  public <U> void setTableFunctionality(
+  protected <U> void setTableFunctionality(
       final TableView<U> table,
       final String columnTitle,
       final String buttonText,

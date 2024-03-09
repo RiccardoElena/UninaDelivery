@@ -246,7 +246,7 @@ public final class OrdersHandlingControl extends NonLoginControl {
    */
   public void shipsSelectedOrder(final Shipment selectedShipment) {
     try {
-      if (isShippingConfirmed(createConfirmationMessage(selectedShipment))) {
+      if (isShippingConfirmed(selectedShipment)) {
         shipmentDAO.shipOrder(Session.getSelectedOrder(), selectedShipment);
         showSuccessModal();
       }
@@ -270,7 +270,7 @@ public final class OrdersHandlingControl extends NonLoginControl {
       final Driver driver) {
     Shipment newShipment = createShipment(shippingDate, startDeposit, transport);
     try {
-      if (isShippingConfirmed(createConfirmationMessage(shippingDate))) {
+      if (isShippingConfirmed(shippingDate)) {
         insertShipment(newShipment);
         shipOrder(Session.getSelectedOrder(), newShipment);
         assignDriver(newShipment, driver);
@@ -315,36 +315,32 @@ public final class OrdersHandlingControl extends NonLoginControl {
         + ". Continuare?";
   }
 
-  private String createConfirmationMessage(final Object data) {
-    if (data instanceof LocalDate) {
-      return createConfirmationMessage((LocalDate) data);
-    }
-
-    if (data instanceof Shipment) {
-      return createConfirmationMessage((Shipment) data);
-    }
-    throw new IllegalArgumentException(
-        "Invalid data type. Cannot create confirmation message. Data must be of type LocalDate or"
-            + " Shipment.");
-  }
-
   private void handleShippingError(final Shipment newShipment, final SQLException e) {
     try {
       shipmentDAO.delete(newShipment);
     } catch (SQLException e1) {
       showInternalError(e1);
     }
-    e.printStackTrace();
     showInternalError(e);
   }
 
-  private boolean isShippingConfirmed(final Object data) {
+  private boolean isShippingConfirmed(final Shipment shipment) {
     Optional<ButtonType> modalResponse =
         showAlert(
             Alert.AlertType.CONFIRMATION,
             "Conferma",
             "Spedire Ordine?",
-            createConfirmationMessage(data));
+            createConfirmationMessage(shipment));
+    return modalResponse.isPresent() && modalResponse.get() == ButtonType.OK;
+  }
+
+  private boolean isShippingConfirmed(final LocalDate date) {
+    Optional<ButtonType> modalResponse =
+        showAlert(
+            Alert.AlertType.CONFIRMATION,
+            "Conferma",
+            "Spedire Ordine?",
+            createConfirmationMessage(date));
     return modalResponse.isPresent() && modalResponse.get() == ButtonType.OK;
   }
 
