@@ -1,2 +1,42 @@
-\chapter{Test}
-test
+\chapter{Analisi dei requisiti e progettazione del sistema}
+
+\section{Introduzione e Requisiti}
+
+È richiesto di progettare un \textbf{applicativo a interfaccia grafica} per la gestione di un \textbf{azienda 
+di delivery} dal lato degli operatori di tale ditta.
+
+
+Una volta effettuato l'accesso, l'operatore deve poter:
+
+\begin{itemize}
+  \item Visualizzare la lista degli ordini in attesa di essere evasi
+  \item Creare spedizioni per tali ordini
+  \item Visualizzare report mensili sugli ordini evasi
+\end{itemize}
+
+\section{Assunzioni sul Dominio}
+
+Si assume che l'azienda di delivery spedisca \textbf{merce propria} o \textbf{di terzi} lasciata in 
+gestione. Si assume inoltre che l'azienda si occupi di spedizioni \textbf{nazionali e 
+internazionali} e che l'operatore gestisca, oltre che le spedizioni \textbf{verso i clienti},
+anche gli \textbf{spostamenti di merci} da un deposito all'altro e le \textbf{spedizioni 
+intermedie}\footnote{L'applicativo è predisposto all'implementazione di queste 
+feature che però non è effettivamente implementata, essendo compresa nelle 
+richieste extra non assegnateci.}.
+
+Inoltre, per ragioni di gestione della \textbf{capillarità del servizio}, si assume che le
+spedizioni \textbf{dirette verso un cliente} partano esclusivamente da depositi \textbf{della stessa
+città} del cliente e che, in caso i prodotti richiesti non siano presenti, sia necessario
+uno spostamento di merci o una spedizione intermedia prima di concludere tale spedizione.
+
+Infine, per ragioni di gestione del sistema, si assume che ogni ordine \textbf{possa contenere
+un solo prodotto}, con quantità variabile, e che quindi ordini contenenti più prodotti
+vengano, una volta richiesti dal cliente, suddivisi \textbf{in più ordini prima di essere inseriti}
+dall'applicativo destinato ai clienti\footnote{Anche per questa feature l'applicativo è 
+predisposto all'implementazione, pur non essendo effettivamente presente per ragioni simili 
+alle precedenti.}. Una spedizione \textbf{può contenere più ordini}, a patto che siano tutti destinati
+alla \textbf{stessa zona di destinazione}, identificata dal CAP, nel caso di spedizione verso clienti,
+o lo stesso \textbf{deposito di arrivo}, in caso di spedizioni intermedie o spostamento merci.
+
+
+

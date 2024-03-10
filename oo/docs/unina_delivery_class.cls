@@ -25,7 +25,7 @@
 \usepackage[no-math]{fontspec} % Required for custom font
 
 % Global variables
-  \gdef\maintitle{\textcolor{PRIMARY}{Project Title}}
+  \gdef\maintitle{\textcolor{PRIMARY}{UninaDelivery}}
   \gdef\authors{Riccardo Elena --- Gennaro De Gregorio}
 
 % Default color
