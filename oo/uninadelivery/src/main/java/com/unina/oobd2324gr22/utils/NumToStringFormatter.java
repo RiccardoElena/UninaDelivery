@@ -3,7 +3,7 @@ package com.unina.oobd2324gr22.utils;
 public final class NumToStringFormatter {
 
   private NumToStringFormatter() {
-    throw new IllegalStateException("Utility class");
+    throw new UtilityClassInstantiationException();
   }
 
   /**

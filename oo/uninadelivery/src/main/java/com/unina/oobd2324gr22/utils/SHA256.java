@@ -10,7 +10,7 @@ public final class SHA256 {
 
   /** Private constructor. */
   private SHA256() {
-    throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    throw new UtilityClassInstantiationException();
   }
 
   /**

@@ -1,4 +1,4 @@
-package com.unina.oobd2324gr22.utils;
+package com.unina.oobd2324gr22.entity.DAO;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -27,7 +27,7 @@ public final class DBConnection {
    *
    * @return instance of the class DBConnection
    */
-  public static DBConnection getDBConnection() {
+  static DBConnection getDBConnection() {
     // if the connection doesn't exist or is closed
     if (dbConn == null) {
       dbConn = new DBConnection();
@@ -41,7 +41,7 @@ public final class DBConnection {
    * @param schemaName name of the schema to connect to
    * @return connection to the DB
    */
-  public static Connection getConnectionBySchema(final String schemaName) {
+  static Connection getConnectionBySchema(final String schemaName) {
     String pwd = null;
     BufferedReader b = null;
     if (Objects.equals(schemaName, "")) {

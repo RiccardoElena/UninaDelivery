@@ -3,7 +3,6 @@ package com.unina.oobd2324gr22.entity.DAO;
 import com.unina.oobd2324gr22.entity.DTO.Driver;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
-import com.unina.oobd2324gr22.utils.DBConnection;
 import com.unina.oobd2324gr22.utils.IterableInt;
 import com.unina.oobd2324gr22.utils.UnimplementedMethodException;
 import java.sql.Connection;
@@ -58,6 +57,13 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
     ResultSet rs = st.getGeneratedKeys();
     if (rs.next()) {
       int id = rs.getInt(1);
+      if (st != null) {
+        st.close();
+      }
+      if (con != null) {
+        con.close();
+      }
+      System.err.println("?");
       return id;
     }
 
@@ -87,13 +93,15 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
     st.setInt(fieldNumber.next(), shipment.getId());
     st.setInt(fieldNumber.next(), order.getId());
 
+    int affectedRows = st.executeUpdate();
+
     if (st != null) {
       st.close();
     }
     if (con != null) {
       con.close();
     }
-    return st.executeUpdate();
+    return affectedRows;
   }
 
   /**
@@ -113,13 +121,15 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
     st.setInt(fieldNumber.next(), shipment.getTransport().getId());
     st.setDate(fieldNumber.next(), java.sql.Date.valueOf(shipment.getShippingDate()));
 
+    int affectedRows = st.executeUpdate();
+
     if (st != null) {
       st.close();
     }
     if (con != null) {
       con.close();
     }
-    return st.executeUpdate();
+    return affectedRows;
   }
 
   /**
@@ -160,6 +170,7 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
             + "FROM shipment S LEFT JOIN (covers NATURAL JOIN transport) C "
             + "ON S.transportid = C.transportid AND S.shippingdate = date "
             + "WHERE S.directedto IS NULL AND "
+            + "isDirectionCorrect(?,?,S.shippingdate,C.Transportid) AND "
             + "S.shippingdate >= CURRENT_DATE AND "
             + "(hasarrived = FALSE OR hasarrived IS NULL) AND "
             + "C.occupiedspace + ? <= C.maxcapacity AND "
@@ -170,6 +181,8 @@ public class ShipmentDAOPostgre implements ShipmentDAO {
             + "quantity >= ? AND isSameCity(zipcode, country, ?,?)) "
             + "ORDER BY shippingdate ASC;";
     st = con.prepareStatement(query);
+    st.setString(fieldNumber.next(), order.getAccount().getAddress().getZipCode());
+    st.setString(fieldNumber.next(), order.getAccount().getAddress().getCountry());
     st.setDouble(
         fieldNumber.next(), order.getProduct().getPackageSizeLiters() * order.getQuantity());
     st.setString(fieldNumber.next(), order.getProduct().getName());

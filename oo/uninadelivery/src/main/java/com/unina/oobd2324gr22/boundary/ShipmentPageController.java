@@ -6,7 +6,7 @@ import com.unina.oobd2324gr22.entity.DTO.Driver;
 import com.unina.oobd2324gr22.entity.DTO.Order;
 import com.unina.oobd2324gr22.entity.DTO.Shipment;
 import com.unina.oobd2324gr22.entity.DTO.Transport;
-import com.unina.oobd2324gr22.utils.LoadingScreenUtil;
+import com.unina.oobd2324gr22.utils.LoadingScreen;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -97,7 +97,7 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
 
     setTableColumns();
 
-    LoadingScreenUtil.loading(
+    LoadingScreen.loading(
         loadingPane,
         () -> displayCompatibleShipments(),
         shipments ->

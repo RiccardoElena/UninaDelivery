@@ -2,6 +2,7 @@ package com.unina.oobd2324gr22.control;
 
 import com.unina.oobd2324gr22.entity.DTO.Operator;
 import com.unina.oobd2324gr22.entity.DTO.Order;
+import com.unina.oobd2324gr22.utils.UtilityClassInstantiationException;
 
 public final class Session {
 
@@ -12,7 +13,7 @@ public final class Session {
   private static Order selectedOrder;
 
   private Session() {
-    throw new IllegalStateException("Utility class");
+    throw new UtilityClassInstantiationException();
   }
 
   /**

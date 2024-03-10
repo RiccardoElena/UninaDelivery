@@ -2,7 +2,6 @@ package com.unina.oobd2324gr22.entity.DAO;
 
 import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Area;
-import com.unina.oobd2324gr22.utils.DBConnection;
 import com.unina.oobd2324gr22.utils.UnimplementedMethodException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

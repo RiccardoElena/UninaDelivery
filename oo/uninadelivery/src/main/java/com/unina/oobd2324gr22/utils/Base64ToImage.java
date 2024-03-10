@@ -19,7 +19,7 @@ public final class Base64ToImage {
 
   /** Private Constructor. */
   private Base64ToImage() {
-    throw new IllegalStateException("Utility class");
+    throw new UtilityClassInstantiationException();
   }
 
   /**

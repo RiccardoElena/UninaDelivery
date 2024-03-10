@@ -1,6 +1,7 @@
 package com.unina.oobd2324gr22;
 
 import com.unina.oobd2324gr22.control.App;
+import com.unina.oobd2324gr22.utils.UtilityClassInstantiationException;
 
 /** Hello world! */
 public final class Main {
@@ -9,7 +10,7 @@ public final class Main {
 
   /** Default constructor. */
   private Main() {
-    throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    throw new UtilityClassInstantiationException();
   }
 
   // Methods

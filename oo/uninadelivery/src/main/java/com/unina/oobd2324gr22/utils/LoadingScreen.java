@@ -6,10 +6,10 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.layout.StackPane;
 
-public final class LoadingScreenUtil {
+public final class LoadingScreen {
 
-  private LoadingScreenUtil() {
-    throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+  private LoadingScreen() {
+    throw new UtilityClassInstantiationException();
   }
 
   /**

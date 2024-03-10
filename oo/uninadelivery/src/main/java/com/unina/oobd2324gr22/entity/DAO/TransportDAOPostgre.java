@@ -2,7 +2,6 @@ package com.unina.oobd2324gr22.entity.DAO;
 
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
 import com.unina.oobd2324gr22.entity.DTO.Transport;
-import com.unina.oobd2324gr22.utils.DBConnection;
 import com.unina.oobd2324gr22.utils.IterableInt;
 import com.unina.oobd2324gr22.utils.UnimplementedMethodException;
 import java.sql.Connection;

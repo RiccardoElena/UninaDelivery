@@ -2,7 +2,7 @@ package com.unina.oobd2324gr22.boundary;
 
 import com.unina.oobd2324gr22.control.OrdersHandlingControl;
 import com.unina.oobd2324gr22.entity.DTO.Order;
-import com.unina.oobd2324gr22.utils.LoadingScreenUtil;
+import com.unina.oobd2324gr22.utils.LoadingScreen;
 import io.github.palexdev.mfxcore.controls.Label;
 import java.time.LocalDate;
 import javafx.application.Platform;
@@ -80,7 +80,7 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
     Platform.runLater(() -> filterButton.getScene().setOnKeyPressed(this::handleKeyPressed));
 
     // Assumi che progressIndicator sia il tuo ProgressIndicator definito altrove
-    LoadingScreenUtil.loading(
+    LoadingScreen.loading(
         loadingPane,
         () -> displayUnfilteredOrders(),
         orders ->
@@ -114,7 +114,7 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
   @FXML
   public final void filterButtonAction(final ActionEvent event) {
     // Mostra il loading indicator e esegui il filtraggio degli ordini in background
-    LoadingScreenUtil.loading(
+    LoadingScreen.loading(
         loadingPane, // Assicurati che loadingPane sia correttamente inizializzato e punti al tuo
         // indicatore nella UI
         () -> { // Task da eseguire in background

@@ -10,6 +10,7 @@ import com.unina.oobd2324gr22.entity.DAO.ShipmentDAO;
 import com.unina.oobd2324gr22.entity.DAO.ShipmentDAOPostgre;
 import com.unina.oobd2324gr22.entity.DAO.TransportDAO;
 import com.unina.oobd2324gr22.entity.DAO.TransportDAOPostgre;
+import com.unina.oobd2324gr22.entity.DTO.Address;
 import com.unina.oobd2324gr22.entity.DTO.Deposit;
 import com.unina.oobd2324gr22.entity.DTO.Driver;
 import com.unina.oobd2324gr22.entity.DTO.Order;
@@ -77,11 +78,34 @@ public final class OrdersHandlingControl extends NonLoginControl {
    * @param order seleted order
    */
   public void goToShipmentPage(final Order order) {
+    if (!depositsHaveEnoughProducts(order)) {
+      Address address = order.getAccount().getAddress();
+      showAlert(
+          Alert.AlertType.ERROR,
+          "Errore",
+          "Non ci sono prodotti a sufficienza nella zona di consegna",
+          "Non sono presenti depositi a "
+              + address.getCity()
+              + " - "
+              + address.getCountry()
+              + " con prodotti a sufficienza per soddisfare l'ordine. Si prega di rifornire i"
+              + " depositi.");
+      return;
+    }
     Session.selectOrder(order);
     try {
       setScene("Shipment");
     } catch (Exception e) {
       showInternalError(e);
+    }
+  }
+
+  private boolean depositsHaveEnoughProducts(final Order order) {
+    try {
+      return !depositsDAO.getCompatibleDeposits(order, LocalDate.now()).isEmpty();
+    } catch (SQLException e) {
+      showInternalError(e);
+      return false;
     }
   }
 
@@ -193,6 +217,18 @@ public final class OrdersHandlingControl extends NonLoginControl {
               depositsDAO.getCompatibleDeposits(Session.getSelectedOrder(), selectedDate));
     } catch (SQLException e) {
       showInternalError(e);
+    }
+    if (deposits.isEmpty()) {
+      showAlert(
+          Alert.AlertType.WARNING,
+          "Attenzione",
+          "Nessun deposito disponibile",
+          "Nessun deposito compatibile all'ordine ha prodotti a sufficienza per soddisfare"
+              + " l'ordine. Si prega di utilizzare un'altra modalità di spedizione o di rifornire i"
+              + " depoiti di "
+              + Session.getSelectedOrder().getAccount().getAddress().getCity()
+              + " - "
+              + Session.getSelectedOrder().getAccount().getAddress().getCountry());
     }
     return deposits;
   }
@@ -331,6 +367,25 @@ public final class OrdersHandlingControl extends NonLoginControl {
             "Conferma",
             "Spedire Ordine?",
             createConfirmationMessage(shipment));
+
+    if (modalResponse.isPresent() && modalResponse.get() == ButtonType.OK) {
+      LocalDate shippingDate = shipment.getShippingDate();
+      LocalDate expectedDeliveryDate = Session.getSelectedOrder().getExpectedDeliveryDate();
+
+      if (shippingDate.isAfter(expectedDeliveryDate)) {
+        modalResponse =
+            showAlert(
+                Alert.AlertType.WARNING,
+                "Attenzione",
+                "Spedizione in ritardo",
+                "La spedizione è prevista per il giorno "
+                    + shippingDate
+                    + " ma la data di consegna stimata dell'ordine è il "
+                    + expectedDeliveryDate
+                    + ". Continuare?");
+      }
+    }
+
     return modalResponse.isPresent() && modalResponse.get() == ButtonType.OK;
   }
 

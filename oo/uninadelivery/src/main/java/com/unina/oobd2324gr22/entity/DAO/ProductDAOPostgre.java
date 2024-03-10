@@ -1,7 +1,6 @@
 package com.unina.oobd2324gr22.entity.DAO;
 
 import com.unina.oobd2324gr22.entity.DTO.Product;
-import com.unina.oobd2324gr22.utils.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
