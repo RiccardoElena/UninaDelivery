@@ -18,7 +18,7 @@
 *.class
 **/target/
 
-!**/sources/*.pdf
+!**/sources/**/*.pdf
 ## macOS app launcher
 /header-template
 /UninaDelivery
