@@ -28,13 +28,6 @@ public abstract class BasePageController<T extends BaseControl> {
   @FXML private Button exitButton;
 
   /**
-   * Hook method for page initialization.
-   *
-   * @param c of the page
-   */
-  protected abstract void initialize(T c);
-
-  /**
    * Template method for page initialization.
    *
    * @param c
@@ -47,21 +40,29 @@ public abstract class BasePageController<T extends BaseControl> {
   }
 
   /**
+   * Button to close the window.
+   *
+   * @param event the event that triggered the action
+   */
+  @FXML
+  final void exitButtonAction(final ActionEvent event) {
+    getControl().exit();
+  }
+
+  /**
+   * Hook method for page initialization.
+   *
+   * @param c of the page
+   */
+  protected abstract void initialize(T c);
+
+  /**
    * Get the control.
    *
    * @return the control
    */
-  public T getControl() {
+  protected T getControl() {
     return control;
-  }
-
-  /**
-   * Set the control.
-   *
-   * @param c the control to set
-   */
-  public void setControl(final T c) {
-    control = c;
   }
 
   /** Make the window draggable. */
@@ -102,12 +103,11 @@ public abstract class BasePageController<T extends BaseControl> {
   }
 
   /**
-   * Button to close the window.
+   * Set the control.
    *
-   * @param event the event that triggered the action
+   * @param c the control to set
    */
-  @FXML
-  void exitButtonAction(final ActionEvent event) {
-    getControl().exit();
+  private void setControl(final T c) {
+    control = c;
   }
 }

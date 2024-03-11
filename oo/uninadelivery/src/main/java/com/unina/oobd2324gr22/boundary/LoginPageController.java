@@ -42,6 +42,21 @@ public class LoginPageController extends BasePageController<LoginControl> {
     togglePswVisibilityButton.setOnKeyPressed(this::handleToggleKeyPressed);
   }
 
+  /**
+   * On loginButton click, retrieves login data and checks if they are correct. In such case, it
+   * loads the next page.
+   *
+   * @param event the event that triggered the method
+   */
+  @FXML
+  final void loginButtonAction(final ActionEvent event) {
+    String password =
+        passwordTextField.isVisible()
+            ? passwordTextField.getText()
+            : plainPasswordTextField.getText();
+    getControl().login(emailTextField.getText(), password);
+  }
+
   private void handleKeyPressed(final KeyEvent event) {
     String keyCode = event.getCode().toString();
     if (keyCode.equals("ENTER")) {
@@ -58,21 +73,6 @@ public class LoginPageController extends BasePageController<LoginControl> {
       togglePswVisibilityButton.fireEvent(new ActionEvent(passwordTextField, null));
       event.consume();
     }
-  }
-
-  /**
-   * On loginButton click, retrieves login data and checks if they are correct. In such case, it
-   * loads the next page.
-   *
-   * @param event the event that triggered the method
-   */
-  @FXML
-  final void loginButtonAction(final ActionEvent event) {
-    String password =
-        passwordTextField.isVisible()
-            ? passwordTextField.getText()
-            : plainPasswordTextField.getText();
-    getControl().login(emailTextField.getText(), password);
   }
 
   private void togglePswVisibility() {

@@ -60,6 +60,41 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
     setNavigationButtons();
   }
 
+  /**
+   * Button to minimize the window.
+   *
+   * @param event the event that triggered the action
+   */
+  @FXML
+  void minimizeButtonAction(final ActionEvent event) {
+    getControl().minimize();
+  }
+
+  /**
+   * Button to resize the window.
+   *
+   * @param event the event that triggered the action
+   */
+  @FXML
+  void resizeButtonAction(final ActionEvent event) {
+    Stage stage = App.getStage();
+    stage.setMaximized(!stage.isMaximized());
+  }
+
+  /**
+   * Button to go back to the home page.
+   *
+   * @param event the event that triggered the action
+   */
+  @FXML
+  void homeButtonAction(final ActionEvent event) {
+    try {
+      getControl().returnToHomePage();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
   /** Make the window resizable. */
   protected void setResizable() {
     Platform.runLater(
@@ -70,6 +105,50 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
           scene.setOnMouseDragged(this::handleSceneResizing);
           scene.setOnMouseMoved(this::handleCursorSwitch);
         });
+  }
+
+  /**
+   * Set the table functions.
+   *
+   * @param <U> the type of the table
+   * @param table the table to set the functions on
+   */
+  protected <U> void setTableFunctionality(final TableView<U> table) {
+    setRowDeselection(table);
+    setColumnSize(table);
+  }
+
+  /**
+   * Set the table functions when action buttons are needed.
+   *
+   * @param <U> the type of the table
+   * @param table the table to set the functions on
+   * @param columnTitle the action column title
+   * @param buttonText the action button text
+   * @param action the action to execute
+   */
+  protected <U> void setTableFunctionality(
+      final TableView<U> table,
+      final String columnTitle,
+      final String buttonText,
+      final Consumer<U> action) {
+    addButtonToTable(table, columnTitle, buttonText, action);
+    setTableFunctionality(table);
+  }
+
+  /**
+   * Set the image and the position for the round image view.
+   *
+   * @param img the image
+   * @param imgView the image view
+   */
+  protected void setRoundImageViewImagesAndPosition(final Image img, final ImageView imgView) {
+    double imgRatio = img.getWidth() / img.getHeight();
+    double imgActualWidth = MAX_IMG_HEIGHT * imgRatio;
+
+    double xoffset = (MAX_IMG_WIDTH - imgActualWidth) / 2;
+    imgView.setImage(img);
+    imgView.setLayoutX(xoffset);
   }
 
   private void handleSceneResizing(final MouseEvent event) {
@@ -137,70 +216,6 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
     button.setOnMouseExited(event -> button.setGraphic(getIcon(baseIconPath)));
   }
 
-  /**
-   * Button to minimize the window.
-   *
-   * @param event the event that triggered the action
-   */
-  @FXML
-  void minimizeButtonAction(final ActionEvent event) {
-    getControl().minimize();
-  }
-
-  /**
-   * Button to resize the window.
-   *
-   * @param event the event that triggered the action
-   */
-  @FXML
-  void resizeButtonAction(final ActionEvent event) {
-    Stage stage = App.getStage();
-    stage.setMaximized(!stage.isMaximized());
-  }
-
-  /**
-   * Button to go back to the home page.
-   *
-   * @param event the event that triggered the action
-   */
-  @FXML
-  void homeButtonAction(final ActionEvent event) {
-    try {
-      getControl().returnToHomePage();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  /**
-   * Set the table functions.
-   *
-   * @param <U> the type of the table
-   * @param table the table to set the functions on
-   */
-  protected <U> void setTableFunctionality(final TableView<U> table) {
-    setRowDeselection(table);
-    setColumnSize(table);
-  }
-
-  /**
-   * Set the table functions when action buttons are needed.
-   *
-   * @param <U> the type of the table
-   * @param table the table to set the functions on
-   * @param columnTitle the action column title
-   * @param buttonText the action button text
-   * @param action the action to execute
-   */
-  protected <U> void setTableFunctionality(
-      final TableView<U> table,
-      final String columnTitle,
-      final String buttonText,
-      final Consumer<U> action) {
-    addButtonToTable(table, columnTitle, buttonText, action);
-    setTableFunctionality(table);
-  }
-
   private <U> void setRowDeselection(final TableView<U> table) {
     table.setRowFactory(
         tableView -> {
@@ -258,20 +273,5 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
         });
 
     table.getColumns().add(actionColumn);
-  }
-
-  /**
-   * Set the image and the position for the round image view.
-   *
-   * @param img the image
-   * @param imgView the image view
-   */
-  public void setRoundImageViewImagesAndPosition(final Image img, final ImageView imgView) {
-    double imgRatio = img.getWidth() / img.getHeight();
-    double imgActualWidth = MAX_IMG_HEIGHT * imgRatio;
-
-    double xoffset = (MAX_IMG_WIDTH - imgActualWidth) / 2;
-    imgView.setImage(img);
-    imgView.setLayoutX(xoffset);
   }
 }

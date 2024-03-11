@@ -142,7 +142,7 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
    * @param control the Orders selection functionality control class
    */
   @Override
-  protected final void initialize(final GraphControl control) {
+  protected void initialize(final GraphControl control) {
     monthlyReportData.setVisible(false);
     scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
     scrollPane.addEventFilter(
@@ -284,6 +284,7 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
     for (String category : pieChartData.keySet()) {
       float percentage = ((float) pieChartData.get(category) / total) * PERCENTAGE_DIVISOR;
       categoryPieChart.getData().add(new PieChart.Data(category, percentage));
+      setPopupOnDataHover(categoryPieChart.getData().getLast(), category);
     }
     categoryPieChart.setLabelsVisible(true);
     categoryPieChart.setLegendVisible(true);
@@ -379,6 +380,40 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
                     popup.hide();
                     pause.stop();
                   });
+            });
+  }
+
+  private void setPopupOnDataHover(final PieChart.Data data, final String label) {
+    Popup popup = new Popup();
+    PauseTransition pause = new PauseTransition(Duration.seconds(1 / 2));
+    popup
+        .getContent()
+        .add(
+            new Label(
+                ""
+                    + label
+                    + ": "
+                    + NumToStringFormatter.trunkDecimal(data.getPieValue(), 2)
+                    + "%"));
+    data.getNode()
+        .addEventHandler(
+            javafx.scene.input.MouseEvent.MOUSE_ENTERED,
+            mouseEvent -> {
+              pause.setOnFinished(
+                  event -> {
+                    popup.show(
+                        chart.getScene().getWindow(),
+                        mouseEvent.getScreenX(),
+                        mouseEvent.getScreenY());
+                  });
+              pause.playFromStart();
+            });
+    data.getNode()
+        .addEventHandler(
+            javafx.scene.input.MouseEvent.MOUSE_EXITED,
+            event -> {
+              popup.hide();
+              pause.stop();
             });
   }
 
