@@ -82,12 +82,26 @@ implementa il \textbf{design pattern Singleton} e si occupa di gestire la connes
 al database, permettendo di avere una sola connessione aperta per l'intera esecuzione
 dell'applicativo.
 
-% class diagram here for both packages
+\newpage
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{classDiagrams/dao}
+  \caption{Class Diagram del package Entity/DAO}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{classDiagrams/dto}
+  \caption{Class Diagram del package Entity/DTO}
+\end{figure}
+
+\newpage
 
 \subsection{Boundary}
 
 La componente \textbf{Boundary} è la componente che si occupa di gestire l'interfaccia,
-ovvero la parte visuale del sistema. Essendo che \textbf{JavaFX} permette di gestire
+ovvero la parte visuale
+ del sistema. Essendo che \textbf{JavaFX} permette di gestire
 la struttura delle pagine utilizzando file \textbf{FXML} e il suo stile utilizzando fogli
 \textbf{CSS}, questa componente si occupa di gestire la logica di visualizzazione
  e d'interazione con l'utente.
@@ -108,7 +122,13 @@ e implementativa per le pagine, di \textbf{cambiare} la \textbf{struttura}
 della pagina senza dover modificare la logica di visualizzazione e di \textbf{aggiungere} nuove
 pagine senza dover riscrivere la logica comune.
 
-% class diagram here
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{classDiagrams/boundaries}
+  \caption{Class Diagram del package Boundary}
+\end{figure}
+
+\newpage
 
 \subsection{Control}
 
@@ -130,7 +150,13 @@ in quanto il centro di controllo di ogni funzionalità dev'essere sempre lo stes
 l'esecuzione dell'applicativo.
 
 
-% class diagram here
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{classDiagrams/controls}
+  \caption{Class Diagram del package Control}
+\end{figure}
+
+\newpage
 
 \subsection{Utils}
 
@@ -158,8 +184,18 @@ In particolare, questo package contiene le classi:
   di chiamata di metodi non implementati
 \end{itemize}
 
-% class diagram here
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{classDiagrams/utils}
+  \caption{Class Diagram del package Utils}
+\end{figure}
+
+\newpage
 
 \subsection{Class Diagram Completo}
 
-% class diagram here
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{classDiagrams/full}
+  \caption{Class Diagram Completo del Sistema}
+\end{figure}

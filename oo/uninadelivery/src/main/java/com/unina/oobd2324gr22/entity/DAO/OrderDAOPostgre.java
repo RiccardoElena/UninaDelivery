@@ -23,9 +23,6 @@ import java.util.List;
  */
 public class OrderDAOPostgre implements OrderDAO {
 
-  /** Base query for retrieving orders. */
-  private static final String BASE_QUERY = "SELECT * FROM \"Order\" ";
-
   private Order populateOrderFromResultSet(final ResultSet rs) throws SQLException {
     Order order = null;
 
@@ -90,7 +87,7 @@ public class OrderDAOPostgre implements OrderDAO {
     PreparedStatement psSelect = null;
     ResultSet rs = null;
 
-    psSelect = con.prepareStatement(BASE_QUERY + "WHERE orderid = ?");
+    psSelect = con.prepareStatement("SELECT * FROM \"Order\" WHERE orderid = ?");
     psSelect.setInt(1, id);
     rs = psSelect.executeQuery();
     while (rs.next()) {
@@ -123,7 +120,9 @@ public class OrderDAOPostgre implements OrderDAO {
     ResultSet rs = null;
 
     st = con.createStatement();
-    rs = st.executeQuery(BASE_QUERY + " WHERE isCompleted IS NULL ORDER BY emissiondate ASC");
+    rs =
+        st.executeQuery(
+            "SELECT * FROM \"Order\" WHERE isCompleted IS NULL ORDER BY emissiondate ASC");
 
     while (rs.next()) {
       orders.add(populateOrderFromResultSet(rs));
@@ -155,7 +154,7 @@ public class OrderDAOPostgre implements OrderDAO {
     ResultSet rs = null;
 
     st = con.createStatement();
-    rs = st.executeQuery(BASE_QUERY);
+    rs = st.executeQuery("SELECT * FROM \"Order\"");
 
     while (rs.next()) {
 
@@ -353,8 +352,7 @@ public class OrderDAOPostgre implements OrderDAO {
     ResultSet rs = null;
     IterableInt fieldNumber = new IterableInt(1);
 
-    StringBuilder query = new StringBuilder(BASE_QUERY);
-    query.append("WHERE isCompleted IS NULL ");
+    StringBuilder query = new StringBuilder("SELECT * FROM \"Order\" WHERE isCompleted IS NULL ");
     if (filters.size() > 0) {
       for (String key : filters.keySet()) {
         query.append("AND ");
@@ -528,7 +526,7 @@ public class OrderDAOPostgre implements OrderDAO {
 
     psSelect =
         con.prepareStatement(
-            BASE_QUERY
+            "SELECT * FROM \"Order\" "
                 + "WHERE email = ? AND EXTRACT(YEAR FROM emissiondate) = ? AND EXTRACT(MONTH FROM"
                 + " emissiondate) = ?");
     psSelect.setString(fieldNumber.next(), client.getEmail());

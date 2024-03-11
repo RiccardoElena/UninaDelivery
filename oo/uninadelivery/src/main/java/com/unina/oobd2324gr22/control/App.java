@@ -13,12 +13,6 @@ import javafx.stage.StageStyle;
  */
 public final class App extends Application {
 
-  /** Width of the window. */
-  static final int WIDTH = 600;
-
-  /** Height of the window. */
-  static final int HEIGHT = 400;
-
   /** App stage. */
   private static Stage stage;
 

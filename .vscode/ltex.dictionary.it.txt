@@ -361,3 +361,8 @@ Sequence
 mockups
 Mockups
 Mockup
+Git
+Read
+getter
+setter
+DBConnection
