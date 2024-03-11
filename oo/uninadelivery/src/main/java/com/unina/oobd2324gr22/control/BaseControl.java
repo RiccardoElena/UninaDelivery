@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public abstract class BaseControl {
@@ -129,6 +130,9 @@ public abstract class BaseControl {
     alert.setTitle(title);
     alert.setHeaderText(header);
     alert.setContentText(content);
+
+    Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
+    alertStage.getIcons().add(App.getStage().getIcons().get(0));
 
     if (alertType == Alert.AlertType.NONE) {
       DialogPane dialogPane = alert.getDialogPane();
