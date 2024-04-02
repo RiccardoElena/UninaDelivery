@@ -56,6 +56,7 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
     displayLoggedOperatorData();
     setRoundImageViewImagesAndPosition(getControl().getLoggedOperator().getPropic(), proPic);
     displayExpiringOrders();
+    displayBadgeOrders();
   }
 
   /**
@@ -108,18 +109,24 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
     int expiringOrders = getControl().getExpiringOrdersNumber();
     if (expiringOrders > 0) {
       ordersExpiringLabel.setText("Ci sono degli ordini\n" + "in scadenza oggi!");
+    } else {
+      ordersExpiringLabel.setVisible(false);
+      warningImage.setVisible(false);
+    }
+  }
 
-      if (expiringOrders > MAX_NUM_ORDER_NOTIFIED) {
+  private void displayBadgeOrders() {
+    int orders = getControl().getUnfinishedOrdersNumber();
+    if (orders > 0) {
+      if (orders > MAX_NUM_ORDER_NOTIFIED) {
         badgeExpiringLabel.setText(MAX_NUM_ORDER_NOTIFIED + "+");
       } else {
         badgeExpiringLabel.setPrefWidth(NOTIFICATION_BADGE_SHRINKED_SIZES);
         badgeExpiringLabel.setPrefHeight(NOTIFICATION_BADGE_SHRINKED_SIZES);
-        badgeExpiringLabel.setText(String.valueOf(expiringOrders));
+        badgeExpiringLabel.setText(String.valueOf(orders));
       }
     } else {
-      ordersExpiringLabel.setVisible(false);
       badgeExpiringLabel.setVisible(false);
-      warningImage.setVisible(false);
     }
   }
 }

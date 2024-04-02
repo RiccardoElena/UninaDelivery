@@ -23,9 +23,6 @@ import javafx.scene.layout.StackPane;
 
 public class OrdersPageController extends NonLoginPageController<OrdersHandlingControl> {
 
-  // All this parameter are a mess, isn't a better way to encapsulate them
-  // in a custom table class?
-
   /** Table containing the orders. */
   @FXML private TableView<Order> ordersTable;
 
@@ -79,7 +76,6 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
     updateEndDatePickerAccordingToStart();
     Platform.runLater(() -> filterButton.getScene().setOnKeyPressed(this::handleKeyPressed));
 
-    // Assumi che progressIndicator sia il tuo ProgressIndicator definito altrove
     LoadingScreen.loading(
         loadingPane,
         () -> displayUnfilteredOrders(),
@@ -113,11 +109,9 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
    */
   @FXML
   public final void filterButtonAction(final ActionEvent event) {
-    // Mostra il loading indicator e esegui il filtraggio degli ordini in background
     LoadingScreen.loading(
-        loadingPane, // Assicurati che loadingPane sia correttamente inizializzato e punti al tuo
-        // indicatore nella UI
-        () -> { // Task da eseguire in background
+        loadingPane,
+        () -> {
           ordersTable.setPlaceholder(new Label("Caricamento..."));
           if (!clientTextField.getText().isEmpty()
               || startDatePicker.getValue() != null
@@ -202,7 +196,7 @@ public class OrdersPageController extends NonLoginPageController<OrdersHandlingC
         if (item == null || empty) {
           setText(null);
         } else {
-          setText(item ? "⚡" : "🐌"); // Emoji for true and false
+          setText(item ? "⚡" : "🐌");
         }
       }
     };

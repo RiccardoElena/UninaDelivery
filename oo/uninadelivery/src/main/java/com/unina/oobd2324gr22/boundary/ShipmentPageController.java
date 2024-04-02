@@ -291,12 +291,11 @@ public class ShipmentPageController extends NonLoginPageController<OrdersHandlin
     shipmentDateTableColumn.setCellValueFactory(new PropertyValueFactory<>("ShippingDate"));
     remainingSpaceTableColumn.setCellValueFactory(new PropertyValueFactory<>("RemainingSpace"));
 
-    // Order class if this makes the code more readable
     startingDepositTableColumn.setCellValueFactory(
         cellData ->
             new SimpleStringProperty(
                 String.valueOf(cellData.getValue().getStartingDeposit().getId())));
-    // Same here!
+
     transportTableColumn.setCellValueFactory(
         cellData ->
             new SimpleStringProperty(String.valueOf(cellData.getValue().getTransport().getId())));

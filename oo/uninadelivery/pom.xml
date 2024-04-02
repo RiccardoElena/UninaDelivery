@@ -135,8 +135,6 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
           <version>3.2.1</version>
-          <!-- TODO remember to test if excluding this files from shaded jar create problem -->
-          <!-- TODO ask dott. di meglio about dependency situation and dep-reduced-pom. -->
           <configuration>
             <filters>
                 <filter>

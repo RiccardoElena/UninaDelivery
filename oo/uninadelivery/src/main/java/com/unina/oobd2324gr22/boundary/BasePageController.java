@@ -71,14 +71,12 @@ public abstract class BasePageController<T extends BaseControl> {
     final double[] xOffset = new double[1];
     final double[] yOffset = new double[1];
 
-    // Evento pressione mouse sulla barra del titolo
     titleBar.setOnMousePressed(
         event -> {
           xOffset[0] = event.getSceneX();
           yOffset[0] = event.getSceneY();
         });
 
-    // Evento trascinamento mouse sulla barra del titolo
     titleBar.setOnMouseDragged(
         event -> {
           if (stage.isMaximized()) {

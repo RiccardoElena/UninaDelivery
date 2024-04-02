@@ -28,7 +28,6 @@ public final class DBConnection {
    * @return instance of the class DBConnection
    */
   static DBConnection getDBConnection() {
-    // if the connection doesn't exist or is closed
     if (dbConn == null) {
       dbConn = new DBConnection();
     }

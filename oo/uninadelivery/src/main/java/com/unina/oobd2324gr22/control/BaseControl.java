@@ -69,9 +69,10 @@ public abstract class BaseControl {
   }
 
   private Scene setupScene() throws StaticResourceLoadingException {
-    FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/" + pageName + ".fxml"));
     Scene scene;
+    FXMLLoader loader;
     try {
+      loader = new FXMLLoader(getClass().getResource("/FXML/" + pageName + ".fxml"));
       scene = new Scene(loader.load(), getWidth(), getHeight());
     } catch (IOException e) {
       throw new StaticResourceLoadingException();
@@ -151,7 +152,6 @@ public abstract class BaseControl {
             "Conferma chiusura",
             "Sei sicuro di voler uscire dall'applicazione?");
     if (result.isPresent() && result.get() == ButtonType.OK) {
-      // Add fade out transition before closing the stage
       fadeOutTransition(0.0, e -> App.getStage().close());
     }
   }

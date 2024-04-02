@@ -173,7 +173,6 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
   private void initializeMonthComboBox() {
     monthComboBox.getItems().addAll(Month.values());
 
-    // Set cell factory to display months in Italian
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM", Locale.ITALIAN);
     monthComboBox.setCellFactory(column -> createMonthListCell(formatter));
     monthComboBox.setButtonCell(createMonthListCell(formatter));
@@ -427,7 +426,6 @@ public class GraphPageController extends NonLoginPageController<GraphControl> {
 
   private void removeLineSymbol(final XYChart.Series<String, Number> line) {
     for (XYChart.Data<String, Number> data : line.getData()) {
-      // this node is StackPane
       StackPane stackPane = (StackPane) data.getNode();
       stackPane.setVisible(false);
     }

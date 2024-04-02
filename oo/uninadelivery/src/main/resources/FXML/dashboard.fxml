@@ -211,7 +211,7 @@
                               <Insets bottom="55.0" left="300.0" />
                            </StackPane.margin>
                            <tooltip>
-                              <Tooltip text="Ordini in scadenza oggi" />
+                              <Tooltip text="Ordini da spedire" />
                            </tooltip>
                            <font>
                               <Font name="System Bold" size="15.0" />

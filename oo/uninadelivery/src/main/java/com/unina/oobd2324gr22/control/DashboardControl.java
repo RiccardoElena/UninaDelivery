@@ -66,6 +66,20 @@ public final class DashboardControl extends NonLoginControl {
     return 0;
   }
 
+  /**
+   * Get the number of all unfinished orders.
+   *
+   * @return the number of unfinished orders
+   */
+  public int getUnfinishedOrdersNumber() {
+    try {
+      return ordersDAO.getUnfinishedOrdersNumber();
+    } catch (SQLException e) {
+      showInternalError(e);
+    }
+    return 0;
+  }
+
   /** Go to the Edit page. */
   public void editOperatorProfile() {
     showAlert(
@@ -87,6 +101,9 @@ public final class DashboardControl extends NonLoginControl {
       try {
         LoginControl loginControl = LoginControl.getInstance();
         Session.logoutOperator();
+        if (App.getStage().isMaximized()) {
+          App.getStage().setMaximized(false);
+        }
         loginControl.setScene();
       } catch (Exception e) {
         showInternalError(e);

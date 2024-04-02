@@ -2431,8 +2431,8 @@ COPY uninadelivery.shipment (shipmentid, shippingdate, hasarrived, shippedfrom, 
 17	2025-01-22	\N	191	\N	T.Yamamoto@uninadelivery.operator.com	20
 16	2025-01-21	t	190	191	T.Yamamoto@uninadelivery.operator.com	19
 15	2025-01-20	t	161	190	T.Yamamoto@uninadelivery.operator.com	18
-31	2024-02-25	\N	1	\N	R.Elena@uninadelivery.operator.com	1
-32	2024-03-11	\N	1	\N	R.Elena@uninadelivery.operator.com	1
+31	2024-03-31	\N	1	\N	R.Elena@uninadelivery.operator.com	1
+32	2024-03-30	\N	1	\N	R.Elena@uninadelivery.operator.com	1
 \.
 
 

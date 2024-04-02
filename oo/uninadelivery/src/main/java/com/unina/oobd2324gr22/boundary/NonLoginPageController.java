@@ -77,8 +77,7 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
    */
   @FXML
   void resizeButtonAction(final ActionEvent event) {
-    Stage stage = App.getStage();
-    stage.setMaximized(!stage.isMaximized());
+    getControl().resize();
   }
 
   /**

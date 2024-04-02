@@ -511,6 +511,36 @@ public class OrderDAOPostgre implements OrderDAO {
   }
 
   /**
+   * PostgreSQL implementation of the getUnfinishedOrdersNumber method.
+   *
+   * <p>{@inheritDoc}
+   */
+  @Override
+  public int getUnfinishedOrdersNumber() throws SQLException {
+    PreparedStatement psSelect = null;
+    ResultSet rs = null;
+    Connection con = DBConnection.getConnectionBySchema("uninadelivery");
+
+    psSelect = con.prepareStatement("SELECT COUNT(*) FROM \"Order\" WHERE isCompleted IS NULL");
+    rs = psSelect.executeQuery();
+    if (rs.next()) {
+      return rs.getInt(1);
+    }
+
+    if (rs != null) {
+      rs.close();
+    }
+    if (psSelect != null) {
+      psSelect.close();
+    }
+    if (con != null) {
+      con.close();
+    }
+
+    return 0;
+  }
+
+  /**
    * PostgreSQL implementation of the getOrdersByAccountAndMonth method.
    *
    * <p>{@inheritDoc}

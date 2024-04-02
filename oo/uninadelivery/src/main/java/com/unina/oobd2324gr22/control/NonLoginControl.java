@@ -1,5 +1,7 @@
 package com.unina.oobd2324gr22.control;
 
+import javafx.stage.Stage;
+
 /**
  * NonLoginControl is the abstract class that represents the control of all the functionalities but
  * the login.
@@ -14,6 +16,12 @@ public abstract class NonLoginControl extends BaseControl {
 
   protected NonLoginControl(final String defaultPageName) {
     super(defaultPageName);
+  }
+
+  /** Resize the window. */
+  public void resize() {
+    Stage stage = App.getStage();
+    stage.setMaximized(!stage.isMaximized());
   }
 
   /** Minimize the window. */

@@ -109,6 +109,14 @@ public interface OrderDAO extends BasicDAO<Order> {
   int getExpiringOrdersNumber() throws SQLException;
 
   /**
+   * Retrive the number of unfinished orders in the database.
+   *
+   * @return number of unfinished orders
+   * @throws SQLException
+   */
+  int getUnfinishedOrdersNumber() throws SQLException;
+
+  /**
    * Retrive all the orders made by an account in a given month.
    *
    * @param client account to search for
