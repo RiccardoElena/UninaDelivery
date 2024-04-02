@@ -26,10 +26,13 @@
    <top>
       <AnchorPane fx:id="titleBar" prefHeight="35.0" prefWidth="975.0" style="-fx-background-color: #F7DBA7;" styleClass="light-background" BorderPane.alignment="CENTER">
          <children>
-            <Label layoutX="39.0" layoutY="9.0" text="UninaDelivery - " />
-            <Label layoutX="124.0" layoutY="9.0" text="Crea Nuova Spedizione">
+            <Label layoutX="39.0" layoutY="9.0" text="UninaDelivery - ">
                <font>
-                  <Font name="System Bold" size="12.0" />
+                  <Font size="11.0" />
+               </font></Label>
+            <Label layoutX="123.0" layoutY="10.0" text="Crea Nuova Spedizione">
+               <font>
+                  <Font name="System Bold" size="10.0" />
                </font>
             </Label>
             <ImageView fitHeight="112.0" fitWidth="30.0" layoutX="3.0" layoutY="1.0" pickOnBounds="true" preserveRatio="true">
@@ -98,7 +101,7 @@
                      <children>
                         <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="SPEDISCI ORDINE" textFill="#f5d9a6" HBox.hgrow="ALWAYS">
                            <font>
-                              <Font name="System Bold" size="48.0" />
+                              <Font name="System Bold" size="46.0" />
                            </font>
                         </Label>
                      </children>
@@ -111,12 +114,12 @@
                                  <children>
                                     <Label fx:id="orderIdLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{orderId} " HBox.hgrow="ALWAYS">
                                        <font>
-                                          <Font name="System Bold" size="17.0" />
+                                          <Font name="System Bold" size="15.0" />
                                        </font>
                                     </Label>
                                     <Label fx:id="orderExpectedDeliveryDateLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1372.0" text="{expectedDeliveryDate}">
                                        <font>
-                                          <Font name="System Bold" size="17.0" />
+                                          <Font name="System Bold" size="15.0" />
                                        </font>
                                     </Label>
                                  </children>
@@ -125,12 +128,12 @@
                                  <children>
                                     <Label fx:id="orderProductLabel" alignment="CENTER" prefHeight="26.0" prefWidth="1144.0" text="{product}">
                                        <font>
-                                          <Font name="System Bold" size="17.0" />
+                                          <Font name="System Bold" size="15.0" />
                                        </font>
                                     </Label>
                                     <Label fx:id="orderAddressLabel" alignment="CENTER" prefHeight="26.0" prefWidth="1313.0" text="{address}">
                                        <font>
-                                          <Font name="System Bold" size="17.0" />
+                                          <Font name="System Bold" size="15.0" />
                                        </font>
                                     </Label>
                                  </children>
@@ -158,13 +161,13 @@
                                     <Pane prefHeight="47.0" prefWidth="37.0" HBox.hgrow="ALWAYS" />
                                     <Label fx:id="orderIdLabel1" alignment="CENTER" contentDisplay="CENTER" prefHeight="47.0" styleClass="title" text="Aggiungi a Spedizione Esistente" HBox.hgrow="ALWAYS">
                                        <font>
-                                          <Font name="System Bold" size="32.0" />
+                                          <Font name="System Bold" size="30.0" />
                                        </font>
                                     </Label>
                                     <Pane prefHeight="47.0" prefWidth="142.0" HBox.hgrow="ALWAYS" />
                                     <Label fx:id="orderExpectedDeliveryDateLabel1" alignment="CENTER" contentDisplay="CENTER" prefHeight="47.0" styleClass="title" text="Crea Nuova Spedizione" HBox.hgrow="ALWAYS">
                                        <font>
-                                          <Font name="System Bold" size="32.0" />
+                                          <Font name="System Bold" size="30.0" />
                                        </font>
                                     </Label>
                                     <Pane prefHeight="47.0" prefWidth="63.0" HBox.hgrow="ALWAYS" />
@@ -263,7 +266,7 @@
    <bottom>
       <MFXButton fx:id="submitButton" buttonType="RAISED" prefHeight="69.0" prefWidth="186.0" rippleColor="#f7dba7" rippleRadius="100.0" styleClass="bigButton" text="Spedisci" BorderPane.alignment="CENTER">
          <font>
-            <Font size="28.0" />
+            <Font size="26.0" />
          </font>
          <BorderPane.margin>
             <Insets bottom="10.0" />

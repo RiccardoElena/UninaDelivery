@@ -158,10 +158,8 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
     double newWidth = Math.max(x, MIN_WIDTH);
     double newHeight = Math.max(y, MIN_HEIGHT);
 
-    if (x > stage.getWidth() - RESIZE_MARGIN) {
+    if (x > stage.getWidth() - RESIZE_MARGIN || y > stage.getHeight() - RESIZE_MARGIN) {
       stage.setWidth(newWidth);
-    }
-    if (y > stage.getHeight() - RESIZE_MARGIN) {
       stage.setHeight(newHeight);
     }
 
@@ -169,6 +167,7 @@ public abstract class NonLoginPageController<T extends NonLoginControl>
       newWidth = stage.getX() + stage.getWidth() - screenWidth;
       newWidth = Math.max(newWidth, MIN_WIDTH);
       stage.setWidth(newWidth);
+      stage.setHeight(newHeight);
       if (newWidth > MIN_WIDTH) {
         stage.setX(screenWidth);
       }

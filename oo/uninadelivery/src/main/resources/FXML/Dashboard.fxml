@@ -21,10 +21,13 @@
    <top>
       <AnchorPane fx:id="titleBar" prefHeight="35.0" prefWidth="975.0" style="-fx-background-color: #F7DBA7;" styleClass="light-background" BorderPane.alignment="CENTER">
          <children>
-            <Label layoutX="39.0" layoutY="9.0" text="UninaDelivery - " textFill="#cc4400" />
-            <Label layoutX="124.0" layoutY="9.0" text="Dashboard" textFill="#cc4400">
+            <Label layoutX="39.0" layoutY="9.0" text="UninaDelivery - " textFill="#cc4400">
                <font>
-                  <Font name="System Bold" size="12.0" />
+                  <Font size="11.0" />
+               </font></Label>
+            <Label layoutX="123.0" layoutY="10.0" text="Dashboard" textFill="#cc4400">
+               <font>
+                  <Font name="System Bold" size="10.0" />
                </font>
             </Label>
             <ImageView fitHeight="112.0" fitWidth="30.0" layoutX="3.0" layoutY="1.0" pickOnBounds="true" preserveRatio="true">
@@ -185,7 +188,7 @@
                   </Label>
                   <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="52.0" prefWidth="366.0" style="-fx-font-weight: bold;" styleClass="title" text="Operator Dashboard" textFill="#f7dba7" VBox.vgrow="ALWAYS">
                      <font>
-                        <Font size="35.0" />
+                        <Font name="System Bold" size="35.0" />
                      </font>
                   </Label>
                </children>
@@ -219,9 +222,9 @@
                         </Label>
                      </children>
                   </StackPane>
-                  <MFXButton fx:id="monthlyReportsButton" buttonType="RAISED" onAction="#monthlyReportsButtonOnAction" prefHeight="64.0" prefWidth="310.0" rippleColor="#f7dba7" text="Resoconti Mensili">
+                  <MFXButton fx:id="monthlyReportsButton" buttonType="RAISED" onAction="#monthlyReportsButtonOnAction" prefHeight="64.0" prefWidth="310.0" rippleColor="#f7dba7" style="-fx-font-size: 30;" text="Resoconti Mensili">
                      <font>
-                        <Font size="32.0" />
+                        <Font name="Noto Sans Regular" size="32.0" />
                      </font>
                      <styleClass>
                         <String fx:value="bigButton" />

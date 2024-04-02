@@ -55,7 +55,7 @@
             </ImageView>
             <TextField fx:id="emailTextField" layoutX="80.0" layoutY="164.0" prefHeight="40.0" prefWidth="252.0" promptText="n.surname@uninadelivery.operator.com">
                <font>
-                  <Font size="14.0" />
+                  <Font size="12.0" />
                </font>
             </TextField>
             <TextField fx:id="plainPasswordTextField" layoutX="80.0" layoutY="212.0" prefHeight="40.0" prefWidth="214.0" promptText="password" visible="false">

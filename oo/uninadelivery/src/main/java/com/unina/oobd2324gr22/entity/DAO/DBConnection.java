@@ -64,7 +64,7 @@ public final class DBConnection {
       String url =
           "jdbc:postgresql://localhost:5432/" + "uninadelivery?currentSchema=" + schemaName;
       try {
-        conn = DriverManager.getConnection(url, "zgenny", "passwordSicura");
+        conn = DriverManager.getConnection(url, "zgenny", "securepassword");
       } catch (SQLException e) {
         e.printStackTrace();
       }

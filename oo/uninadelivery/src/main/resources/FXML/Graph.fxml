@@ -27,9 +27,9 @@
                <children>
                   <ComboBox fx:id="yearComboBox" layoutX="528.0" layoutY="115.0" prefWidth="150.0" promptText="Anno" AnchorPane.leftAnchor="528.0" />
                   <ComboBox fx:id="monthComboBox" layoutX="338.0" layoutY="114.0" prefWidth="150.0" promptText="Mese" AnchorPane.leftAnchor="338.0" />
-                  <Label layoutX="311.0" layoutY="39.0" prefHeight="70.0" prefWidth="434.0" text="Resoconto Mensile" AnchorPane.leftAnchor="311.0" AnchorPane.rightAnchor="278.0">
+                  <Label layoutX="297.0" layoutY="39.0" prefHeight="70.0" prefWidth="465.0" text="Resoconto Mensile" AnchorPane.leftAnchor="297.0" AnchorPane.rightAnchor="261.0">
                      <font>
-                        <Font name="System Bold" size="48.0" />
+                        <Font name="System Bold" size="46.0" />
                      </font>
                   </Label>
                   <VBox fx:id="monthlyReportData" alignment="CENTER" layoutY="569.0" prefHeight="1521.0" prefWidth="1063.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.5">
@@ -38,7 +38,7 @@
                            <children>
                               <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="Ordini Del Mese" textFill="#f5d9a6" HBox.hgrow="ALWAYS">
                                  <font>
-                                    <Font name="System Bold" size="52.0" />
+                                    <Font name="System Bold" size="50.0" />
                                  </font>
                               </Label>
                            </children>
@@ -47,7 +47,7 @@
                            <children>
                               <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="Ordine Con Più Prodotti" textFill="#f5d9a6" HBox.hgrow="ALWAYS">
                                  <font>
-                                    <Font name="System Bold" size="48.0" />
+                                    <Font name="System Bold" size="46.0" />
                                  </font>
                               </Label>
                            </children>
@@ -63,12 +63,12 @@
                                        <children>
                                           <Label fx:id="highestProductNumberOrderId" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderId} " HBox.hgrow="ALWAYS">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                           <Label fx:id="highestProductNumberOrderCost" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderCost}">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                        </children>
@@ -77,12 +77,12 @@
                                        <children>
                                           <Label fx:id="highestProductNumberOrderProduct" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderProduct}">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                           <Label fx:id="highestProductNumberOrderAccount" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestProductNumberOrderAccount}">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                        </children>
@@ -101,7 +101,7 @@
                            <children>
                               <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="Ordine Con Meno Prodotti" textFill="#f5d9a6" HBox.hgrow="ALWAYS">
                                  <font>
-                                    <Font name="System Bold" size="48.0" />
+                                    <Font name="System Bold" size="46.0" />
                                  </font>
                               </Label>
                            </children>
@@ -117,12 +117,12 @@
                                        <children>
                                           <Label fx:id="lowestProductNumberOrderId" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestProductNumberOrderId} " HBox.hgrow="ALWAYS">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                           <Label fx:id="lowestProductNumberOrderCost" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestProductNumberOrderCosto}">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                        </children>
@@ -131,12 +131,12 @@
                                        <children>
                                           <Label fx:id="lowestProductNumberOrderProduct" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{owestProductNumberOrderProduct}">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                           <Label fx:id="lowestProductNumberOrderAccount" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{owestProductNumberOrderAccount}">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                        </children>
@@ -155,7 +155,7 @@
                            <children>
                               <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="Ordine Più costoso" textFill="#f5d9a6" HBox.hgrow="ALWAYS">
                                  <font>
-                                    <Font name="System Bold" size="48.0" />
+                                    <Font name="System Bold" size="46.0" />
                                  </font>
                               </Label>
                            </children>
@@ -171,12 +171,12 @@
                                        <children>
                                           <Label fx:id="highestCostOrderId" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestCostOrderId} " HBox.hgrow="ALWAYS">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                           <Label fx:id="highestCostOrderCost" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestCostOrderCost}">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                        </children>
@@ -185,12 +185,12 @@
                                        <children>
                                           <Label fx:id="highestCostOrderProduct" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestCostOrderProduct}">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                           <Label fx:id="highestCostOrderIdAccount" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{highestCostOrderAccount}">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                        </children>
@@ -209,7 +209,7 @@
                            <children>
                               <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="Ordine Meno Costoso" textFill="#f5d9a6" HBox.hgrow="ALWAYS">
                                  <font>
-                                    <Font name="System Bold" size="48.0" />
+                                    <Font name="System Bold" size="46.0" />
                                  </font>
                               </Label>
                            </children>
@@ -225,12 +225,12 @@
                                        <children>
                                           <Label fx:id="lowestCostOrderId" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderId} " HBox.hgrow="ALWAYS">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                           <Label fx:id="lowestCostOrderCost" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderCost}">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                        </children>
@@ -239,12 +239,12 @@
                                        <children>
                                           <Label fx:id="lowestCostOrderProduct" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderProduct}">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                           <Label fx:id="lowestCostOrderAccount" alignment="CENTER" prefHeight="26.0" prefWidth="1080.0" text="{lowestCostOrderAccount}">
                                              <font>
-                                                <Font name="System Bold" size="17.0" />
+                                                <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Label>
                                        </children>
@@ -263,7 +263,7 @@
                            <children>
                               <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="138.0" prefWidth="682.0" styleClass="title" text="Clienti Del Mese" textFill="#f5d9a6" HBox.hgrow="ALWAYS">
                                  <font>
-                                    <Font name="System Bold" size="52.0" />
+                                    <Font name="System Bold" size="50.0" />
                                  </font>
                               </Label>
                            </children>
@@ -277,7 +277,7 @@
                                  <children>
                                     <Label fx:id="orderIdLabel31" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="Maggior Numero di Ordini">
                                        <font>
-                                          <Font name="System Bold" size="22.0" />
+                                          <Font name="System Bold" size="20.0" />
                                        </font>
                                     </Label>
                                     <Pane prefHeight="173.0" prefWidth="300.0" VBox.vgrow="NEVER">
@@ -296,7 +296,7 @@
                                     </Pane>
                                     <Label fx:id="highestNumberNameSurname" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestNumberNameSurname} ">
                                        <font>
-                                          <Font name="System Bold" size="17.0" />
+                                          <Font name="System Bold" size="15.0" />
                                        </font>
                                        <VBox.margin>
                                           <Insets bottom="20.0" top="20.0" />
@@ -304,7 +304,7 @@
                                     </Label>
                                     <Label fx:id="highestNumberEmail" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestNumberEmail} ">
                                        <font>
-                                          <Font name="System Bold" size="17.0" />
+                                          <Font name="System Bold" size="15.0" />
                                        </font>
                                        <VBox.margin>
                                           <Insets bottom="20.0" top="20.0" />
@@ -312,7 +312,7 @@
                                     </Label>
                                     <Label fx:id="orderNumber" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{OrderNumber} ">
                                        <font>
-                                          <Font name="System Bold" size="17.0" />
+                                          <Font name="System Bold" size="15.0" />
                                        </font>
                                        <VBox.margin>
                                           <Insets bottom="20.0" top="20.0" />
@@ -330,7 +330,7 @@
                                  <children>
                                     <Label fx:id="orderIdLabel311" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="Spesa Maggiore">
                                        <font>
-                                          <Font name="System Bold" size="22.0" />
+                                          <Font name="System Bold" size="20.0" />
                                        </font>
                                     </Label>
                                     <Pane prefHeight="173.0" prefWidth="300.0" VBox.vgrow="NEVER">
@@ -349,7 +349,7 @@
                                     </Pane>
                                     <Label fx:id="highestCostNameSurname" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestCostNameSurname} ">
                                        <font>
-                                          <Font name="System Bold" size="17.0" />
+                                          <Font name="System Bold" size="15.0" />
                                        </font>
                                        <VBox.margin>
                                           <Insets bottom="20.0" top="20.0" />
@@ -357,7 +357,7 @@
                                     </Label>
                                     <Label fx:id="highestCostEmail" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{highestCostEmail} ">
                                        <font>
-                                          <Font name="System Bold" size="17.0" />
+                                          <Font name="System Bold" size="15.0" />
                                        </font>
                                        <VBox.margin>
                                           <Insets bottom="20.0" top="20.0" />
@@ -365,7 +365,7 @@
                                     </Label>
                                     <Label fx:id="moneySpent" alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="1208.0" text="{MoneySpent} ">
                                        <font>
-                                          <Font name="System Bold" size="17.0" />
+                                          <Font name="System Bold" size="15.0" />
                                        </font>
                                        <VBox.margin>
                                           <Insets bottom="20.0" top="20.0" />
@@ -428,10 +428,13 @@
    <top>
       <AnchorPane fx:id="titleBar" prefHeight="35.0" prefWidth="975.0" style="-fx-background-color: #F7DBA7;" styleClass="light-background" BorderPane.alignment="CENTER">
          <children>
-            <Label layoutX="39.0" layoutY="9.0" text="UninaDelivery - " textFill="#cc4400" />
-            <Label layoutX="124.0" layoutY="9.0" text="Grafico" textFill="#cc4400">
+            <Label layoutX="39.0" layoutY="9.0" text="UninaDelivery - " textFill="#cc4400">
                <font>
-                  <Font name="System Bold" size="12.0" />
+                  <Font size="11.0" />
+               </font></Label>
+            <Label layoutX="122.0" layoutY="10.0" text="Grafico" textFill="#cc4400">
+               <font>
+                  <Font name="System Bold" size="10.0" />
                </font>
             </Label>
             <ImageView fitHeight="112.0" fitWidth="30.0" layoutX="3.0" layoutY="1.0" pickOnBounds="true" preserveRatio="true">

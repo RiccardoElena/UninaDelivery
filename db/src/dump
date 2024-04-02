@@ -2262,7 +2262,7 @@ COPY uninadelivery.area (zipcode, city, state, country, worldzone) FROM stdin;
 --
 
 COPY uninadelivery.covers (transportid, zipcode, country, date, occupiedspace) FROM stdin;
-1	00123	Italia	2024-02-25	50.000
+1	00123	Italia	2025-02-25	50.000
 1	00123	Italia	2025-02-04	1.200
 20	67890	Cina	2025-01-22	0.000
 18	12345	Corea del Sud	2025-01-20	0.000
@@ -2373,7 +2373,7 @@ J.Park@uninadelivery.driver.com	CE	89btshater@redpil.org	191
 --
 
 COPY uninadelivery.drives (transportid, businessmail, date) FROM stdin;
-1	L.Bianchi1@uninadelivery.driver.com	2024-02-25
+1	L.Bianchi1@uninadelivery.driver.com	2025-02-25
 \.
 
 
@@ -2431,8 +2431,8 @@ COPY uninadelivery.shipment (shipmentid, shippingdate, hasarrived, shippedfrom, 
 17	2025-01-22	\N	191	\N	T.Yamamoto@uninadelivery.operator.com	20
 16	2025-01-21	t	190	191	T.Yamamoto@uninadelivery.operator.com	19
 15	2025-01-20	t	161	190	T.Yamamoto@uninadelivery.operator.com	18
-31	2024-03-31	\N	1	\N	R.Elena@uninadelivery.operator.com	1
-32	2024-03-30	\N	1	\N	R.Elena@uninadelivery.operator.com	1
+31	2025-03-31	\N	1	\N	R.Elena@uninadelivery.operator.com	1
+32	2025-03-30	\N	1	\N	R.Elena@uninadelivery.operator.com	1
 \.
 
 

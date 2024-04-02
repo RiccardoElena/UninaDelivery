@@ -186,4 +186,22 @@ public abstract class BaseControl {
         "Si è verifacto un errore interno inatteso, si prega di riprovare o riavviare"
             + " l'applicazione.");
   }
+
+  /**
+   * Get the name of the page.
+   *
+   * @return the name of the page
+   */
+  public String getPageName() {
+    return pageName;
+  }
+
+  /**
+   * Set the name of the page.
+   *
+   * @param newPageName the name of the page
+   */
+  public void setPageName(final String newPageName) {
+    this.pageName = newPageName;
+  }
 }

@@ -68,8 +68,8 @@ public class Order {
       final Product pct) {
     id = orderid;
     emissionDate = emissiondate;
-    setExpectedDeliveryDate(emissiondate);
     isExpress = isexpress;
+    setExpectedDeliveryDate(emissiondate);
     extraWarranty = extrawarranty;
     account = client;
     quantity = qty;

@@ -108,7 +108,9 @@ public class DashboardPageController extends NonLoginPageController<DashboardCon
   private void displayExpiringOrders() {
     int expiringOrders = getControl().getExpiringOrdersNumber();
     if (expiringOrders > 0) {
-      ordersExpiringLabel.setText("Ci sono degli ordini\n" + "in scadenza oggi!");
+      String expiringOrdersText =
+          expiringOrders == 1 ? "C'è 1 ordine" : " Ci sono " + expiringOrders + " ordini";
+      ordersExpiringLabel.setText(expiringOrdersText + "\nin scadenza oggi!");
     } else {
       ordersExpiringLabel.setVisible(false);
       warningImage.setVisible(false);

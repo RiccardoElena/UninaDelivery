@@ -415,9 +415,11 @@ public final class OrdersHandlingControl extends NonLoginControl {
 
     modalResponse.ifPresent(
         response -> {
+          Session.unselectOrder();
           if (response == orderButtonType) {
             goToOrdersPage();
           } else {
+            setPageName("Orders");
             returnToHomePage();
           }
         });
