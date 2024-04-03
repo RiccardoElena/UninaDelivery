@@ -12,6 +12,7 @@ env:
   VALIDATE_JSCPD: false
   VALIDATE_YAML: false
   VALIDATE_CSS: false
+  VALIDATE_JSON: false
 
 on:
   push:
