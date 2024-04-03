@@ -123,7 +123,7 @@ public class OrderDAOPostgre implements OrderDAO {
     rs =
         st.executeQuery(
             "SELECT * FROM \"Order\" WHERE isCompleted IS NULL ORDER BY "
-            + "add_days(emissiondate,isexpress) ASC");
+                + "add_days(emissiondate,isexpress) ASC");
 
     while (rs.next()) {
       orders.add(populateOrderFromResultSet(rs));
@@ -492,7 +492,7 @@ public class OrderDAOPostgre implements OrderDAO {
     psSelect =
         con.prepareStatement(
             "SELECT COUNT(*) FROM \"Order\" WHERE add_days(emissiondate,isexpress)"
-            + "- 1 <= CURRENT_DATE and isCompleted IS NULL");
+                + "- 1 <= CURRENT_DATE and isCompleted IS NULL");
     rs = psSelect.executeQuery();
     if (rs.next()) {
       return rs.getInt(1);

@@ -145,5 +145,4 @@ public interface OrderDAO extends BasicDAO<Order> {
    * @throws SQLException possible DB related errors
    */
   HashMap<String, Integer> getQuantityOrdersByCategory(Month month, Year year) throws SQLException;
-
 }
