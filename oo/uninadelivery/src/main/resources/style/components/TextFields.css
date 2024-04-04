@@ -1,0 +1,10 @@
+.text-field {
+  -fx-background-color: -fx-secondary-color, -fx-default-bg;
+  -fx-background-insets: 0, 0 0 1 0;
+  -fx-background-radius: 0;
+  -fx-text-fill: -fx-secondary-color;
+}
+.text-field:focused {
+  -fx-background-color: -fx-focus-color, -fx-default-bg;
+  -fx-text-fill: -fx-focus-color;
+}

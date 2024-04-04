@@ -1,0 +1,16 @@
+@import url('Main.css');
+@import url('components/TitleBar.css');
+
+.bigButton {
+  -fx-font-size: 32px;
+}
+
+.smallButton {
+  -fx-font-size: 17px;
+}
+
+.badge {
+  -fx-background-color: red;
+  -fx-text-fill: white;
+  -fx-background-radius: 100;
+}

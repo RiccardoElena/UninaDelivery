@@ -1,0 +1,21 @@
+@import url('Main.css');
+@import url('components/TitleBar.css');
+
+.switch-button {
+  -fx-background-color: transparent;
+  -fx-background-radius: 15;
+}
+
+.switch-thumb {
+  -fx-background-color: white;
+  -fx-background-radius: 15;
+}
+
+.switch-pane {
+  -fx-background-color: red;
+  -fx-background-radius: 15;
+}
+
+.bigButton {
+  -fx-font-size: 32px;
+}

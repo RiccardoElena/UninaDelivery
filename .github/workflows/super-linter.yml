@@ -11,6 +11,8 @@ env:
   VALIDATE_LATEX: false
   VALIDATE_JSCPD: false
   VALIDATE_YAML: false
+  VALIDATE_CSS: false
+  VALIDATE_JSON: false
 
 on:
   push:
@@ -18,19 +20,31 @@ on:
   pull_request:
     branches: ['master']
 jobs:
-  run-lint:
+  build:
+    name: Lint
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: read
+      # To report GitHub Actions status checks
+      statuses: write
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          # Full git history is needed to get a proper list of changed
-          # files within `super-linter`
+          # super-linter needs the full git history to get the
+          # list of files that changed across commits
           fetch-depth: 0
 
-      - name: Lint Code Base
-        uses: github/super-linter@v4
+      - name: Super-linter
+        uses: super-linter/super-linter@v5.7.2 # x-release-please-version
         env:
           VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: 'master'
+          DEFAULT_BRANCH: master
+          # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          LINTER_RULES_PATH: config/
+          JAVA_FILE_NAME: checks.xml

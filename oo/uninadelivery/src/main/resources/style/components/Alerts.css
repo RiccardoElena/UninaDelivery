@@ -1,0 +1,23 @@
+@import url('Buttons.css');
+
+.dialog-pane {
+  -fx-background-color: -fx-default-bg;
+}
+
+.dialog-pane .label {
+  -fx-text-fill: -fx-secondary-color;
+}
+
+.button-bar {
+}
+
+.header-panel {
+  -fx-background-color: -fx-default-bg;
+  -fx-font-weight: bold;
+}
+
+.header-panel .label {
+  -fx-text-fill: -fx-secondary-color;
+}
+.content-panel {
+}

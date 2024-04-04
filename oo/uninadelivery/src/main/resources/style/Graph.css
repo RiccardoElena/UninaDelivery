@@ -1,0 +1,68 @@
+@import url('Main.css');
+@import url('components/TitleBar.css');
+
+.chart-line-symbol:hover {
+  -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 5, 0, 0, 0);
+  -fx-cursor: crosshair;
+}
+
+.chart-legend {
+  -fx-background-color: -fx-default-bg;
+}
+
+.chart-pie-label{
+  -fx-background-color: -fx-default-bg;
+  -fx-fill: -fx-secondary-color;
+}
+
+.popup .label {
+  -fx-text-fill: -fx-primary-color;
+  -fx-background-color: white; 
+  -fx-padding: 10; 
+}
+
+.scroll-pane {
+  -fx-background-color:-fx-default-bg;
+}
+
+.scroll-pane .viewport {
+  -fx-background-color:-fx-default-bg;
+  
+}
+
+.scroll-bar:vertical {
+  -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .thumb {
+  -fx-background-color: -fx-secondary-color;
+  -fx-background-insets: 2, 2, 2;
+  -fx-background-radius: 10em;
+}
+
+.scroll-bar:vertical .thumb:hover {
+  -fx-background-color: -fx-primary-color;
+}
+
+.scroll-bar:vertical .thumb:pressed {
+  -fx-background-color: rgb(186, 90, 0);
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+    -fx-max-width: 0;
+    -fx-max-height: 0;
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-shape: "";
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}

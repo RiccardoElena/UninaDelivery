@@ -72,16 +72,17 @@ Da definire in seguito ad assegnazione traccia.
 
 ### Struttura del repository
 
+- `db/`: cartella relativa al progetto di Basi di Dati.
+  - `db/docs`: documentazione del progetto di Basi di Dati.
+    - `Documentazione-BasiDiDati-GroupID.pdf`: documentazione del progetto di Basi di Dati, con annesso progetto *LaTeX* per la generazione del PDF.
+  - `db/src/`: codice sorgente del progetto di Basi di Dati.
+    - `dump`: dump del database.
+    - `README.md`: README del progetto di Basi di Dati.
 - `oo/`: cartella relativa al progetto di Object Orientation.
   - `oo/docs`: documentazione del progetto di Object Orientation.
     - `Documentazione-ObjectOrientation-GroupID.pdf`: documentazione del progetto di Object Orientation.
-  - `oo/src/`: codice sorgente del progetto di Object Orientation.
+  - `oo/uninadelivery/`: codice sorgente del progetto di Object Orientation.
     - `oo/pom.xml`: file di configurazione Maven.
-- `db/`: cartella relativa al progetto di Basi di Dati.
-  - `db/docs`: documentazione del progetto di Basi di Dati.
-    - `Documentazione-BasiDiDati-GroupID.pdf`: documentazione del progetto di Basi di Dati.
-  - `db/src/`: codice sorgente del progetto di Basi di Dati.
-    - `README.md`: README del progetto di Basi di Dati.
 - `README.md`: README generale del progetto, questo file.
 - `sun_checks.xml`: file di configurazione Checkstyle.
 
@@ -99,7 +100,7 @@ Struttura generale di ereditarietà:
 
 `feature-NOMEFEATURE -> develop -> master` (tramite pull request e code review per master).
 
-Utilizzo del **workflow _Gitflow_**.
+Utilizzo del **workflow *Gitflow***.
 
 #### Standard dei Commit Messages
 
@@ -121,7 +122,7 @@ Per quanto riguarda l'intera fase di progettazione sia di Basi di Dati che di Ob
 
 #### Implementazione
 
-Suddivisione equa delle feature da implementare tra tutti i membri del gruppo **_successiva alla fase di progettazione_**.
+Suddivisione equa delle feature da implementare tra tutti i membri del gruppo ***successiva alla fase di progettazione***.
 
 #### Documentazione
 
@@ -129,4 +130,4 @@ Ogni membro si farà carico di aggiornare la documentazione relativa alla parte 
 
 #### Testing
 
-Ogni membro si farà carico di testare in autonomia **TUTTO** il progetto nello stato corrente e di riportare agli altri collaboratori eventuali _warnings_, **errors**, o **_BUG_** trovati.
+Ogni membro si farà carico di testare in autonomia **TUTTO** il progetto nello stato corrente e di riportare agli altri collaboratori eventuali *warnings*, **errors**, o ***BUG_*** trovati.

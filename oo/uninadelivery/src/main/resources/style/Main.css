@@ -1,0 +1,27 @@
+/* Main stylesheet of the application.
+   This file contains all the style shared across all the application scenes
+   and all the import common to all the scenes.
+*/
+
+@import url('components/variables.css');
+@import url('components/Alerts.css');
+@import url('components/TextFields.css');
+@import url('components/DatePickers.css');
+@import url('components/TableView.css');
+@import url('components/ComboBox.css');
+
+* {
+  -fx-text-fill: -fx-secondary-color;
+}
+
+.title {
+  -fx-text-fill: -fx-secondary-color;
+}
+
+.light-background {
+  -fx-background-color: -fx-secondary-color;
+}
+
+.light-background .label {
+  -fx-text-fill: -fx-primary-color;
+}

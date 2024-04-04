@@ -1,0 +1,18 @@
+@import url('variables.css');
+
+.button {
+  -fx-background-color: -fx-primary-color;
+  -fx-background-radius: 100px;
+  -fx-text-fill: -fx-secondary-color;
+  -fx-font-weight: bold;
+}
+
+.button:hover {
+  -fx-background-color: #fa722d;
+  -fx-text-fill: #feeac5;
+  -fx-cursor: hand;
+}
+
+.m-ripple {
+    -fx-background-radius: 50%;
+}

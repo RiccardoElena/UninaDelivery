@@ -1,5 +1,5 @@
 {
-  "java.checkstyle.configuration": "${workspaceFolder}/sun_checks.xml",
+  "java.checkstyle.configuration": "${workspaceFolder}/config/checks.xml",
   "latex-workshop.linting.chktex.enabled": true,
   "latex-workshop.linting.chktex.exec.args": [
     "-wall",
@@ -66,5 +66,20 @@
       "username": "riccardoelena"
     }
   ],
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "match": "\\.java$",
+        "cmd": "echo Formatting file: ${file} && google-java-format --replace \"${file}\""
+      },
+    ],
+  },
+  "maven.view": "flat",
+  "maven.terminal.favorites": [
+    {
+      "alias": "Run App",
+      "command": "javafx:run"
+    }
+  ]
 }
 

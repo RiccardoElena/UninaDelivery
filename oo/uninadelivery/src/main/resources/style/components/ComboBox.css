@@ -1,0 +1,53 @@
+.combo-box {
+  -fx-font-size: 16px;
+  -fx-font-family: "Arial";
+  -fx-background-color: transparent;
+  -fx-border-color: -fx-secondary-color;
+  -fx-border-width: 0 0 1px 0;
+}
+
+.combo-box:focused {
+  -fx-border-color: -fx-primary-color;
+  -fx-text-fill: -fx-primary-color;
+}
+
+.combo-box .arrow-button {
+  -fx-padding: 10px;
+}
+
+.combo-box .arrow-button:hover {
+  -fx-background-color: -fx-primary-color;
+  
+}
+
+.combo-box .arrow-button .arrow {
+    -fx-background-color: -fx-secondary-color;
+}
+
+.combo-box:focused .arrow-button .arrow {
+    -fx-background-color: -fx-primary-color;
+}
+
+.combo-box:focused .arrow-button:hover .arrow {
+    -fx-background-color: -fx-secondary-color;
+}
+
+.combo-box .list-cell {
+  -fx-text-fill: -fx-secondary-color;
+}
+
+.combo-box .combo-box-popup .list-cell {
+  -fx-text-fill: -fx-primary-color;
+}
+
+.combo-box .combo-box-popup .list-cell:filled:hover,
+.combo-box .combo-box-popup .list-cell:filled:selected,
+ .combo-box .combo-box-popup .list-cell:filled:focused:hover{
+  -fx-background-color: -fx-secondary-color;
+}
+
+.combo-box .combo-box-popup .list-cell:focused,
+.combo-box .combo-box-popup .list-cell:filled:focused {
+  -fx-border-color: -fx-primary-color;
+  -fx-background-color: white;
+}
