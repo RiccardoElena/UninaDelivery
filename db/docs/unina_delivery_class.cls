@@ -22,7 +22,7 @@
 \usepackage{soul} % Required for fancy text highlighting
 \usepackage{float} % Required for forcing floating objects in position
 \usepackage{listings, lstautogobble, lstfiracode} % Required for code listings
-\usepackage[no-math]{fontspec} % Required for custom font
+\usepackage[no-math]{fontspec} % Required for custom fon t
 
 % Global variables
   \gdef\maintitle{\textcolor{PRIMARY}{Unina Delivery}}
